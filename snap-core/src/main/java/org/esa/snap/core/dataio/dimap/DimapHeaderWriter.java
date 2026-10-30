@@ -23,7 +23,6 @@ import org.esa.snap.core.dataio.persistence.JdomLanguageSupport;
 import org.esa.snap.core.dataio.persistence.Persistence;
 import org.esa.snap.core.dataio.persistence.PersistenceEncoder;
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.BasicPixelGeoCoding;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.FXYGeoCoding;
@@ -573,10 +572,9 @@ public final class DimapHeaderWriter extends XmlWriter {
         if (geoCoding != null) {
 
             final boolean isTiePointGeoCoding = geoCoding instanceof TiePointGeoCoding;
-            final boolean isBasicPixelGeoCoding = geoCoding instanceof BasicPixelGeoCoding;
             final boolean isFXYGeoCoding = geoCoding instanceof FXYGeoCoding;
 
-            if (!isTiePointGeoCoding && !isBasicPixelGeoCoding && !isFXYGeoCoding) {
+            if (!isTiePointGeoCoding && !isFXYGeoCoding) {
                 final PersistenceEncoder<Object> encoder = persistence.getEncoder(geoCoding);
                 if (encoder != null) {
                     final Item encoded = encoder.encode(geoCoding);
@@ -593,8 +591,6 @@ public final class DimapHeaderWriter extends XmlWriter {
                 writeGeoCoding((TiePointGeoCoding) geoCoding, indent, bandIndex);
             } else if (geoCoding instanceof MapGeoCoding) {
                 writeGeoCoding((MapGeoCoding) geoCoding, indent);
-            } else if (isBasicPixelGeoCoding) {
-                writeGeoCoding((BasicPixelGeoCoding) geoCoding, indent, bandIndex);
             } else if (isFXYGeoCoding) {
                 writeGeoCoding((FXYGeoCoding) geoCoding, indent, bandIndex);
             } else if (geoCoding instanceof GcpGeoCoding) {
@@ -857,33 +853,6 @@ public final class DimapHeaderWriter extends XmlWriter {
         println(horizontalCsTags[1]);
         --indent;
         println(crsTags[1]);
-    }
-
-    private void writeGeoCoding(final BasicPixelGeoCoding pixelGeoCoding, final int indent, final int bandIndex) {
-        final String latBandName = pixelGeoCoding.getLatBand().getName();
-        final String lonBandName = pixelGeoCoding.getLonBand().getName();
-        final String validMask = pixelGeoCoding.getValidMask();
-        final int searchRadius = pixelGeoCoding.getSearchRadius();
-        final GeoCoding posEstimator = pixelGeoCoding.getPixelPosEstimator();
-
-        final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
-        println(geopositionTags[0]);
-        writeBandIndexIf(bandIndex >= 0, bandIndex, indent + 1);
-        printLine(indent + 1, DimapProductConstants.TAG_LATITUDE_BAND, latBandName);
-        printLine(indent + 1, DimapProductConstants.TAG_LONGITUDE_BAND, lonBandName);
-        if (validMask != null && !validMask.trim().isEmpty()) {
-            printLine(indent + 1, DimapProductConstants.TAG_VALID_MASK_EXPRESSION, validMask);
-        }
-        printLine(indent + 1, DimapProductConstants.TAG_SEARCH_RADIUS, searchRadius);
-        if (posEstimator != null) {
-            final String[] pixelPosEstimatorTags = createTags(indent + 1,
-                                                              DimapProductConstants.TAG_PIXEL_POSITION_ESTIMATOR);
-            println(pixelPosEstimatorTags[0]);
-            // no band index needed, estimator is part of PixelGeoCoding
-            writeGeoCoding(posEstimator, indent + 2, -1);
-            println(pixelPosEstimatorTags[1]);
-        }
-        println(geopositionTags[1]);
     }
 
     private void writeGeoCoding(final FXYGeoCoding fxyGeoCoding, int indent, final int bandIndex) {
