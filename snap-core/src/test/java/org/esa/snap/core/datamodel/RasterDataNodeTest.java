@@ -32,13 +32,14 @@ import static org.junit.Assert.*;
  * @author Marco Peters
  * @author Norman Fomferra
  */
+@SuppressWarnings("resource")
 public class RasterDataNodeTest {
 
     /**
      * Tests use of Product.getNumResolutionsMax in RasterDataNode.getMultiLevelMode
      */
     @Test
-    public void testGetMultiLevelModel() throws Exception {
+    public void testGetMultiLevelModel() {
         MultiLevelModel mlm1, mlm2;
         final Product p = new Product("P", "T", 10960, 10960);
 
@@ -63,20 +64,20 @@ public class RasterDataNodeTest {
     }
 
     @Test
-    public void testImageToModelTransformCannotDetermine() throws Exception {
+    public void testImageToModelTransformCannotDetermine() {
         Band band = new Band("B", ProductData.TYPE_FLOAT32, 4, 2);
         assertEquals(new AffineTransform(), band.getImageToModelTransform());
     }
 
     @Test
-    public void testImageToModelTransformSetterGetter() throws Exception {
+    public void testImageToModelTransformSetterGetter() {
         Band band = new Band("B", ProductData.TYPE_FLOAT32, 4, 2);
         band.setImageToModelTransform(AffineTransform.getScaleInstance(.6, .3));
         assertEquals(AffineTransform.getScaleInstance(.6, .3), band.getImageToModelTransform());
     }
 
     @Test
-    public void testImageToModelTransformIsIdentity() throws Exception {
+    public void testImageToModelTransformIsIdentity() {
         Product product = new Product("N", "T", 4, 2);
         Band band = new Band("B", ProductData.TYPE_FLOAT32, 4, 2);
         product.addBand(band);
@@ -84,7 +85,7 @@ public class RasterDataNodeTest {
     }
 
     @Test
-    public void testImageToModelTransformIsNewInstance() throws Exception {
+    public void testImageToModelTransformIsNewInstance() {
         Product product = new Product("N", "T", 4, 2);
         Band band = new Band("B", ProductData.TYPE_FLOAT32, 4, 2);
         product.addBand(band);
@@ -110,7 +111,6 @@ public class RasterDataNodeTest {
     public void testGetPixelString_Byte() {
         final Product product = new Product("X", "Y", 2, 1);
         Band node = product.addBand("name", ProductData.TYPE_INT8);
-        node.setSynthetic(true);
         node.setNoDataValue(0);
         node.setNoDataValueUsed(true);
         final byte[] data = new byte[product.getSceneRasterWidth() * product.getSceneRasterHeight()];
