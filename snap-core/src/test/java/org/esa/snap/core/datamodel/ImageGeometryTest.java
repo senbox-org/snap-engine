@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 public class ImageGeometryTest {
 
     @Test
-    public void testImageToMapTransform() throws Exception {
+    public void testImageToMapTransform() {
 
         // i2m := easting + pixelSize * (pixelX - referencePixelX)
 
@@ -50,8 +50,6 @@ public class ImageGeometryTest {
         product.addTiePointGrid(latGrid);
         TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5, 0.5, 50, 50, new float[]{10f, 15f, 10f, 15f});
         product.addTiePointGrid(lonGrid);
-        latGrid.setSynthetic(true);
-        lonGrid.setSynthetic(true);
         product.setSceneGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
 
         ImageGeometry imageGeometry = ImageGeometry.createTargetGeometry(product, product.getSceneGeoCoding().getMapCRS(),
@@ -68,8 +66,6 @@ public class ImageGeometryTest {
         product.addTiePointGrid(latGrid);
         TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5, 0.5, 50, 50, new float[]{10f, 15f, 10f, 15f});
         product.addTiePointGrid(lonGrid);
-        latGrid.setSynthetic(true);
-        lonGrid.setSynthetic(true);
         product.setSceneGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
 
         Rectangle2D mapBoundary = ImageGeometry.createMapBoundary(product, product.getSceneGeoCoding().getMapCRS());
@@ -86,8 +82,6 @@ public class ImageGeometryTest {
         Product product = new Product("test", "T", 2, 2);
         Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
         Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
-        latBand.setSynthetic(true);
-        lonBand.setSynthetic(true);
         // these are the outer bounds
         latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
         lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
@@ -110,8 +104,6 @@ public class ImageGeometryTest {
         Product product = new Product("test", "T", 2, 2);
         Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
         Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
-        latBand.setSynthetic(true);
-        lonBand.setSynthetic(true);
         // these are the outer bounds
         latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
         lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
@@ -183,5 +175,4 @@ public class ImageGeometryTest {
                                                        pixelSize,
                                                        0.0);
     }
-
 }
