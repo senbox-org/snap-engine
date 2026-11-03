@@ -62,6 +62,8 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.*;
 
+import static eu.esa.snap.core.dataio.CfConstants.TITLE;
+
 /**
  * This class provides many static factory methods to be used in conjunction with data products.
  *
@@ -1139,7 +1141,7 @@ public class ProductUtils {
         // Created by Daniel Knowles
 
         markAsDerivedFromMetaDataField(product, "product_name");
-        markAsDerivedFromMetaDataField(product, "title");
+        markAsDerivedFromMetaDataField(product, TITLE);
         markAsDerivedFromMetaDataField(product, "processing_level");
 
         String tag = "Derived from (";

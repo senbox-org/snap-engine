@@ -7,6 +7,8 @@ import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 
+import static eu.esa.snap.core.dataio.CfConstants.ADD_OFFSET;
+import static eu.esa.snap.core.dataio.CfConstants.SCALE_FACTOR;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -21,7 +23,7 @@ public class ReaderUtilsTest {
         when(scaleAttribute.getNumericValue()).thenReturn(26.98867);
 
         final Variable variable = mock(Variable.class);
-        when(variable.findAttribute("scale_factor")).thenReturn(scaleAttribute);
+        when(variable.findAttribute(SCALE_FACTOR)).thenReturn(scaleAttribute);
 
         double scalingFactor = ReaderUtils.getScalingFactor(variable);
         assertEquals(26.98867, scalingFactor, 1e-8);
@@ -72,7 +74,7 @@ public class ReaderUtilsTest {
         when(offsetAttribute.getNumericValue()).thenReturn(-11.6);
 
         final Variable variable = mock(Variable.class);
-        when(variable.findAttribute("add_offset")).thenReturn(offsetAttribute);
+        when(variable.findAttribute(ADD_OFFSET)).thenReturn(offsetAttribute);
 
         final double offset = ReaderUtils.getAddOffset(variable);
         assertEquals(-11.6, offset, 1e-8);
@@ -124,8 +126,8 @@ public class ReaderUtilsTest {
         when(offsetAttribute.getNumericValue()).thenReturn(-1.0);
 
         final Variable variable = mock(Variable.class);
-        when(variable.findAttribute("scale_factor")).thenReturn(scaleAttribute);
-        when(variable.findAttribute("add_offset")).thenReturn(offsetAttribute);
+        when(variable.findAttribute(SCALE_FACTOR)).thenReturn(scaleAttribute);
+        when(variable.findAttribute(ADD_OFFSET)).thenReturn(offsetAttribute);
 
         final Array scaledArray = ReaderUtils.scaleArray(shortArray, variable);
         assertEquals(-0.5, scaledArray.getDouble(0), 1e-8);
@@ -139,7 +141,7 @@ public class ReaderUtilsTest {
         final Array shortArray = Array.factory(DataType.INT, new int[]{2, 3}, new int[]{7, 8, 9, 10, 11, 12});
 
         final Variable variable = mock(Variable.class);
-        when(variable.findAttribute("scale_factor")).thenReturn(null);
+        when(variable.findAttribute(SCALE_FACTOR)).thenReturn(null);
         when(variable.findAttribute("add_offset")).thenReturn(null);
 
         final Array scaledArray = ReaderUtils.scaleArray(shortArray, variable);
