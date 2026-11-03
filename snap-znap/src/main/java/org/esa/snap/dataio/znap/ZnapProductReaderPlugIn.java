@@ -132,7 +132,7 @@ public class ZnapProductReaderPlugIn implements ProductReaderPlugIn {
             }
 
             private boolean isFileInZnapRootDir(File file) {
-                return file != null && isZnapRootDir(file.getParentFile());
+                return isZnapRootDir(file.getParentFile());
             }
 
             private boolean isZnapZipArchive(File file) {
