@@ -429,7 +429,7 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
             ArrayList<Handle> handles = new ArrayList<Handle>(vertexHandles.length + scaleHandles.length);
             handles.addAll(Arrays.asList(vertexHandles));
             handles.addAll(Arrays.asList(scaleHandles));
-            return handles.toArray(new Handle[handles.size()]);
+            return handles.toArray(NO_HANDLES);
         }
         return NO_HANDLES;
     }
@@ -455,6 +455,6 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
             pathIterator.next();
             segmentIndex++;
         }
-        return handleList.toArray(new Handle[handleList.size()]);
+        return handleList.toArray(NO_HANDLES);
     }
 }

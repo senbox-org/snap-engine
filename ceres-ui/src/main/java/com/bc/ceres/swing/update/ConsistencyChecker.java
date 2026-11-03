@@ -112,7 +112,7 @@ class ConsistencyChecker {
         if (missingDependencies == null) {
             return new MissingDependencyInfo[0];
         }
-        return missingDependencies.values().toArray(new MissingDependencyInfo[missingDependencies.size()]);
+        return missingDependencies.values().toArray(new MissingDependencyInfo[0]);
     }
 
 

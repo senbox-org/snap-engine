@@ -124,6 +124,7 @@ public class ResourceResolver implements LSResourceResolver {
         }
     }
 
+    @SuppressWarnings("SynchronizeOnNonFinalField")
     private class Input implements LSInput {
         private String publicId;
 

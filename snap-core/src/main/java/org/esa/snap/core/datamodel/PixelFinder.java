@@ -112,17 +112,13 @@ class PixelFinder {
                         if (getSample(minX, y1, maskImage) != 0) {
                             break;
                         }
-                        if (minX > rasterMinX) {
-                            minX--;
-                        }
+                        minX--;
                     }
                     while (maxX < rasterMaxX) {
                         if (getSample(maxX, y1, maskImage) != 0) {
                             break;
                         }
-                        if (maxX < rasterMaxX) {
-                            maxX++;
-                        }
+                        maxX++;
                     }
                 }
                 for (int y = minY; y <= maxY; y++) {

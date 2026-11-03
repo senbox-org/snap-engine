@@ -330,7 +330,7 @@ public class EnviProductWriter extends AbstractProductWriter {
             return true;
         }
         final File imageFile = getImageFile((Band) node);
-        return !(imageFile != null && imageFile.exists());
+        return !(imageFile.exists());
     }
 
     /**

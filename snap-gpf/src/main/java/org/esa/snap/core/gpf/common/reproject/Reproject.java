@@ -41,7 +41,7 @@ import java.awt.image.RenderedImage;
 import java.awt.image.renderable.ParameterBlock;
 
 
-final class Reproject {
+public class Reproject {
 
 
     private static final int DIMENSION_X_INDEX = 0;
@@ -51,7 +51,7 @@ final class Reproject {
      */
     private static final double EPS = 1.0E-6;
 
-    private OpImage[] leveledWarpImages;
+    private final OpImage[] leveledWarpImages;
 
     Reproject(int numLevels) {
         leveledWarpImages = new OpImage[numLevels];

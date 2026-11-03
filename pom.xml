@@ -47,7 +47,7 @@
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-io.version>2.19.0</commons-io.version>
-        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <commons-lang3.version>3.21.0</commons-lang3.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-math3.version>3.6.1</commons-math3.version>
         <commons-net.version>3.11.1</commons-net.version>
@@ -57,10 +57,11 @@
         <guava.version>33.4.8-jre</guava.version>
         <hdf.version>3.3.2</hdf.version>
         <hdf.native.version>3.3.2</hdf.native.version>
-        <jackson.version>2.19.0</jackson.version>
+        <jackson.version>2.22.4</jackson.version>
+        <jackson.annotations.version>2.22</jackson.annotations.version>
         <jide.version>3.7.15</jide.version>
         <jna.version>5.17.0</jna.version>
-        <jsoup.version>1.20.1</jsoup.version>
+        <jsoup.version>1.23.2</jsoup.version>
         <slf4j.version>2.0.17</slf4j.version> <!-- used by netcdf, yes we hate that! -->
         <org.locationtech.version>1.17.0</org.locationtech.version>
         <mockito.version>5.17.0</mockito.version>
@@ -486,7 +487,7 @@
             <dependency>
                 <groupId>io.airlift</groupId>
                 <artifactId>aircompressor</artifactId>
-                <version>0.27</version>
+                <version>2.0.3</version>
             </dependency>
 
             <dependency>
@@ -703,7 +704,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
+                <version>${jackson.annotations.version}</version>
             </dependency>
 
             <dependency>
@@ -732,7 +733,7 @@
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
-                <version>3.27.3</version>
+                <version>3.27.7</version>
                 <scope>test</scope>
             </dependency>
 

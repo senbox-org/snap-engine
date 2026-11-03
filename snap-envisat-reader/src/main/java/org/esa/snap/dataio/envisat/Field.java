@@ -57,9 +57,6 @@ public class Field {
         Guardian.assertNotNull("info", info);
         _info = info;
         _data = ProductData.createInstance(info.getDataType(), info.getNumDataElems());
-        if (_data == null) {
-            throw new IllegalArgumentException("field info has an unknown data type"); /*I18N*/
-        }
     }
 
     /**

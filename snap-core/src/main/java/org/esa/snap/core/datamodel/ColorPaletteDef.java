@@ -340,7 +340,6 @@ public class ColorPaletteDef implements Cloneable {
      * @author Daniel Knowles
      */
     public static ColorPaletteDef loadCpt(File file) throws IOException {
-
         if (file == null) {
             throw new IOException("Null file in loadCpt");
         }
@@ -349,25 +348,25 @@ public class ColorPaletteDef implements Cloneable {
             throw new IOException("File='" + file.getName() + "'does not exist");
         }
 
-        String label = file.getName();
+        final String label = file.getName();
         Point lastPoint = null;
 
-        ArrayList<Point> pointsArrayList = new ArrayList<Point>();
-
-        ArrayList<String> lines = readFileIntoArrayList(file);
+        final ArrayList<Point> pointsArrayList = new ArrayList<Point>();
+        final ArrayList<String> lines = readFileIntoArrayList(file);
 
         for (String line : lines) {
             line = line.trim();
-            if (!line.startsWith("#")) {
-                String[] values = line.split("\\s+");
+            if (line.startsWith("#")) {
+                continue;
+            }
 
-                if (values != null && values.length == 8) {
-                    Point firstPoint = string2Point(label, values[0], values[1], values[2], values[3]);
-                    if (firstPoint != null) {
-                        pointsArrayList.add(firstPoint);
-                    }
-                    lastPoint = string2Point(label, values[4], values[5], values[6], values[7]);
+            final String[] values = line.split("\\s+");
+            if (values.length == 8) {
+                Point firstPoint = string2Point(label, values[0], values[1], values[2], values[3]);
+                if (firstPoint != null) {
+                    pointsArrayList.add(firstPoint);
                 }
+                lastPoint = string2Point(label, values[4], values[5], values[6], values[7]);
             }
         }
 
@@ -375,9 +374,8 @@ public class ColorPaletteDef implements Cloneable {
             pointsArrayList.add(lastPoint);
         }
 
-        if (pointsArrayList == null || pointsArrayList.size() < 2) {
-            throw new IOException("The selected file contains less than\n" +
-                    "two color points.");
+        if (pointsArrayList.size() < 2) {
+            throw new IOException("The selected file contains less than two color points.");
         }
 
         final Point[] points = new Point[pointsArrayList.size()];

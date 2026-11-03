@@ -31,17 +31,15 @@ import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.util.EscapeStrings;
 
 import java.io.IOException;
 
+import static eu.esa.snap.core.dataio.CfConstants.FLAG_MEANINGS;
+import static eu.esa.snap.core.dataio.CfConstants.FLAG_VALUES;
+
 public class CfIndexCodingPart extends ProfilePartIO {
-
-    private static final String FLAG_VALUES = "flag_values";
-    private static final String FLAG_MEANINGS = "flag_meanings";
-
 
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {

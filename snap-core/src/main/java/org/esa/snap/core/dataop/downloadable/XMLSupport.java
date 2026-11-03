@@ -225,6 +225,6 @@ public final class XMLSupport {
                 array.add(((Element) o).getName());
             }
         }
-        return array.toArray(new String[array.size()]);
+        return array.toArray(new String[0]);
     }
 }

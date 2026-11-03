@@ -221,7 +221,7 @@ public class DefaultFigureEditor extends ExtensibleObject implements FigureEdito
             }
         }
         figureSelection.removeAllFigures();
-        figureSelection.addFigures(selectedFigures.toArray(new Figure[selectedFigures.size()]));
+        figureSelection.addFigures(selectedFigures.toArray(new Figure[0]));
     }
 
     @Override
@@ -241,8 +241,8 @@ public class DefaultFigureEditor extends ExtensibleObject implements FigureEdito
 
     @Override
     public void insert(Transferable contents) throws IOException, UnsupportedFlavorException {
-        Figure[] figures = (Figure[]) contents.getTransferData(FigureTransferable.FIGURES_DATA_FLAVOR);
-        if (figures != null && figures.length > 0) {
+        final Figure[] figures = (Figure[]) contents.getTransferData(FigureTransferable.FIGURES_DATA_FLAVOR);
+        if (figures.length > 0) {
             insertFigures(true, figures);
         }
     }

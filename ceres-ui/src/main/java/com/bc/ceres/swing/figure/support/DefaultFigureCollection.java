@@ -167,12 +167,12 @@ public class DefaultFigureCollection extends AbstractFigure implements FigureCol
                 containedFigures.add(figure);
             }
         }
-        return containedFigures.toArray(new Figure[containedFigures.size()]);
+        return containedFigures.toArray(new Figure[0]);
     }
 
     @Override
     public synchronized Figure[] getFigures() {
-        return figureList.toArray(new Figure[figureList.size()]);
+        return figureList.toArray(new Figure[0]);
     }
 
     @Override

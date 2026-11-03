@@ -181,7 +181,7 @@ public class TypeParser {
             list.add(compoundType);
             compoundTypeMap.put(compoundType.getName(), compoundType);
         }
-        return list.toArray(new CompoundType[list.size()]);
+        return list.toArray(new CompoundType[0]);
     }
 
     private CompoundType parseCompoundType() throws IOException, ParseException {
@@ -231,7 +231,7 @@ public class TypeParser {
             }
             list.add(member);
         }
-        return list.toArray(new CompoundMember[list.size()]);
+        return list.toArray(new CompoundMember[0]);
     }
 
     private CompoundMember parseMember(String parentCompoundName) throws IOException, ParseException {

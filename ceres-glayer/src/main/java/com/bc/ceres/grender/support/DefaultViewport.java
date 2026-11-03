@@ -235,7 +235,7 @@ public class DefaultViewport implements Viewport {
 
     @Override
     public ViewportListener[] getListeners() {
-        return changeListeners.toArray(new ViewportListener[changeListeners.size()]);
+        return changeListeners.toArray(new ViewportListener[0]);
     }
 
     @Override

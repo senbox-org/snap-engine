@@ -54,7 +54,7 @@ public class RuntimeActivator implements Activator {
     private Map<String, RuntimeRunnable> applications;
     private List<ServiceRegistration> serviceRegistrations;
     private ModuleContext moduleContext;
-    private ClassLoader resourcesClassLoader;
+    private volatile ClassLoader resourcesClassLoader;
 
     public static RuntimeActivator getInstance() {
         return instance;
@@ -147,7 +147,7 @@ public class RuntimeActivator implements Activator {
                 urlArrayList.add(location);
             }
         }
-        return new URLClassLoader(urlArrayList.toArray(new URL[urlArrayList.size()]), new NullClassLoader());
+        return new URLClassLoader(urlArrayList.toArray(new URL[0]), new NullClassLoader());
     }
 
     private void registerProviderImpl(ServiceRegistration serviceRegistration, Class<?> providerImplClass) {
@@ -436,11 +436,11 @@ public class RuntimeActivator implements Activator {
                     s = s.substring(0, i);
                 }
                 s = s.trim();
-                if (s.length() > 0) {
+                if (!s.isEmpty()) {
                     classNames.add(s);
                 }
             }
-            return classNames.toArray(new String[classNames.size()]);
+            return classNames.toArray(new String[0]);
         }
     }
 

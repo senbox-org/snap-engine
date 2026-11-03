@@ -131,7 +131,7 @@ public class BindingContext {
                 list.add(problem);
             }
         }
-        return list.toArray(new BindingProblem[list.size()]);
+        return list.toArray(new BindingProblem[0]);
     }
 
     /**
@@ -167,7 +167,7 @@ public class BindingContext {
      */
     public BindingProblemListener[] getProblemListeners() {
         return bindingProblemListeners != null
-                ? bindingProblemListeners.toArray(new BindingProblemListener[bindingProblemListeners.size()])
+                ? bindingProblemListeners.toArray(new BindingProblemListener[0])
                 : new BindingProblemListener[0];
     }
 

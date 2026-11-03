@@ -213,18 +213,15 @@ public class ModuleImpl implements Module {
 */
 
     public Dependency[] getDeclaredDependencies() {
-        return declaredDependencies != null ? declaredDependencies.toArray(
-                new DependencyImpl[declaredDependencies.size()]) : DependencyImpl.EMPTY_ARRAY;
+        return declaredDependencies != null ? declaredDependencies.toArray(new DependencyImpl[0]) : DependencyImpl.EMPTY_ARRAY;
     }
 
     public ExtensionPoint[] getExtensionPoints() {
-        return extensionPoints != null ? extensionPoints.toArray(
-                new ExtensionPointImpl[extensionPoints.size()]) : ExtensionPointImpl.EMPTY_ARRAY;
+        return extensionPoints != null ? extensionPoints.toArray(ExtensionPointImpl.EMPTY_ARRAY) : ExtensionPointImpl.EMPTY_ARRAY;
     }
 
     public Extension[] getExtensions() {
-        return extensions != null ? extensions.toArray(
-                new ExtensionImpl[extensions.size()]) : ExtensionImpl.EMPTY_ARRAY;
+        return extensions != null ? extensions.toArray(ExtensionImpl.EMPTY_ARRAY) : ExtensionImpl.EMPTY_ARRAY;
     }
 
     public ExtensionPoint getExtensionPoint(String extensionPointId) {
@@ -509,7 +506,7 @@ public class ModuleImpl implements Module {
         if (resolveExceptionList == null) {
             return new ResolveException[0];
         }
-        return resolveExceptionList.toArray(new ResolveException[resolveExceptionList.size()]);
+        return resolveExceptionList.toArray(new ResolveException[0]);
     }
 
     private List<ResolveException> addResolveException(ResolveException resolveException,

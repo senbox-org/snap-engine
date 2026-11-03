@@ -164,7 +164,7 @@ public class StxFactory {
             }
         }
         if (!filteredRasterList.isEmpty()) {
-            RasterDataNode[] filteredRasters = filteredRasterList.toArray(new RasterDataNode[filteredRasterList.size()]);
+            RasterDataNode[] filteredRasters = filteredRasterList.toArray(new RasterDataNode[0]);
 
             Shape[] roiShapes = new Shape[rasters.length];
             RenderedImage[] roiImages = new RenderedImage[rasters.length];

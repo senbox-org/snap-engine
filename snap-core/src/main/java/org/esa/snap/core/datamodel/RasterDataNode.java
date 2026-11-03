@@ -138,7 +138,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     private MathTransform2D modelToSceneTransform;
     private MathTransform2D sceneToModelTransform;
 
-    private Stx stx;
+    private volatile Stx stx;
 
     private ImageInfo imageInfo;
 
@@ -147,10 +147,10 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
     private Pointing pointing;
 
     private MultiLevelImage sourceImage;
-    private MultiLevelImage geophysicalImage;
+    private volatile MultiLevelImage geophysicalImage;
     private MultiLevelImage validMaskImage;
 
-    private ROI validMaskROI;
+    private volatile ROI validMaskROI;
 
     private ProductNodeGroup<RasterDataNode> ancillaryVariables;
 

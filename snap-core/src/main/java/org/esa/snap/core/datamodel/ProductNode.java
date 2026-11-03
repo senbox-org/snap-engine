@@ -34,7 +34,7 @@ public abstract class ProductNode extends ExtensibleObject {
     public final static String PROPERTY_NAME_NAME = "name";
     public final static String PROPERTY_NAME_DESCRIPTION = "description";
 
-    private transient Product product;
+    private transient volatile Product product;
     private transient ProductNode owner;
     private transient boolean modified;
     private String name;
