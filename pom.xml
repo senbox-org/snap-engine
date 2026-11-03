@@ -53,7 +53,9 @@
         <commons-text.version>1.13.1</commons-text.version>
         <geotools.version>28.6</geotools.version>
         <geotools.opengis.version>28.6</geotools.opengis.version>
-        <guava.version>33.4.8-jre</guava.version>
+        <guava.version>33.7.2-jre</guava.version>
+        <!-- pins the transitive protobuf of cdm-core (via jzarr); 3.9.1 has CVE-2021-22569/2022-3509/2022-3510/2024-7254 -->
+        <protobuf.version>3.25.9</protobuf.version>
         <hdf.version>3.3.2</hdf.version>
         <hdf.native.version>3.3.2</hdf.native.version>
         <netcdf.version>5.3.3</netcdf.version>
@@ -461,6 +463,11 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
             </dependency>
 
             <!-- ImageioIO-Ext ############################################# -->
