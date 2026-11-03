@@ -41,7 +41,7 @@ class SimplePixelDimensionEstimator implements PixelDimensionEstimator {
                     if (maskImage == null || getSampleBoolean(maskImage, x1, y0)) {
                         final double latX = getSampleDouble(latImage, x1, y0, -90.0, 90.0);
                         final double lonX = getSampleDouble(lonImage, x1, y0, -180.0, 180.0);
-                        pixelSizeX = Math.toDegrees(calculator.distance(lonX, latX)) / ((w * (i - 2)) / i);
+                        pixelSizeX = Math.toDegrees(calculator.distance(lonX, latX)) / ((double) (w * (i - 2)) / i);
                     }
                 }
             }

@@ -41,7 +41,7 @@ public class MissingDependencyInfo {
     }
 
     public Module[] getDependentModules() {
-        return dependentModules.toArray(new Module[dependentModules.size()]);
+        return dependentModules.toArray(new Module[0]);
     }
 
     void addDependentModule(Module module) {

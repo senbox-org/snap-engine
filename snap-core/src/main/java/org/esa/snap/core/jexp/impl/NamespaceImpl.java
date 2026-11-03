@@ -94,7 +94,7 @@ public class NamespaceImpl implements WritableNamespace {
             if (!functionList.remove(function)) {
                 return;
             }
-            array = functionList.toArray(new Function[functionList.size()]);
+            array = functionList.toArray(new Function[0]);
             functions.put(function.getName(), array);
         }
     }
@@ -143,7 +143,7 @@ public class NamespaceImpl implements WritableNamespace {
             final Symbol[] defaultSymbols = writableNamespace.getAllSymbols();
             symbolList.addAll(Arrays.asList(defaultSymbols));
         }
-        return symbolList.toArray(new Symbol[symbolList.size()]);
+        return symbolList.toArray(new Symbol[0]);
     }
 
     public final Function[] getAllFunctions() {
@@ -157,7 +157,7 @@ public class NamespaceImpl implements WritableNamespace {
             final Function[] defaultFunctions = writableNamespace.getAllFunctions();
             functionList.addAll(Arrays.asList(defaultFunctions));
         }
-        return functionList.toArray(new Function[functionList.size()]);
+        return functionList.toArray(new Function[0]);
     }
 
     private Function[] getFunctions(final String name) {

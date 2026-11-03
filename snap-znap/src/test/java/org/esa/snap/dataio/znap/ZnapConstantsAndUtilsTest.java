@@ -18,6 +18,7 @@
 
 package org.esa.snap.dataio.znap;
 
+import com.bc.zarr.DataType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -31,8 +32,11 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.jsonToMetadata;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.metadataToJson;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class ZnapConstantsAndUtilsTest {
 
@@ -70,6 +74,27 @@ public class ZnapConstantsAndUtilsTest {
             MetadataElement e2 = elements[i];
             equalMetadataElements(e1, e2);
         }
+    }
+
+    @Test
+    public void testGetSnapDataType() {
+        assertEquals(SnapDataType.TYPE_FLOAT64, ZnapConstantsAndUtils.getSnapDataType(DataType.f8));
+        assertEquals(SnapDataType.TYPE_FLOAT32, ZnapConstantsAndUtils.getSnapDataType(DataType.f4));
+        assertEquals(SnapDataType.TYPE_INT8, ZnapConstantsAndUtils.getSnapDataType(DataType.i1));
+        assertEquals(SnapDataType.TYPE_UINT8, ZnapConstantsAndUtils.getSnapDataType(DataType.u1));
+        assertEquals(SnapDataType.TYPE_INT16, ZnapConstantsAndUtils.getSnapDataType(DataType.i2));
+        assertEquals(SnapDataType.TYPE_UINT16, ZnapConstantsAndUtils.getSnapDataType(DataType.u2));
+        assertEquals(SnapDataType.TYPE_INT32, ZnapConstantsAndUtils.getSnapDataType(DataType.i4));
+        assertEquals(SnapDataType.TYPE_UINT32, ZnapConstantsAndUtils.getSnapDataType(DataType.u4));
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test
+    public void testGetSnapDataType_unsupported() {
+        try {
+            ZnapConstantsAndUtils.getSnapDataType(DataType.i8);
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException expected) {}
     }
 
     private void equalMetadataElements(MetadataElement e1, MetadataElement e2) {

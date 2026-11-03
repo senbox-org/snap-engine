@@ -508,4 +508,100 @@ public class AggregatorAverageTest {
         assertEquals(sumW, out.get(2), 1e-5f);
     }
 
+    @Test
+    public void testAggregatorAverage_completeSpatial_noCounts() {
+        final Aggregator agg = new AggregatorAverage(new MyVariableContext("c"), "c", "c", 1.0, false, true);
+
+        VectorImpl svec = vec(0,0);
+        agg.initSpatial(ctx, svec);
+
+        agg.completeSpatial(ctx, 0, svec);
+        assertEquals(NaN, svec.get(0), 1e-8f);
+        assertEquals(NaN, svec.get(1), 1e-8f);
+    }
+
+    @Test
+    public void testAggregatorAverage_computeOutput_noCounts_outputSums() {
+        final Aggregator agg = new AggregatorAverage(new MyVariableContext("c"), "c", "c", 1.0, false, true);
+
+        final VectorImpl tempVec = vec(0,0,0);
+        final VectorImpl outVec = vec(0,0,0);
+
+        agg.computeOutput(tempVec, outVec);
+
+        assertEquals(NaN, outVec.get(0), 1e-8f);
+        assertEquals(NaN, outVec.get(1), 1e-8f);
+        assertEquals(NaN, outVec.get(2), 1e-8f);
+    }
+
+    @Test
+    public void testAggregatorAverage_computeOutput_noCounts_outputCounts() {
+        final Aggregator agg = new AggregatorAverage(new MyVariableContext("c"), "c", "c", 1.0, true, false);
+
+        final VectorImpl tempVec = vec(0,0,0);
+        final VectorImpl outVec = vec(0,0,0);
+
+        agg.computeOutput(tempVec, outVec);
+
+        assertEquals(NaN, outVec.get(0), 1e-8f);
+        assertEquals(NaN, outVec.get(1), 1e-8f);
+        assertEquals(0.f, outVec.get(2), 1e-8f);
+    }
+
+    @Test
+    public void testConstruction_noCtx() {
+        try {
+            new AggregatorAverage(null, "c", "c", 1.0, false, true);
+            fail("NullPointerException expected");
+        } catch (NullPointerException expected) {
+        }
+    }
+
+    @Test
+    public void testConstruction_noVarName() {
+        try {
+            new AggregatorAverage(new MyVariableContext("c"), null, "c", 1.0, false, true);
+            fail("NullPointerException expected");
+        } catch (NullPointerException expected) {
+        }
+    }
+
+    @Test
+    public void testConstruction_negativeWeight() {
+        try {
+            new AggregatorAverage(new MyVariableContext("c"), "c", "c", -2.7, false, true);
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testConfigConstruction() {
+        final AggregatorAverage.Config config = new AggregatorAverage.Config("Myself");
+
+        assertEquals("AVG", config.getName());
+        assertEquals("Myself", config.varName);
+        assertNull(config.targetName);
+        assertNull(config.weightCoeff);
+        assertNull(config.outputCounts);
+        assertNull(config.outputSums);
+    }
+
+    @Test
+    public void testDescriptor_getTargetVarNames() {
+        final AggregatorAverage.Descriptor descriptor = new AggregatorAverage.Descriptor();
+
+        String[] targetVarNames = descriptor.getTargetVarNames(new AggregatorAverage.Config("Myself", "target", 2.8, true, false));
+        assertEquals(3, targetVarNames.length);
+        assertEquals("target_mean", targetVarNames[0]);
+        assertEquals("target_sigma", targetVarNames[1]);
+        assertEquals("target_counts", targetVarNames[2]);
+
+        targetVarNames = descriptor.getTargetVarNames(new AggregatorAverage.Config("Myself", null, 2.8, true, true));
+        assertEquals(4, targetVarNames.length);
+        assertEquals("Myself_sum", targetVarNames[0]);
+        assertEquals("Myself_sum_sq", targetVarNames[1]);
+        assertEquals("Myself_weights", targetVarNames[2]);
+        assertEquals("Myself_counts", targetVarNames[3]);
+    }
 }

@@ -128,7 +128,7 @@ public class SnapFileFilter extends FileFilter {
                     extensionList.add("." + extension);
                 }
             }
-            this.extensions = extensionList.toArray(new String[extensionList.size()]);
+            this.extensions = extensionList.toArray(new String[0]);
         } else {
             this.extensions = null;
         }

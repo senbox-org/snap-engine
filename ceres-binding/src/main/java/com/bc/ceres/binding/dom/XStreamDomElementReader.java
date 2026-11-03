@@ -17,7 +17,7 @@
 package com.bc.ceres.binding.dom;
 
 import com.thoughtworks.xstream.io.xml.AbstractDocumentReader;
-import com.thoughtworks.xstream.io.xml.XmlFriendlyReplacer;
+import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 
 /**
  * todo - add API doc
@@ -31,11 +31,11 @@ public class XStreamDomElementReader extends AbstractDocumentReader {
     private String[] attributeNames;
 
     public XStreamDomElementReader(DomElement child) {
-        this(child, new XmlFriendlyReplacer());
+        this(child, new XmlFriendlyNameCoder());
     }
 
-    public XStreamDomElementReader(DomElement child, XmlFriendlyReplacer xmlFriendlyReplacer) {
-        super(child, xmlFriendlyReplacer);
+    public XStreamDomElementReader(DomElement child, XmlFriendlyNameCoder xmlFriendlyNameCoder) {
+        super(child, xmlFriendlyNameCoder);
     }
 
     @Override
@@ -76,6 +76,9 @@ public class XStreamDomElementReader extends AbstractDocumentReader {
 
     @Override
     public String getAttribute(int i) {
+        if (i >= attributeNames.length) {
+            return null;
+        }
         return current.getAttribute(attributeNames[i]);
     }
 
@@ -86,6 +89,9 @@ public class XStreamDomElementReader extends AbstractDocumentReader {
 
     @Override
     public String getAttributeName(int i) {
+        if (i >= attributeNames.length) {
+            return null;
+        }
         return attributeNames[i];
     }
 }

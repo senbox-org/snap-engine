@@ -18,12 +18,9 @@ package org.esa.snap.core.param.editors;
 import org.esa.snap.core.param.AbstractParamEditor;
 import org.esa.snap.core.param.Parameter;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
+import javax.swing.*;
 import javax.swing.text.JTextComponent;
-import java.awt.Component;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
@@ -91,8 +88,8 @@ public class ComboBoxEditor extends AbstractParamEditor {
         java.awt.Font font = _comboBox.getFont();
         if (font != null) {
             _comboBox.setFont(new java.awt.Font(font.getName(),
-                                                Font.PLAIN,
-                                                font.getSize()));
+                    Font.PLAIN,
+                    font.getSize()));
         }
     }
 
@@ -103,11 +100,9 @@ public class ComboBoxEditor extends AbstractParamEditor {
         JComboBox comboBox = getComboBox();
         String text = getParameter().getValueAsText();
         JTextComponent textComp = getTextComponent();
-        if (text != null && !text.equals(textComp.getText())) {
-            if (textComp != null) {
-                if (!textComp.getText().equals(text)) {
-                    textComp.setText(text);
-                }
+        if (textComp != null) {
+            if (text != null && !text.equals(textComp.getText())) {
+                textComp.setText(text);
             }
             Object selItem = comboBox.getSelectedItem();
             if (selItem == null || !selItem.equals(text)) {
@@ -122,8 +117,8 @@ public class ComboBoxEditor extends AbstractParamEditor {
     @Override
     public void reconfigureUI() {
         JComboBox jComboBox = getComboBox();
-        ItemListener[] itemListeners = (ItemListener[]) jComboBox.getListeners(ItemListener.class);
-        ActionListener[] actionListeners = (ActionListener[]) jComboBox.getListeners(ActionListener.class);
+        ItemListener[] itemListeners = jComboBox.getListeners(ItemListener.class);
+        ActionListener[] actionListeners = jComboBox.getListeners(ActionListener.class);
         for (int i = 0; i < itemListeners.length; i++) {
             jComboBox.removeItemListener(itemListeners[i]);
         }
@@ -163,7 +158,7 @@ public class ComboBoxEditor extends AbstractParamEditor {
         } else {
             Object newValue = getComboBox().getSelectedItem();
             getParameter().setValueAsText(newValue != null ? newValue.toString() : "",
-                                          getExceptionHandler());
+                    getExceptionHandler());
         }
     }
 }

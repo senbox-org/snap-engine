@@ -17,6 +17,7 @@
 package com.bc.ceres.binding.converters;
 
 public class LongConverter extends NumberConverter<Long> {
+
     @Override
     public Class<Long> getValueType() {
         return Long.class;

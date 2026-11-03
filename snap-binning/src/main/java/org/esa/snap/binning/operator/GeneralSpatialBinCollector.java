@@ -71,9 +71,7 @@ public class GeneralSpatialBinCollector implements SpatialBinCollector {
 
     @Override
     public void close() throws IOException {
-        if (fileBinCollector != null) {
             fileBinCollector.close();
-        }
         if (mapBinCollector != null) {
             mapBinCollector.close();
         }

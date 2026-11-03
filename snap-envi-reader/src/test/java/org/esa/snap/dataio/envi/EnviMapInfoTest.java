@@ -115,6 +115,24 @@ public class EnviMapInfoTest {
         assertEquals(unit_2, mapInfo.getUnit());
     }
 
+    @Test
+    public void testToString() {
+        mapInfo.setProjectionName("Gandalf");
+        mapInfo.setReferencePixelX(1.0);
+        mapInfo.setReferencePixelY(2.0);
+        mapInfo.setEasting(3.0);
+        mapInfo.setNorthing(4.0);
+        mapInfo.setPixelSizeX(5.0);
+        mapInfo.setPixelSizeY(6.0);
+        mapInfo.setDatum("May");
+        mapInfo.setUnit("Meffolumt");
+        mapInfo.setUtmZone(7);
+        mapInfo.setUtmHemisphere("southwest");
+        mapInfo.setOrientation(8.0);
+
+        assertEquals("EnviMapInfo{projectionName='Gandalf', referencePixelX=1.0, referencePixelY=2.0, easting=3.0, northing=4.0, pixelSizeX=5.0, pixelSizeY=6.0, datum='May', unit='Meffolumt', utmZone=7, utmHemisphere='southwest', orientation='8.0'}", mapInfo.toString());
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     /////// END OF PUBLIC
     ///////////////////////////////////////////////////////////////////////////

@@ -476,9 +476,6 @@ public class DimapProductWriter extends AbstractProductWriter {
                 }
             }
         }
-        if (node instanceof RasterDataNode && ((RasterDataNode) node).isSynthetic()) {
-            return false;
-        }
         if (node instanceof VirtualBand) {
             return false;
         }
@@ -495,7 +492,7 @@ public class DimapProductWriter extends AbstractProductWriter {
             return true;
         }
         final File imageFile = getImageFile((Band) node);
-        return !(imageFile != null && imageFile.exists());
+        return !(imageFile.exists());
     }
 
     /**

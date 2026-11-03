@@ -15,6 +15,8 @@
  */
 package org.esa.snap.core.jexp;
 
+import java.io.Serial;
+
 /**
  * An exception thrown by a <code>ParserX.parse()</code> call in order to
  * signal a parser error.
@@ -23,6 +25,7 @@ package org.esa.snap.core.jexp;
  */
 public class ParseException extends Exception {
 
+    @Serial
     private static final long serialVersionUID = 4479172738937713857L;
     
     /**

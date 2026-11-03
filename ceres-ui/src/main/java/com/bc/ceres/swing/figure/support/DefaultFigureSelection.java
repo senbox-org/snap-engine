@@ -67,7 +67,7 @@ public class DefaultFigureSelection extends DefaultFigureCollection implements F
     @Override
     public Handle[] getHandles() {
         if (handles != null) {
-            return handles.toArray(new Handle[handles.size()]);
+            return handles.toArray(new Handle[0]);
         }
         return NO_HANDLES;
     }
@@ -296,7 +296,7 @@ public class DefaultFigureSelection extends DefaultFigureCollection implements F
                     selectableFigures.add(figure);
                 }
             }
-            figures = selectableFigures.toArray(new Figure[selectableFigures.size()]);
+            figures = selectableFigures.toArray(new Figure[0]);
         }
         return figures;
     }

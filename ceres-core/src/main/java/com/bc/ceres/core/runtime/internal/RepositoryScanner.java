@@ -91,7 +91,7 @@ public class RepositoryScanner {
             reader.close();
             progressMonitor.done();
         }
-        return repositoryModules.toArray(new Module[repositoryModules.size()]);
+        return repositoryModules.toArray(new Module[0]);
     }
 
     private void collectModules(String[] hrefs, List<Module> repositoryModules, ProgressMonitor pm) throws CanceledException {
@@ -194,6 +194,6 @@ public class RepositoryScanner {
             }
             list.add(st.sval);
         }
-        return list.toArray(new String[list.size()]);
+        return list.toArray(new String[0]);
     }
 }

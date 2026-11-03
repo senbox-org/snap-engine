@@ -187,7 +187,7 @@ public class EnviProductWriter extends AbstractProductWriter {
             pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);//sourceHeight);
             try {
                 synchronized (outputStream) {
-                    final long max = sourceHeight * sourceWidth;
+                    final long max = (long) sourceHeight * sourceWidth;
                     for (int sourcePos = 0; sourcePos < max; sourcePos += sourceWidth) {
                         sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
                         outputPos += sourceBandWidth;
@@ -330,7 +330,7 @@ public class EnviProductWriter extends AbstractProductWriter {
             return true;
         }
         final File imageFile = getImageFile((Band) node);
-        return !(imageFile != null && imageFile.exists());
+        return !(imageFile.exists());
     }
 
     /**

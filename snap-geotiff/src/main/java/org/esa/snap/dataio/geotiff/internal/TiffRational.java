@@ -48,6 +48,6 @@ class TiffRational extends TiffValue {
     }
 
     public double getValue() {
-        return getNumerator() / getDenominator();
+        return (double) getNumerator() / getDenominator();
     }
 }

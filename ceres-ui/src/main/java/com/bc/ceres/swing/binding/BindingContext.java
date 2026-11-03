@@ -131,7 +131,7 @@ public class BindingContext {
                 list.add(problem);
             }
         }
-        return list.toArray(new BindingProblem[list.size()]);
+        return list.toArray(new BindingProblem[0]);
     }
 
     /**
@@ -167,7 +167,7 @@ public class BindingContext {
      */
     public BindingProblemListener[] getProblemListeners() {
         return bindingProblemListeners != null
-                ? bindingProblemListeners.toArray(new BindingProblemListener[bindingProblemListeners.size()])
+                ? bindingProblemListeners.toArray(new BindingProblemListener[0])
                 : new BindingProblemListener[0];
     }
 
@@ -548,7 +548,7 @@ public class BindingContext {
         boolean conditionIsTrue = condition.evaluate(this);
         final JComponent[] components = getBinding(targetPropertyName).getComponents();
         for (JComponent component : components) {
-            component.setEnabled(conditionIsTrue ? targetState : !targetState);
+            component.setEnabled(conditionIsTrue == targetState);
         }
     }
 

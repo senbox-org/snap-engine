@@ -111,7 +111,7 @@ class TemporaryMODISImage extends SourcelessOpImage {
         boolean isSourceInvalid(int x, int y);
     }
 
-    private class SouthStrategy implements Strategy {
+    private static class SouthStrategy implements Strategy {
 
         public int xOffset(int x) {
             int xOffset = 0;
@@ -149,7 +149,7 @@ class TemporaryMODISImage extends SourcelessOpImage {
 
     }
 
-    private class NorthStrategy implements Strategy {
+    private static class NorthStrategy implements Strategy {
 
         public int xOffset(int x) {
             return 0;

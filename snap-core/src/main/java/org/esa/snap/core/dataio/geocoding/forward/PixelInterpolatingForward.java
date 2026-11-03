@@ -137,7 +137,7 @@ public class PixelInterpolatingForward implements ForwardCoding {
         return context;
     }
 
-    static private class InterpolationContext {
+    static public class InterpolationContext {
         double d00;
         double d10;
         double d01;

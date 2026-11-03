@@ -77,7 +77,7 @@ public class AggregatorAverageML extends AbstractAggregator {
     @Override
     public void aggregateSpatial(BinContext ctx, Observation observationVector, WritableVector spatialVector) {
         final double x = observationVector.get(varIndex);
-        final double logX = log(x > EPS ? x : EPS);
+        final double logX = log(Math.max(x, EPS));
         spatialVector.set(0, spatialVector.get(0) + (float) (logX));
         spatialVector.set(1, spatialVector.get(1) + (float) (logX * logX));
     }
@@ -180,7 +180,7 @@ public class AggregatorAverageML extends AbstractAggregator {
         @Override
         public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
             Config config = ((Config) aggregatorConfig);
-            boolean outputSums = config.outputSums != null ? config.outputSums : false;
+            boolean outputSums = config.outputSums != null && config.outputSums;
             String targetName = StringUtils.isNotNullAndNotEmpty(config.targetName)  ? config.targetName : config.varName;
             double weightCoeff = config.weightCoeff != null ? config.weightCoeff : 0.5;
             return new AggregatorAverageML(varCtx, config.varName, targetName, weightCoeff, outputSums);

@@ -47,7 +47,7 @@
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-io.version>2.19.0</commons-io.version>
-        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <commons-lang3.version>3.21.0</commons-lang3.version>
         <commons-math3.version>3.6.1</commons-math3.version>
         <commons-net.version>3.11.1</commons-net.version>
         <commons-text.version>1.13.1</commons-text.version>
@@ -57,7 +57,7 @@
         <hdf.version>3.3.2</hdf.version>
         <hdf.native.version>3.3.2</hdf.native.version>
         <netcdf.version>5.3.3</netcdf.version>
-        <jackson.version>2.22.3</jackson.version>
+        <jackson.version>2.22.4</jackson.version>
         <jide.version>3.7.15</jide.version>
         <jna.version>5.17.0</jna.version>
         <jsoup.version>1.23.2</jsoup.version>

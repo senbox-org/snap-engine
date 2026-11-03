@@ -445,13 +445,13 @@ public class VectorDataNodeReader {
                     featureType = DataUtilities.createType("Geometry", "geometry:Polygon");
                     featureBuilder = new SimpleFeatureBuilder(featureType);
                     feature = featureBuilder.buildFeature(Integer.toString(coordList.size() + 1));
-                    final LinearRing polygon = geometryFactory.createLinearRing(coordList.toArray(new Coordinate[coordList.size()]));
+                    final LinearRing polygon = geometryFactory.createLinearRing(coordList.toArray(new Coordinate[0]));
                     feature.setDefaultGeometry(polygon);
                 } else {
                     featureType = DataUtilities.createType("Geometry", "geometry:LineString");
                     featureBuilder = new SimpleFeatureBuilder(featureType);
                     feature = featureBuilder.buildFeature(Integer.toString(coordList.size() + 1));
-                    final LineString lineString = geometryFactory.createLineString(coordList.toArray(new Coordinate[coordList.size()]));
+                    final LineString lineString = geometryFactory.createLineString(coordList.toArray(new Coordinate[0]));
                     feature.setDefaultGeometry(lineString);
                 }
             } catch (SchemaException e) {

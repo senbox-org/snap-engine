@@ -311,9 +311,6 @@ public class BeamBandPart extends ProfilePartIO {
         final String productDimensions = ncFile.getDimensions();
         final HashMap<String, String> dimMap = new HashMap<String, String>();
         for (Band band : p.getBands()) {
-            if (isPixelGeoCodingBand(band)) {
-                continue;
-            }
             int dataType;
             if (band.isLog10Scaled()) {
                 dataType = band.getGeophysicalDataType();
@@ -396,15 +393,6 @@ public class BeamBandPart extends ProfilePartIO {
                 }
             }
         }
-    }
-
-    private boolean isPixelGeoCodingBand(Band band) {
-        final GeoCoding geoCoding = band.getGeoCoding();
-        if (geoCoding instanceof BasicPixelGeoCoding pixelGeoCoding) {
-            return pixelGeoCoding.getLatBand() == band || pixelGeoCoding.getLonBand() == band;
-        }
-        return false;
-
     }
 
     private void maybeApplySpectralIndexAndSolarFluxFromMetadata(Product p) {

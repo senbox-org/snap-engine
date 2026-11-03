@@ -81,9 +81,6 @@ class SnapToStac {
                 writeGeoCoding((CrsGeoCoding) geoCoding);
             } else if (geoCoding instanceof TiePointGeoCoding) {
                 writeGeoCoding((TiePointGeoCoding) geoCoding, geoCodingJSON);
-            } else if (geoCoding instanceof BasicPixelGeoCoding) {
-                throw new IOException("GeoCoding " + geoCoding + " not supported");
-                //writeGeoCoding((BasicPixelGeoCoding) geoCoding, geoCodingJSON);
             } else if (geoCoding instanceof FXYGeoCoding) {
                 throw new IOException("GeoCoding " + geoCoding + " not supported");
                 //writeGeoCoding((FXYGeoCoding) geoCoding, geoCodingJSON);

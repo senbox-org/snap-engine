@@ -90,9 +90,7 @@ public class Tools {
                 try {
                     flatMatrix[i] = Double.valueOf(parameter);
                 } catch (NumberFormatException e) {
-                    IOException ioException = new IOException("Could not read world file. " + e.getMessage());
-                    ioException.initCause(e);
-                    throw ioException;
+                    throw new IOException("Could not read world file. " + e.getMessage());
                 }
             }
             return new AffineTransform(flatMatrix);

@@ -207,7 +207,7 @@ public abstract class AbstractInteractor implements Interactor {
 
     @Override
     public InteractorListener[] getListeners() {
-        return this.listeners.toArray(new InteractorListener[this.listeners.size()]);
+        return this.listeners.toArray(new InteractorListener[0]);
     }
 
     protected boolean startInteraction(InputEvent inputEvent) {

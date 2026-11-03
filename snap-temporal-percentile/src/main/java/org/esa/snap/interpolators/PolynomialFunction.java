@@ -18,6 +18,7 @@
  */
 package org.esa.snap.interpolators;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -27,11 +28,12 @@ import java.util.Arrays;
  * <a href="http://mathworld.wolfram.com/HornersMethod.html">Horner's Method</a>
  * is used to evaluate the function.
  */
-class PolynomialFunction implements Serializable {
+public class PolynomialFunction implements Serializable {
 
     /**
      * Serialization identifier
      */
+    @Serial
     private static final long serialVersionUID = -7726511984200295583L;
     /**
      * The coefficients of the polynomial, ordered by degree -- i.e.,
@@ -51,7 +53,7 @@ class PolynomialFunction implements Serializable {
      * the coefficients property.
      *
      * @param c Polynomial coefficients.
-     * @throws NullPointerException if {@code c} is {@code null}.
+     * @throws NullPointerException     if {@code c} is {@code null}.
      * @throws IllegalArgumentException if {@code c} is empty.
      */
     public PolynomialFunction(double[] c) {
@@ -71,16 +73,14 @@ class PolynomialFunction implements Serializable {
     /**
      * Compute the value of the function for the given argument.
      * <p>
-     *  The value returned is <br/>
-     *  <code>coefficients[n] * x^n + ... + coefficients[1] * x  + coefficients[0]</code>
-     *
+     * The value returned is <br/>
+     * <code>coefficients[n] * x^n + ... + coefficients[1] * x  + coefficients[0]</code>
      *
      * @param x the argument for which the function value should be computed.
-     *
      * @return the value of the polynomial at the given point.
      */
     public double value(double x) {
-       return evaluate(coefficients, x);
+        return evaluate(coefficients, x);
     }
 
     /**
@@ -88,12 +88,10 @@ class PolynomialFunction implements Serializable {
      * the argument.
      *
      * @param coefficients the coefficients of the polynomial to evaluate.
-     * @param argument the input value.
-     *
+     * @param argument     the input value.
      * @return the value of the polynomial.
-     *
      * @throws IllegalArgumentException if {@code coefficients} is empty.
-     * @throws NullPointerException if {@code coefficients} is {@code null}.
+     * @throws NullPointerException     if {@code coefficients} is {@code null}.
      */
     protected static double evaluate(double[] coefficients, double argument) {
         int n = coefficients.length;
@@ -130,12 +128,12 @@ class PolynomialFunction implements Serializable {
                 return "0";
             }
         } else {
-            s.append(Double.toString(coefficients[0]));
+            s.append(coefficients[0]);
         }
 
         for (int i = 1; i < coefficients.length; ++i) {
             if (coefficients[i] != 0) {
-                if (s.length() > 0) {
+                if (!s.isEmpty()) {
                     if (coefficients[i] < 0) {
                         s.append(" - ");
                     } else {
@@ -149,14 +147,14 @@ class PolynomialFunction implements Serializable {
 
                 double absAi = Math.abs(coefficients[i]);
                 if ((absAi - 1) != 0) {
-                    s.append(Double.toString(absAi));
+                    s.append(absAi);
                     s.append(' ');
                 }
 
                 s.append("x");
                 if (i > 1) {
                     s.append('^');
-                    s.append(Integer.toString(i));
+                    s.append(i);
                 }
             }
         }
@@ -165,7 +163,7 @@ class PolynomialFunction implements Serializable {
     }
 
     /**
-* {@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public int hashCode() {
@@ -176,21 +174,16 @@ class PolynomialFunction implements Serializable {
     }
 
     /**
-* {@inheritDoc}
-*/
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof PolynomialFunction)) {
+        if (!(obj instanceof PolynomialFunction other)) {
             return false;
         }
-        PolynomialFunction other = (PolynomialFunction) obj;
-        if (!Arrays.equals(coefficients, other.coefficients)) {
-            return false;
-        }
-        return true;
+        return Arrays.equals(coefficients, other.coefficients);
     }
-
 }

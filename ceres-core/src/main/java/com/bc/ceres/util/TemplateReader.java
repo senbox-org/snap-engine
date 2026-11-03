@@ -29,6 +29,7 @@ import java.util.Map;
  *
  * @author Norman Fomferra
  */
+@SuppressWarnings("SynchronizeOnNonFinalField")
 public class TemplateReader extends FilterReader {
 
     private static final char DEFAULT_KEY_INDICATOR = '$';

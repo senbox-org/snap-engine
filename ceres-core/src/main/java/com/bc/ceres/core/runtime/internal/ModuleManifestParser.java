@@ -140,7 +140,7 @@ public class ModuleManifestParser {
             }
         }
 
-        Field.setAccessible(stringFields.toArray(new Field[stringFields.size()]), true);
+        Field.setAccessible(stringFields.toArray(new Field[0]), true);
         try {
             for (Field field : stringFields) {
                 try {
@@ -153,7 +153,7 @@ public class ModuleManifestParser {
                 }
             }
         } finally {
-            Field.setAccessible(stringFields.toArray(new Field[stringFields.size()]), false);
+            Field.setAccessible(stringFields.toArray(new Field[0]), false);
         }
     }
 
@@ -232,7 +232,7 @@ public class ModuleManifestParser {
                 stringList.add(stringElement);
             }
         }
-        return stringList.toArray(new String[stringList.size()]);
+        return stringList.toArray(new String[0]);
     }
 
     private CoreException toCoreException(XStreamException e) {

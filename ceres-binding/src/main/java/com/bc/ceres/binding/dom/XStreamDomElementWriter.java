@@ -17,7 +17,7 @@
 package com.bc.ceres.binding.dom;
 
 import com.thoughtworks.xstream.io.xml.AbstractDocumentWriter;
-import com.thoughtworks.xstream.io.xml.XmlFriendlyReplacer;
+import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 
 /**
  * todo - add API doc
@@ -28,11 +28,11 @@ import com.thoughtworks.xstream.io.xml.XmlFriendlyReplacer;
 public class XStreamDomElementWriter extends AbstractDocumentWriter {
 
     public XStreamDomElementWriter(DomElement child) {
-        this(child, new XmlFriendlyReplacer());
+        this(child, new XmlFriendlyNameCoder());
     }
 
-    public XStreamDomElementWriter(DomElement child, XmlFriendlyReplacer xmlFriendlyReplacer) {
-        super(child, xmlFriendlyReplacer);
+    public XStreamDomElementWriter(DomElement child, XmlFriendlyNameCoder xmlFriendlyNameCoder) {
+        super(child, xmlFriendlyNameCoder);
     }
 
     @Override

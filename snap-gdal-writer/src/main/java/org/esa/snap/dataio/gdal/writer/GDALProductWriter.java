@@ -423,8 +423,8 @@ public class GDALProductWriter extends AbstractProductWriter {
         }
 
         //Sample grid center
-        int centerY = Math.round((sceneH-1)/2);
-        int centerX = Math.round((sceneW-1)/2);
+        int centerY = Math.round((sceneH-1) * 0.5f);
+        int centerX = Math.round((sceneW-1) * 0.5f);
         addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, centerX, centerY);
         addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, centerX, sceneH - centerY);
         addScenePixelGcpFromGeoCoding(uniqGCPs, geoCoding, sceneW - centerX, centerY);

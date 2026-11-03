@@ -14,6 +14,8 @@ import ucar.nc2.Variable;
 import java.io.File;
 import java.io.IOException;
 
+import static eu.esa.snap.core.dataio.CfConstants.TITLE;
+import static eu.esa.snap.core.dataio.CfConstants.UNITS;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -27,11 +29,11 @@ public class NetcdfFileOpenerNativeNc4Test {
 
         try (NetcdfFile netcdfFile = NetcdfFileOpener.openNativeNc4(file)) {
             assertNotNull(netcdfFile);
-            assertEquals("native-nc4-test", netcdfFile.findGlobalAttribute("title").getStringValue());
+            assertEquals("native-nc4-test", netcdfFile.findGlobalAttribute(TITLE).getStringValue());
 
             final Variable variable = netcdfFile.findVariable("data");
             assertNotNull(variable);
-            final Attribute units = variable.findAttribute("units");
+            final Attribute units = variable.findAttribute(UNITS);
             assertNotNull(units);
             assertEquals("count", units.getStringValue());
 
@@ -54,8 +56,8 @@ public class NetcdfFileOpenerNativeNc4Test {
         writer.addDimension("y", 2);
         writer.addDimension("x", 3);
         final Variable variable = writer.addVariable("data", DataType.INT, "y x");
-        writer.addGlobalAttribute("title", "native-nc4-test");
-        variable.addAttribute(new Attribute("units", "count"));
+        writer.addGlobalAttribute(TITLE, "native-nc4-test");
+        variable.addAttribute(new Attribute(UNITS, "count"));
         writer.create();
 
         try {

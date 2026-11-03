@@ -141,7 +141,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
         return numberValue.toString();
     }
 
-    private class Measure {
+    private static class Measure {
 
         final static int BAND_NAME = 0;
         final static int INTERVAL = 1;

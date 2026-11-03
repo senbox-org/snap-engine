@@ -100,7 +100,7 @@ public class BufferedRandomAccessFile implements IRandomAccessFile {
 
 	@Override
 	public final long readUnsignedInt() throws IOException {
-		return (long) ((readByte() << 24) | (readByte() << 16) | (readByte() << 8) | readByte());
+		return (((long) readByte() << 24) | ((long) readByte() << 16) | ((long) readByte() << 8) | readByte());
 	}
 
 	@Override

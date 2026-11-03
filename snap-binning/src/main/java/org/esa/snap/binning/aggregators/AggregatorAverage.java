@@ -254,8 +254,8 @@ public final class AggregatorAverage extends AbstractAggregator {
             Config config = (Config) aggregatorConfig;
             String targetName = StringUtils.isNotNullAndNotEmpty(config.targetName) ? config.targetName : config.varName;
             double weightCoeff = config.weightCoeff != null ? config.weightCoeff : 0.0;
-            boolean outputCounts = config.outputCounts != null ? config.outputCounts : false;
-            boolean outputSums = config.outputSums != null ? config.outputSums : false;
+            boolean outputCounts = config.outputCounts != null && config.outputCounts;
+            boolean outputSums = config.outputSums != null && config.outputSums;
             return new AggregatorAverage(varCtx, config.varName, targetName, weightCoeff, outputCounts, outputSums);
         }
 
@@ -274,8 +274,8 @@ public final class AggregatorAverage extends AbstractAggregator {
         public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
             Config config = (Config) aggregatorConfig;
             String targetName = StringUtils.isNotNullAndNotEmpty(config.targetName) ? config.targetName : config.varName;
-            boolean outputCounts = config.outputCounts != null ? config.outputCounts : false;
-            boolean outputSums = config.outputSums != null ? config.outputSums : false;
+            boolean outputCounts = config.outputCounts != null && config.outputCounts;
+            boolean outputSums = config.outputSums != null && config.outputSums;
             return outputSums ?
                     createFeatureNames(targetName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null) :
                     createFeatureNames(targetName, "mean", "sigma", outputCounts ? "counts" : null);
