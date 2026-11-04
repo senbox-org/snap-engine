@@ -10,6 +10,7 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Activator;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -126,7 +127,15 @@ public class HDFLoader implements Activator {
             SystemUtils.LOG.fine("installing HDF resources from " + sourceDirPath + " into " + auxdataDirectory);
             resourceInstaller.install(".*", ProgressMonitor.NULL);
         } catch (IOException e) {
-            SystemUtils.LOG.severe("Native libraries for HDF could not be extracted to " + auxdataDirectory);
+            // On Windows an already-installed DLL cannot be overwritten while another process has it loaded
+            // (e.g. a second SNAP/JVM sharing the same auxdata dir). Fall back to the existing install if present.
+            if (Files.isDirectory(auxdataDirectory.resolve(System.getProperty("os.arch").toLowerCase()))
+                    || Files.isDirectory(auxdataDirectory.resolve("macosx"))) {
+                SystemUtils.LOG.warning("Native libraries for HDF could not be updated in " + auxdataDirectory
+                        + ", using the existing installation: " + e);
+                return auxdataDirectory;
+            }
+            SystemUtils.LOG.severe("Native libraries for HDF could not be extracted to " + auxdataDirectory + ": " + e);
             return null;
         }
         return auxdataDirectory;
