@@ -230,7 +230,7 @@ public class GETASSE30Reader extends AbstractProductReader {
                     if (pm.isCanceled()) {
                         break;
                     }
-                    final long sourcePos = sourceY * sceneWidth + sourceOffsetX;
+                    final long sourcePos = (long) sourceY * sceneWidth + sourceOffsetX;
                     final int destPos = destY * destWidth;
                     _imageInputStream.seek(2 * sourcePos);      // 2 byte
                     _imageInputStream.readFully(elems, destPos, destWidth);
@@ -246,7 +246,7 @@ public class GETASSE30Reader extends AbstractProductReader {
                     }
                     int sourceX = sourceOffsetX;
                     for (int destX = 0; destX < destWidth; destX++) {
-                        final long sourcePos = sourceY * sceneWidth + sourceX;
+                        final long sourcePos = (long) sourceY * sceneWidth + sourceX;
                         final int destPos = destY * destWidth + destX;
                         _imageInputStream.seek(2 * sourcePos);
                         elems[destPos] = _imageInputStream.readShort();

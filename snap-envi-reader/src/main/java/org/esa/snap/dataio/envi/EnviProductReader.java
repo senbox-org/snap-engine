@@ -157,7 +157,7 @@ public class EnviProductReader extends AbstractProductReader {
         String interleave = header.getInterleave();
         if ("bil".equalsIgnoreCase(interleave)) {
             // band interleaved by line
-            final long lineSizeInBytes = header.getNumSamples() * elemSize;
+            final long lineSizeInBytes = (long) header.getNumSamples() * elemSize;
             int numBands = product.getNumBands();
 
             pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceMaxY - sourceOffsetY);
@@ -169,7 +169,7 @@ public class EnviProductReader extends AbstractProductReader {
                     }
                     synchronized (imageInputStream) {
                         long lineStartPos = headerOffset + sourceY * numBands * lineSizeInBytes + bandIndex * lineSizeInBytes;
-                        imageInputStream.seek(lineStartPos + elemSize * sourceOffsetX);
+                        imageInputStream.seek(lineStartPos + (long) elemSize * sourceOffsetX);
                         destBuffer.readFrom(destPos, destWidth, imageInputStream);
                         destPos += destWidth;
                     }
@@ -181,7 +181,7 @@ public class EnviProductReader extends AbstractProductReader {
         } else if ("bip".equalsIgnoreCase(interleave)) {
             // band interleaved by pixel
             int numBands = product.getNumBands();
-            final long lineSizeInBytes = header.getNumSamples() * numBands * elemSize;
+            final long lineSizeInBytes = (long) header.getNumSamples() * numBands * elemSize;
             ProductData lineData = ProductData.createInstance(destBuffer.getType(), sourceWidth * numBands);
 
             pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceMaxY - sourceOffsetY);
@@ -193,7 +193,7 @@ public class EnviProductReader extends AbstractProductReader {
                     }
                     synchronized (imageInputStream) {
                         long lineStartPos = headerOffset + sourceY * lineSizeInBytes;
-                        imageInputStream.seek(lineStartPos + elemSize * sourceOffsetX * numBands);
+                        imageInputStream.seek(lineStartPos + (long) elemSize * sourceOffsetX * numBands);
                         lineData.readFrom(0, sourceWidth * numBands, imageInputStream);
                     }
                     for (int x = 0; x < sourceWidth; x++) {
@@ -506,7 +506,7 @@ public class EnviProductReader extends AbstractProductReader {
             }
             product.addBand(band);
 
-            final long bandStartPosition = headerOffset + bandSizeInBytes * i;
+            final long bandStartPosition = headerOffset + (long) bandSizeInBytes * i;
             bandStreamPositionMap.put(band, bandStartPosition);
             imageInputStreamMap.put(band, initializeInputStreamForBandData(inputFile, header.getJavaByteOrder()));
             headerMap.put(band, header);

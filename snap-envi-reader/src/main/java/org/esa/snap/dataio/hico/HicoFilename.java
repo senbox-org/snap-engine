@@ -122,8 +122,8 @@ class HicoFilename {
                 return new HicoFilename(acquisitionUTC, l0UTC,
                                  processingLevel, processingVersion,
                                  target, sceneID, spatialResolution, fileType, productBase);
-            } catch (ParseException ignore) {
-                Debug.trace(ignore);
+            } catch (ParseException parseException) {
+                Debug.trace(parseException);
             }
         }
         return null;

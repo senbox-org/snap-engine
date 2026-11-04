@@ -52,6 +52,6 @@ public class BruteForceClasspathFactory extends AbstractClasspathFactory {
 
     @Override
     protected File[] getClasspathFiles() {
-        return classpath.toArray(new File[classpath.size()]);
+        return classpath.toArray(new File[0]);
     }
 }

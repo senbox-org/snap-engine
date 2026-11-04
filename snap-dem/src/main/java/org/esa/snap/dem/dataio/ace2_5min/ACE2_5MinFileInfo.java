@@ -136,7 +136,7 @@ public class ACE2_5MinFileInfo {
         _easting = eastingNorthing[0];
         _northing = eastingNorthing[1];
 
-        _width = (int) Math.sqrt(fileSize / 4);
+        _width = (int) Math.sqrt(fileSize * 0.25);
         _height = _width;
         //if (_width * _height * 2L != fileSize) {
         ///    throw new IOException("Illegal file size: " + fileSize);

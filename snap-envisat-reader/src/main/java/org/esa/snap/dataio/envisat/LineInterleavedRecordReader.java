@@ -71,7 +71,7 @@ class LineInterleavedRecordReader extends RecordReader {
      *
      * @param index  the record index, must be <code>&gt;=0</code> and <code>&lt;getDSD().getDatasetOffset()</code>
      * @param record record to be recycled, can be <code>null</code>
-     * @throws java.io.IOException if an I/O error occurs
+     * @throws java.io.IOException                 if an I/O error occurs
      * @throws java.lang.IndexOutOfBoundsException if the index is out of bounds
      */
     @Override
@@ -100,14 +100,13 @@ class LineInterleavedRecordReader extends RecordReader {
      * <p> In order to reduce memory allocation, the method accepts an mandantory record argument.
      * It will be used to read in the data.
      *
-     * @param sourceY the record index, must be <code>&gt;=0</code> and <code>&lt;getDSD().getDatasetOffset()</code>
-     * @param fieldOffset the offset in byte this field has in its containing record
+     * @param sourceY             the record index, must be <code>&gt;=0</code> and <code>&lt;getDSD().getDatasetOffset()</code>
+     * @param fieldOffset         the offset in byte this field has in its containing record
      * @param dataFieldSampleSize the sample rate of the data field element
-     * @param minX the first element of the field to read
-     * @param maxX the last element of the field to be read
-     * @param field the field into which the data is read
-     *
-     * @throws java.io.IOException if an I/O error occurs
+     * @param minX                the first element of the field to read
+     * @param maxX                the last element of the field to be read
+     * @param field               the field into which the data is read
+     * @throws java.io.IOException                 if an I/O error occurs
      * @throws java.lang.IndexOutOfBoundsException if the index is out of bounds
      */
     @Override
@@ -115,17 +114,16 @@ class LineInterleavedRecordReader extends RecordReader {
         if (getDSD().getDatasetType() == 'M') {
             sourceY = getProductFile().getMappedMDSRIndex(sourceY);
         }
-        long pos = headerSize +
-                    sourceY * recordLength +
-                    recordOffset +
-                    fieldOffset +
-                    minX * dataFieldSampleSize * field.getData().getElemSize();
-//        System.out.println("sourceY = " + sourceY+"; pos = " + pos);
+        final long pos = headerSize +
+                sourceY * recordLength +
+                recordOffset +
+                fieldOffset +
+                (long) minX * dataFieldSampleSize * field.getData().getElemSize();
         final ImageInputStream istream = getProductFile().getDataInputStream();
         synchronized (istream) {
             istream.seek(pos);
-            field.getData().readFrom(minX * dataFieldSampleSize, (maxX-minX+1) * dataFieldSampleSize, istream);
+            field.getData().readFrom(minX * dataFieldSampleSize, (maxX - minX + 1) * dataFieldSampleSize, istream);
         }
     }
-    
+
 }

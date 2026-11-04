@@ -92,7 +92,7 @@ public class DefaultModuleManager implements ModuleManager {
 
     public ModuleItem[] getUpdatableModuleItems() {
         if (updatableModuleItems == null) {
-            return new ModuleItem[0];
+            return ModuleItem.EMPTY_ARRAY;
 
         }
         return updatableModuleItems;
@@ -100,7 +100,7 @@ public class DefaultModuleManager implements ModuleManager {
 
     public ModuleItem[] getAvailableModuleItems() {
         if (availableModuleItems == null) {
-            return new ModuleItem[0];
+            return ModuleItem.EMPTY_ARRAY;
         }
         return availableModuleItems;
     }
@@ -171,7 +171,7 @@ public class DefaultModuleManager implements ModuleManager {
                 updates.add(installedModuleItem);
             }
         }
-        return updates.toArray(new ModuleItem[updates.size()]);
+        return updates.toArray(ModuleItem.EMPTY_ARRAY);
     }
 
 

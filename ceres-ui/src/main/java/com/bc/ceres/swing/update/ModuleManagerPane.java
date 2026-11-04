@@ -531,7 +531,7 @@ public class ModuleManagerPane extends JPanel {
                     filteredModuleItems.add(moduleItem);
                 }
             }
-            moduleItems = filteredModuleItems.toArray(new ModuleItem[filteredModuleItems.size()]);
+            moduleItems = filteredModuleItems.toArray(ModuleItem.EMPTY_ARRAY);
         }
 
         Arrays.sort(moduleItems);
@@ -564,7 +564,7 @@ public class ModuleManagerPane extends JPanel {
 
     private void updateCategories() {
         categoriesSet.add(new CaselessKey(""));
-        CaselessKey[] keys = categoriesSet.toArray(new CaselessKey[categoriesSet.size()]);
+        CaselessKey[] keys = categoriesSet.toArray(new CaselessKey[0]);
         Arrays.sort(keys);
         Object selectedItem = categories.getSelectedItem().toString();
         categories.setModel(new DefaultComboBoxModel<>(keys));

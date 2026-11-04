@@ -20,8 +20,7 @@ import com.bc.ceres.swing.figure.AbstractHandle;
 import com.bc.ceres.swing.figure.Figure;
 import com.bc.ceres.swing.figure.FigureStyle;
 
-import java.awt.Cursor;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
@@ -118,29 +117,7 @@ public class ScaleHandle extends AbstractHandle {
 
     @Override
     public Cursor getCursor() {
-        double rotation = 0.0; // todo - derive rotation angle
-        if (rotation == 0.0) {
-            return Cursor.getPredefinedCursor(CURSOR_TYPES[type]);
-        } else {
-            final Point2D direction = DIRECTIONS[type];
-            // todo - rotate "direction" by "rotation"
-            double a = Math.atan2(direction.getY(), direction.getX());
-            if (a < 0.0) {
-                a = 2.0 * Math.PI - a;
-            }
-            final double b = 0.5 * a / Math.PI;
-            final double n = CURSOR_TYPES.length;
-            final double c = n * b + 0.5 * (1.0 / n);
-            int index = (int) c;
-            if (index >= CURSOR_TYPES.length) {
-                index = CURSOR_TYPES.length - 1;
-            }
-            return Cursor.getPredefinedCursor(CURSOR_TYPES[index]);
-        }
-    }
-
-    private Point2D.Double getRefPoint() {
-        return getRefPoint(type);
+        return Cursor.getPredefinedCursor(CURSOR_TYPES[type]);
     }
 
     private Point2D.Double getRefPoint(int type) {
@@ -150,13 +127,13 @@ public class ScaleHandle extends AbstractHandle {
         final double w = bounds.getWidth();
         final double h = bounds.getHeight();
         return new Point2D.Double(x + POSITIONS[type].getX() * w,
-                                  y + POSITIONS[type].getY() * h);
+                y + POSITIONS[type].getY() * h);
     }
 
     private static Shape createHandleShape(double dx, double dy) {
         return new Rectangle2D.Double(dx - 0.5 * StyleDefaults.SCALE_HANDLE_SIZE,
-                                      dy - 0.5 * StyleDefaults.SCALE_HANDLE_SIZE,
-                                      StyleDefaults.SCALE_HANDLE_SIZE,
-                                      StyleDefaults.SCALE_HANDLE_SIZE);
+                dy - 0.5 * StyleDefaults.SCALE_HANDLE_SIZE,
+                StyleDefaults.SCALE_HANDLE_SIZE,
+                StyleDefaults.SCALE_HANDLE_SIZE);
     }
 }

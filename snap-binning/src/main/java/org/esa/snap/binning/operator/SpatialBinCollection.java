@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Implementations provide an {@link Iterable} for the bin collection and some meta-data of the collection.
  */
-interface SpatialBinCollection {
+public interface SpatialBinCollection {
 
     /**
      * Provides an {@link Iterable iterable} for the underlying collection of bins.

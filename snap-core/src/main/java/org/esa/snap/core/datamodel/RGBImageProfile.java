@@ -460,7 +460,7 @@ public class RGBImageProfile implements ConfigurableExtension {
         }
         properties.put(PROPERTY_KEY_NAME, getName());
         if (isInternal()) {
-            properties.put(PROPERTY_KEY_INTERNAL, isInternal() ? "true" : "false");
+            properties.put(PROPERTY_KEY_INTERNAL, isInternal());
         } else {
             properties.remove(PROPERTY_KEY_INTERNAL);
         }

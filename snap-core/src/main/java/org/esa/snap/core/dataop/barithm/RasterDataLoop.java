@@ -195,7 +195,7 @@ public class RasterDataLoop {
             rasterRegions.add(rasterRegion);
             symbol.setData(rasterRegion.getData().getElems());
         }
-        return rasterRegions.toArray(new RasterRegion[rasterRegions.size()]);
+        return rasterRegions.toArray(new RasterRegion[0]);
     }
 
     /**

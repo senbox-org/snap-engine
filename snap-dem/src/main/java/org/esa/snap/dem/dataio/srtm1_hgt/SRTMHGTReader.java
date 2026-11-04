@@ -164,7 +164,7 @@ public class SRTMHGTReader extends AbstractProductReader {
             int destPos = 0;
 
             for (int sourceY = sourceOffsetY; sourceY < sourceMaxY; sourceY += sourceStepY) {
-                final long sourcePosY = sourceY * sourceRasterWidth;
+                final long sourcePosY = (long) sourceY * sourceRasterWidth;
                 if (sourceStepX == 1) {
                     imageInputStream.seek(bandOffset + elemSize * (sourcePosY + sourceOffsetX));
                     destBuffer.readFrom(destPos, destWidth, imageInputStream);

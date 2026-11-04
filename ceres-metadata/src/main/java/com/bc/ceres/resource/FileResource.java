@@ -22,6 +22,7 @@ import java.io.IOException;
 /**
  * A [@link Resource} reading its content from a @{link File}.
  */
+@Deprecated
 public class FileResource extends Resource {
 
     public FileResource(String path) {

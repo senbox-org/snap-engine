@@ -34,6 +34,8 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.util.List;
 
+import static eu.esa.snap.core.dataio.CfConstants.CONVENTIONS;
+
 public class CfInitialisationPart extends ProfileInitPartIO {
 
     @Override
@@ -151,7 +153,7 @@ public class CfInitialisationPart extends ProfileInitPartIO {
     @Override
     public void writeProductBody(ProfileWriteContext ctx, Product product) throws IOException {
         NFileWriteable writeable = ctx.getNetcdfFileWriteable();
-        writeable.addGlobalAttribute("Conventions", "CF-1.4");
+        writeable.addGlobalAttribute(CONVENTIONS, "CF-1.4");
         if (!isLatLonPresent(product) && CfGeocodingPart.isGeographicCRS(product.getSceneGeoCoding())) {
             writeDimensions(writeable, product, "lat", "lon");
         } else if (isLatLonPresent(product) && CfGeocodingPart.isGeographicCRS(product.getSceneGeoCoding())) {
@@ -173,7 +175,7 @@ public class CfInitialisationPart extends ProfileInitPartIO {
     }
 
     public String readProductType(final ProfileReadContext ctx) {
-        Attribute productType = ctx.getNetcdfFile().findGlobalAttribute("Conventions");
+        Attribute productType = ctx.getNetcdfFile().findGlobalAttribute(CONVENTIONS);
         if (productType != null && StringUtils.isNotNullAndNotEmpty(productType.getStringValue())) {
             return productType.getStringValue();
         } else {

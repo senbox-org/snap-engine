@@ -23,11 +23,6 @@ import java.util.Map;
 
 public final class CFConstantsAndUtils {
 
-    // CF sample coding attributes
-    public static final String FLAG_VALUES = "flag_values";
-    public static final String FLAG_MASKS = "flag_masks";
-    public static final String FLAG_MEANINGS = "flag_meanings";
-
     private static final Map<String, String> unitMap = new HashMap<>();
 
     static {

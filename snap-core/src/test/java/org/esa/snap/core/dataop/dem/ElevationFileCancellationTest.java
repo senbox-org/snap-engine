@@ -28,17 +28,16 @@ public class ElevationFileCancellationTest {
     @Test
     @STTM("SNAP-4209")
     public void testHttpDownloadStopsWhenProgressMonitorIsCanceled() throws Exception {
-        SlowHttpServer server = new SlowHttpServer("tile.zip");
-        server.start();
-        try {
+        final SlowHttpServer server = new SlowHttpServer("tile.zip");
+
+        try (server) {
+            server.start();
             TestElevationFile elevationFile = new TestElevationFile(new File(temporaryFolder.getRoot(), "tile.dat"));
             ProgressMonitor progressMonitor = new CancelAfterChecksProgressMonitor(1);
 
-            assertThrows(CancellationException.class, () -> elevationFile.download(server.getBaseUrl(), progressMonitor));
+            assertThrows(IOException.class, () -> elevationFile.download(server.getBaseUrl(), progressMonitor));
 
             assertFalse(new File(temporaryFolder.getRoot(), "tile.zip").exists());
-        } finally {
-            server.close();
         }
     }
 

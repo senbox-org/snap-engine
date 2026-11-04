@@ -219,7 +219,7 @@ public class DefaultParameterDescriptor implements ParameterDescriptor {
 
     @Override
     public boolean isNotNull() {
-        return notNull != null ? notNull : false;
+        return notNull != null && notNull;
     }
 
     public void setNotNull(boolean notNull) {
@@ -228,7 +228,7 @@ public class DefaultParameterDescriptor implements ParameterDescriptor {
 
     @Override
     public boolean isNotEmpty() {
-        return notEmpty != null ? notEmpty : false;
+        return notEmpty != null && notEmpty;
     }
 
     public void setNotEmpty(boolean notEmpty) {
@@ -237,7 +237,7 @@ public class DefaultParameterDescriptor implements ParameterDescriptor {
 
     @Override
     public boolean isDeprecated() {
-        return deprecated != null ? deprecated : false;
+        return deprecated != null && deprecated;
     }
 
     public void setDeprecated(boolean deprecated) {

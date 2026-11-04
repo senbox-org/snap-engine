@@ -1,16 +1,7 @@
 package org.esa.snap.core.dataio.dimap.spi;
 
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.ATTRIB_VALUE;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_ANCILLARY_RELATION;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_ANCILLARY_VARIABLE;
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.TAG_IMAGE_TO_MODEL_TRANSFORM;
-
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductNode;
-import org.esa.snap.core.datamodel.ProductNodeEvent;
-import org.esa.snap.core.datamodel.ProductNodeListenerAdapter;
-import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.StringUtils;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
@@ -19,6 +10,8 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
+
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.*;
 
 public abstract class RasterDataNodePersistable implements DimapPersistable {
 
@@ -33,7 +26,7 @@ public abstract class RasterDataNodePersistable implements DimapPersistable {
             if (variable != null) {
                 rasterDataNode.addAncillaryVariable(variable);
             } else {
-                product.addProductNodeListener(new ProductNodeListenerAdapter(){
+                product.addProductNodeListener(new ProductNodeListenerAdapter() {
                     @Override
                     public void nodeAdded(ProductNodeEvent event) {
                         final ProductNode sourceNode = event.getSourceNode();
@@ -70,21 +63,21 @@ public abstract class RasterDataNodePersistable implements DimapPersistable {
         }
     }
 
-    protected void setImageToModelTransform(Element element, RasterDataNode rasterDataNode) {
+    protected static void setImageToModelTransform(Element element, RasterDataNode rasterDataNode) {
         String matrix = element.getChildTextTrim(TAG_IMAGE_TO_MODEL_TRANSFORM); //Old format??
-        if (matrix == null || matrix.length() == 0) {
+        if (matrix == null || matrix.isEmpty()) {
             //Try new format
-            Element child = element.getChild(TAG_IMAGE_TO_MODEL_TRANSFORM);
-            if(child == null) {
+            final Element child = element.getChild(TAG_IMAGE_TO_MODEL_TRANSFORM);
+            if (child == null) {
                 return;
             }
-            Attribute attribute = child.getAttribute(ATTRIB_VALUE);
-            if(attribute == null) {
+            final Attribute attribute = child.getAttribute(ATTRIB_VALUE);
+            if (attribute == null) {
                 return;
             }
             matrix = attribute.getValue().trim();
         }
-        if (matrix != null && matrix.length() > 0) {
+        if (!matrix.isEmpty()) {
             final AffineTransform transform = new AffineTransform(StringUtils.toDoubleArray(matrix, null));
             rasterDataNode.setImageToModelTransform(transform);
         }

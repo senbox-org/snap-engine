@@ -26,6 +26,7 @@ import java.util.List;
 public class MultiValidator implements Validator {
     private final List<Validator> validators;
 
+    @Deprecated
     public MultiValidator() {
         this.validators = new ArrayList<Validator>(3);
     }
@@ -38,10 +39,12 @@ public class MultiValidator implements Validator {
         return validators.toArray(new Validator[0]);
     }
 
+    @Deprecated
     public void addValidator(Validator validator) {
         validators.add(validator);
     }
 
+    @Deprecated
     public void removeValidator(Validator validator) {
         validators.remove(validator);
     }

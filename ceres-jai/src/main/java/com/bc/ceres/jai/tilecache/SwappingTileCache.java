@@ -528,7 +528,7 @@ public final class SwappingTileCache extends Observable implements TileCache, Ca
                 }
             }
             if (!temp.isEmpty()) {
-                return temp.toArray(new Raster[temp.size()]);
+                return temp.toArray(new Raster[0]);
             }
         }
 

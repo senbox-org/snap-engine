@@ -31,10 +31,6 @@
         ODESA.
     </description>
 
-    <properties>
-        <netcdf.version>5.3.3</netcdf.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -68,7 +64,6 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdfAll</artifactId>
-            <version>${netcdf.version}</version>
         </dependency>
 
         <!--

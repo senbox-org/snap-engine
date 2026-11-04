@@ -167,8 +167,6 @@ public class Property {
         if (equalObjects(oldValue, value)) {
             return;
         }
-        // todo - test cast castToPropertyType() - needed for Python API, nf 25.06.2013
-        // value = castToPropertyType(value);
         validate(value);
         accessor.setValue(value);
 
@@ -177,61 +175,6 @@ public class Property {
         }
     }
 
-    // todo - test cast castToPropertyType() - needed for Python API, nf 25.06.2013
-    /*
-    private Object castToPropertyType(Object value) {
-        if (value == null) {
-            return value;
-        } else if (getType().isAssignableFrom(value.getClass())) {
-            return value;
-        } else if (getType().isArray()) {
-            if (value.getClass().isArray()) {
-                return castSourceArrayToTargetArray(value);
-            } else if (value instanceof List) {
-                final List list = (List) value;
-                return castSourceArrayToTargetArray(list.toArray(new Object[list.size()]));
-            }
-        } else if (Object.class.isAssignableFrom(getType())) {
-            if (value instanceof Map) {
-                PropertySet sourcePS = PropertyContainer.createMapBacked((Map) value, getType());
-                PropertySet targetPS = PropertyContainer.createObjectBacked(getType().newInstance());
-                copyPropertySets(sourcePS, targetPS);
-            } else if (Map.class.isAssignableFrom(getType())) {
-                PropertySet sourcePS = PropertyContainer.createObjectBacked(value);
-                PropertySet targetPS = PropertyContainer.createMapBacked(new HashMap());
-                copyPropertySets(sourcePS, targetPS);
-            }
-        }
-        // No cast possible, validate() will check for us
-        return value;
-    }
-
-    private Object castSourceArrayToTargetArray(Object sourceArray) throws ValidationException {
-        Class<?> targetCompType = getType().getComponentType();
-        int length = Array.getLength(sourceArray);
-        Object targetArray = Array.newInstance(targetCompType, length);
-        for (int i = 0; i < length; i++) {
-            Object sourceElement = Array.get(sourceArray, i);
-            Property elementProperty = Property.create(String.format("%s[%d]", getName(), i), targetCompType);
-            // forces recursively calling castToPropertyType() on array elements
-            elementProperty.setValue(sourceElement);
-            Array.set(sourceArray, i, elementProperty.getValue());
-        }
-        return targetArray;
-    }
-
-    private void copyPropertySets(PropertySet sourcePS, PropertySet targetPS) {
-        final Property[] sourceProperties = sourcePS.getProperties();
-        for (Property sourceProperty : sourceProperties) {
-            if (targetPS.isPropertyDefined(sourceProperty.getName())) {
-                // forces recursively calling castToPropertyType() on set members
-                targetPS.setValue(sourceProperty.getName(), sourceProperty.getValue());
-            }
-        }
-    }
-
-    */
-
     private boolean equalObjects(Object oldValue, Object newValue) {
         if (oldValue == newValue) {
             return true;
@@ -239,8 +182,7 @@ public class Property {
         if (oldValue == null) {
             return false;
         }
-        if (oldValue instanceof Number && newValue instanceof Number) {
-            final Number number = (Number) newValue;
+        if (oldValue instanceof Number && newValue instanceof Number number) {
             final Object epsValue = descriptor.getAttribute("eps");
             if (epsValue instanceof Number) {
                 if ((oldValue instanceof Float)) {

@@ -37,7 +37,7 @@ public class BootstrapClasspathFactory extends AbstractClasspathFactory {
         if (ceresCoreFile != null) {
             classpath.add(0, ceresCoreFile);
         }
-        return classpath.toArray(new File[classpath.size()]);
+        return classpath.toArray(new File[0]);
     }
 
     @Override

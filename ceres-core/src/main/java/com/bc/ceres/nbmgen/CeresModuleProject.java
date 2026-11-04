@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * @author Norman
  */
-class CeresModuleProject {
+public class CeresModuleProject {
 
     public static final String ORIGINAL_POM_XML = "pom-original.xml";
     public static final String POM_XML = "pom.xml";

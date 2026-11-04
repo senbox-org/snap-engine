@@ -503,7 +503,7 @@ public abstract class Layer extends ExtensibleObject {
      * @return The listeners added to this layer..
      */
     public LayerListener[] getListeners() {
-        return layerListenerList.toArray(new LayerListener[layerListenerList.size()]);
+        return layerListenerList.toArray(new LayerListener[0]);
     }
 
     /**

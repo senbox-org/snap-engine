@@ -304,7 +304,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 if (geometryNames.size() < 2) {
                     throw new OperatorException("Cannot train on vectors because first source product has less than 2 vectors");
                 }
-                params.trainingVectors = geometryNames.toArray(new String[geometryNames.size()]);
+                params.trainingVectors = geometryNames.toArray(new String[0]);
             }
             polygonVectorDataNodes = new VectorDataNode[params.trainingVectors.length];
             final ProductNodeGroup<VectorDataNode> vectorGroup = maskProduct.getVectorDataGroup();
@@ -658,7 +658,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                         allFeatureBands.add(bandName + "::" + p.getName());
                     }
                 }
-                params.featureBands = allFeatureBands.toArray(new String[allFeatureBands.size()]);
+                params.featureBands = allFeatureBands.toArray(new String[0]);
             }
 
             final Map<String, Product> productHashMap = new HashMap<>();
@@ -698,7 +698,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 }
             }
 
-            featureInfoList = featureInfos.toArray(new FeatureInfo[featureInfos.size()]);
+            featureInfoList = featureInfos.toArray(new FeatureInfo[0]);
 
             final LabeledInstances allLabeledInstances = getLabeledInstances(operator, params.numTrainSamples * 2,
                     featureInfoList);
@@ -864,7 +864,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                     break;
                 }
 
-                final FeatureInfo[] featureInfos = featureSet.toArray(new FeatureInfo[featureSet.size()]);
+                final FeatureInfo[] featureInfos = featureSet.toArray(new FeatureInfo[0]);
 
                 Classifier setClassifier = createMLClassifier(featureInfos);
 
@@ -1140,7 +1140,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 featureInfos.add(new FeatureInfo(featureBand, i, noDataValue, offset, scale));
             }
 
-            featureInfoList = featureInfos.toArray(new FeatureInfo[featureInfos.size()]);
+            featureInfoList = featureInfos.toArray(new FeatureInfo[0]);
 
         } catch (Exception ex) {
             classifierFailed = true; // So it won't try to train again

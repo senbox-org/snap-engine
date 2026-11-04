@@ -26,6 +26,7 @@ import com.thoughtworks.xstream.XStream;
  * @author Marco Peters
  * @since BEAM 4.6
  */
+@Deprecated
 public class XStreamDomConverter implements DomConverter {
 
     private final Class<?> valueType;

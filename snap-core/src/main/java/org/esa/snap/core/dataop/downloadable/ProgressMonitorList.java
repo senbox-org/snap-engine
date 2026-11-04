@@ -53,7 +53,7 @@ public class ProgressMonitorList {
     }
 
     public StatusProgressMonitor[] getList() {
-        return list.toArray(new StatusProgressMonitor[list.size()]);
+        return list.toArray(new StatusProgressMonitor[0]);
     }
 
     public boolean isEmpty() {

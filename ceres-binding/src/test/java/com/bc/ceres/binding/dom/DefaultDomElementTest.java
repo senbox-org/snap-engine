@@ -32,6 +32,7 @@ public class DefaultDomElementTest extends AbstractDomElementTest {
         return new DefaultDomElement(name, value);
     }
 
+    @Test
     public void testConstructor() {
         try {
             new DefaultDomElement(null);
@@ -65,6 +66,85 @@ public class DefaultDomElementTest extends AbstractDomElementTest {
         testMixChildren(new XppDomElement("a"), new XppDomElement("b"), new XppDomElement("c"));
     }
 
+    @Test
+    public void testGetChildren() {
+        final DefaultDomElement parent = new DefaultDomElement("parent");
+        final DefaultDomElement child1 = new DefaultDomElement("child_1");
+        parent.addChild(child1);
+
+        final DefaultDomElement child2 = new DefaultDomElement("child_2");
+        parent.addChild(child2);
+
+        final DomElement[] children = parent.getChildren();
+        assertEquals(2, children.length);
+        assertEquals("child_1", children[0].getName());
+    }
+
+    @Test
+    public void testGetChildren_empty() {
+        final DefaultDomElement parent = new DefaultDomElement("parent");
+
+        final DomElement[] children = parent.getChildren();
+        assertEquals(0, children.length);
+    }
+
+    @Test
+    public void testGetChildren_named() {
+        final DefaultDomElement parent = new DefaultDomElement("parent");
+        final DefaultDomElement child1 = new DefaultDomElement("child");
+        parent.addChild(child1);
+
+        final DefaultDomElement child2 = new DefaultDomElement("child");
+        parent.addChild(child2);
+
+        DomElement[] children = parent.getChildren("child");
+        assertEquals(2, children.length);
+        assertEquals("child", children[1].getName());
+
+        children = parent.getChildren("opa");
+        assertEquals(0, children.length);
+    }
+
+    @Test
+    public void testGetChildren_named_empty() {
+        final DefaultDomElement parent = new DefaultDomElement("parent");
+
+        final DomElement[] children = parent.getChildren("child");
+        assertEquals(0, children.length);
+    }
+
+    @Test
+    public void testGetChild_index_empty() {
+        final DefaultDomElement parent = new DefaultDomElement("parent");
+
+        assertNull(parent.getChild(8));
+    }
+
+    @Test
+    public void testGetChild_index_outOfRange() {
+        final DefaultDomElement parent = new DefaultDomElement("parent");
+        final DefaultDomElement child1 = new DefaultDomElement("child_1");
+        parent.addChild(child1);
+
+        assertNull(parent.getChild(2));
+    }
+
+    @Test
+    public void testGetChild_index() {
+        final DefaultDomElement parent = new DefaultDomElement("parent");
+        final DefaultDomElement child1 = new DefaultDomElement("child_1");
+        parent.addChild(child1);
+
+        final DefaultDomElement child2 = new DefaultDomElement("child_2");
+        parent.addChild(child2);
+
+        DomElement child = parent.getChild(0);
+        assertEquals("child_1", child.getName());
+
+        child = parent.getChild(1);
+        assertEquals("child_2", child.getName());
+    }
+
     private void testMixChildren(DomElement a, DomElement b, DomElement c) {
         b.addChild(c);
         a.addChild(b);
@@ -76,10 +156,11 @@ public class DefaultDomElementTest extends AbstractDomElementTest {
         assertSame(a, a.getChild("b").getParent());
         assertSame(a.getChild("b"), a.getChild("b").getChild("c").getParent());
 
-        assertEquals("<a>\n" +
-                             "<b>\n" +
-                             "<c/>\n" +
-                             "</b>\n" +
-                             "</a>", a.toXml().replace("  ", ""));
+        assertEquals("""
+                <a>
+                <b>
+                <c/>
+                </b>
+                </a>""", a.toXml().replace("  ", ""));
     }
 }

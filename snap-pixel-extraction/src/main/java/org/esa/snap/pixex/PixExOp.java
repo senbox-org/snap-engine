@@ -495,7 +495,7 @@ public class PixExOp extends Operator {
                 return false;
             }
         }
-        int offset = MathUtils.floorInt(windowSize / 2);
+        int offset = MathUtils.floorInt(windowSize * 0.5);
         final int centerX = MathUtils.floorInt(centerPos.x);
         final int centerY = MathUtils.floorInt(centerPos.y);
         final int upperLeftX = centerX - offset;

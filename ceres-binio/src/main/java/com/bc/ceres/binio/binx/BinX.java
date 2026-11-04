@@ -337,7 +337,7 @@ public class BinX {
             members.add(MEMBER(memberName, memberType));
         }
 
-        return COMPOUND(generateCompoundName(), members.toArray(new CompoundMember[members.size()]));
+        return COMPOUND(generateCompoundName(), members.toArray(new CompoundMember[0]));
     }
 
     //    <arrayVariable varName="SM_SWATH" byteOrder="littleEndian">

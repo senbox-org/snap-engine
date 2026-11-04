@@ -634,30 +634,4 @@ public class NavControl2 extends JComponent {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
-
-    private class I {
-        int x0;
-        int y0;
-        BufferedImage image;
-        Shape shape;
-        Shape testShape;
-
-        private I(int x0, int y0, BufferedImage image, Shape shape) {
-            this.x0 = x0;
-            this.y0 = y0;
-            this.image = image;
-            this.shape = shape;
-        }
-
-        private void draw(Graphics2D g ) {
-            g.drawImage(image, null, x0, y0);
-
-        }
-
-        private boolean contains(int x, int y) {
-             return testShape.contains(x - x0 - 0.5* image.getWidth(),
-                                       y - y0 - 0.5* image.getHeight());
-        }
-    }
-
 }

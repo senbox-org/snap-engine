@@ -192,7 +192,7 @@ public class ProductFunctions {
         long size = 0;
         for (Band band : product.getBands()) {
             if (!(band instanceof VirtualBand)) {
-                size += band.getRasterWidth() * band.getRasterHeight();
+                size += (long) band.getRasterWidth() * band.getRasterHeight();
             }
         }
         return size;
@@ -230,10 +230,10 @@ public class ProductFunctions {
         if (totalPixels != null && totalPixels > 0 && totalSeconds > 0) {
             final long PperSec = totalPixels / totalSeconds;
             if (PperSec > Constants.oneBillion) {
-                final long GiBperSec = Math.round(totalPixels / (1000 * 1000 * 1000)) / totalSeconds;
+                final long GiBperSec = Math.round((float) totalPixels / (1000 * 1000 * 1000)) / totalSeconds;
                 pixelsRateStr = " (" + GiBperSec + " GPixel/s)";
             } else if (PperSec > Constants.oneMillion) {
-                final long MiBperSec = Math.round(totalPixels / (1000 * 1000)) / totalSeconds;
+                final long MiBperSec = Math.round((float) totalPixels / (1000 * 1000)) / totalSeconds;
                 pixelsRateStr = " " + MiBperSec + " MPixel/s)";
             } else {
                 pixelsRateStr = " " + PperSec + " Pixels/s)";

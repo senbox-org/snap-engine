@@ -51,7 +51,7 @@ public class PropertyDescriptor {
     private PropertySetDescriptor propertySetDescriptor;
 
     public PropertyDescriptor(String name, Class<?> type) {
-        this(name, type, new HashMap<String, Object>(8));
+        this(name, type, new HashMap<>(8));
     }
 
     public PropertyDescriptor(PropertyDescriptor propertyDescriptor) {
@@ -78,6 +78,7 @@ public class PropertyDescriptor {
         return a == b || !(a == null || b == null) && a.equals(b);
     }
 
+    @Deprecated
     public static String getDisplayName(PropertyDescriptor propertyDescriptor) {
         String label = propertyDescriptor.getDisplayName();
         if (label != null) {
@@ -362,7 +363,7 @@ public class PropertyDescriptor {
     }
 
     private Validator createEffectiveValidator() {
-        List<Validator> validators = new ArrayList<>(3);
+        List<Validator> validators = new ArrayList<>();
 
         if (isNotNull()) {
             validators.add(new NotNullValidator());
@@ -390,9 +391,7 @@ public class PropertyDescriptor {
             validators.add(getValidator());
         }
         Validator validator;
-        if (validators.isEmpty()) {
-            validator = null;
-        } else if (validators.size() == 1) {
+        if (validators.size() == 1) {
             validator = validators.get(0);
         } else {
             validator = new MultiValidator(validators);

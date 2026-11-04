@@ -19,9 +19,7 @@ package com.bc.ceres.swing.selection.support;
 import com.bc.ceres.swing.selection.AbstractSelectionContext;
 import com.bc.ceres.swing.selection.Selection;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.ListModel;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.datatransfer.DataFlavor;
@@ -87,16 +85,15 @@ public class ListSelectionContext extends AbstractSelectionContext {
         list.setSelectedIndices(indices);
         list.setValueIsAdjusting(false);
     }
+
     @Override
     public void insert(Transferable transferable) throws IOException, UnsupportedFlavorException {
-        Object transferData = transferable.getTransferData(DataFlavor.stringFlavor);
-        if (transferData != null) {
-            int selectedIndex = list.getSelectedIndex();
-            if (selectedIndex >= 0) {
-                ((DefaultListModel) list.getModel()).add(selectedIndex, transferData.toString());
-            } else {
-                ((DefaultListModel) list.getModel()).addElement(transferData.toString());
-            }
+        final Object transferData = transferable.getTransferData(DataFlavor.stringFlavor);
+        final int selectedIndex = list.getSelectedIndex();
+        if (selectedIndex >= 0) {
+            ((DefaultListModel) list.getModel()).add(selectedIndex, transferData.toString());
+        } else {
+            ((DefaultListModel) list.getModel()).addElement(transferData.toString());
         }
     }
 
@@ -123,7 +120,7 @@ public class ListSelectionContext extends AbstractSelectionContext {
     boolean isListEditable() {
         return getList().getModel() instanceof DefaultListModel;
     }
-    
+
     public JList getList() {
         return list;
     }

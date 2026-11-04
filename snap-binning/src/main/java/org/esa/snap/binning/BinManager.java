@@ -72,8 +72,8 @@ public class BinManager {
             }
         }
 
-        this.aggregators = standardAggregators.toArray(new Aggregator[standardAggregators.size()]);
-        this.growableDataAggregators = growableAggregators.toArray(new Aggregator[growableAggregators.size()]);
+        this.aggregators = standardAggregators.toArray(new Aggregator[0]);
+        this.growableDataAggregators = growableAggregators.toArray(new Aggregator[0]);
 
         this.spatialFeatureOffsets = new int[standardAggregators.size()];
         this.temporalFeatureOffsets = new int[aggregators.length];
@@ -109,8 +109,8 @@ public class BinManager {
         this.spatialFeatureCount = spatialFeatureCount;
         this.temporalFeatureCount = temporalFeatureCount;
         this.outputFeatureCount = outputFeatureCount;
-        this.spatialFeatureNames = spatialFeatureNameList.toArray(new String[spatialFeatureNameList.size()]);
-        this.temporalFeatureNames = temporalFeatureNameList.toArray(new String[temporalFeatureNameList.size()]);
+        this.spatialFeatureNames = spatialFeatureNameList.toArray(new String[0]);
+        this.temporalFeatureNames = temporalFeatureNameList.toArray(new String[0]);
         this.outputFeatureNames = new String[outputFeatureCount];
         final NameUnifier nameUnifier = new NameUnifier();
         int k = 0;

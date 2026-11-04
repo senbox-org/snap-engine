@@ -97,7 +97,7 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
                 return noDataValue;
 
             Resampling.Index newIndex = resampling.createIndex();
-            resampling.computeCornerBasedIndex(pix.x, pix.y, RASTER_WIDTH, RASTER_HEIGHT, newIndex);
+            resampling.computeIndex(pix.x, pix.y, RASTER_WIDTH, RASTER_HEIGHT, newIndex);
 
             final double elevation = resampling.resample(resamplingRaster, newIndex);
             if (Double.isNaN(elevation)) {

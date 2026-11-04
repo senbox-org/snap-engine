@@ -277,7 +277,7 @@ public class CollocateOp extends Operator {
             throw new OperatorException("Reference product not found in sourceProducts");
         }
 
-        secondaryProducts = slaveProductList.toArray(new Product[slaveProductList.size()]);
+        secondaryProducts = slaveProductList.toArray(new Product[0]);
         validateProduct(referenceProduct);
 
         //for slave, we only need geoCoding. It is not needed singleSize anymore.
@@ -986,7 +986,7 @@ public class CollocateOp extends Operator {
             ArrayList<Product> productList = new ArrayList<>();
             Collections.addAll(productList, sourceProducts);
             productList.add(product);
-            sourceProducts = productList.toArray(new Product[productList.size()]);
+            sourceProducts = productList.toArray(new Product[0]);
         }
     }
 
