@@ -13,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * <ul>
  *     <li>{@code snap.netcdf.remote.blockSizeKB} - size of one cached block, default 32</li>
  *     <li>{@code snap.netcdf.remote.cacheSizeMB} - memory for cached blocks across all remote files, default 512</li>
- *     <li>{@code snap.netcdf.remote.threads} - parallel range requests, default 32</li>
+ *     <li>{@code snap.netcdf.remote.threads} - parallel range requests, default 64 (files with many small chunks, such as L3 mapped, are limited by request count)</li>
  *     <li>{@code snap.netcdf.remote.readAheadBlocks} - blocks read ahead when a file is read sequentially, default 32</li>
  *     <li>{@code snap.netcdf.remote.maxRequestKB} - largest single range request, default 4096</li>
  * </ul>
@@ -22,7 +22,7 @@ public final class RemoteFileAccess {
 
     static final int BLOCK_SIZE = Integer.getInteger("snap.netcdf.remote.blockSizeKB", 32) * 1024;
     static final BlockCache CACHE = new BlockCache(Long.getLong("snap.netcdf.remote.cacheSizeMB", 512L) * 1024 * 1024);
-    static final int THREADS = Integer.getInteger("snap.netcdf.remote.threads", 32);
+    static final int THREADS = Integer.getInteger("snap.netcdf.remote.threads", 64);
     static final int READ_AHEAD = Integer.getInteger("snap.netcdf.remote.readAheadBlocks", 32);
     static final int MAX_REQUEST = Integer.getInteger("snap.netcdf.remote.maxRequestKB", 4096) * 1024;
 
