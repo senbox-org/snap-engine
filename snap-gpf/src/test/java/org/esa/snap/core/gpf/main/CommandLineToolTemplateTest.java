@@ -11,6 +11,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
@@ -34,11 +36,20 @@ public class CommandLineToolTemplateTest {
 
     @BeforeClass
     public static void initClass() throws Exception {
-        String tempDir = System.getProperty("java.io.tmpdir");
-        sourceFile = new File(tempDir, "test.testdata");
-        // only run this test if the file could be created or it already exists
-        Assume.assumeTrue(sourceFile.createNewFile() || sourceFile.exists());
-        sourceFile.deleteOnExit();
+        // Private temp dir per run: a fixed path in java.io.tmpdir is shared by concurrent CI jobs on
+        // the same runner (C:\Windows\Temp for the SYSTEM account), and another JVM's deleteOnExit
+        // removed it mid-test ("file didn't exist"). The base name must stay "test" because
+        // testTemplateMergingWithGraphXml resolves "test-metadata.xml" from it.
+        try {
+            File dir = Files.createTempDirectory("CommandLineToolTemplateTest").toFile();
+            dir.deleteOnExit();
+            sourceFile = new File(dir, "test" + TestProductIOPlugIn.FILE_EXT);
+            Assume.assumeTrue(sourceFile.createNewFile());
+        } catch (IOException e) {
+            Assume.assumeNoException("cannot create temp source file", e);
+        }
+        sourceFile.deleteOnExit(); // registered after dir, so runs first (reverse order)
+
         targetFile = new File("20120607-CHL-1D.testdata");
     }
 
