@@ -65,8 +65,9 @@ final class FixSequenceOfVarCollections extends AbstractSequenceOfCollections {
 
         ensureElementOffsetsCreated();
 
-        CollectionInstance elementInstance = null;
+
         for (int i = maxResolvedElementIndex + 1; i <= index; i++) {
+            final CollectionInstance elementInstance;
             if (i == lastAccessedElementIndex) {
                 elementInstance = lastAccessedElementInstance;
             } else {

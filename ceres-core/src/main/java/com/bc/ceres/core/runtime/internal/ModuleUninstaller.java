@@ -116,26 +116,19 @@ public class ModuleUninstaller {
     }
 
     private boolean uninstallModuleDirectory(File moduleDir, ProgressMonitor pm) {
-        File installInfoFile = new File(moduleDir, ModuleInstaller.INSTALL_INFO_XML);
+        final File installInfoFile = new File(moduleDir, ModuleInstaller.INSTALL_INFO_XML);
 
-        InstallInfo installInfo;
+        final InstallInfo installInfo;
         try {
-            FileReader reader = new FileReader(installInfoFile);
-            installInfo = null;
-            try {
+            try (FileReader reader = new FileReader(installInfoFile)) {
                 installInfo = InstallInfo.read(reader);
-            } finally {
-                reader.close();
             }
         } catch (FileNotFoundException e) {
-            logger.warning(
-                    MessageFormat.format("[{0}] not found.", installInfoFile.getName()));
-            logger.warning(
-                    MessageFormat.format("Please remove directory [{1}] manually to get rid of this warning.", installInfoFile.getName(), moduleDir));
+            logger.warning(MessageFormat.format("[{0}] not found.", installInfoFile.getName()));
+            logger.warning(MessageFormat.format("Please remove directory [{0}] manually to get rid of this warning.", moduleDir));
             return false;
         } catch (IOException e) {
-            logger.warning(
-                    MessageFormat.format("Failed to read [{0}]: {1}", installInfoFile.getName(), e.getMessage()));
+            logger.warning(MessageFormat.format("Failed to read [{0}]: {1}", installInfoFile.getName(), e.getMessage()));
             return false;
         }
 

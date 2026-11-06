@@ -104,12 +104,11 @@ public abstract class AbstractParamValidator implements ParamValidator {
         if (valueSet == null) {
             return false;
         }
-        for (int i = 0; i < valueSet.length; i++) {
-            String valueSetEntry = valueSet[i];
+
+        for (String valueSetEntry : valueSet) {
             // @todo 1 nf/nf - check: performance drawback, due to frequent parse() calls!
-            Object value2 = null;
             try {
-                value2 = parse(parameter, valueSetEntry);
+                final Object value2 = parse(parameter, valueSetEntry);
                 if (equalValues(parameter, value, value2)) {
                     return true;
                 }

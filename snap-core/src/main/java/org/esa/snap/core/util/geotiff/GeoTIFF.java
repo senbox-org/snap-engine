@@ -65,7 +65,7 @@ public class GeoTIFF {
             throw new IIOException("Failed to create TIFF output stream.", e);
         }
 
-        boolean writerFound = false;
+        boolean writerFound;
         try {
             writerFound = writeImage(image, stream, geoTIFFMetadata);
         } finally {

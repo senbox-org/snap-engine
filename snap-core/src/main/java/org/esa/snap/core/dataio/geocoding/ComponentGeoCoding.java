@@ -203,8 +203,8 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         final String lonVarName = geoRaster.getLonVariableName();
         final String latVarName = geoRaster.getLatVariableName();
 
-        final Product srcProduct = srcScene.getProduct();
-        final Product destProduct = destScene.getProduct();
+        final Product srcProduct = srcScene.product();
+        final Product destProduct = destScene.product();
 
         final RasterDataNode srcLonRaster = srcProduct.getRasterDataNode(lonVarName);
         if (srcLonRaster instanceof TiePointGrid) {
@@ -326,7 +326,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
 
     private GeoRaster calculateGeoRaster(Scene destScene, String lonVariableName, String latVariableName) throws IOException {
         GeoRaster geoRaster;
-        final Product destProduct = destScene.getProduct();
+        final Product destProduct = destScene.product();
         final RasterDataNode lonRaster = destProduct.getRasterDataNode(lonVariableName);
         final RasterDataNode latRaster = destProduct.getRasterDataNode(latVariableName);
         final double[] longitudes;

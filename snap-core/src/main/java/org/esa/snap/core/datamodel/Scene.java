@@ -33,7 +33,7 @@ public interface Scene {
 
     int getRasterHeight();
 
-    Product getProduct();
+    Product product();
 
     boolean isSameRasterSize(Scene other);
 }

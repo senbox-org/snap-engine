@@ -59,12 +59,11 @@ public class CopernicusDownloader {
     }
 
     public boolean downloadTiles(double lat, double lon, int resolution, ProgressMonitor progressMonitor) throws Exception {
-        String installDir = this.installDir.getAbsolutePath();
-        String download_path = "";
-        String target_filename = "";
+        String download_path;
+        String target_filename;
 
-        int latRounded = (int) lat;
-        int lonRounded = (int) lon;
+        final int latRounded = (int) lat;
+        final int lonRounded = (int) lon;
 
         if (resolution == 30) {
             String name = createTileFilename(latRounded, lonRounded, "10");
@@ -80,10 +79,11 @@ public class CopernicusDownloader {
         DownloadStatusManager statusManager = DownloadStatusManager.getInstance();
         statusManager.setDownloading(true, target_filename);
 
-        Path targetPath = Paths.get(installDir, target_filename);
+        final String installDirAbsolutePath = installDir.getAbsolutePath();
+        final Path targetPath = Paths.get(installDirAbsolutePath, target_filename);
         try (ProgressMonitorContext.Scope ignored = ProgressMonitorContext.use(progressMonitor)) {
             ProgressMonitorContext.checkCanceled(progressMonitor);
-            final Path installDirPath = Paths.get(installDir);
+            final Path installDirPath = Paths.get(installDirAbsolutePath);
             if (Files.notExists(installDirPath)) {
                 Files.createDirectories(installDirPath);
             }
