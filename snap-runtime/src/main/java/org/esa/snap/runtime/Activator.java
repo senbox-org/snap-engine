@@ -31,4 +31,21 @@ public interface Activator {
     default int getStartLevel() {
         return 0;
     }
+
+    /**
+     * Whether this activator may be started on a background thread after
+     * {@link Engine#start(boolean, java.util.concurrent.Executor)} has returned, instead of synchronously during the
+     * engine start. Deferral only happens if the engine is started with a non-null executor, which SNAP Desktop does
+     * to keep such work out of its startup.
+     * <p>
+     * Only return {@code true} if nothing relies on the activator having run when the engine start returns, i.e. all
+     * code depending on its work initialises it on demand in a thread-safe way that waits for a running
+     * initialisation to complete. Deferred activators are started in start-level order among themselves, but after
+     * all non-deferred activators.
+     *
+     * @return {@code true} if the activator may be started in the background, defaults to {@code false}
+     */
+    default boolean isDeferrable() {
+        return false;
+    }
 }

@@ -17,6 +17,7 @@
 package org.esa.snap.dataio.netcdf.nc;
 
 import org.esa.snap.dataio.netcdf.NetCDF4Chunking;
+import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.esa.snap.dataio.netcdf.util.DimKey;
 import ucar.ma2.DataType;
@@ -38,6 +39,8 @@ public class N4FileWriteable extends NFileWriteable {
 
 
     N4FileWriteable(String filename) throws IOException {
+        // NetCDF-4 writing uses the native library
+        NetCdfActivator.activate();
         netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename, new NetCDF4Chunking());
     }
 

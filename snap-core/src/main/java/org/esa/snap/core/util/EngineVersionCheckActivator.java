@@ -39,4 +39,10 @@ public class EngineVersionCheckActivator implements Activator {
         // no need to start early, others can be served first.
         return 1000;
     }
+
+    @Override
+    public boolean isDeferrable() {
+        // only logs a hint, but may wait on the network
+        return true;
+    }
 }

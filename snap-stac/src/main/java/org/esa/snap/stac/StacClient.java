@@ -29,6 +29,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -98,55 +100,19 @@ public class StacClient {
      * @throws Exception
      */
     public StacItem[] search(final String[] collections, final double[] bbox, String datetime) throws Exception {
-        String searchEndpoint = stacURL + "/search?";
         String bboxStr = bbox[0] + "," + bbox[1] + "," + bbox[2] + "," + bbox[3];
-        String validCollections = "";
-        for (String collectionName : collections) {
-            if (this.catalog.containsCollection(collectionName)) {
-                validCollections = validCollections + collectionName + ",";
-            }
-        }
-        if (Objects.equals(validCollections, "")) {
-            return new StacItem[0];
-        }
-        validCollections = validCollections.substring(0, validCollections.length() - 1);
-        String query = searchEndpoint + "collections=" + validCollections +
-                "&bbox=" + bboxStr;
-        if(datetime != null) query = query + "&datetime=" + datetime;
+        String queryParams = "&bbox=" + bboxStr;
+        if(datetime != null) queryParams = queryParams + "&datetime=" + datetime;
 
-        JSONObject queryResults = StacComponent.getJSONFromURLStatic(query);
-        JSONArray jsonFeatures = getAllFeatures(queryResults);
-        StacItem[] items = new StacItem[jsonFeatures.size()];
-        for (int x = 0; x < jsonFeatures.size(); x++) {
-            items[x] = new StacItem((JSONObject) jsonFeatures.get(x));
-        }
-        return items;
+        return searchEachCollection(collections, queryParams);
     }
 
     // Performs a search and returns an array of STAC Items from the server that match the search
     public StacItem[] search(final String[] collections, final JSONObject geometry, String datetime) throws Exception {
-        String searchEndpoint = stacURL + "/search?";
-        String validCollections = "";
-        for (String collectionName : collections) {
-            if (this.catalog.containsCollection(collectionName)) {
-                validCollections = validCollections + collectionName + ",";
-            }
-        }
-        if (Objects.equals(validCollections, "")) {
-            return new StacItem[0];
-        }
-        validCollections = validCollections.substring(0, validCollections.length() - 1);
-        String query = searchEndpoint + "collections=" + validCollections +
-                "&intersects=" + geometry;
-        if(datetime != null) query = query + "&datetime=" + datetime;
+        String queryParams = "&intersects=" + geometry;
+        if(datetime != null) queryParams = queryParams + "&datetime=" + datetime;
 
-        JSONObject queryResults = StacComponent.getJSONFromURLStatic(query);
-        JSONArray jsonFeatures = getAllFeatures(queryResults);
-        StacItem[] items = new StacItem[jsonFeatures.size()];
-        for (int x = 0; x < jsonFeatures.size(); x++) {
-            items[x] = new StacItem((JSONObject) jsonFeatures.get(x));
-        }
-        return items;
+        return searchEachCollection(collections, queryParams);
     }
 
     /**
@@ -167,35 +133,43 @@ public class StacClient {
      */
     public StacItem[] search(String[] collections, Map<String, Object> parameters, int pageNumber, int pageSize) throws Exception {
 
-        String searchEndpoint = stacURL + "/search?";
-        String validCollections = "";
-        for (String collectionName : collections) {
-            if (this.catalog.containsCollection(collectionName)) {
-                validCollections = validCollections + collectionName + ",";
-            }
-        }
-        if (Objects.equals(validCollections, "")) {
-            return new StacItem[0];
-        }
-        validCollections = validCollections.substring(0, validCollections.length() - 1);
-        String query = searchEndpoint + "collections=" + validCollections + "&";
+        String queryParams = "&";
         for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-            query += entry.getKey()+"="+entry.getValue()+"&";
+            queryParams += entry.getKey()+"="+entry.getValue()+"&";
         }
         if (pageNumber > 0 & pageSize > 0) {
-            query +="page="+pageSize+"&limit="+pageSize;
+            queryParams +="page="+pageSize+"&limit="+pageSize;
         }
-        if (query.charAt(query.length() - 1) == '&') {
-            query = query.substring(0, query.length() - 1);
+        if (queryParams.charAt(queryParams.length() - 1) == '&') {
+            queryParams = queryParams.substring(0, queryParams.length() - 1);
         }
 
-        JSONObject queryResults = StacComponent.getJSONFromURLStatic(query);
-        JSONArray jsonFeatures = getAllFeatures(queryResults);
-        StacItem[] items = new StacItem[jsonFeatures.size()];
-        for (int x = 0; x < jsonFeatures.size(); x++) {
-            items[x] = new StacItem((JSONObject) jsonFeatures.get(x));
+        return searchEachCollection(collections, queryParams);
+    }
+
+    /**
+     * Runs one search request per collection and concatenates the results. Some servers (e.g. Planetary
+     * Computer) reject a search spanning more than one collection with HTTP 400, so collections are never
+     * combined into a single request. Collections not in the catalog are skipped.
+     * @param collections    The collection names
+     * @param queryParams    The query string appended after the collections parameter, starting with '&'
+     */
+    private StacItem[] searchEachCollection(final String[] collections, final String queryParams) throws Exception {
+        String searchEndpoint = stacURL + "/search?";
+        List<StacItem> items = new ArrayList<>();
+        for (String collectionName : collections) {
+            if (!this.catalog.containsCollection(collectionName)) {
+                continue;
+            }
+            String query = searchEndpoint + "collections=" + collectionName + queryParams;
+
+            JSONObject queryResults = StacComponent.getJSONFromURLStatic(query);
+            JSONArray jsonFeatures = getAllFeatures(queryResults);
+            for (Object feature : jsonFeatures) {
+                items.add(new StacItem((JSONObject) feature));
+            }
         }
-        return items;
+        return items.toArray(new StacItem[0]);
     }
 
     public String signURL(Assets.Asset asset) {
