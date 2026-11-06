@@ -110,7 +110,7 @@ public class IIOUtils {
         if (output == null) {
             throw new IllegalArgumentException("output == null!");
         }
-        ImageOutputStream stream = null;
+        ImageOutputStream stream;
         try {
             output.delete();
             stream = ImageIO.createImageOutputStream(output);

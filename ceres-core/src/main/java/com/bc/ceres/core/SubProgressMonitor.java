@@ -56,17 +56,18 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
      */
     public static final int PREPEND_MAIN_LABEL_TO_SUBTASK = 1 << 2;
 
-    private int parentTicks = 0;
+    private final static boolean traceTimeStat = Boolean.getBoolean("com.bc.ceres.core.SubProgressMonitor.traceTimeStat");
+    private final int style;
+    private final int parentTicks;
+
     private double sentToParent = 0.0;
     private double scale = 0.0;
     private int nestedBeginTasks = 0;
     private boolean usedUp = false;
     private boolean hasSubTask = false;
-    private int style;
     private String taskName;
     private int totalWork;
     private long t0;
-    private final static boolean traceTimeStat = Boolean.getBoolean("com.bc.ceres.core.SubProgressMonitor.traceTimeStat");
 
     /**
      * Creates a progress monitor based on the passed in parent monitor. If the parent monitor is {@link ProgressMonitor#NULL},

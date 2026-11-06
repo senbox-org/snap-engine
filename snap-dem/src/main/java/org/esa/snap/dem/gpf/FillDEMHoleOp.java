@@ -263,47 +263,38 @@ public final class FillDEMHoleOp extends Operator {
         final int w = srcTileRectangle.width;
         final int h = srcTileRectangle.height;
 
-        double v = 0.0;
         if (dir == Direction.UP) {
-
             for (int yy = y; yy >= y0; yy--) {
-                v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(x, yy));
+                final double v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(x, yy));
                 if (v != NoDataValue) {
                     pixel.y = yy;
                     return v;
                 }
             }
-
         } else if (dir == Direction.DOWN) {
-
             for (int yy = y; yy < y0 + h; yy++) {
-                v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(x, yy));
+                final double v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(x, yy));
                 if (v != NoDataValue) {
                     pixel.y = yy;
                     return v;
                 }
             }
-
         } else if (dir == Direction.LEFT) {
-
             for (int xx = x; xx >= x0; xx--) {
-                v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(xx, y));
+                final double v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(xx, y));
                 if (v != NoDataValue) {
                     pixel.x = xx;
                     return v;
                 }
             }
-
         } else if (dir == Direction.RIGHT) {
-
             for (int xx = x; xx < x0 + w; xx++) {
-                v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(xx, y));
+                final double v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(xx, y));
                 if (v != NoDataValue) {
                     pixel.x = xx;
                     return v;
                 }
             }
-
         } else {
             throw new OperatorException("Invalid direction");
         }

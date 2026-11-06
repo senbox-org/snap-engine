@@ -432,10 +432,8 @@ public class ColorPaletteDef implements Cloneable {
     private static Point string2Point(String label, String sampleStr, String redStr, String greenStr, String blueStr) {
         boolean valid = true;
 
-        Point point = new Point();
-
         double sample = 0.0;
-        if (sampleStr != null && sampleStr.length() > 0) {
+        if (sampleStr != null && !sampleStr.isEmpty()) {
             sampleStr = sampleStr.trim();
             try {
                 sample = Double.parseDouble(sampleStr);
@@ -449,7 +447,7 @@ public class ColorPaletteDef implements Cloneable {
         Color color = string2Color(redStr, greenStr, blueStr);
 
         if (valid && color != null) {
-            point = new Point();
+            final Point point = new Point();
             point.setColor(color);
             point.setSample(sample);
             point.setLabel(label);
@@ -636,8 +634,7 @@ public class ColorPaletteDef implements Cloneable {
     }
 
     private static void printStringArrayListToFile(File file, String header, ArrayList<String> contentsArrayList) {
-
-        BufferedWriter bos = null;
+        BufferedWriter bos;
         try {
             bos = new BufferedWriter(new FileWriter(file));
 

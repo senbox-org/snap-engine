@@ -302,16 +302,16 @@ public class GeoPos {
      */
     // SEP2018 - Daniel Knowles - Modified to support compassFormat and decimalFormat options
     private static String getDegreeString(double value, boolean longitudial, boolean compassFormat, boolean decimalFormat) {
-
-
-        int sign = (value == 0.0F) ? 0 : (value < 0.0F) ? -1 : 1;
+        final int sign = (value == 0.0F) ? 0 : (value < 0.0F) ? -1 : 1;
         double rest = Math.abs(value);
+
         int degree = MathUtils.floorInt(rest);
         rest -= degree;
+
         int minutes = MathUtils.floorInt(MIN_PER_DEG * rest);
         rest -= minutes / MIN_PER_DEG;
+
         int seconds = (int) Math.round(SEC_PER_DEG * rest);
-        rest -= seconds / SEC_PER_DEG;
         if (seconds == 60) {
             seconds = 0;
             minutes++;

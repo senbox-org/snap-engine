@@ -496,7 +496,7 @@ public class ResamplingOp extends Operator {
 
     private MultiLevelImage createInterpolatedImage(RasterDataNode sourceRDN, MultiLevelImage sourceImage, int dataBufferType, double noDataValue,
                                                     AffineTransform sourceImageToModelTransform, boolean isFlagOrIndexBand, MultiLevelModel referenceModel) {
-        Interpolation interpolation = null;
+        Interpolation interpolation;
         Upsampling upsampling = null;
 
         String bandUpsamplingMethod = upsamplingMethod;
@@ -505,7 +505,7 @@ public class ResamplingOp extends Operator {
             bandUpsamplingMethod = "Nearest";
         }
 
-        //Load ResamplingPreset and set upsampling methid if it is valid
+        //Load ResamplingPreset and set upsampling method if it is valid
         if(selectedResamplingPreset != null) {
             BandResamplingPreset bandResamplingPreset = selectedResamplingPreset.getBandResamplingPreset(sourceRDN.getName());
             if (bandResamplingPreset != null) {

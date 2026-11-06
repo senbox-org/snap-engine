@@ -106,9 +106,7 @@ public final class EarthGravitationalModel96 {
             try (final InputStream inputStream = zipFile.getInputStream(entry)) {
 
                 try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-
                     // read data from file and save them in 2-D array
-                    String line = "";
                     StringTokenizer st;
                     int rowIdx = 0;
                     int colIdx = 0;
@@ -128,9 +126,9 @@ public final class EarthGravitationalModel96 {
                     int linesRead = 0;
                     for (int i = 0; i < numLinesToRead - 1; i++) { // -1 because the last line read from file is null
 
-                        line = reader.readLine();
+                        final String line = reader.readLine();
                         linesRead++;
-                        if (!line.equals("")) {
+                        if (!line.isEmpty()) {
                             st = new StringTokenizer(line);
                             final int numCols = st.countTokens();
                             for (int j = 0; j < numCols; j++) {

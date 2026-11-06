@@ -39,7 +39,7 @@ public class NumberValidator extends AbstractParamValidator {
             return null;
         }
 
-        Number number = null;
+        Number number;
         try {
             if (parameter.getValueType() == Double.class) {
                 number = Double.valueOf(trimmedText);

@@ -42,7 +42,7 @@ import java.lang.ref.WeakReference;
  */
 public class CheckThreadViolationRepaintManager extends RepaintManager {
     // it is recommended to pass the complete check  
-    private boolean completeCheck = true;
+    private boolean completeCheck;
     private WeakReference<JComponent> lastComponent;
 
     public CheckThreadViolationRepaintManager(boolean completeCheck) {

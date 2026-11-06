@@ -82,19 +82,18 @@ final public class SummaryStxOp extends StxOp {
     }
 
     public double getEquivalentNumberOfLooks(final String unit) {
-        double enl = 0.0;
+        final double invSampleCount = 1.0 / sampleCount;
         if (unit != null && unit.contains("intensity")) {
-            final double m = valueSum / sampleCount;
-            final double m2 = sqrSum / sampleCount;
+            final double m = valueSum * invSampleCount;
+            final double m2 = sqrSum * invSampleCount;
             final double mm = m*m;
-            enl = mm / (m2 - mm);
+            return mm / (m2 - mm);
         } else {
-            final double m4 = power4Sum / sampleCount;
-            final double m2 = sqrSum / sampleCount;
+            final double m4 = power4Sum * invSampleCount;
+            final double m2 = sqrSum * invSampleCount;
             final double m2m2 = m2*m2;
-            enl = m2m2 / (m4 - m2m2);
+            return m2m2 / (m4 - m2m2);
         }
-        return enl;
     }
 
     @Override

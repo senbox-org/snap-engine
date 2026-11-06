@@ -900,19 +900,6 @@ public class CollocateOp extends Operator {
         if (autoGrouping == null) {
             return;
         }
-        String replacementSlaveNumberId = "";
-        if (secondaryProducts.length == 1) {
-            replacementSlaveNumberId = "";
-        } else {
-            int id = -1;
-            for (int i = 0; i < secondaryProducts.length; i++) {
-                if (product.getName().equals(secondaryProducts[i].getName())) {
-                    id = i;
-                    break;
-                }
-            }
-            replacementSlaveNumberId = String.valueOf(id);
-        }
 
         for (String[] pattern : autoGrouping) {
             String[] clone = pattern.clone();
