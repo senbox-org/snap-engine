@@ -356,9 +356,9 @@ public class ComponentGeoCodingTest {
 
         geoCoding.transferRequiredRasters(sourceScene, targetScene, new ProductSubsetDef());
 
-        final TiePointGrid longitude = targetScene.getProduct().getTiePointGrid("longitude");
+        final TiePointGrid longitude = targetScene.product().getTiePointGrid("longitude");
         assertNotNull(longitude);
-        final TiePointGrid latitude = targetScene.getProduct().getTiePointGrid("latitude");
+        final TiePointGrid latitude = targetScene.product().getTiePointGrid("latitude");
         assertNotNull(latitude);
     }
 
@@ -387,10 +387,10 @@ public class ComponentGeoCodingTest {
 
         geoCoding.transferRequiredRasters(sourceScene, targetScene, subsetDef);
 
-        final Band longitude = targetScene.getProduct().getBand("longitude");
+        final Band longitude = targetScene.product().getBand("longitude");
         assertNotNull(longitude);
 
-        final Band latitude = targetScene.getProduct().getBand("latitude");
+        final Band latitude = targetScene.product().getBand("latitude");
         assertNotNull(latitude);
     }
 

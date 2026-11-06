@@ -50,7 +50,7 @@ public class ProductSubsetDef {
     /**
      * The optional name of the subset
      */
-    private String subsetName = null;
+    private String subsetName;
 
     /**
      * The spatial subset for each RasterDataNode

@@ -805,7 +805,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     }
 
     protected void copyGridsToDestScene(Scene destScene) {
-        final Product destProduct = destScene.getProduct();
+        final Product destProduct = destScene.product();
         final TiePointGrid latGrid = getLatGrid().cloneTiePointGrid();
         if (!destProduct.containsTiePointGrid(latGrid.getName())) {
             destProduct.addTiePointGrid(latGrid);
@@ -817,7 +817,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     }
 
     protected TiePointGrid getDestGrid(TiePointGrid grid, final Scene destScene, final ProductSubsetDef subsetDef) {
-        final Product destProduct = destScene.getProduct();
+        final Product destProduct = destScene.product();
         TiePointGrid destGrid = destProduct.getTiePointGrid(grid.getName());
         if (destGrid == null) {
             if (subsetDef != null) {
