@@ -113,6 +113,21 @@ public class TestSTACProductReaderPlugIn {
     }
 
     @Test
+    public void testGetDecodeQualificationUnableForUrlWithoutPrinting() {
+        java.io.ByteArrayOutputStream printed = new java.io.ByteArrayOutputStream();
+        java.io.PrintStream out = System.out;
+        System.setOut(new java.io.PrintStream(printed));
+        try {
+            DecodeQualification qual = plugIn.getDecodeQualification(
+                    "https://example.earthdatacloud.nasa.gov/bucket/PACE_OCI.20260603T113224.L2.OC_AOP.V3_2.NRT.nc");
+            assertEquals(DecodeQualification.UNABLE, qual);
+        } finally {
+            System.setOut(out);
+        }
+        assertEquals("", printed.toString());
+    }
+
+    @Test
     public void testGetDecodeQualificationUnableForNonJson() {
         DecodeQualification qual = plugIn.getDecodeQualification(new File("test.tif"));
         assertEquals(DecodeQualification.UNABLE, qual);

@@ -18,14 +18,17 @@ package org.esa.snap.stac.io;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.engine_utilities.gpf.ReaderUtils;
 import org.esa.snap.stac.StacItem;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.logging.Level;
 
 /**
  * The ReaderPlugIn for SkyWatch Format.
@@ -49,16 +52,17 @@ public class STACProductReaderPlugIn implements ProductReaderPlugIn {
      */
     public DecodeQualification getDecodeQualification(final Object input) {
 
-        final Path path = ReaderUtils.getPathFromInput(input);
-        if (path != null) {
-            try {
+        try {
+            final Path path = ReaderUtils.getPathFromInput(input);
+            // Only local files: other readers are asked about URLs too (e.g. a NetCDF file opened over HTTPS).
+            if (path != null && Files.isRegularFile(path)) {
                 String realName = path.toRealPath().getFileName().toString();
                 if (realName.endsWith(METADATA_EXT)) {
                     return StacItem.isStacItem(path) ? DecodeQualification.SUITABLE : DecodeQualification.UNABLE;
                 }
-            } catch (Exception e) {
-                System.out.println(e);
             }
+        } catch (Exception e) {
+            SystemUtils.LOG.log(Level.FINE, "STAC reader: cannot check " + input, e);
         }
         return DecodeQualification.UNABLE;
     }
