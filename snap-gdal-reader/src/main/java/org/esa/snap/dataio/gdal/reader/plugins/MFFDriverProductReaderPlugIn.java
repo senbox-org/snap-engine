@@ -26,16 +26,13 @@ public class MFFDriverProductReaderPlugIn extends AbstractDriverProductReaderPlu
         DecodeQualification result = super.getDecodeQualification(input);
 
         if (DecodeQualification.UNABLE != result) {
-            File inputFile = null;
-            if (input instanceof String) {
-                inputFile = new File((String)input);
-            } else if (input instanceof File) {
-                inputFile = (File)input;
-            } else if (input instanceof Path) {
-                inputFile = ((Path)input).toFile();
-            } else {
-                throw new IllegalArgumentException("Unknown type '"+input.getClass()+"' for input '"+ input.toString()+"'.");
-            }
+            final File inputFile = switch (input) {
+                case String s -> new File(s);
+                case File file -> file;
+                case Path path -> path.toFile();
+                default ->
+                        throw new IllegalArgumentException("Unknown type '" + input.getClass() + "' for input '" + input + "'.");
+            };
             String filePath = inputFile.getAbsolutePath();
             // '.rat.hdr' file extension for RATProductReaderPlugIn
             // 'bin.hdr' file extension for PolsarProProductReaderPlugIn

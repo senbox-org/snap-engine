@@ -17,6 +17,8 @@
 package org.esa.snap.core.jexp;
 
 
+import java.io.Serial;
+
 /**
  * An exception that can be thrown during the evaluation of a
  * <code>{@link org.esa.snap.core.jexp.Term}</code>.
@@ -29,6 +31,7 @@ package org.esa.snap.core.jexp;
  */
 public class EvalException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 1321063032856719846L;
 
     /**

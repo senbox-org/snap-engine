@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import static eu.esa.snap.core.dataio.CfConstants.*;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.*;
 import static org.esa.snap.dataio.znap.CFConstantsAndUtils.*;
 

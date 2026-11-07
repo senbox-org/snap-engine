@@ -45,22 +45,18 @@
         <dependency>
             <groupId>org.hdfgroup</groupId>
             <artifactId>jarhdf</artifactId>
-            <version>${hdf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hdfgroup</groupId>
             <artifactId>jarhdf5</artifactId>
-            <version>${hdf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hdfgroup</groupId>
             <artifactId>hdfobject</artifactId>
-            <version>${hdf.version}</version>
         </dependency>
         <dependency>
             <groupId>gov.nasa.gsfc.heasarc</groupId>
             <artifactId>nom-tam-fits</artifactId>
-            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>

@@ -874,11 +874,11 @@ public class ReprojectionOp extends Operator {
 
     }
 
-    private static class ReprojectionSettings {
+    public static class ReprojectionSettings {
 
-        private GeoCoding geoCoding;
-        private MultiLevelModel sourceModel;
-        private ImageGeometry imageGeometry;
+        private final GeoCoding geoCoding;
+        private final MultiLevelModel sourceModel;
+        private final ImageGeometry imageGeometry;
 
         public void setTargetModel(MultiLevelModel targetModel) {
             this.targetModel = targetModel;

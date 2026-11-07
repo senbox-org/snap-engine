@@ -16,6 +16,8 @@
 package org.esa.snap.core.dataio;
 
 
+import java.io.Serial;
+
 /**
  * A <code>ProductIOException</code> that is thrown by <code>ProductReader</code>s
  *
@@ -24,6 +26,7 @@ package org.esa.snap.core.dataio;
  */
 public class IllegalFileFormatException extends ProductIOException {
 
+    @Serial
     private static final long serialVersionUID = -3109342364111884614L;
 
     /**

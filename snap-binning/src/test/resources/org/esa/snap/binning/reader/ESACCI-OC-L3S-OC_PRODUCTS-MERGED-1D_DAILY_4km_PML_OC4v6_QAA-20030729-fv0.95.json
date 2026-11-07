@@ -26,77 +26,73 @@
         "bands": [
             {
                 "name": "nobs",
-                "noDataValue": "0.0",
-                "noDataValueUsed": "true",
+                "noDataValueUsed": "false",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
                 "expectedPixels": [
                     {
                         "x": 450,
                         "y": 769,
-                        "value": "NaN"
+                        "value": 0.0
                     },
                     {
                         "x": 5919,
                         "y": 3674,
-                        "value": "NaN"
+                        "value": 0.0
                     }
                 ]
             },
             {
                 "name": "MODISA_index",
-                "noDataValue": "0.0",
-                "noDataValueUsed": "true",
+                "noDataValueUsed": "false",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
                 "expectedPixels": [
                     {
                         "x": 2513,
                         "y": 1109,
-                        "value": "NaN"
+                        "value": 0.0
                     },
                     {
                         "x": 5274,
                         "y": 1578,
-                        "value": "NaN"
+                        "value": 0.0
                     }
                 ]
             },
             {
                 "name": "MERIS_index",
-                "noDataValue": "0.0",
-                "noDataValueUsed": "true",
+                "noDataValueUsed": "false",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
                 "expectedPixels": [
                     {
                         "x": 4752,
                         "y": 3219,
-                        "value": "NaN"
+                        "value": 0
                     },
                     {
                         "x": 5256,
                         "y": 4010,
-                        "value": "NaN"
+                        "value": 0
                     }
                 ]
             },
             {
                 "name": "SeaWiFS_index",
-                "noDataValue": "0.0",
-                "noDataValueUsed": "true",
+                "noDataValueUsed": "false",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
                 "expectedPixels": [
                     {
                         "x": 1367,
                         "y": 2877,
-                        "value": "NaN"
+                        "value": 0.0
                     },
                     {
                         "x": 4485,
                         "y": 3946,
-                        "value": "NaN"
+                        "value": 0.0
                     }
                 ]
             },

@@ -28,8 +28,7 @@
                 "name": "longitude",
                 "description": "longitude",
                 "geophysicalUnit": "degrees_east",
-                "noDataValue": "NaN",
-                "noDataValueUsed": "true",
+                "noDataValueUsed": "false",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
                 "expectedPixels": [
@@ -49,8 +48,7 @@
                 "name": "latitude",
                 "description": "latitude",
                 "geophysicalUnit": "degrees_north",
-                "noDataValue": "NaN",
-                "noDataValueUsed": "true",
+                "noDataValueUsed": "false",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
                 "expectedPixels": [

@@ -45,6 +45,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static eu.esa.snap.core.dataio.CfConstants.FILL_VALUE;
+import static eu.esa.snap.core.dataio.CfConstants.TITLE;
+
 
 public class BinnedProductReader extends AbstractProductReader {
 
@@ -182,7 +185,7 @@ public class BinnedProductReader extends AbstractProductReader {
         final String productName = FileUtils.getFilenameWithoutExtension(productFile);
 
         String productType = "BINNED";
-        Attribute titleAttribute = netcdfFile.findGlobalAttribute("title");
+        Attribute titleAttribute = netcdfFile.findGlobalAttribute(TITLE);
         if (titleAttribute != null) {
             productType = titleAttribute.getStringValue();
         }
@@ -319,7 +322,7 @@ public class BinnedProductReader extends AbstractProductReader {
     }
 
     private float getFillValue(Variable binVariable) {
-        final Number fillValueN = getAttributeNumericValue(binVariable, "_FillValue");
+        final Number fillValueN = getAttributeNumericValue(binVariable, FILL_VALUE);
         return fillValueN != null ? fillValueN.floatValue() : 0;
     }
 
@@ -411,7 +414,7 @@ public class BinnedProductReader extends AbstractProductReader {
             band.setDescription(variableMetadata.description);
             band.setUnit(variableMetadata.variable.getUnitsString());
             band.setNoDataValue(variableMetadata.fillValue);
-            band.setNoDataValueUsed(!Double.isNaN(variableMetadata.fillValue));
+            band.setNoDataValueUsed(variableMetadata.fillValueUsed);
             band.setSpectralWavelength(getWavelengthFromBandName(varName));
             product.addBand(band);
             final VariableReader variableReader = new VariableReader(variableMetadata.variable);
@@ -429,7 +432,7 @@ public class BinnedProductReader extends AbstractProductReader {
             band.setDescription(variableMetadata.description);
             band.setUnit(variableMetadata.variable.getUnitsString());
             band.setNoDataValue(variableMetadata.fillValue);
-            band.setNoDataValueUsed(!Double.isNaN(variableMetadata.fillValue));
+            band.setNoDataValueUsed(variableMetadata.fillValueUsed);
             band.setSpectralWavelength(getWavelengthFromBandName(varName));
 
             product.addBand(band);
@@ -461,8 +464,15 @@ public class BinnedProductReader extends AbstractProductReader {
             description = getAttributeStringValue(variable, "comment");
         }
 
-        numericValue = getAttributeNumericValue(variable, "_FillValue");
-        final double fillValue = numericValue != null ? numericValue.doubleValue() : Double.NaN;
+        numericValue = getAttributeNumericValue(variable, FILL_VALUE);
+        double fillValue = Double.NaN;
+        boolean fillValueUsed;
+        if (numericValue != null) {
+            fillValue = numericValue.doubleValue();
+            fillValueUsed = true;
+        } else {
+            fillValueUsed = false;
+        }
 
         final DataType dataType = variable.getDataType();
         int productDataType = ProductData.TYPE_INT32;
@@ -474,7 +484,7 @@ public class BinnedProductReader extends AbstractProductReader {
             productDataType = ProductData.TYPE_FLOAT64;
         }
 
-        return new VariableMetadata(variable, varName, description, fillValue, productDataType);
+        return new VariableMetadata(variable, varName, description, fillValueUsed, fillValue, productDataType);
     }
 
     private static Number getAttributeNumericValue(Variable variable, String attributeName) {
@@ -519,12 +529,14 @@ public class BinnedProductReader extends AbstractProductReader {
         final String name;
         final String description;
         final double fillValue;
+        final boolean fillValueUsed;
         final int dataType;
 
-        public VariableMetadata(Variable variable, String name, String description, double fillValue, int dataType) {
+        public VariableMetadata(Variable variable, String name, String description, boolean fillValueUsed, double fillValue, int dataType) {
             this.variable = variable;
             this.name = name;
             this.description = description;
+            this.fillValueUsed = fillValueUsed;
             this.fillValue = fillValue;
             this.dataType = dataType;
         }

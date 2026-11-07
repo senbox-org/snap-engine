@@ -27,9 +27,9 @@ import java.util.prefs.BackingStoreException;
  * @see Engine
  * @since SNAP 2.0
  */
-class EnginePreferences extends AbstractPreferences {
+public class EnginePreferences extends AbstractPreferences {
 
-    private static EnginePreferences root = new EnginePreferences(null, "");
+    private static final EnginePreferences root = new EnginePreferences(null, "");
 
     private Properties properties;
     private final String keyPrefix;
@@ -145,13 +145,9 @@ class EnginePreferences extends AbstractPreferences {
      * <p>If this node throws a <tt>BackingStoreException</tt>, the exception
      * will propagate out beyond the enclosing {@link #removeNode()}
      * invocation.
-     *
-     * @throws BackingStoreException if this operation cannot be completed
-     *                               due to a failure in the backing store, or inability to
-     *                               communicate with it.
      */
     @Override
-    protected void removeNodeSpi() throws BackingStoreException {
+    protected void removeNodeSpi() {
         properties.clear();
     }
 
@@ -168,14 +164,11 @@ class EnginePreferences extends AbstractPreferences {
      *
      * @return an array of the keys that have an associated value in this
      * preference node.
-     * @throws BackingStoreException if this operation cannot be completed
-     *                               due to a failure in the backing store, or inability to
-     *                               communicate with it.
      */
     @Override
-    protected String[] keysSpi() throws BackingStoreException {
-        Set<String> names = properties.stringPropertyNames();
-        return names.toArray(new String[names.size()]);
+    protected String[] keysSpi() {
+        final Set<String> names = properties.stringPropertyNames();
+        return names.toArray(new String[0]);
     }
 
     /**
@@ -192,12 +185,9 @@ class EnginePreferences extends AbstractPreferences {
      *
      * @return an array containing the names of the children of this
      * preference node.
-     * @throws BackingStoreException if this operation cannot be completed
-     *                               due to a failure in the backing store, or inability to
-     *                               communicate with it.
      */
     @Override
-    protected String[] childrenNamesSpi() throws BackingStoreException {
+    protected String[] childrenNamesSpi() {
         return new String[0];
     }
 

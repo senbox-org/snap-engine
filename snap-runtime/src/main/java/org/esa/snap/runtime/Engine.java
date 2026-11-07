@@ -7,8 +7,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -26,10 +28,6 @@ import java.util.stream.Collectors;
  * @since SNAP 2.0
  */
 public class Engine {
-
-    private enum Lifecycle {
-        START, STOP
-    }
 
     private static Engine instance;
     private final ClassLoader clientClassLoader;
@@ -112,6 +110,23 @@ public class Engine {
      * @see #start()
      */
     public static Engine start(boolean setContextClassLoader) {
+        return start(setContextClassLoader, null);
+    }
+
+    /**
+     * Starts the SNAP Engine Runtime like {@link #start(boolean)}, but lets {@link Activator#isDeferrable() deferrable}
+     * activators be started by the given executor instead of synchronously. This keeps their work, e.g. loading native
+     * libraries, out of an application's startup.
+     *
+     * @param setContextClassLoader     If {@code true}, the {@link #getClientClassLoader() client
+     *                                  class loader} will become the current thread's context class loader.
+     * @param deferredActivatorExecutor Runs the start of the deferrable activators (as a single task, in start-level
+     *                                  order). If {@code null}, all activators are started synchronously.
+     * @return The runtime singleton instance
+     *
+     * @see #start(boolean)
+     */
+    public static Engine start(boolean setContextClassLoader, Executor deferredActivatorExecutor) {
         if (instance == null) {
             synchronized (Engine.class) {
                 if (instance == null) {
@@ -119,7 +134,13 @@ public class Engine {
                     if (setContextClassLoader) {
                         instance.setContextClassLoader();
                     }
-                    instance.runClientCode(() -> instance.informActivators(Lifecycle.START));
+                    final Engine engine = instance;
+                    engine.runClientCode(() -> {
+                        final List<Activator> deferred = engine.startActivators(deferredActivatorExecutor != null);
+                        if (!deferred.isEmpty()) {
+                            deferredActivatorExecutor.execute(engine.createClientRunnable(() -> engine.startActivators(deferred)));
+                        }
+                    });
                 }
             }
         }
@@ -134,7 +155,7 @@ public class Engine {
      */
     public synchronized void stop() {
         if (instance != null) {
-            instance.runClientCode(() -> instance.informActivators(Lifecycle.STOP));
+            instance.runClientCode(() -> instance.stopActivators());
             instance = null;
         }
     }
@@ -209,27 +230,54 @@ public class Engine {
         return () -> runClientCode(runnable);
     }
 
-    private void informActivators(Lifecycle lifecycle) {
-        ServiceLoader<Activator> activators = ServiceLoader.load(Activator.class, clientClassLoader);
-        List<Activator> activatorList = new ArrayList<>();
-        for (Activator activator : activators) {
-            activatorList.add(activator);
+    /**
+     * Starts all activators, or only the non-deferrable ones if {@code deferDeferrable} is set.
+     *
+     * @return the deferrable activators which have not been started, in start-level order
+     */
+    private List<Activator> startActivators(boolean deferDeferrable) {
+        final List<Activator> activatorList = loadActivators();
+        activatorList.sort(Comparator.comparingInt(Activator::getStartLevel));
+        final List<Activator> deferred = new ArrayList<>();
+        final List<Activator> immediate = new ArrayList<>();
+        for (Activator activator : activatorList) {
+            (deferDeferrable && activator.isDeferrable() ? deferred : immediate).add(activator);
         }
-        activatorList.sort(
-                (a1, a2) -> lifecycle == Lifecycle.START ? a1.getStartLevel() - a2.getStartLevel() : a2.getStartLevel() - a1.getStartLevel());
+        startActivators(immediate);
+        return deferred;
+    }
+
+    private void startActivators(List<Activator> activators) {
+        for (Activator activator : activators) {
+            final long t0 = System.nanoTime();
+            try {
+                activator.start();
+            } catch (Exception ex) {
+                getConfig().logger().log(Level.SEVERE, String.format("Failed to start %s", activator.getClass().getName()), ex);
+            }
+            getConfig().logger().log(Level.FINE, () -> String.format("Started %s in %d ms", activator.getClass().getName(),
+                                                                     (System.nanoTime() - t0) / 1_000_000));
+        }
+    }
+
+    private void stopActivators() {
+        final List<Activator> activatorList = loadActivators();
+        activatorList.sort(Comparator.comparingInt(Activator::getStartLevel).reversed());
         for (Activator activator : activatorList) {
             try {
-                if (lifecycle == Lifecycle.START) {
-                    activator.start();
-                } else {
-                    activator.stop();
-                }
+                activator.stop();
             } catch (Exception ex) {
-                getConfig().logger().log(Level.SEVERE, String.format("Failed to %s %s",
-                                                                     lifecycle == Lifecycle.START ? "start" : "stop",
-                                                                     activator.getClass().getName()), ex);
+                getConfig().logger().log(Level.SEVERE, String.format("Failed to stop %s", activator.getClass().getName()), ex);
             }
         }
+    }
+
+    private List<Activator> loadActivators() {
+        final List<Activator> activatorList = new ArrayList<>();
+        for (Activator activator : ServiceLoader.load(Activator.class, clientClassLoader)) {
+            activatorList.add(activator);
+        }
+        return activatorList;
     }
 
     private ClassLoader createClientClassLoader(List<Path> paths) {

@@ -476,9 +476,6 @@ public class DimapProductWriter extends AbstractProductWriter {
                 }
             }
         }
-        if (node instanceof RasterDataNode && ((RasterDataNode) node).isSynthetic()) {
-            return false;
-        }
         if (node instanceof VirtualBand) {
             return false;
         }

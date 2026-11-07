@@ -16,6 +16,8 @@
 
 package org.esa.snap.binning.aggregators;
 
+import org.esa.snap.binning.Aggregator;
+import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.BinContext;
 import org.esa.snap.binning.MyVariableContext;
 import org.esa.snap.binning.support.VectorImpl;
@@ -182,5 +184,60 @@ public class AggregatorAverageMLTest {
         assertEquals(sumX, out.get(0), 1e-5);
         assertEquals(sumXX, out.get(1), 1e-5);
         assertEquals(sumW, out.get(2), 1e-5);
+    }
+
+    @Test
+    public void testConstructConfig_allEmpty() {
+        final AggregatorAverageML.Config config = new AggregatorAverageML.Config();
+
+        assertEquals("AVG_ML", config.getName());
+        assertNull(config.varName);
+        assertNull(config.targetName);
+        assertEquals(0.0, config.weightCoeff, 1e-8f);
+        assertFalse(config.outputSums);
+    }
+
+    @Test
+    public void testConstructConfig_parametrised() {
+        final AggregatorAverageML.Config config = new AggregatorAverageML.Config("var_iab_le", "target", 1.8, true);
+
+        assertEquals("AVG_ML", config.getName());
+        assertEquals("var_iab_le", config.varName);
+        assertEquals("target", config.targetName);
+        assertEquals(1.8, config.weightCoeff, 1e-8f);
+        assertTrue(config.outputSums);
+    }
+
+    @Test
+    public void testDescriptor_getName() {
+        final AggregatorAverageML.Descriptor descriptor = new AggregatorAverageML.Descriptor();
+
+        assertEquals("AVG_ML", descriptor.getName());
+    }
+
+    @Test
+    public void testDescriptor_createConfig() {
+        final AggregatorAverageML.Descriptor descriptor = new AggregatorAverageML.Descriptor();
+
+        final AggregatorConfig config = descriptor.createConfig();
+        assertEquals("AVG_ML", config.getName());
+    }
+
+    @Test
+    public void testDescriptor_createAggregator() {
+        final AggregatorAverageML.Descriptor descriptor = new AggregatorAverageML.Descriptor();
+
+        final AggregatorAverageML.Config config = new AggregatorAverageML.Config();
+        config.varName = "var_iab_le";
+
+        final Aggregator aggregator = descriptor.createAggregator(new MyVariableContext("const"), config);
+
+        assertEquals("AVG_ML", aggregator.getName());
+        final String[] outputFeatureNames = aggregator.getOutputFeatureNames();
+        assertEquals(4, outputFeatureNames.length);
+        assertEquals("var_iab_le_mean", outputFeatureNames[0]);
+        assertEquals("var_iab_le_sigma", outputFeatureNames[1]);
+        assertEquals("var_iab_le_median", outputFeatureNames[2]);
+        assertEquals("var_iab_le_mode", outputFeatureNames[3]);
     }
 }

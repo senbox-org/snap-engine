@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import static eu.esa.snap.core.dataio.CfConstants.TITLE;
 import static org.junit.Assert.*;
 
 /**
@@ -83,7 +84,7 @@ public class SeaDASLevel3BinWriterTest {
         binWriter.write(metadataProperties, temporalBins);
 
         final NetcdfFile netcdfFile = NetcdfFileOpener.open(binWriter.getTargetFilePath());
-        assertNotNull(netcdfFile.findGlobalAttribute("title"));
+        assertNotNull(netcdfFile.findGlobalAttribute(TITLE));
         assertNotNull(netcdfFile.findGlobalAttribute("super_sampling"));
         assertEquals(numRows * 2, netcdfFile.findGlobalAttribute("SEAGrid_bins").getNumericValue());
 

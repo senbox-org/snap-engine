@@ -32,12 +32,11 @@ public class TileImageDisposer {
      * Disposes all registered images.
      */
     public void disposeAll() {
-        int index = -1;
+        int index;
         while ((index = this.tileOpImages.size() - 1) >= 0) {
             PlanarImage image = this.tileOpImages.remove(index);
             if (image != null) {
                 image.dispose();
-                image = null;
             }
         }
     }

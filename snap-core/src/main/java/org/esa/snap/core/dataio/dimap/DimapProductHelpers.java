@@ -269,7 +269,7 @@ public class DimapProductHelpers {
                     geoCodings[bandIndex] = createFXYGeoCoding(datum, geoPosElem);
                 } else if (geoPosElem.getChild(DimapProductConstants.TAG_SEARCH_RADIUS) != null
                         && geoPosElem.getChild(DimapProductConstants.TAG_LATITUDE_BAND) != null) {
-                    geoCodings[bandIndex] = createPixelGeoCoding(product, datum, geoPosElem);
+                    geoCodings[bandIndex] = createPixelGeoCoding(product, geoPosElem);
                 } else if (geoPosElem.getChild(DimapProductConstants.TAG_GEOPOSITION_POINTS) != null) {
                     final Element geoPositionPointsElement = geoPosElem.getChild(DimapProductConstants.TAG_GEOPOSITION_POINTS);
                     geoCodings[bandIndex] = createGeoCodingFromGeoPositionPointsElement(product,
@@ -579,20 +579,12 @@ public class DimapProductHelpers {
         return null;
     }
 
-    private static GeoCoding createPixelGeoCoding(Product product, Datum datum, Element geoPosElem) throws IOException {
+    private static GeoCoding createPixelGeoCoding(Product product, Element geoPosElem) throws IOException {
         final String latBandName = geoPosElem.getChildTextTrim(DimapProductConstants.TAG_LATITUDE_BAND);
         final String lonBandName = geoPosElem.getChildTextTrim(DimapProductConstants.TAG_LONGITUDE_BAND);
         final Band latBand = product.getBand(latBandName);
         final Band lonBand = product.getBand(lonBandName);
-        final Element searchRadiusElem = geoPosElem.getChild(DimapProductConstants.TAG_SEARCH_RADIUS);
-        int searchRadius = Integer.parseInt(searchRadiusElem.getTextTrim());
-        if (searchRadius == 0) {
-            searchRadius = 6;
-        }
-        String validMask = null;
-        if (geoPosElem.getChild(DimapProductConstants.TAG_VALID_MASK_EXPRESSION) != null) {
-            validMask = geoPosElem.getChildTextTrim(DimapProductConstants.TAG_VALID_MASK_EXPRESSION);
-        }
+
         final Element posEstimatorElement = geoPosElem.getChild(DimapProductConstants.TAG_PIXEL_POSITION_ESTIMATOR);
         if (posEstimatorElement != null) {
             final Content posEstimatorContent = posEstimatorElement.detach();

@@ -2108,11 +2108,9 @@ public class Product extends ProductNode implements Closeable {
 
         // All the positions computations will be done at the centre of pixel cell
         final PixelPos pixelPosRef = new PixelPos(pixelX + 0.5f, pixelY + 0.5f);
-
         final GeoCoding rasterGeocoding = raster.getGeoCoding();
-        GeoPos geoPos = null;
         if (rasterGeocoding != null) {
-            geoPos = rasterGeocoding.getGeoPos(pixelPosRef, null);
+            final GeoPos geoPos = rasterGeocoding.getGeoPos(pixelPosRef, null);
 
             sb.append("Longitude:\t");
             sb.append(geoPos.getLonString());
@@ -2137,7 +2135,6 @@ public class Product extends ProductNode implements Closeable {
                 sb.append("\t").append(mapUnit).append("\n");
             }
         } // rasterGeoding not null
-
 
         if (raster.isPixelWithinImageBounds(pixelX, pixelY)) {
 

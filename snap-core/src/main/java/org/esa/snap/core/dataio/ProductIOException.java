@@ -16,6 +16,7 @@
 package org.esa.snap.core.dataio;
 
 import java.io.IOException;
+import java.io.Serial;
 
 /**
  * A <code>java.io.IOException</code> that is thrown by <code>ProductReader</code>s, <code>ProductWriters</code>s and
@@ -26,6 +27,7 @@ import java.io.IOException;
  */
 public class ProductIOException extends IOException {
 
+    @Serial
     private static final long serialVersionUID = -8807981283294580325L;
 
     /**

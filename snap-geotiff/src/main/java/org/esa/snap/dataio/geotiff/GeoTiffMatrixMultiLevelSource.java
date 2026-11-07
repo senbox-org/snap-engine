@@ -76,10 +76,10 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
     public synchronized void reset() {
         super.reset();
 
-        for (int rowIndex = 0; rowIndex < this.mosaicMatrix.getRowCount(); rowIndex++) {
-            for (int columnIndex = 0; columnIndex < this.mosaicMatrix.getColumnCount(); columnIndex++) {
-                GeoTiffMatrixCell geoTiffMatrixCell = (GeoTiffMatrixCell)this.mosaicMatrix.getCellAt(rowIndex, columnIndex);
-                synchronized (geoTiffMatrixCell) {
+        for (int rowIndex = 0; rowIndex < mosaicMatrix.getRowCount(); rowIndex++) {
+            for (int columnIndex = 0; columnIndex < mosaicMatrix.getColumnCount(); columnIndex++) {
+                GeoTiffMatrixCell geoTiffMatrixCell = (GeoTiffMatrixCell) mosaicMatrix.getCellAt(rowIndex, columnIndex);
+                synchronized (mosaicMatrix) {
                     try {
                         geoTiffMatrixCell.close();
                     } catch (IOException e) {

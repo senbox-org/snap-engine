@@ -28,9 +28,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_MASKS;
-import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_MEANINGS;
-import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_VALUES;
+import static eu.esa.snap.core.dataio.CfConstants.*;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.FLAG_DESCRIPTIONS;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.NAME_SAMPLE_CODING;
 import static org.hamcrest.Matchers.*;

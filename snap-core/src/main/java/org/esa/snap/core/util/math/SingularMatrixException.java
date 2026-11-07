@@ -15,6 +15,8 @@
  */
 package org.esa.snap.core.util.math;
 
+import java.io.Serial;
+
 /**
  * Thrown, if a matrix is singular and processing cannot be continued.
  *
@@ -22,6 +24,7 @@ package org.esa.snap.core.util.math;
  */
 public class SingularMatrixException extends ArithmeticException {
 
+    @Serial
     private static final long serialVersionUID = -6472145334613236151L;
 
     /**

@@ -44,7 +44,6 @@ import org.esa.snap.core.dataio.persistence.JsonLanguageSupport;
 import org.esa.snap.core.dataio.persistence.Persistence;
 import org.esa.snap.core.dataio.persistence.PersistenceEncoder;
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.BasicPixelGeoCoding;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.FilterBand;
@@ -91,11 +90,11 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
+import static eu.esa.snap.core.dataio.CfConstants.FLAG_MASKS;
+import static eu.esa.snap.core.dataio.CfConstants.FLAG_MEANINGS;
+import static eu.esa.snap.core.dataio.CfConstants.FLAG_VALUES;
 import static org.esa.snap.core.util.StringUtils.isNotNullAndNotEmpty;
 import static org.esa.snap.core.util.SystemUtils.LOG;
-import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_MASKS;
-import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_MEANINGS;
-import static org.esa.snap.dataio.znap.CFConstantsAndUtils.FLAG_VALUES;
 import static org.esa.snap.dataio.znap.CFConstantsAndUtils.tryFindUnitString;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_BINARY_FORMAT;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ATT_NAME_GEOCODING;
@@ -397,13 +396,7 @@ public class ZnapProductWriter extends AbstractProductWriter {
     private void collectProductGeoCodingAttrs(Map<String, Object> attrs) throws ProductIOException {
         final ArrayList<String> coordNames = new ArrayList<>();
         final GeoCoding gc = getSourceProduct().getSceneGeoCoding();
-        //noinspection deprecation
-        if (gc instanceof BasicPixelGeoCoding) {
-            @SuppressWarnings("deprecation")
-            final BasicPixelGeoCoding pgc = (BasicPixelGeoCoding) gc;
-            coordNames.add(pgc.getLatBand().getName());
-            coordNames.add(pgc.getLonBand().getName());
-        }
+
         if (gc instanceof ComponentGeoCoding) {
             final ComponentGeoCoding pgc = (ComponentGeoCoding) gc;
             final GeoRaster geoRaster = pgc.getGeoRaster();

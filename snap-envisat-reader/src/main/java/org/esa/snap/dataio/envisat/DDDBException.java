@@ -15,6 +15,8 @@
  */
 package org.esa.snap.dataio.envisat;
 
+import java.io.Serial;
+
 /**
  * An  I/O exception thrown by the <code>DDDB</code> class in order to signal internal I/O errors with origin in the
  * DDDB.
@@ -24,6 +26,7 @@ package org.esa.snap.dataio.envisat;
  */
 public class DDDBException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 1164442142242614057L;
 
     /**

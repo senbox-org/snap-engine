@@ -37,7 +37,7 @@ public final class GeoUtils {
      * @param geoPos The geodetic coordinate of a given pixel.
      * @param xyz    The xyz coordinates of the given pixel.
      */
-    public static void geo2xyz(final GeoPos geoPos, final double xyz[]) {
+    public static void geo2xyz(final GeoPos geoPos, final double[] xyz) {
         geo2xyz(geoPos.lat, geoPos.lon, 0.0, xyz, EarthModel.WGS84);
     }
 
@@ -51,21 +51,16 @@ public final class GeoUtils {
      * @param geoSystem The geodetic system.
      */
     public static void geo2xyz(final double latitude, final double longitude, final double altitude,
-                               final double xyz[], final EarthModel geoSystem) {
+                               final double[] xyz, final EarthModel geoSystem) {
 
-        double a = 0.0;
-        double e2 = 0.0;
-
+        double a;
+        double e2;
         if (geoSystem == EarthModel.WGS84) {
-
             a = WGS84.a;
             e2 = WGS84.e2;
-
         } else if (geoSystem == EarthModel.GRS80) {
-
             a = GRS80.a;
             e2 = GRS80.e2;
-
         } else {
             throw new OperatorException("Incorrect geodetic system");
         }
@@ -144,27 +139,22 @@ public final class GeoUtils {
      * @param geoPos    The geodetic coordinate of the given pixel.
      * @param geoSystem The geodetic system.
      */
-    public static void xyz2geo(final double xyz[], final GeoPos geoPos, final EarthModel geoSystem) {
-
-        double a = 0.0;
-        double b = 0.0;
-        double e2 = 0.0;
-        double ep2 = 0.0;
+    public static void xyz2geo(final double[] xyz, final GeoPos geoPos, final EarthModel geoSystem) {
+        double a;
+        double b;
+        double e2;
+        double ep2;
 
         if (geoSystem == EarthModel.WGS84) {
-
             a = WGS84.a;
             b = WGS84.b;
             e2 = WGS84.e2;
             ep2 = WGS84.ep2;
-
         } else if (geoSystem == EarthModel.GRS80) {
-
             a = GRS80.a;
             b = GRS80.b;
             e2 = GRS80.e2;
             ep2 = GRS80.ep2;
-
         } else {
             throw new OperatorException("Incorrect geodetic system");
         }
@@ -193,7 +183,7 @@ public final class GeoUtils {
      * @param xyz    The xyz coordinate of the given pixel.
      * @param geoPos The geodetic coordinate of the given pixel.
      */
-    public static void xyz2geoWGS84(final double xyz[], final GeoPos geoPos) {
+    public static void xyz2geoWGS84(final double[] xyz, final GeoPos geoPos) {
 
         final double x = xyz[0];
         final double y = xyz[1];

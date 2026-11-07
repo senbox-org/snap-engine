@@ -31,15 +31,12 @@ public final class SceneFactory {
      * Creates a scene wrapper around the given product node.
      *
      * @param node the product node
-     *
      * @return a scene instance or null if it could not be created
      */
     public static Scene createScene(final ProductNode node) {
-        if (node instanceof Product) {
-            final Product product = (Product) node;
+        if (node instanceof Product product) {
             return new ProductScene(product);
-        } else if (node instanceof RasterDataNode) {
-            final RasterDataNode raster = (RasterDataNode) node;
+        } else if (node instanceof RasterDataNode raster) {
             return new RasterDataNodeScene(raster);
         }
         return null;
@@ -58,46 +55,45 @@ public final class SceneFactory {
             targetScene.setGeoCoding(null);
             return true;
         }
-        if (sourceGeoCoding instanceof AbstractGeoCoding) {
-            AbstractGeoCoding abstractGeoCoding = (AbstractGeoCoding) sourceGeoCoding;
+        if (sourceGeoCoding instanceof AbstractGeoCoding abstractGeoCoding) {
             return abstractGeoCoding.transferGeoCoding(sourceScene, targetScene, subsetDef);
         }
         return false;
     }
-    
+
     private static boolean transferGeoCodingBandwise(final Scene sourceScene,
                                                      final Scene targetScene,
                                                      final ProductSubsetDef subsetDef) {
         boolean sceneTransferred = transferGeoCoding(sourceScene, targetScene, subsetDef);
 
-        Product sourceProduct = sourceScene.getProduct();
-        Product targetProduct = targetScene.getProduct();
+        Product sourceProduct = sourceScene.product();
+        Product targetProduct = targetScene.product();
         final String[] rasterNames = StringUtils.addArrays(sourceProduct.getBandNames(),
-                                                           sourceProduct.getTiePointGridNames());
+                sourceProduct.getTiePointGridNames());
         int numTransferred = 0;
         for (String rasterName : rasterNames) {
             final RasterDataNode sourceRaster = sourceProduct.getRasterDataNode(rasterName);
             final RasterDataNode targetRaster = targetProduct.getRasterDataNode(rasterName);
             if (sourceRaster != null && targetRaster != null) {
-                ProductSubsetDef auxiliarSubsetDef = null;
-                if(subsetDef == null || subsetDef.getRegionMap() == null) {
+                final ProductSubsetDef auxiliarSubsetDef;
+                if (subsetDef == null || subsetDef.getRegionMap() == null) {
                     auxiliarSubsetDef = subsetDef;
                 } else {
                     auxiliarSubsetDef = new ProductSubsetDef();
                     auxiliarSubsetDef.setSubsetRegion(new PixelSubsetRegion(subsetDef.getRegionMap().get(sourceRaster.getName()).getSubsetExtent(), 0));
-                    auxiliarSubsetDef.setSubSampling(subsetDef.getSubSamplingX(),subsetDef.getSubSamplingY());
+                    auxiliarSubsetDef.setSubSampling(subsetDef.getSubSamplingX(), subsetDef.getSubSamplingY());
                 }
 
                 final Scene sourceRasterScene = SceneFactory.createScene(sourceRaster);
 
                 //if (targetRaster != null) {
-                    final Scene targetRasterScene = SceneFactory.createScene(targetRaster);
-                    if (transferGeoCoding(sourceRasterScene, targetRasterScene, auxiliarSubsetDef)) {
-                        numTransferred++;
-                    } else {
-                        SystemUtils.LOG.warning(
-                                "failed to transfer geo-coding of band '" + sourceRaster.getName() + "'");
-                    }
+                final Scene targetRasterScene = SceneFactory.createScene(targetRaster);
+                if (transferGeoCoding(sourceRasterScene, targetRasterScene, auxiliarSubsetDef)) {
+                    numTransferred++;
+                } else {
+                    SystemUtils.LOG.warning(
+                            "failed to transfer geo-coding of band '" + sourceRaster.getName() + "'");
+                }
                 //}
             }
         }
@@ -105,48 +101,41 @@ public final class SceneFactory {
         return numTransferred > 0 || sceneTransferred;
     }
 
-    private static class ProductScene implements Scene {
+    private record ProductScene(Product product) implements Scene {
 
-        private final Product product;
-
-        public ProductScene(final Product product) {
+        private ProductScene {
             Guardian.assertNotNull("product", product);
-            this.product = product;
         }
 
-        public void setGeoCoding(final GeoCoding geoCoding) {
-            product.setSceneGeoCoding(geoCoding);
-        }
+            public void setGeoCoding(final GeoCoding geoCoding) {
+                product.setSceneGeoCoding(geoCoding);
+            }
 
-        public GeoCoding getGeoCoding() {
-            return product.getSceneGeoCoding();
-        }
+            public GeoCoding getGeoCoding() {
+                return product.getSceneGeoCoding();
+            }
 
-        public boolean transferGeoCodingTo(final Scene targetScene, final ProductSubsetDef subsetDef) {
-            if (product.isUsingSingleGeoCoding()) {
-                return transferGeoCoding(this, targetScene, subsetDef);
-            } else {
-                return transferGeoCodingBandwise(this, targetScene, subsetDef);
+            public boolean transferGeoCodingTo(final Scene targetScene, final ProductSubsetDef subsetDef) {
+                if (product.isUsingSingleGeoCoding()) {
+                    return transferGeoCoding(this, targetScene, subsetDef);
+                } else {
+                    return transferGeoCodingBandwise(this, targetScene, subsetDef);
+                }
+            }
+
+            public int getRasterWidth() {
+                return product.getSceneRasterWidth();
+            }
+
+            public int getRasterHeight() {
+                return product.getSceneRasterHeight();
+            }
+
+            @Override
+            public boolean isSameRasterSize(Scene other) {
+                return SceneFactory.isSameRasterSize(this, other);
             }
         }
-
-        public int getRasterWidth() {
-            return product.getSceneRasterWidth();
-        }
-
-        public int getRasterHeight() {
-            return product.getSceneRasterHeight();
-        }
-
-        public Product getProduct() {
-            return product;
-        }
-
-        @Override
-        public boolean isSameRasterSize(Scene other) {
-            return SceneFactory.isSameRasterSize(this, other);
-        }
-    }
 
     private static class RasterDataNodeScene implements Scene {
 
@@ -177,7 +166,7 @@ public final class SceneFactory {
             return raster.getRasterHeight();
         }
 
-        public Product getProduct() {
+        public Product product() {
             Product product = raster.getProduct();
             if (product == null) {
                 // product can be null if e.g. raster is a mask and is contained in a group

@@ -261,9 +261,8 @@ public final class RecordInfo extends ItemInfo {
      */
     @Override
     public void setNamePrefix(String prefix) {
-        FieldInfo info = null;
         for (int n = 0; n < _fieldInfos.size(); n++) {
-            info = (FieldInfo) _fieldInfos.elementAt(n);
+            final FieldInfo info = (FieldInfo) _fieldInfos.elementAt(n);
             info.setNamePrefix(prefix);
         }
     }

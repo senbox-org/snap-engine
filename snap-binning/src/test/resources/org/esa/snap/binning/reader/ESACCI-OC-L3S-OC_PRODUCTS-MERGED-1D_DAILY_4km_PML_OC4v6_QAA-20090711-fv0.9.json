@@ -425,15 +425,14 @@
             },
             {
                 "name": "sensor_contributions_0",
-                "noDataValue": "0.0",
-                "noDataValueUsed": "true",
+                "noDataValueUsed": "false",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
                 "expectedPixels": [
                     {
                         "x": 831,
                         "y": 336,
-                        "value": "NaN"
+                        "value": 0.0
                     },
                     {
                         "x": 2938,
@@ -444,39 +443,37 @@
             },
             {
                 "name": "sensor_contributions_1",
-                "noDataValue": "0.0",
-                "noDataValueUsed": "true",
+                "noDataValueUsed": "false",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
                 "expectedPixels": [
                     {
                         "x": 4018,
                         "y": 3867,
-                        "value": "NaN"
+                        "value": 0.0
                     },
                     {
                         "x": 7494,
                         "y": 2592,
-                        "value": "NaN"
+                        "value": 0.0
                     }
                 ]
             },
             {
                 "name": "sensor_contributions_2",
-                "noDataValue": "0.0",
-                "noDataValueUsed": "true",
+                "noDataValueUsed": "false",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
                 "expectedPixels": [
                     {
                         "x": 8312,
                         "y": 1645,
-                        "value": "NaN"
+                        "value": 0.0
                     },
                     {
                         "x": 759,
                         "y": 2301,
-                        "value": "NaN"
+                        "value": 0.0
                     }
                 ]
             },

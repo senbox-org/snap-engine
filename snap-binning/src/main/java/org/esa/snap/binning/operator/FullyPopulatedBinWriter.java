@@ -37,6 +37,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static eu.esa.snap.core.dataio.CfConstants.*;
+
 /**
  * Utility class that writes SeaDAS-Level-3-alike NetCDF files containing binned Level-3 data.
  *
@@ -64,7 +66,7 @@ class FullyPopulatedBinWriter extends AbstractBinWriter {
         final NetcdfFileWriter netcdfFile = NetcdfFileWriter.createNew(getTargetFilePath(),false);
         netcdfFile.setLargeFile(true);
 
-        netcdfFile.addGlobalAttribute("title", "Level-3 Binned Data");
+        netcdfFile.addGlobalAttribute(TITLE, "Level-3 Binned Data");
         netcdfFile.addGlobalAttribute("super_sampling", binningContext.getSuperSampling());
         if (getRegion() != null) {
             netcdfFile.addGlobalAttribute("region", getRegion().toText());
@@ -86,16 +88,16 @@ class FullyPopulatedBinWriter extends AbstractBinWriter {
         final Variable numScenesVar = netcdfFile.addVariable("bl_nscenes", DataType.INT, Arrays.asList(binListDim));
 
         Variable longitude = netcdfFile.addVariable("longitude", DataType.FLOAT, Arrays.asList(binListDim));
-        longitude.addAttribute(new Attribute("units", "degrees_east"));
+        longitude.addAttribute(new Attribute(UNITS, "degrees_east"));
         Variable latitude = netcdfFile.addVariable("latitude", DataType.FLOAT, Arrays.asList(binListDim));
-        latitude.addAttribute(new Attribute("units", "degrees_north"));
+        latitude.addAttribute(new Attribute(UNITS, "degrees_north"));
 
         final BinManager binManager = binningContext.getBinManager();
         final String[] resultFeatureNames = binManager.getResultFeatureNames();
         final ArrayList<Variable> featureVars = new ArrayList<Variable>(resultFeatureNames.length);
         for (String featureName : resultFeatureNames) {
             final Variable featureVar = netcdfFile.addVariable(featureName, DataType.FLOAT, Arrays.asList(binListDim));
-            featureVar.addAttribute(new Attribute("_FillValue", Float.NaN));
+            featureVar.addAttribute(new Attribute(FILL_VALUE, Float.NaN));
             featureVars.add(featureVar);
         }
 
@@ -173,26 +175,23 @@ class FullyPopulatedBinWriter extends AbstractBinWriter {
         getLogger().info("Writing bin list variables");
 
         final int[] origin = new int[1];
+        final ArrayList<TemporalBin> rowBins = new ArrayList<TemporalBin>(2 * planetaryGrid.getNumRows());
+
         int bufferIndex = 0;
         int lastRowIndex = -1;
-        int rowIndex = -1;
-        ArrayList<TemporalBin> rowBins = new ArrayList<TemporalBin>(2 * planetaryGrid.getNumRows());
 
         // Reverse-iterate through the bins
         int binListIndex = temporalBins.size() - 1;
         TemporalBin temporalBin = null;
         TemporalBin emptyBin = new TemporalBin(0,0);
         int id = -1;
-        final int numFeatures = 0;//temporalBins.get(0).getFeatureValues().length;
         for (int globalIndex = (int) (planetaryGrid.getNumBins() - 1); globalIndex >= 0; globalIndex--) {
             if (temporalBin == null && binListIndex >= 0) {
                 temporalBin = temporalBins.get(binListIndex--);
                 id = (int) temporalBin.getIndex();
             }
 
-//            final long id = temporalBin.getIndex();
-
-            rowIndex = planetaryGrid.getRowIndex(globalIndex);
+            final int rowIndex = planetaryGrid.getRowIndex(globalIndex);
             // Row change? If so we can write the bins of the same row.
             if (rowIndex == lastRowIndex) {
                 if (id == globalIndex) {

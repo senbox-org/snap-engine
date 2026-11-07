@@ -458,7 +458,7 @@ public class GraticuleLayer extends Layer {
         double xAllowedMax = raster.getRasterWidth() - overlapMultiplierBuffer * singleLetter.getHeight();
         double yAllowedMin = 0 + overlapMultiplierBuffer * singleLetter.getHeight();
         double yAllowedMax = raster.getRasterHeight() - overlapMultiplierBuffer * singleLetter.getHeight();
-        double buffer = 0;
+        double buffer;
 
         switch (textLocation) {
             case NORTH:

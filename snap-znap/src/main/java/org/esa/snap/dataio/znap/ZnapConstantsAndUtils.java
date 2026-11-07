@@ -56,10 +56,10 @@ import java.util.Map;
 
 final class ZnapConstantsAndUtils {
 
-    public static final int IDX_WIDTH = 1;
-    public static final int IDX_X = IDX_WIDTH;
-    public static final int IDX_HEIGHT = 0;
-    public static final int IDX_Y = IDX_HEIGHT;
+    static final int IDX_WIDTH = 1;
+    static final int IDX_X = IDX_WIDTH;
+    static final int IDX_HEIGHT = 0;
+    static final int IDX_Y = IDX_HEIGHT;
 
     static final String FORMAT_NAME = "ZNAP";
     static final String ZNAP_CONTAINER_EXTENSION = ".znap";
@@ -72,65 +72,65 @@ final class ZnapConstantsAndUtils {
     static final String KEY_SNAP_VECTOR_DATA_SUBGROUP = KEY_SNAP_SUBGROUP + "/vector_data";
     static final String KEY_SNAP_PRODUCT_METADATA_JSON = KEY_SNAP_SUBGROUP + "/product_metadata.json";
 
-    public static final String UNIT_EXTENSION = "_unit";
-    public static final String BANDWIDTH = "bandwidth";
-    public static final String BANDWIDTH_UNIT = "nm";
-    public static final String WAVELENGTH = "wavelength";
-    public static final String WAVELENGTH_UNIT = "nm";
-    public static final String VALID_PIXEL_EXPRESSION = "valid_pixel_expression";
-    public static final String QUICKLOOK_BAND_NAME = "quicklook_band_name";
-    public static final String SOLAR_FLUX = "solar_flux";
-    public static final String SPECTRAL_BAND_INDEX = "spectral_band_index";
-    public static final String VIRTUAL_BAND_EXPRESSION = "virtual_band_expression";
+    static final String UNIT_EXTENSION = "_unit";
+    static final String BANDWIDTH = "bandwidth";
+    static final String BANDWIDTH_UNIT = "nm";
+    static final String WAVELENGTH = "wavelength";
+    static final String WAVELENGTH_UNIT = "nm";
+    static final String VALID_PIXEL_EXPRESSION = "valid_pixel_expression";
+    static final String QUICKLOOK_BAND_NAME = "quicklook_band_name";
+    static final String SOLAR_FLUX = "solar_flux";
+    static final String SPECTRAL_BAND_INDEX = "spectral_band_index";
+    static final String VIRTUAL_BAND_EXPRESSION = "virtual_band_expression";
 
-    public static final String NO_DATA_VALUE_USED = "no_data_value_used";
+    static final String NO_DATA_VALUE_USED = "no_data_value_used";
 
-    public static final String IMAGE_INFO = "image_info";
-    public static final String STATISTICS = "statistics";
-    public static final String COLOR_PALETTE_POINTS = "color_palette_points";
-    public static final String COLOR_PALETTE_NUM_COLORS = "color_palette_num_colors";
-    public static final String COLOR_PALETTE_DISCRETE = "color_palette_discrete";
-    public static final String COLOR_PALETTE_AUTO_DISTRIBUTE = "color_palette_auto_dist";
-    public static final String SAMPLE = "sample";
-    public static final String LABEL = "label";
-    public static final String COLOR_RGBA = "color_rgba";
-    public static final String HISTOGRAM_MATCHING = "histogram_matching";
-    public static final String LOG_10_SCALED = "log_10_scaled";
-    public static final String NO_DATA_COLOR_RGBA = "no_data_color";
-    public static final String UNCERTAINTY_BAND_NAME = "uncertainty_band_name";
-    public static final String UNCERTAINTY_VISUALISATION_MODE = "uncertainty_visualisation_mode";
+    static final String IMAGE_INFO = "image_info";
+    static final String STATISTICS = "statistics";
+    static final String COLOR_PALETTE_POINTS = "color_palette_points";
+    static final String COLOR_PALETTE_NUM_COLORS = "color_palette_num_colors";
+    static final String COLOR_PALETTE_DISCRETE = "color_palette_discrete";
+    static final String COLOR_PALETTE_AUTO_DISTRIBUTE = "color_palette_auto_dist";
+    static final String SAMPLE = "sample";
+    static final String LABEL = "label";
+    static final String COLOR_RGBA = "color_rgba";
+    static final String HISTOGRAM_MATCHING = "histogram_matching";
+    static final String LOG_10_SCALED = "log_10_scaled";
+    static final String NO_DATA_COLOR_RGBA = "no_data_color";
+    static final String UNCERTAINTY_BAND_NAME = "uncertainty_band_name";
+    static final String UNCERTAINTY_VISUALISATION_MODE = "uncertainty_visualisation_mode";
 
     // Product attributes
-    public static final String DATASET_AUTO_GROUPING = "dataset_auto_grouping";
+    static final String DATASET_AUTO_GROUPING = "dataset_auto_grouping";
 
     // Tie point grid attributes
-    public static final String DISCONTINUITY = "discontinuity";
+    static final String DISCONTINUITY = "discontinuity";
 
     // Sample coding attributes
-    public static final String FLAG_DESCRIPTIONS = "flag_descriptions";
+    static final String FLAG_DESCRIPTIONS = "flag_descriptions";
 
     // Product header attribute names
-    public static final String ATT_NAME_PRODUCT_NAME = "product_name";
-    public static final String ATT_NAME_PRODUCT_TYPE = "product_type";
-    public static final String ATT_NAME_PRODUCT_DESC = "product_description";
-    public static final String ATT_NAME_PRODUCT_SCENE_WIDTH = "product_scene_raster_width";
-    public static final String ATT_NAME_PRODUCT_SCENE_HEIGHT = "product_scene_raster_height";
-    public static final String ATT_NAME_BINARY_FORMAT = ZnapPreferencesConstants.PROPERTY_NAME_BINARY_FORMAT.replace(".", "_");
-    public static final String ATT_NAME_GEOCODING = "geocoding";
-    public static final String ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER = "original_raster_data_node_order";
+    static final String ATT_NAME_PRODUCT_NAME = "product_name";
+    static final String ATT_NAME_PRODUCT_TYPE = "product_type";
+    static final String ATT_NAME_PRODUCT_DESC = "product_description";
+    static final String ATT_NAME_PRODUCT_SCENE_WIDTH = "product_scene_raster_width";
+    static final String ATT_NAME_PRODUCT_SCENE_HEIGHT = "product_scene_raster_height";
+    static final String ATT_NAME_BINARY_FORMAT = ZnapPreferencesConstants.PROPERTY_NAME_BINARY_FORMAT.replace(".", "_");
+    static final String ATT_NAME_GEOCODING = "geocoding";
+    static final String ATT_NAME_ORIGINAL_RASTER_DATA_NODE_ORDER = "original_raster_data_node_order";
 
     // Tie point grid attribute names
-    public static final String ATT_NAME_OFFSET_X = "offset_x";
-    public static final String ATT_NAME_OFFSET_Y = "offset_y";
-    public static final String ATT_NAME_SUBSAMPLING_X = "subsampling_x";
-    public static final String ATT_NAME_SUBSAMPLING_Y = "subsampling_y";
+    static final String ATT_NAME_OFFSET_X = "offset_x";
+    static final String ATT_NAME_OFFSET_Y = "offset_y";
+    static final String ATT_NAME_SUBSAMPLING_X = "subsampling_x";
+    static final String ATT_NAME_SUBSAMPLING_Y = "subsampling_y";
 
     // Sample Coding
-    public static final String NAME_SAMPLE_CODING = "name_sample_coding";
+    static final String NAME_SAMPLE_CODING = "name_sample_coding";
 
     // Others
-    public static final String NAME_MASKS = "Masks";
-    public static final String NAME_FILTER_BANDS = "FilterBands";
+    static final String NAME_MASKS = "Masks";
+    static final String NAME_FILTER_BANDS = "FilterBands";
 
     static final Class<?>[] IO_TYPES = new Class[]{
             Path.class,
@@ -151,15 +151,6 @@ final class ZnapConstantsAndUtils {
             }
         }
         return null;
-    }
-
-    static boolean isExistingEmptyDirectory(Path path) {
-        try {
-            return Files.isDirectory(path) && Files.list(path).count() == 0;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     private interface OutputConverter {
@@ -399,7 +390,7 @@ final class ZnapConstantsAndUtils {
     }
 
     private static void writeNonEmptyStringField(JsonGenerator gen, String fieldName, String string) throws IOException {
-        if (string != null && string.trim().length() > 0) {
+        if (string != null && !string.trim().isEmpty()) {
             gen.writeStringField(fieldName, string.trim());
         }
     }

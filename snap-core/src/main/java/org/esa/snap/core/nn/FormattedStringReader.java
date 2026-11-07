@@ -49,9 +49,9 @@ class FormattedStringReader {
     }
 
     private static String readLine(StringReader sr) throws IOException {
+        final char[] helper = new char[1];
         String res = "";
-        char[] helper = new char[1];
-        int readCount = 0;
+        int readCount;
         while (helper[0] != '\n') {
             readCount = sr.read(helper, 0, 1);
             if (readCount == -1) {

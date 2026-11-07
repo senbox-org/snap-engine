@@ -59,7 +59,7 @@ public class VectorDataNode extends ProductNode {
     private final SimpleFeatureType featureType;
     private final ObservableFeatureCollection featureCollection;
     private final PlacemarkDescriptor placemarkDescriptor;
-    private PlacemarkGroup placemarkGroup;
+    private volatile PlacemarkGroup placemarkGroup;
     private String defaultStyleCss;
     private String styleCss;
     private boolean permanent;

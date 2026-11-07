@@ -629,15 +629,10 @@ public class Graticule {
         for (final List<Coord> latitudeGridLinePoint : latitudeGridLinePoints) {
 
             if (latitudeGridLinePoint.size() >= 2) {
+                final Coord coord1 = latitudeGridLinePoint.getFirst();
 
-                int first = 0;
-                int second = 1;
-
-                Coord coord1 = latitudeGridLinePoint.get(first);
-                Coord coord2 = latitudeGridLinePoint.get(second);
-
-                PixelPos pixelPos2 = new PixelPos((float) (coord1.pixelPos.getX() + 1), (float) coord1.pixelPos.getY());
-                coord2 = new Coord(coord1.geoPos, pixelPos2);
+                final PixelPos pixelPos2 = new PixelPos((float) (coord1.pixelPos.getX() + 1), (float) coord1.pixelPos.getY());
+                final Coord coord2 = new Coord(coord1.geoPos, pixelPos2);
 
                 if (isCoordPairValid(coord1, coord2)) {
                     TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(formatCompass, formatDecimal), coord1, coord2);
@@ -672,18 +667,14 @@ public class Graticule {
         // text will point backwards due to this so it will subsequently need to be rotated
         for (final List<Coord> latitudeGridLinePoint : latitudeGridLinePoints) {
             if (latitudeGridLinePoint.size() >= 2) {
+                final int last = latitudeGridLinePoint.size() - 1;
+                final Coord coord1 = latitudeGridLinePoint.get(last);
 
-                int last = latitudeGridLinePoint.size() - 1;
-                int nextToLast = last - 1;
-
-                Coord coord1 = latitudeGridLinePoint.get(last);
-                Coord coord2 = latitudeGridLinePoint.get(nextToLast);
-
-                PixelPos pixelPos2 = new PixelPos((float) (coord1.pixelPos.getX() - 1), (float) coord1.pixelPos.getY());
-                coord2 = new Coord(coord1.geoPos, pixelPos2);
+                final PixelPos pixelPos2 = new PixelPos((float) (coord1.pixelPos.getX() - 1), (float) coord1.pixelPos.getY());
+                final Coord coord2 = new Coord(coord1.geoPos, pixelPos2);
 
                 if (isCoordPairValid(coord1, coord2)) {
-                    TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(formatCompass, formatDecimal), coord1, coord2);
+                    final TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(formatCompass, formatDecimal), coord1, coord2);
                     textGlyphs.add(textGlyph);
                 }
             }
