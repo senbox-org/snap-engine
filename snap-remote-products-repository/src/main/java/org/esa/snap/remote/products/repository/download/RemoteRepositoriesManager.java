@@ -511,13 +511,17 @@ public class RemoteRepositoriesManager {
 
     /**
      * The polygon of an area of interest for a remote query: the vertices of a {@link PolygonArea}, else the corners
-     * of the rectangle.
+     * of the rectangle. Both go clockwise (in longitude and latitude), the order TAO's polygon expects and its
+     * converters reverse for counter-clockwise services; a polygon drawn the other way round is reversed.
      */
     static ro.cs.tao.eodata.Polygon2D buildQueryPolygon(Rectangle2D selectionArea) {
         ro.cs.tao.eodata.Polygon2D polygon2D = new ro.cs.tao.eodata.Polygon2D();
         if (selectionArea instanceof PolygonArea) {
             PolygonArea polygonArea = (PolygonArea) selectionArea;
-            for (int i = 0; i < polygonArea.getVertexCount(); i++) {
+            final int count = polygonArea.getVertexCount();
+            final boolean counterClockwise = signedArea(polygonArea) > 0.0;
+            for (int k = 0; k < count; k++) {
+                final int i = counterClockwise ? (count - k) % count : k; // reversed from the same first vertex
                 polygon2D.append(polygonArea.getLongitude(i), polygonArea.getLatitude(i));
             }
             polygon2D.append(polygonArea.getLongitude(0), polygonArea.getLatitude(0)); // closed
@@ -529,6 +533,19 @@ public class RemoteRepositoriesManager {
         polygon2D.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
         polygon2D.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
         return polygon2D;
+    }
+
+    /**
+     * Twice the signed area in longitude and latitude: positive for counter-clockwise vertices.
+     */
+    private static double signedArea(PolygonArea polygonArea) {
+        final int count = polygonArea.getVertexCount();
+        double sum = 0.0;
+        for (int i = 0; i < count; i++) {
+            final int j = (i + 1) % count;
+            sum += polygonArea.getLongitude(i) * polygonArea.getLatitude(j) - polygonArea.getLongitude(j) * polygonArea.getLatitude(i);
+        }
+        return sum;
     }
 
     private static List<RepositoryProduct> convertProducts(RemoteMission mission, List<EOProduct> pageResults, WKTReader wktReader) throws InterruptedException, ParseException {
