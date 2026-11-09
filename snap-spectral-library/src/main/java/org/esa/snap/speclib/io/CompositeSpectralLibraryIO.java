@@ -35,6 +35,15 @@ public class CompositeSpectralLibraryIO implements SpectralLibraryIO {
     }
 
     @Override
+    public List<SpectralLibrary> readAll(Path path) throws IOException {
+        SpectralLibraryIODelegate delegate = findReadDelegate(path);
+        if (delegate == null) {
+            throw new IOException("No reader found for: " + path.getFileName());
+        }
+        return delegate.readAll(path);
+    }
+
+    @Override
     public void write(SpectralLibrary library, Path path) throws IOException {
         SpectralLibraryIODelegate delegate = findWriteDelegate(path);
         if (delegate == null) {

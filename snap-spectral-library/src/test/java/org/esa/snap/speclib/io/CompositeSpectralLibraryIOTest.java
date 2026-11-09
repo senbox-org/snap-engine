@@ -87,6 +87,50 @@ public class CompositeSpectralLibraryIOTest {
         assertSame(first, composite.read(Paths.get("lib.geojson")));
     }
 
+    @Test
+    @STTM("SNAP-4336")
+    public void test_readAll_delegatesToMatchingFormat() throws IOException {
+        SpectralLibrary first = dummyLibrary();
+        SpectralLibrary second = dummyLibrary();
+
+        SpectralLibraryIODelegate delegate = stubDelegate("gpkg", first);
+        CompositeSpectralLibraryIO composite = new CompositeSpectralLibraryIO(List.of(new SpectralLibraryIODelegate() {
+                @Override
+                public SpectralLibrary read(Path path) {
+                    return first;
+                }
+                @Override
+                public List<SpectralLibrary> readAll(Path path) {
+                    return List.of(first, second);
+                }
+                @Override
+                public void write(SpectralLibrary library, Path path) {
+                    // no need for writing here
+                }
+                @Override
+                public boolean canRead(Path path) {
+                    return delegate.canRead(path);
+                }
+                @Override
+                public boolean canWrite(Path path) {
+                    return delegate.canWrite(path);
+                }
+                @Override
+                public List<String> getFileExtensions() {
+                    return List.of("gpkg");
+                }
+            }
+        ));
+
+        assertEquals(List.of(first, second), composite.readAll(Paths.get("libraries.gpkg")));
+    }
+
+    @Test(expected = IOException.class)
+    @STTM("SNAP-4336")
+    public void test_readAll_noMatchingDelegate_throwsIOException() throws IOException {
+        new CompositeSpectralLibraryIO(List.of(stubDelegate("hdr", dummyLibrary()))).readAll(Paths.get("libraries.gpkg"));
+    }
+
     @Test(expected = IOException.class)
     @STTM("SNAP-4177")
     public void test_read_noMatchingDelegate_throwsIOException() throws IOException {
