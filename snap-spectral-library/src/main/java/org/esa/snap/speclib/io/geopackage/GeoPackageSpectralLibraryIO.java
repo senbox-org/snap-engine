@@ -16,8 +16,10 @@ import org.locationtech.jts.io.WKTWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.*;
 import java.util.*;
 
@@ -42,7 +44,7 @@ public class GeoPackageSpectralLibraryIO implements SpectralLibraryIODelegate {
     public SpectralLibrary read(Path path) throws IOException {
         List<SpectralLibrary> libraries = readAll(path);
         if (libraries.isEmpty()) {
-            throw new IOException("No EnMAP-Box spectral profiles found in GeoPackage: " + path);
+            throw new IOException("No spectral profiles found in GeoPackage: " + path);
         }
         return libraries.getFirst();
     }
@@ -75,16 +77,27 @@ public class GeoPackageSpectralLibraryIO implements SpectralLibraryIODelegate {
         Objects.requireNonNull(path, "path must not be null");
 
         loadDriver();
-        Files.createDirectories(path.toAbsolutePath().getParent());
-        Files.deleteIfExists(path);
+        Path target = path.toAbsolutePath();
+        Path parent = target.getParent();
+        Files.createDirectories(parent);
+        Path temporary = Files.createTempFile(parent, target.getFileName().toString(), ".tmp");
+        boolean replaced = false;
 
-        try (Connection connection = DriverManager.getConnection(url(path))) {
-            connection.setAutoCommit(false);
-            createGeoPackageSchema(connection);
-            writeLibrary(connection, library);
-            connection.commit();
+        try {
+            try (Connection connection = DriverManager.getConnection(url(temporary))) {
+                connection.setAutoCommit(false);
+                createGeoPackageSchema(connection);
+                writeLibrary(connection, library);
+                connection.commit();
+            }
+            replaceTarget(temporary, target);
+            replaced = true;
         } catch (SQLException e) {
             throw new IOException("Unable to write GeoPackage " + path + ": " + e.getMessage(), e);
+        } finally {
+            if (!replaced) {
+                Files.deleteIfExists(temporary);
+            }
         }
     }
 
@@ -182,7 +195,7 @@ public class GeoPackageSpectralLibraryIO implements SpectralLibraryIODelegate {
         return false;
     }
 
-    private static boolean isProfileJson(String text) {
+    static boolean isProfileJson(String text) {
         try {
             return MAPPER.readTree(text).path("y").isArray();
         }
@@ -243,7 +256,7 @@ public class GeoPackageSpectralLibraryIO implements SpectralLibraryIODelegate {
         return attrs;
     }
 
-    private static AttributeValue toAttribute(Object value) throws SQLException {
+    static AttributeValue toAttribute(Object value) {
         if (value == null) {
             return null;
         }
@@ -459,6 +472,14 @@ public class GeoPackageSpectralLibraryIO implements SpectralLibraryIODelegate {
 
     private static String quote(String name) {
         return "\"" + name.replace("\"", "\"\"") + "\"";
+    }
+
+    private static void replaceTarget(Path temporary, Path target) throws IOException {
+        try {
+            Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (AtomicMoveNotSupportedException e) {
+            Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
     private static String url(Path path) {

@@ -118,7 +118,7 @@ public class GeoPackageSpectralLibraryIOTest {
             new GeoPackageSpectralLibraryIO().read(path);
             fail("expected IOException");
         } catch (IOException expected) {
-            assertTrue(expected.getMessage().contains("No EnMAP-Box spectral profiles found"));
+            assertTrue(expected.getMessage().contains("No spectral profiles found"));
         }
     }
 
@@ -165,6 +165,8 @@ public class GeoPackageSpectralLibraryIOTest {
     @STTM("SNAP-4336")
     public void reportsWriteFailureForInvalidSqlIdentifier() throws Exception {
         GeoPackageSpectralLibraryIO io = new GeoPackageSpectralLibraryIO();
+        Path target = Files.createTempFile("invalid-write-", ".gpkg");
+        Files.writeString(target, "original GeoPackage content");
         SpectralProfile profile = new SpectralProfile(
                 UUID.randomUUID(),
                 "p",
@@ -182,13 +184,14 @@ public class GeoPackageSpectralLibraryIOTest {
                     List.of(profile),
                     new AttributeSchema()
                 ),
-                Files.createTempFile("invalid-write-", ".gpkg")
+                target
             );
 
             fail("expected IOException");
         } catch (IOException expected) {
             assertTrue(expected.getMessage().contains("Unable to write GeoPackage"));
         }
+        assertEquals("original GeoPackage content", Files.readString(target));
     }
 
     @Test
@@ -208,6 +211,23 @@ public class GeoPackageSpectralLibraryIOTest {
         } catch (IOException expected) {
             assertTrue(expected.getMessage().contains("differs from y length"));
         }
+    }
+
+    @Test
+    @STTM("SNAP-4336")
+    public void identifiesProfileJsonAndConvertsDatabaseValues() {
+        assertTrue(GeoPackageSpectralLibraryIO.isProfileJson("{\"y\":[0.1]}"));
+        assertFalse(GeoPackageSpectralLibraryIO.isProfileJson("{\"y\":0.1}"));
+        assertFalse(GeoPackageSpectralLibraryIO.isProfileJson("not JSON"));
+
+        assertNull(GeoPackageSpectralLibraryIO.toAttribute(null));
+        assertEquals(7, GeoPackageSpectralLibraryIO.toAttribute(7).asInt());
+        assertEquals(8L, GeoPackageSpectralLibraryIO.toAttribute(8L).asLong());
+        assertEquals(0.5, GeoPackageSpectralLibraryIO.toAttribute(0.5f).asDouble(), 0.0);
+        assertTrue(GeoPackageSpectralLibraryIO.toAttribute(true).asBoolean());
+        assertEquals("text", GeoPackageSpectralLibraryIO.toAttribute("text").asString());
+        assertEquals(List.of("field", "test"), GeoPackageSpectralLibraryIO.toAttribute("[\"field\",\"test\"]").asStringList());
+        assertEquals("[invalid", GeoPackageSpectralLibraryIO.toAttribute("[invalid").asString());
     }
 
 
