@@ -17,32 +17,55 @@ public class SpectralNoiseKernelFactory {
     public static final String FILTER_SG = "Savitzky-Golay";
     public static final String FILTER_GAUSSIAN = "Gaussian";
     public static final String FILTER_BOX = "Box";
+    public static final String FILTER_RICKER_WAVELET = "Ricker Wavelet";
+    public static final String FILTER_TRAPEZOID = "Trapezoid";
 
     private final String filterType;
     private final int kernelSize;
     private final double gaussianSigma;
     private final int sgPolynomialOrder;
+    private final double rickerWidth;
+    private final double trapezoidWidth;
+    private final double trapezoidSlope;
 
 
     public SpectralNoiseKernelFactory(String filterType, int kernelSize, double gaussianSigma, int sgPolynomialOrder) {
+        this(filterType, kernelSize, gaussianSigma, sgPolynomialOrder, 1.0, 3.0, 1.0);
+    }
+
+    public SpectralNoiseKernelFactory(String filterType, int kernelSize, double gaussianSigma, int sgPolynomialOrder,
+                                      double rickerWidth, double trapezoidWidth, double trapezoidSlope) {
         this.filterType = filterType;
         this.kernelSize = kernelSize;
         this.gaussianSigma = gaussianSigma;
         this.sgPolynomialOrder = sgPolynomialOrder;
+        this.rickerWidth = rickerWidth;
+        this.trapezoidWidth = trapezoidWidth;
+        this.trapezoidSlope = trapezoidSlope;
     }
 
 
     public void ensureKernelSize(int numBands) {
-        if (kernelSize > numBands) {
+        if (getActualKernelSize() > numBands) {
             throw new IllegalArgumentException("Kernel size must not be greater than the number of selected bands.");
         }
+    }
+
+    private int getActualKernelSize() {
+        if (FILTER_RICKER_WAVELET.equals(filterType)) {
+            return roundUpToOddInteger(8.0 * rickerWidth);
+        }
+        if (FILTER_TRAPEZOID.equals(filterType)) {
+            return roundUpToOddInteger(trapezoidWidth + 2.0 / trapezoidSlope);
+        }
+        return kernelSize;
     }
 
     public void validateFilterParameters() {
         if (filterType == null) {
             throw new IllegalArgumentException("Filter type must not be null");
         }
-        if (kernelSize < 3 || kernelSize % 2 == 0) {
+        if (!FILTER_RICKER_WAVELET.equals(filterType) && !FILTER_TRAPEZOID.equals(filterType) && (kernelSize < 3 || kernelSize % 2 == 0)) {
             throw new IllegalArgumentException("Kernel size must be odd and >= 3.");
         }
 
@@ -56,6 +79,18 @@ public class SpectralNoiseKernelFactory {
             }
             if (sgPolynomialOrder >= kernelSize) {
                 throw new IllegalArgumentException("Savitzky-Golay polynomial order must be smaller than kernel size.");
+            }
+        }
+
+        if (FILTER_RICKER_WAVELET.equals(filterType) && rickerWidth <= 0.0) {
+            throw new IllegalArgumentException("Ricker wavelet width must be > 0.");
+        }
+        if (FILTER_TRAPEZOID.equals(filterType)) {
+            if (trapezoidWidth <= 0.0) {
+                throw new IllegalArgumentException("Trapezoid width must be > 0.");
+            }
+            if (trapezoidSlope <= 0.0) {
+                throw new IllegalArgumentException("Trapezoid slope must be > 0.");
             }
         }
     }
@@ -75,8 +110,18 @@ public class SpectralNoiseKernelFactory {
                 throw new IllegalStateException("Failed to create Savitzky-Golay kernel.", ex);
             }
         }
+        if (FILTER_RICKER_WAVELET.equals(filterType)) {
+            return createRickerWaveletKernel(rickerWidth);
+        }
+        if (FILTER_TRAPEZOID.equals(filterType)) {
+            return createTrapezoidKernel(trapezoidWidth, trapezoidSlope);
+        }
 
         throw new IllegalArgumentException("Unsupported filter type: " + filterType);
+    }
+
+    public boolean usesZeroIntegralKernel() {
+        return FILTER_RICKER_WAVELET.equals(filterType);
     }
 
     private static double[] createBoxKernel(int size) {
@@ -102,6 +147,45 @@ public class SpectralNoiseKernelFactory {
         }
 
         return kernel;
+    }
+
+
+    private static double[] createRickerWaveletKernel(double width) {
+        final int size = roundUpToOddInteger(8.0 * width);
+        final int half = size / 2;
+        final double[] kernel = new double[size];
+        final double amplitude = 1.0 / (Math.sqrt(2.0 * Math.PI) * width * width * width);
+
+        for (int i = -half; i <= half; i++) {
+            final double normalized = i / width;
+            kernel[i + half] = amplitude * (1.0 - normalized * normalized) * Math.exp(-0.5 * normalized * normalized);
+        }
+        return kernel;
+    }
+
+
+    private static double[] createTrapezoidKernel(double width, double slope) {
+        final int size = roundUpToOddInteger(width + 2.0 / slope);
+        final int half = size / 2;
+        final double[] kernel = new double[size];
+        double sum = 0.0;
+        for (int i = -half; i <= half; i++) {
+            final double distance = Math.abs(i);
+            final double value = distance <= width / 2.0 ? 1.0 : Math.max(0.0, 1.0 - slope * (distance - width / 2.0));
+
+            kernel[i + half] = value;
+            sum += value;
+        }
+
+        for (int i = 0; i < kernel.length; i++) {
+            kernel[i] /= sum;
+        }
+        return kernel;
+    }
+
+    private static int roundUpToOddInteger(double value) {
+        final int roundedUp = (int) Math.ceil(value);
+        return roundedUp % 2 == 0 ? roundedUp + 1 : roundedUp;
     }
 
 

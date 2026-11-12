@@ -81,4 +81,17 @@ public class SpectralNoiseReducerTest {
 
         assertArrayEquals(spectrum, result, DOUBLE_ERR);
     }
+
+    @Test
+    @STTM("SNAP-4338")
+    public void test_ZeroIntegralKernelIsNotRenormalizedAndUsesZeroAtBoundaries() {
+        double[] spectrum = {1.0, 2.0, 3.0};
+        boolean[] validMask = {true, true, true};
+        double[] kernel = {-1.0, 2.0, -1.0};
+        double[] result = new double[3];
+
+        SpectralNoiseReducer.applyConvolution(spectrum, validMask, kernel, result, false, false);
+
+        assertArrayEquals(new double[]{0.0, 0.0, 4.0}, result, 1.0e-10);
+    }
 }
