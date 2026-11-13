@@ -20,30 +20,30 @@ import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 public class ObjectConverterTest extends AbstractConverterTest {
 
-    private FileConverter converter;
+    private PathConverter converter;
 
     @Override
-    public Converter getConverter() {
+    public Converter<Path> getConverter() {
         if (converter == null) {
-            converter = new FileConverter();
+            converter = new PathConverter();
         }
         return converter;
     }
 
     @Test
     public void testConverter() throws ConversionException {
-        testValueType(File.class);
+        testValueType(Path.class);
 
-        File value = new File("/usr/local");
+        Path value = Path.of("/usr/local");
 
         testParseSuccess(value, "/usr/local");
         testParseSuccess(null, "");
 
-        testFormatSuccess(value.toString(), value);
+        testFormatSuccess(value.toAbsolutePath().toString(), value);
         testFormatSuccess("", null);
 
         assertNullCorrectlyHandled();

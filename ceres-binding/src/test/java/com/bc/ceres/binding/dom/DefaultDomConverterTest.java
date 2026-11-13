@@ -19,12 +19,8 @@ package com.bc.ceres.binding.dom;
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 import com.bc.ceres.binding.ConverterRegistry;
-import com.bc.ceres.binding.DefaultPropertySetDescriptor;
-import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.PropertyDescriptorFactory;
-import com.bc.ceres.binding.PropertySet;
-import com.bc.ceres.binding.PropertySetDescriptor;
 import com.bc.ceres.binding.ValidationException;
 import com.thoughtworks.xstream.io.copy.HierarchicalStreamCopier;
 import com.thoughtworks.xstream.io.xml.XppDomWriter;
@@ -38,7 +34,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.StringReader;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -115,7 +111,7 @@ public class DefaultDomConverterTest {
         convertDomToValue(dom, value);
         assertEquals(42, value.intField);
         assertEquals("a string", value.stringField);
-        assertEquals(new File("C:/data/MER.N1"), value.fileField);
+        assertEquals(Path.of("C:/data/MER.N1"), value.fileField);
         assertNotNull(value.doubleArrayField);
         assertEquals(3, value.doubleArrayField.length);
         assertEquals(1.2, value.doubleArrayField[0], 1.0e-10);
@@ -127,7 +123,7 @@ public class DefaultDomConverterTest {
     public void testSimplePojoToDom() throws ValidationException, ConversionException {
         final String expectedXml = ""
                                    + "<parameters>\n"
-                                   + "  <fileField>" + new File("C:/data/dat.ini") + "</fileField>\n"
+                                   + "  <fileField>" + Path.of("C:/data/dat.ini") + "</fileField>\n"
                                    + "  <stringField>This is a test.</stringField>\n"
                                    + "  <intField>43</intField>\n"
                                    + "  <doubleArrayField>0.1,0.2,-0.4</doubleArrayField>\n"
@@ -137,7 +133,7 @@ public class DefaultDomConverterTest {
         value.intField = 43;
         value.stringField = "This is a test.";
         value.doubleArrayField = new double[]{0.1, 0.2, -0.4};
-        value.fileField = new File("C:/data/dat.ini");
+        value.fileField = Path.of("C:/data/dat.ini");
         convertValueToDom(value, dom);
         assertEquals(expectedXml, getXml(dom));
     }
@@ -146,7 +142,7 @@ public class DefaultDomConverterTest {
     public void testSimplePojoWithNullArrayToDom() throws ValidationException, ConversionException {
         final String expectedXml = ""
                                    + "<parameters>\n"
-                                   + "  <fileField>" + new File("C:/data/dat.ini") + "</fileField>\n"
+                                   + "  <fileField>" + Path.of("C:/data/dat.ini") + "</fileField>\n"
                                    + "  <stringField>This is a test.</stringField>\n"
                                    + "  <intField>43</intField>\n"
                                    + "</parameters>";
@@ -155,7 +151,7 @@ public class DefaultDomConverterTest {
         value.intField = 43;
         value.stringField = "This is a test.";
         value.doubleArrayField = null;
-        value.fileField = new File("C:/data/dat.ini");
+        value.fileField = Path.of("C:/data/dat.ini");
         convertValueToDom(value, dom);
         assertEquals(expectedXml, getXml(dom));
     }
@@ -249,7 +245,7 @@ public class DefaultDomConverterTest {
     public void testDomToArrayPojo() throws ConversionException {
         final String expectedXml = ""
                                    + "<parameters>\n"
-                                   + "  <fileField>" + new File("C:/data/dat.ini") + "</fileField>\n"
+                                   + "  <fileField>" + Path.of("C:/data/dat.ini") + "</fileField>\n"
                                    + "  <stringField>This is a test.</stringField>\n"
                                    + "  <intField>43</intField>\n"
                                    + "  <doubleArrayField>0.1,0.2,-0.4</doubleArrayField>\n"
@@ -259,7 +255,7 @@ public class DefaultDomConverterTest {
         value.intField = 43;
         value.stringField = "This is a test.";
         value.doubleArrayField = new double[]{0.1, 0.2, -0.4};
-        value.fileField = new File("C:/data/dat.ini");
+        value.fileField = Path.of("C:/data/dat.ini");
         convertValueToDom(value, dom);
         assertEquals(expectedXml, getXml(dom));
     }
@@ -783,7 +779,7 @@ public class DefaultDomConverterTest {
 
     public static class SimplePojo {
 
-        File fileField;
+        Path fileField;
         String stringField;
         int intField;
         double[] doubleArrayField;

@@ -18,7 +18,7 @@ package com.bc.ceres.binding;
 
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -75,14 +75,14 @@ public class ConverterRegistryTest {
     public void testObjects() {
         final ConverterRegistry r = ConverterRegistry.getInstance();
         assertNotNull(r.getConverter(String.class));
-        assertNotNull(r.getConverter(File.class));
+        assertNotNull(r.getConverter(Path.class));
         assertNotNull(r.getConverter(ValueRange.class));
         assertNotNull(r.getConverter(Date.class));
         assertNotNull(r.getConverter(Pattern.class));
         // todo - assertNotNull(r.getConverter(Color.class));
 
         assertNotNull(r.getConverter(String[].class));
-        assertNotNull(r.getConverter(File[].class));
+        assertNotNull(r.getConverter(Path[].class));
         assertNotNull(r.getConverter(ValueRange[].class));
         assertNotNull(r.getConverter(Date[].class));
         assertNotNull(r.getConverter(Pattern[].class));
@@ -94,7 +94,7 @@ public class ConverterRegistryTest {
     public void testDerivedObjects() {
         final ConverterRegistry r = ConverterRegistry.getInstance();
 
-        assertSame(r.getConverter(File.class), r.getConverter(MyFile.class));
+        assertSame(r.getConverter(ValueRange.class), r.getConverter(MyValueRange.class));
         assertSame(r.getConverter(Date.class), r.getConverter(java.sql.Date.class));
     }
 
@@ -102,9 +102,9 @@ public class ConverterRegistryTest {
         A, B, C
     }
 
-    private static class MyFile extends File {
-        MyFile() {
-            super("");
+    private static class MyValueRange extends ValueRange {
+        MyValueRange() {
+            super(0,1);
         }
     }
 }
