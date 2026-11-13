@@ -18,15 +18,14 @@ package com.bc.ceres.binio.util;
 
 import com.bc.ceres.binio.DataContext;
 import com.bc.ceres.binio.IOHandler;
+import com.bc.ceres.core.io.EnhancedNIORandomAccessFile;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.EOFException;
 
 public class RandomAccessFileIOHandler implements IOHandler {
-    private final RandomAccessFile raf;
+    private final EnhancedNIORandomAccessFile raf;
 
-    public RandomAccessFileIOHandler(RandomAccessFile raf) {
+    public RandomAccessFileIOHandler(EnhancedNIORandomAccessFile raf) {
         this.raf = raf;
     }
 

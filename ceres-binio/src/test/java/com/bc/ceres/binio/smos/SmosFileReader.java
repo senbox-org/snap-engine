@@ -21,13 +21,15 @@ import com.bc.ceres.binio.DataContext;
 import com.bc.ceres.binio.IOHandler;
 import com.bc.ceres.binio.SequenceData;
 import com.bc.ceres.binio.util.RandomAccessFileIOHandler;
+import com.bc.ceres.core.io.EnhancedNIORandomAccessFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 /**
  * todo - API doc
@@ -41,9 +43,9 @@ public class SmosFileReader {
         MemoryUsage before = memoryMXBean.getHeapMemoryUsage();
         System.out.println(before);
 
-        File file = new File(args[0]);
-        if (file.isDirectory()) {
-            file = new File(file, file.getName() + ".DBL");
+        Path file = Path.of(args[0]);
+        if (Files.isDirectory(file)) {
+            file = file.resolve(file.getFileName() + ".DBL");
         }
         IOHandler handler = createIOHandler(file);
 
@@ -127,15 +129,15 @@ public class SmosFileReader {
         }
     }
 
-    private static IOHandler createIOHandler(File file) throws IOException {
+    private static IOHandler createIOHandler(Path file) throws IOException {
 //        return new FileChannelIOHandler(new RandomAccessFile(file, "r").getChannel());
 
-        return new RandomAccessFileIOHandler(new RandomAccessFile(file, "r"));
+        return new RandomAccessFileIOHandler(new EnhancedNIORandomAccessFile(file, StandardOpenOption.READ));
 
-//        final FileImageInputStream iis = new FileImageInputStream(file);
+//        final ImageInputStream iis = ImageUtils.getImageInputStream(file);
 //        return new ImageIOHandler(iis);
 
-//        final FileInputStream iis = new FileInputStream(file);
+//        final InputStream iis = Files.newInputStream(file);
 //        return new MappedFileChannelIOHandler(iis.getChannel());
     }
 }

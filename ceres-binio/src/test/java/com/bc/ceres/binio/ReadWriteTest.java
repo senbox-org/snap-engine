@@ -17,13 +17,15 @@
 package com.bc.ceres.binio;
 
 import com.bc.ceres.binio.util.ByteArrayIOHandler;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.test.LongTestRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static com.bc.ceres.binio.TypeBuilder.*;
@@ -34,12 +36,15 @@ public class ReadWriteTest {
 
     @Before
     public void setUp() throws Exception {
-        new File("test.dat").delete();
+        IOHelper.delete(Path.of("test.dat"));
     }
 
     @After
     public void tearDown() {
-        new File("test.dat").delete();
+        try {
+            Files.delete(Path.of("test.dat"));
+        } catch (IOException ignored) {
+        }
     }
 
     @Test

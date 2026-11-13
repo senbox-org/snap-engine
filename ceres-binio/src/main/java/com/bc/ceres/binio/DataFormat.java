@@ -20,15 +20,16 @@ import com.bc.ceres.binio.internal.DataContextImpl;
 import com.bc.ceres.binio.util.FileChannelIOHandler;
 import com.bc.ceres.binio.util.RandomAccessFileIOHandler;
 import com.bc.ceres.core.Assert;
+import com.bc.ceres.core.io.EnhancedNIORandomAccessFile;
 import com.bc.ceres.util.CleanUpState;
 import com.bc.ceres.util.CleanerRegistry;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,15 +65,15 @@ public class DataFormat {
      * Creates a new random access file data context.
      *
      * @param file the file object
-     * @param mode the access mode, one of <tt>"r"</tt>, <tt>"rw"</tt>, <tt>"rws"</tt>, or
-     *             <tt>"rwd"</tt>. See also mode description in {@link RandomAccessFile#RandomAccessFile(java.io.File, String)}.
+     * @param modes the access modes, one of <tt>"r"</tt>, <tt>"rw"</tt>, <tt>"rws"</tt>, or
+     *             <tt>"rwd"</tt>. See also mode description in {@link FileChannel#open(java.nio.file.Path, OpenOption[])}.
      * @return The context.
      * @throws FileNotFoundException If in read-only mode and the file could nt be found.
      */
-    public DataContext createContext(File file, String mode) throws FileNotFoundException {
+    public DataContext createContext(Path file, OpenOption ... modes) throws IOException {
         Assert.notNull(file, "file");
-        Assert.notNull(mode, "mode");
-        final RandomAccessFile raf = new RandomAccessFile(file, mode);
+        Assert.notNull(modes, "modes");
+        final EnhancedNIORandomAccessFile raf = new EnhancedNIORandomAccessFile(file, modes);
         final DataContextImpl ctx = new DataContextImpl(this, new RandomAccessFileIOHandler(raf)) {
             private boolean disposed;
 
@@ -94,7 +95,7 @@ public class DataFormat {
         return ctx;
     }
 
-    public DataContext createContext(RandomAccessFile raf) {
+    public DataContext createContext(EnhancedNIORandomAccessFile raf) {
         Assert.notNull(raf, "raf");
         return new DataContextImpl(this, new RandomAccessFileIOHandler(raf));
     }
@@ -186,9 +187,9 @@ public class DataFormat {
     }
 
     private static final class RandomAccessFileCleanupState implements CleanUpState {
-        private RandomAccessFile raf;
+        private EnhancedNIORandomAccessFile raf;
 
-        private RandomAccessFileCleanupState(RandomAccessFile raf) {
+        private RandomAccessFileCleanupState(EnhancedNIORandomAccessFile raf) {
             this.raf = raf;
         }
 

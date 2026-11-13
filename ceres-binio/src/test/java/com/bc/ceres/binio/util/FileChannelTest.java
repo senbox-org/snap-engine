@@ -16,16 +16,23 @@
 
 package com.bc.ceres.binio.util;
 
+import com.bc.ceres.core.io.EnhancedNIORandomAccessFile;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.test.LongTestRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.spi.AbstractInterruptibleChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -47,8 +54,8 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(LongTestRunner.class)
 public class FileChannelTest {
-    private File file;
-    private RandomAccessFile raf;
+    private Path file;
+    private EnhancedNIORandomAccessFile raf;
 
     /**
      * read some raw bytes from a file
@@ -57,16 +64,15 @@ public class FileChannelTest {
      */
     @SuppressWarnings({"UnusedAssignment"})
     private static void readRawBytes() throws IOException {
-        final FileOutputStream fos = new FileOutputStream("test.dat");
+        final Path testFile = IOHelper.createATempDir().resolve("test.dat");
+        final OutputStream fos = Files.newOutputStream(testFile);
         for (int i = 0; i < 1024 * 64; i++) {
             fos.write((byte) i);
         }
         fos.close();
 
-        final FileInputStream fis = new FileInputStream("test.dat");
-
         // allocate a channel to read that file
-        FileChannel fc = fis.getChannel();
+        FileChannel fc = FileChannel.open(testFile);
 
         // allocate a buffer, as big a chunk as we are willing to handle at a pop.
         ByteBuffer buffer = ByteBuffer.allocate(1024 * 15);
@@ -143,8 +149,8 @@ public class FileChannelTest {
      */
     @Before
     public void setUp() throws Exception {
-        file = new File("test.dat");
-        file.delete();
+        file = IOHelper.createATempDir().resolve("test.dat");
+        IOHelper.delete(file);
     }
 
     @After
@@ -154,35 +160,35 @@ public class FileChannelTest {
                 raf.close();
             }
         } finally {
-            file.delete();
+            IOHelper.delete(file);
         }
     }
 
     @Test
     public void testIt() throws IOException {
-        raf = new RandomAccessFile(file, "rw");
-        FileChannel channel = raf.getChannel();
-        assertTrue(channel.isOpen());
+        raf = new EnhancedNIORandomAccessFile(file, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+        assertTrue(raf.withChannel(AbstractInterruptibleChannel::isOpen));
         byte[] array = new byte[16];
-        ByteBuffer buffer = ByteBuffer.wrap(array);
+        final ByteBuffer buffer = ByteBuffer.wrap(array);
         buffer.putLong(123456789);
         buffer.putLong(987654321);
         buffer.rewind();
-        int n = channel.write(buffer);
-        channel.force(true);
+        int n = raf.withChannel(channel -> channel.write(buffer));
+        raf.withChannelVoid(channel -> channel.force(true));
         assertEquals(16, n);
-        assertEquals(16, channel.size());
-        channel.close();
+        long size = raf.withChannel(FileChannel::size);
+        assertEquals(16, size);
+        raf.close();
 
-        raf = new RandomAccessFile(file, "r");
-        channel = raf.getChannel();
-        assertEquals(16, channel.size());
+        raf = new EnhancedNIORandomAccessFile(file, StandardOpenOption.READ);
+        size = raf.withChannel(FileChannel::size);
+        assertEquals(16, size);
         array = new byte[16];
-        buffer = ByteBuffer.wrap(array);
-        channel.read(buffer);
-        buffer.rewind();
-        assertEquals(123456789, buffer.getLong());
-        assertEquals(987654321, buffer.getLong());
-        channel.close();
+        final ByteBuffer rBuffer = ByteBuffer.wrap(array);
+        raf.withChannel(channel -> channel.read(rBuffer));
+        rBuffer.rewind();
+        assertEquals(123456789, rBuffer.getLong());
+        assertEquals(987654321, rBuffer.getLong());
+        raf.close();
     }
 }
