@@ -16,15 +16,17 @@
 
 package com.bc.ceres.metadata;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
- * An implementation of the {@link SimpleFileSystem} interface relying on {@link File}.
+ * An implementation of the {@link SimpleFileSystem} interface relying on {@link Path}.
  *
  * @author MarcoZ
  * @author Bettina
@@ -34,19 +36,19 @@ public class DefaultSimpleFileSystem implements SimpleFileSystem {
 
     @Override
     public Reader createReader(String path) throws IOException {
-        return new FileReader(path);
+        return Files.newBufferedReader(Path.of(path));
     }
 
     @Override
     public Writer createWriter(String path) throws IOException {
-        return new FileWriter(path);
+        return Files.newBufferedWriter(Path.of(path));
     }
 
     @Override
     public String[] list(String path) throws IOException {
-        File directory = new File(path);
-        if (directory.exists() && directory.isDirectory()) {
-            return directory.list();
+        Path directory = Paths.get(path);
+        if (Files.exists(directory) && Files.isDirectory(directory)) {
+            return IOHelper.list(directory).toArray(new String[0]);
         } else {
             return null;
         }
@@ -54,6 +56,6 @@ public class DefaultSimpleFileSystem implements SimpleFileSystem {
 
     @Override
     public boolean isFile(String path) {
-        return new File(path).isFile();
+        return Files.isRegularFile(Path.of(path));
     }
 }

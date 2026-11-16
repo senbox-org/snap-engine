@@ -16,8 +16,10 @@
 
 package com.bc.ceres.resource;
 
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * A [@link Resource} reading its content from a @{link File}.
@@ -35,20 +37,10 @@ public class FileResource extends Resource {
     @Override
     protected String read() {
         String path = getPath();
-        FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(path);
+        try (Reader fileReader = Files.newBufferedReader(Path.of(path))){
             return readText(fileReader);
         } catch (IOException e) {
             throw new IllegalArgumentException("failed to read from path: " + path, e);
-        } finally {
-            try {
-                if (fileReader != null) {
-                    fileReader.close();
-                }
-            } catch (IOException e) {
-                throw new IllegalArgumentException("failed to read from path: " + path, e);
-            }
         }
     }
 
