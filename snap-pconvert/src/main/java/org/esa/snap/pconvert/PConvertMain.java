@@ -42,7 +42,8 @@ import javax.media.jai.JAI;
 import javax.media.jai.operator.BandSelectDescriptor;
 import java.awt.Color;
 import java.awt.image.RenderedImage;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,8 +74,8 @@ public class PConvertMain {
     private static final double[] DEFAULT_HISTO_SKIP_PERCENTAGE = new double[]{1, 4};
     private static final String DEFAULT_FORMAT_EXT = "dim";
 
-    private File[] _inputFiles;
-    private File _outputDir;
+    private Path[] _inputFiles;
+    private Path _outputDir;
     private String _formatExt;
     private String _formatName;
     private boolean _imageFormat;
@@ -82,8 +83,8 @@ public class PConvertMain {
     private String[] _bandNames;
     private int[] _maxOutputResolution;
     private double[] _histoSkipRatios;
-    private File _rgbProfile;
-    private File _colorPalette;
+    private Path _rgbProfile;
+    private Path _colorPalette;
     private String _histogramMatching;
     private Color _noDataColor;
     private Integer _forcedWidth;
@@ -227,7 +228,7 @@ public class PConvertMain {
         String bandIndicesStr = null;
         String bandNamesStr = null;
         String histoSkipPercentStr = null;
-        List<File> fileList = new LinkedList<File>();
+        List<Path> fileList = new LinkedList<>();
         String maxResStr = null;
         String forcedWidthStr = null;
         String forcedHeightStr = null;
@@ -237,6 +238,8 @@ public class PConvertMain {
         // Parse command line
 
         for (int i = 0; i < args.length; i++) {
+            final String optionArg = getOptionArg(args, i);
+            final Path filePath = optionArg != null ? Path.of(optionArg) : null;
             if (isOption(args, i, 'b', "bands")) {
                 bandIndicesStr = getOptionArg(args, i);
                 i++;
@@ -244,7 +247,7 @@ public class PConvertMain {
                 bandNamesStr = getOptionArg(args, i);
                 i++;
             } else if (isOption(args, i, 'c', "color-palette")) {
-                _colorPalette = new File(getOptionArg(args, i));
+                _colorPalette = filePath;
                 i++;
             } else if (isOption(args, i, 'd', "debug")) {
                 Debug.setEnabled(true);
@@ -264,10 +267,10 @@ public class PConvertMain {
                 noDataColorStr = getOptionArg(args, i);
                 i++;
             } else if (isOption(args, i, 'o', "outdir")) {
-                _outputDir = new File(getOptionArg(args, i));
+                _outputDir = filePath;
                 i++;
             } else if (isOption(args, i, 'p', "rgb-profile")) {
-                _rgbProfile = new File(getOptionArg(args, i));
+                _rgbProfile = filePath;
                 i++;
             } else if (isOption(args, i, 'r', "max-res")) {
                 maxResStr = getOptionArg(args, i);
@@ -281,14 +284,14 @@ public class PConvertMain {
             } else if (isOption(args, i)) {
                 error("unknown option '" + args[i] + "'");
             } else {
-                fileList.add(new File(args[i]));
+                fileList.add(Path.of(args[i]));
             }
         }
 
         /////////////////////////////////////////////////////////////////////////
         // Get input files
 
-        _inputFiles = new File[fileList.size()];
+        _inputFiles = new Path[fileList.size()];
         fileList.toArray(_inputFiles);
         if (_inputFiles.length == 0) {
             printUsage();
@@ -297,14 +300,14 @@ public class PConvertMain {
         /////////////////////////////////////////////////////////////////////////
         // Check output directory
 
-        if (_outputDir != null && !_outputDir.exists()) {
-            error("output directory not found: " + _outputDir.getAbsolutePath());
+        if (_outputDir != null && !Files.exists(_outputDir)) {
+            error("output directory not found: " + _outputDir.toAbsolutePath());
         }
 
-        if (_rgbProfile != null && !_rgbProfile.exists()) {
+        if (_rgbProfile != null && !Files.exists(_rgbProfile)) {
             error("RGB channels file not found");
         }
-        if (_colorPalette != null && !_colorPalette.exists()) {
+        if (_colorPalette != null && !Files.exists(_colorPalette)) {
             error("Color palette definition file not found");
         }
 
@@ -470,7 +473,7 @@ public class PConvertMain {
         _forcedWidth = null;
         if (forcedWidthStr != null) {
             try {
-                _forcedWidth = new Integer(forcedWidthStr);
+                _forcedWidth = Integer.valueOf(forcedWidthStr);
                 if (_forcedWidth <= 1) {
                     error("invalid forced image width '" + forcedWidthStr + "'");
                 }
@@ -482,7 +485,7 @@ public class PConvertMain {
         _forcedHeight = null;
         if (forcedHeightStr != null) {
             try {
-                _forcedHeight = new Integer(forcedHeightStr);
+                _forcedHeight = Integer.valueOf(forcedHeightStr);
                 if (_forcedHeight <= 1) {
                     error("invalid forced image height '" + forcedHeightStr + "'");
                 }
@@ -509,11 +512,11 @@ public class PConvertMain {
         /////////////////////////////////////////////////////////////////////////
         // Convert all input products
 
-        for (File inputFile : _inputFiles) {
+        for (Path inputFile : _inputFiles) {
 
             Product product = null;
             try {
-                log("reading file " + inputFile.getPath());
+                log("reading file " + inputFile.toString());
                 product = ProductIO.readProduct(inputFile);
             } catch (IOException e) {
                 error("I/O error while reading input product: " + e.getMessage());
@@ -526,7 +529,7 @@ public class PConvertMain {
                 }
                 try {
                     String filename = FileUtils.createValidFilename(product.getName());
-                    File outputFile = new File(_outputDir, filename);
+                    Path outputFile = _outputDir.resolve(filename);
                     outputFile = FileUtils.ensureExtension(outputFile, "." + _formatExt);
                     if (_imageFormat) {
                         convertToImage(product, outputFile);
@@ -549,7 +552,7 @@ public class PConvertMain {
     // Convert to Image
     /////////////////////////////////////////////////////////////////////////
 
-    private void convertToImage(Product product, File outputFile) throws IOException {
+    private void convertToImage(Product product, Path outputFile) throws IOException {
         assert product != null;
         assert outputFile != null;
 
@@ -560,7 +563,7 @@ public class PConvertMain {
         if (_rgbProfile != null) {
             try {
                 // to replace getAbsolutPath() replaced by getPath()?
-                log("loading RGB profile from '" + _rgbProfile.getAbsolutePath() + "'...");
+                log("loading RGB profile from '" + _rgbProfile.toAbsolutePath() + "'...");
                 rgbImageProfile = RGBImageProfile.loadProfile(_rgbProfile);
                 _bandIndices = createRGBBands(product, rgbImageProfile);
             } catch (IOException e) {
@@ -572,7 +575,7 @@ public class PConvertMain {
         ColorPaletteDef colorPaletteDef = null;
         if (_colorPalette != null) {
             try {
-                log("loading colour palette from: " + _colorPalette.getAbsolutePath());
+                log("loading colour palette from: " + _colorPalette.toAbsolutePath());
                 colorPaletteDef = ColorPaletteDef.loadColorPaletteDef(_colorPalette);
             } catch (IOException e) {
                 error("failed to load colour palette: " + e.getMessage());
@@ -687,12 +690,12 @@ public class PConvertMain {
         }
     }
 
-    private void writePlainImage(RenderedImage image, File outputFile) {
+    private void writePlainImage(RenderedImage image, Path outputFile) {
         log("writing RGB image to '" + outputFile + "'...");
-        JAI.create("filestore", image, outputFile.getPath(), _formatName, null);
+        JAI.create("filestore", image, outputFile.toString(), _formatName, null);
     }
 
-    private boolean writeGeoTIFFImage(Product product, RenderedImage image, File outputFile) throws IOException {
+    private boolean writeGeoTIFFImage(Product product, RenderedImage image, Path outputFile) throws IOException {
         boolean geoTIFFWritten = false;
         final GeoTIFFMetadata metadata = ProductUtils.createGeoTIFFMetadata(product);
         if (metadata != null) {
@@ -780,7 +783,7 @@ public class PConvertMain {
     // Convert to Product
     /////////////////////////////////////////////////////////////////////////
 
-    private Product convertToProduct(Product product, File outputFile) throws IOException {
+    private Product convertToProduct(Product product, Path outputFile) throws IOException {
         assert product != null;
         assert outputFile != null;
 
@@ -788,7 +791,7 @@ public class PConvertMain {
         try {
             log("writing a data product of size " + product.getSceneRasterWidth() + " x " +
                         product.getSceneRasterHeight() + " pixels to '" +
-                        outputFile.getPath() + "'...");
+                        outputFile + "'...");
             ProductIO.writeProduct(product, outputFile, _formatName, false, ProgressMonitor.NULL);
         } catch (IOException e) {
             Debug.trace(e);
@@ -802,7 +805,7 @@ public class PConvertMain {
     /////////////////////////////////////////////////////////////////////////
 
     private static Product createProductSubset(Product product, int[] maxOutputResolution, int[] bandIndices,
-                                               File outputFile) throws IOException {
+                                               Path outputFile) throws IOException {
         if (maxOutputResolution != null || bandIndices != null) {
             ProductSubsetDef productSubsetDef = new ProductSubsetDef();
             if (maxOutputResolution != null) {
@@ -822,7 +825,7 @@ public class PConvertMain {
                         Band band = product.getBandAt(index);
                         productSubsetDef.addNodeName(band.getName());
                     } else {
-                        warn("ignoring invalid " + i + ". band index for input product '" + outputFile.getPath() + "'");
+                        warn("ignoring invalid " + i + ". band index for input product '" + outputFile.toString() + "'");
                     }
                 }
             }
