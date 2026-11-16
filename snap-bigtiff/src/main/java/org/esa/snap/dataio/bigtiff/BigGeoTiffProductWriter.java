@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.bigtiff;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.multilevel.MultiLevelImage;
 import it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet;
 import it.geosolutions.imageio.plugins.tiff.TIFFField;
@@ -23,6 +24,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNode;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
@@ -36,7 +38,7 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriter;
-import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageOutputStream;
 import javax.media.jai.JAI;
 import javax.media.jai.operator.FormatDescriptor;
 import java.awt.color.ColorSpace;
@@ -47,10 +49,10 @@ import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.awt.image.renderable.ParameterBlock;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -74,13 +76,13 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
     public static final String PARAM_PUSH_PROCESSING = "snap.dataio.bigtiff.support.pushprocessing";   // boolean
     private static final String PARAM_ARCGIS_AUX = "snap.dataio.bigtiff.write.arcgisaux";   // boolean
 
-    private File outputFile;
+    private Path outputFile;
     private TIFFImageWriter imageWriter;
     private AtomicBoolean isDataWritten;
-    private FileImageOutputStream outputStream;
+    private ImageOutputStream outputStream;
     private TIFFImageWriteParam writeParam;
     private boolean withIntermediate;
-    private File intermediateFile = null;
+    private Path intermediateFile = null;
     private ProductWriter intermediateWriter = null;
     private List<String> bandNames = new ArrayList<>();
     private boolean writingDataHasStarted = false;
@@ -117,9 +119,9 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
         }
 
         if (outputStream != null && Config.instance().preferences().getBoolean(PARAM_ARCGIS_AUX, false)) {
-            File auxFile = new File(outputFile.getParent(), outputFile.getName() + ".aux.xml");
-            SystemUtils.LOG.info("writing band names to ArcGIS aux " + auxFile.getPath());
-            try (BufferedWriter auxWriter = new BufferedWriter(new FileWriter(auxFile))) {
+            Path auxFile = outputFile.getParent().resolve(outputFile.getFileName() + ".aux.xml");
+            SystemUtils.LOG.info("writing band names to ArcGIS aux " + auxFile);
+            try (BufferedWriter auxWriter = Files.newBufferedWriter(auxFile)) {
                 auxWriter.write("<PAMDataset>\n  <Metadata>\n    <MDI key='Band_0'>dummy</MDI>\n");
                 int i = 0;
                 for (String bandName : bandNames) {
@@ -150,9 +152,9 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
 
     @Override
     public void deleteOutput() throws IOException {
-        if (outputFile != null && outputFile.isFile()) {
-            if (!outputFile.delete()) {
-                throw new IOException("Unable to delete file: " + outputFile.getAbsolutePath());
+        if (outputFile != null && Files.isRegularFile(outputFile)) {
+            if (!IOHelper.delete(outputFile)) {
+                throw new IOException("Unable to delete file: " + outputFile.toAbsolutePath());
             }
         }
     }
@@ -176,12 +178,10 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
             bandNames.add(band.getName());
         }
         if (withIntermediate) {
-            if (getOutput() instanceof String) {
-                intermediateFile = new File(System.getProperty("java.io.tmpdir"), getOutput() + ".tmp.dim");
-            } else {
-                intermediateFile = new File(System.getProperty("java.io.tmpdir"), ((File) getOutput()).getName() + ".tmp.dim");
-            }
-            SystemUtils.LOG.info("writing to intermediate file " + intermediateFile.getPath());
+            final Path productPath = ProductUtils.getProductPath(getOutput());
+            final String tempFileName = (productPath != null ? productPath.getFileName() : "bigtiff") + ".tmp.dim";
+            intermediateFile = IOHelper.createATempDir().resolve(tempFileName);
+            SystemUtils.LOG.info("writing to intermediate file " + intermediateFile);
             intermediateWriter.writeProductNodes(getSourceProduct(), intermediateFile);
         } else {
             _writeProductNodesImpl();
@@ -279,22 +279,17 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
     private void _writeProductNodesImpl() throws IOException {
         outputFile = null;
 
-        final File file;
-        if (getOutput() instanceof String) {
-            file = new File((String) getOutput());
-        } else {
-            file = (File) getOutput();
-        }
+        final Path file = ProductUtils.getProductPath(getOutput());
 
         outputFile = FileUtils.ensureExtension(file, Constants.FILE_EXTENSIONS[0]);
-        SystemUtils.LOG.info("writing to output file " + outputFile.getPath());
+        SystemUtils.LOG.info("writing to output file " + outputFile);
 
         deleteOutput();
         updateProductName();
 
         imageWriter = getTiffImageWriter();
 
-        outputStream = new FileImageOutputStream(outputFile);
+        outputStream = ImageUtils.getImageOutputStream(outputFile);
         imageWriter.setOutput(outputStream);
     }
 

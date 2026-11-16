@@ -63,7 +63,7 @@ public class TiffFileInfo {
             } else if (tiffTagLocation == TAG_GEO_ASCII_PARAMS___SPOT && asciiValues.length > strIdx) {
                 value = asciiValues[strIdx++];
             } else {
-                value = new Integer(offsetOrValue);
+                value = offsetOrValue;
             }
             map.put(keyId, new GeoKeyEntry(keyId, tiffTagLocation, count, value));
         }

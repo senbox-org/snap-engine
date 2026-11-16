@@ -17,6 +17,7 @@
 package org.esa.snap.dataio.bigtiff;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
 import org.esa.snap.core.dataio.ProductIO;
@@ -42,6 +43,7 @@ import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
@@ -69,8 +71,8 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -91,14 +93,14 @@ public class BigGeoTiffWriteReadTest {
     private static final String LAMBERT_CONIC_CONFORMAL_1SP = "EPSG:9801";
     private static final String ALBERS_CONIC_EQUAL_AREA = "Albers_Conic_Equal_Area";
 
-    private final static File TEST_DIR = new File("test_data");
+    private final static Path TEST_DIR = IOHelper.createATempDir().resolve("test_data");
 
     private Product outProduct;
-    private File location;
+    private Path location;
 
     @Before
     public void setup() {
-        if (!TEST_DIR.mkdirs()) {
+        if (!IOHelper.createDirectories(TEST_DIR)) {
             fail("unable to create test directory");
         }
         final int width = 14;
@@ -176,7 +178,7 @@ public class BigGeoTiffWriteReadTest {
         try {
             assertEquals(2, inProduct.getNumBands());
 
-            try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(location)) {
+            try (ImageInputStream imageInputStream = ImageUtils.getImageInputStream(location)) {
                 final TIFFImageReader imageReader = BigGeoTiffProductReaderPlugIn.getTiffImageReader(imageInputStream);
                 if (imageReader == null) {
                     throw new IOException("GeoTiff imageReader not found");
@@ -639,10 +641,10 @@ public class BigGeoTiffWriteReadTest {
 
 
     private Product writeReadProduct() throws IOException {
-        location = new File(TEST_DIR, "test_product.tif");
+        location = TEST_DIR.resolve("test_product.tif");
 
         final String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
-        ProductIO.writeProduct(outProduct, location.getAbsolutePath(), bigGeoTiffFormatName);
+        ProductIO.writeProduct(outProduct, location.toAbsolutePath(), bigGeoTiffFormatName);
 
         return ProductIO.readProduct(location, bigGeoTiffFormatName);
     }

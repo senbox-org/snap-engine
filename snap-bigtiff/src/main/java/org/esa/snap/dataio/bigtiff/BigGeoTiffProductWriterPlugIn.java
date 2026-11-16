@@ -12,14 +12,14 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.runtime.Config;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Locale;
 
 public class BigGeoTiffProductWriterPlugIn implements ProductWriterPlugIn {
 
     public static final String FORMAT_NAME = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
 
-    private static final Class[] OUTPUT_TYPES = new Class[]{String.class, File.class,};
+    private static final Class[] OUTPUT_TYPES = new Class[]{String.class, Path.class,};
 
     @Override
     public EncodeQualification getEncodeQualification(Product product) {

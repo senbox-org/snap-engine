@@ -5,7 +5,7 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Locale;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -37,7 +37,7 @@ public class BigGeoTiffProductWriterPlugInTest {
     @Test
     public void testGetOutputTypes() {
         final Class[] outputTypes = plugIn.getOutputTypes();
-        assertArrayEquals(new Class[]{String.class, File.class,}, outputTypes);
+        assertArrayEquals(new Class[]{String.class, Path.class,}, outputTypes);
     }
 
     @Test

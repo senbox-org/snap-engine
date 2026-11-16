@@ -15,16 +15,69 @@ import it.geosolutions.imageioimpl.plugins.tiff.TIFFIFD;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.image.DataBuffer;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.stream.ImageInputStream;
+import javax.media.jai.BorderExtender;
+import javax.media.jai.ImageLayout;
+import javax.media.jai.JAI;
+import javax.media.jai.operator.BandSelectDescriptor;
+import javax.media.jai.operator.BorderDescriptor;
+import javax.media.jai.operator.FormatDescriptor;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.dataio.dimap.DimapProductHelpers;
-import org.esa.snap.core.dataio.geocoding.*;
+import org.esa.snap.core.dataio.geocoding.ComponentFactory;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.ForwardCoding;
+import org.esa.snap.core.dataio.geocoding.GeoChecks;
+import org.esa.snap.core.dataio.geocoding.GeoRaster;
+import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.forward.TiePointBilinearForward;
 import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.ColorPaletteDef;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.FilterBand;
+import org.esa.snap.core.datamodel.GcpDescriptor;
+import org.esa.snap.core.datamodel.GcpGeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.ImageInfo;
+import org.esa.snap.core.datamodel.IndexCoding;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Placemark;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.geotiff.EPSGCodes;
 import org.esa.snap.core.util.geotiff.GeoTIFFCodes;
@@ -38,40 +91,17 @@ import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffIIOMetadataDecoder;
 import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffMetadata2CRSAdapter;
 import org.geotools.coverage.grid.io.imageio.geotiff.PixelScale;
 import org.geotools.coverage.grid.io.imageio.geotiff.TiePoint;
-import org.geotools.util.factory.Hints;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.matrix.GeneralMatrix;
 import org.geotools.referencing.operation.transform.ProjectiveTransform;
+import org.geotools.util.factory.Hints;
 import org.jdom2.Document;
 import org.jdom2.input.DOMBuilder;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.xml.sax.SAXException;
-
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.stream.ImageInputStream;
-import javax.media.jai.BorderExtender;
-import javax.media.jai.ImageLayout;
-import javax.media.jai.JAI;
-import javax.media.jai.operator.BandSelectDescriptor;
-import javax.media.jai.operator.BorderDescriptor;
-import javax.media.jai.operator.FormatDescriptor;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.*;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.logging.Level;
 
 import static org.esa.snap.core.dataio.geocoding.util.RasterUtils.toFloat;
 
@@ -94,15 +124,8 @@ class BigGeoTiffProductReader extends AbstractProductReader {
 
     @Override
     protected synchronized Product readProductNodesImpl() throws IOException {
-        File inputFile = null;
-        Object input = getInput();
-        if (input instanceof String) {
-            input = new File((String) input);
-        }
-        if (input instanceof File) {
-            inputFile = (File) input;
-        }
-        inputStream = ImageIO.createImageInputStream(input);
+        final Path inputFile = getProductPath();
+        inputStream = ImageUtils.getImageInputStream(inputFile);
 
         return readGeoTIFFProduct(inputStream, inputFile);
     }
@@ -226,7 +249,7 @@ class BigGeoTiffProductReader extends AbstractProductReader {
         inputStream.close();
     }
 
-    Product readGeoTIFFProduct(final ImageInputStream stream, final File inputFile) throws IOException {
+    Product readGeoTIFFProduct(final ImageInputStream stream, final Path inputFile) throws IOException {
         try {
             imageReader = BigGeoTiffProductReaderPlugIn.getTiffImageReader(stream);
         } catch (Exception e) {
@@ -262,7 +285,7 @@ class BigGeoTiffProductReader extends AbstractProductReader {
         return product;
     }
 
-    private Product createProduct(File inputFile, TiffFileInfo tiffFileInfo) throws IOException {
+    private Product createProduct(Path inputFile, TiffFileInfo tiffFileInfo) throws IOException {
         Product product;
         final String productName = getProductName(inputFile, tiffFileInfo);
         final String productType = getReaderPlugIn().getFormatNames()[0];
@@ -567,7 +590,7 @@ class BigGeoTiffProductReader extends AbstractProductReader {
         return DefaultGeographicCRS.WGS84;
     }
 
-    private String getProductName(File inputFile, TiffFileInfo tiffFileInfo) {
+    private String getProductName(Path inputFile, TiffFileInfo tiffFileInfo) {
         final String productName;
         if (tiffFileInfo.containsField(BaselineTIFFTagSet.TAG_IMAGE_DESCRIPTION)) {
             final TIFFField imageDescriptionField = tiffFileInfo.getField(BaselineTIFFTagSet.TAG_IMAGE_DESCRIPTION);

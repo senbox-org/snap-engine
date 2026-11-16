@@ -2,7 +2,7 @@ package org.esa.snap.dataio.bigtiff.internal;
 
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
@@ -52,7 +52,7 @@ public class GeoKeyEntryTest {
     @Test
     public void testConstruct_unsupportedType() {
         try {
-            new GeoKeyEntry(3074, 12, 2, new File("."));
+            new GeoKeyEntry(3074, 12, 2, Path.of("."));
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException expected) {
         }

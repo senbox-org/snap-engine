@@ -6,7 +6,7 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.InputStream;
 import java.util.Locale;
 
@@ -31,7 +31,7 @@ public class BigGeoTiffProductReaderPlugInTest {
         assertNotNull(inputTypes);
         assertEquals(3, inputTypes.length);
         assertEquals(String.class, inputTypes[0]);
-        assertEquals(File.class, inputTypes[1]);
+        assertEquals(Path.class, inputTypes[1]);
         assertEquals(InputStream.class, inputTypes[2]);
     }
 

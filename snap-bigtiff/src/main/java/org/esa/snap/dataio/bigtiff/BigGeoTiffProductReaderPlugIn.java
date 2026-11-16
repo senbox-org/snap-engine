@@ -12,7 +12,7 @@ import org.esa.snap.dataio.geotiff.Utils;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
@@ -42,7 +42,7 @@ public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class, InputStream.class,};
+        return new Class[]{String.class, Path.class, InputStream.class,};
     }
 
     @Override

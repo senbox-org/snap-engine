@@ -3,14 +3,8 @@
  */
 package org.esa.snap.dataio.bigtiff;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.io.IOException;
-
+import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -21,20 +15,26 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bc.ceres.annotation.STTM;
+import java.io.IOException;
+import java.nio.file.Path;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * Tests for the BigGeoTiff writter
  */
 public class BigGeoTiffWriterTest {
 
-    private final static File TEST_DIR = new File("test_data_biggeotiff_writer");
+    private final static Path TEST_DIR = IOHelper.createATempDir().resolve("test_data_biggeotiff_writer");
 
     private Product outProduct;
 
     @Before
     public void setup() {
-        if (!TEST_DIR.mkdirs()) {
+        if (!IOHelper.createDirectories(TEST_DIR)) {
             fail("unable to create test directory");
         }
         final int width = 14;
@@ -82,10 +82,10 @@ public class BigGeoTiffWriterTest {
     	}
     	
         // save the product with the name of a band
-    	final File location = new File(TEST_DIR, "B1.tif");
+    	final Path location = TEST_DIR.resolve("B1.tif");
         final String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
         try {
-			ProductIO.writeProduct(outProduct, location.getAbsolutePath(), bigGeoTiffFormatName);
+			ProductIO.writeProduct(outProduct, location.toAbsolutePath(), bigGeoTiffFormatName);
 		} catch (IOException e) {
 			fail("Error writing product: " + e.getMessage());
 		}
