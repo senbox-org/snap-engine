@@ -16,6 +16,7 @@
 
 package com.bc.ceres.jai;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.jai.operator.XmlDescriptor;
 
 import javax.media.jai.EnumeratedParameter;
@@ -25,14 +26,14 @@ import javax.media.jai.OperationDescriptor;
 import javax.media.jai.OperationRegistry;
 import javax.media.jai.ParameterListDescriptor;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Array;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -75,7 +76,7 @@ public class JaiShell {
         }
 
         for (String arg : argList) {
-            File file = new File(arg);
+            Path file = Path.of(arg);
             try {
                 URI location = createInput(file, configuration);
                 XmlDescriptor.create(location, null, null).getRendering();
@@ -113,30 +114,24 @@ public class JaiShell {
         }
     }
 
-    private static URI createInput(File file, HashMap<String, String> conf) throws IOException {
+    private static URI createInput(Path file, HashMap<String, String> conf) throws IOException {
         String text = readText(file, conf);
         // System.out.println(text);
-        File tempFile = File.createTempFile("jai", "xml");
+        Path tempFile = IOHelper.createTempFile("jai", "xml");
         // todo - I (nf) don't remember, why I need the following?!
-        FileWriter writer = new FileWriter(tempFile);
-        try {
+        try (Writer writer = Files.newBufferedWriter(tempFile);){
             writer.write(text);
-        } finally {
-            writer.close();
         }
-        return tempFile.toURI();
+        return tempFile.toUri();
     }
 
-    private static String readText(File file, HashMap<String, String> conf) throws IOException {
+    private static String readText(Path file, HashMap<String, String> conf) throws IOException {
         return replace(read(file), conf).toString();
     }
 
-    private static StringBuilder read(File file) throws IOException {
-        Reader reader = new BufferedReader(new FileReader(file));
-        try {
+    private static StringBuilder read(Path file) throws IOException {
+        try (Reader reader = Files.newBufferedReader(file)) {
             return readAll(reader);
-        } finally {
-            reader.close();
         }
     }
 

@@ -16,15 +16,17 @@
 
 package com.bc.ceres.compiler;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 /**
@@ -32,14 +34,14 @@ import java.util.Arrays;
  */
 public class CodeCompiler {
     private final JavaCompiler compiler;
-    private final File outputDir;
-    private final File[] classPath;
+    private final Path outputDir;
+    private final Path[] classPath;
 
-    public CodeCompiler(File outputDir, File[] classPath) {
+    public CodeCompiler(Path outputDir, Path[] classPath) {
         this(ToolProvider.getSystemJavaCompiler(), outputDir, classPath);
     }
 
-    public CodeCompiler(JavaCompiler compiler, File outputDir, File[] classPath) {
+    public CodeCompiler(JavaCompiler compiler, Path outputDir, Path[] classPath) {
         this.compiler = compiler;
         this.outputDir = outputDir;
         this.classPath = classPath.clone();
@@ -57,7 +59,7 @@ public class CodeCompiler {
         }
         URL[] urls = new URL[classPath.length];
         for (int i = 0; i < urls.length; i++) {
-            urls[i] = classPath[i].toURI().toURL();
+            urls[i] = classPath[i].toUri().toURL();
         }
         URLClassLoader loader = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
         return loader.loadClass(code.getClassName());
@@ -65,9 +67,9 @@ public class CodeCompiler {
 
     private boolean performCompilerTask(JavaFileObject... source) throws IOException {
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-        outputDir.mkdirs();
-        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(outputDir));
-        fileManager.setLocation(StandardLocation.CLASS_PATH, Arrays.asList(classPath));
+        IOHelper.createDirectories(outputDir);
+        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(outputDir.toFile()));
+        fileManager.setLocation(StandardLocation.CLASS_PATH, Arrays.stream(classPath).map(Path::toFile).toList());
         final JavaCompiler.CompilationTask task = compiler.getTask(null, // todo - specify writer
                                                                    fileManager,
                                                                    null,

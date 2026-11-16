@@ -16,11 +16,11 @@
 
 package com.bc.ceres.jai;
 
-import static com.bc.ceres.jai.DFTTestMain.showImage;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.jai.operator.DFTConvolveDescriptor;
 import com.bc.ceres.jai.opimage.DFTConvolveRIF;
-import com.bc.ceres.jai.tilecache.SwappingTileCache;
 import com.bc.ceres.jai.tilecache.DefaultSwapSpace;
+import com.bc.ceres.jai.tilecache.SwappingTileCache;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.JAI;
@@ -32,17 +32,19 @@ import javax.media.jai.operator.MultiplyConstDescriptor;
 import javax.media.jai.operator.SubtractDescriptor;
 import java.awt.RenderingHints;
 import java.awt.image.RenderedImage;
-import java.io.File;
-import java.util.logging.Logger;
+import java.nio.file.Path;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.bc.ceres.jai.DFTTestMain.showImage;
 
 public class DFTConvolveTestMain {
     private static final long M = 1024L*1024L;
 
     public static void main(String[] args) {
-        final File swapDir = new File("swap");
-        swapDir.mkdir();
+        final Path swapDir = IOHelper.createATempDir().resolve("swap");
+        IOHelper.createDirectory(swapDir);
         final Logger logger = Logger.getAnonymousLogger();
         final ConsoleHandler consoleHandler = new ConsoleHandler();
         consoleHandler.setLevel(Level.ALL);

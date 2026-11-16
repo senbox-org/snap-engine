@@ -19,7 +19,7 @@ package com.bc.ceres.compiler;
 
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 
 import static org.junit.Assert.assertEquals;
@@ -76,8 +76,8 @@ public final class CodeCompilerTest {
                 deref.toString(),
                 expression);
 
-        File outputDir = new File("./target/test-classes");
-        File[] classPath = {new File("./target/classes"), new File("./target/test-classes")};
+        Path outputDir = Path.of("./target/test-classes");
+        Path[] classPath = {Path.of("./target/classes"), outputDir};
         Class<?> aClass = new CodeCompiler(outputDir, classPath).compile("com.bc.ceres.jai.opimage.exprc", className, code);
         final Function function = (Function) aClass.getConstructor(Product.class).newInstance(p);
         assertEquals(0.5 * (1 + 6), function.eval(0), 1e-10);

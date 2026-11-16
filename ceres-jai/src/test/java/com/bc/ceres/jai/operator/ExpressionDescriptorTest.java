@@ -16,6 +16,7 @@
 
 package com.bc.ceres.jai.operator;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.jai.ExpressionCompilerConfig;
 import com.bc.ceres.jai.opimage.ExpressionCRIF;
 import com.bc.ceres.jai.opimage.ExpressionOpImage_1;
@@ -34,7 +35,7 @@ import java.awt.image.DataBuffer;
 import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
-import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -66,7 +67,7 @@ public class ExpressionDescriptorTest {
     public static void setUpClass() {
         System.setProperty("com.sun.media.jai.disableMediaLib", "true");
         String classPath = System.getProperty("java.class.path");
-        String[] split = classPath.split(File.pathSeparator);
+        String[] split = classPath.split(IOHelper.PATH_SEPARATOR);
         for (String s : split) {
             if (s.contains(JAI_CORE_NAME)) {
                 jaiCoreLibPath = s;
@@ -126,12 +127,12 @@ public class ExpressionDescriptorTest {
     }
 
     static ExpressionCompilerConfig createExpressionCompilerConfig() {
-        File outputDir = new File("./target/test-classes");
-        File[] classPath = {
-                new File(jaiCoreLibPath),
-                new File(jaiCodecLibPath),
-                new File("./target/classes"),
-                new File("./target/test-classes")
+        Path outputDir = Path.of("./target/test-classes");
+        Path[] classPath = {
+                Path.of(jaiCoreLibPath),
+                Path.of(jaiCodecLibPath),
+                Path.of("./target/classes"),
+                outputDir
         };
 
         return new ExpressionCompilerConfig(outputDir, classPath);

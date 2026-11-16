@@ -16,7 +16,7 @@
 
 package com.bc.ceres.jai;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * The configuration for the Java expression compiler.
@@ -24,31 +24,31 @@ import java.io.File;
  * {@link com.bc.ceres.jai.operator.ExpressionDescriptor expression} operation.
  */
 public class ExpressionCompilerConfig {
-    private File outputDir;
-    private File[] classPath;
+    private Path outputDir;
+    private Path[] classPath;
 
     public ExpressionCompilerConfig() {
-        this(new File("."), new File[]{new File(".")});
+        this(Path.of("."), new Path[]{Path.of(".")});
     }
 
-    public ExpressionCompilerConfig(File outputDir, File[] classPath) {
+    public ExpressionCompilerConfig(Path outputDir, Path[] classPath) {
         this.outputDir = outputDir;
         this.classPath = classPath;
     }
 
-    public File[] getClassPath() {
+    public Path[] getClassPath() {
         return classPath;
     }
 
-    public void setClassPath(File[] classPath) {
+    public void setClassPath(Path[] classPath) {
         this.classPath = classPath;
     }
 
-    public File getOutputDir() {
+    public Path getOutputDir() {
         return outputDir;
     }
 
-    public void setOutputDir(File outputDir) {
+    public void setOutputDir(Path outputDir) {
         this.outputDir = outputDir;
     }
 }

@@ -16,8 +16,9 @@
 
 package com.bc.ceres.jai.tilecache;
 
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.FileImageOutputStream;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+
+import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.Point;
@@ -30,21 +31,24 @@ import java.awt.image.DataBufferShort;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.channels.Channel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 
 final class SwappedTile {
-    private final File file;
+    private final Path file;
     private final long fileSize;
     private final SampleModel sampleModel;
     private final boolean writable;
     private final Point location;
     private final Object tileCacheMetric;
 
-    SwappedTile(MemoryTile mt, File cacheDir) {
-        this.file = new File(cacheDir, mt.getKeyAsString());
+    SwappedTile(MemoryTile mt, Path cacheDir) {
+        this.file = cacheDir.resolve(mt.getKeyAsString());
         this.fileSize = mt.getTileSize();
         this.sampleModel = mt.getTile().getSampleModel();
         this.location = (Point) mt.getTile().getBounds().getLocation().clone();
@@ -53,10 +57,10 @@ final class SwappedTile {
     }
 
     public boolean isAvailable() {
-        return file.length() == fileSize;
+        return IOHelper.size(file) == fileSize;
     }
 
-    public File getFile() {
+    public Path getFile() {
         return file;
     }
 
@@ -77,16 +81,15 @@ final class SwappedTile {
     }
 
     public boolean delete() {
-        return file.delete();
+        return IOHelper.delete(file);
     }
 
     public Raster restoreTile() throws IOException {
-        final ImageInputStream stream = new FileImageInputStream(file);
         final DataBuffer dataBuffer;
-        try {
+        try (Channel channel = Files.newByteChannel(file, StandardOpenOption.READ);
+             final ImageInputStream stream = ImageIO.createImageInputStream(channel)
+        ) {
             dataBuffer = readTileData(stream, sampleModel);
-        } finally {
-            stream.close();
         }
         final Raster tile;
         if (writable) {
@@ -98,11 +101,9 @@ final class SwappedTile {
     }
 
     public void storeTile(Raster tile) throws IOException {
-        final ImageOutputStream stream = new FileImageOutputStream(file);
-        try {
+        try (Channel fileChannel = Files.newByteChannel(file, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+             ImageOutputStream stream = ImageIO.createImageOutputStream(fileChannel)) {
             writeTileData(stream, tile.getDataBuffer());
-        } finally {
-            stream.close();
         }
     }
 

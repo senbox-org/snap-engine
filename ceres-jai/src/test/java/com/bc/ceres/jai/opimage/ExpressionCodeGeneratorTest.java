@@ -17,25 +17,30 @@
 package com.bc.ceres.jai.opimage;
 
 import com.bc.ceres.compiler.Code;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.jai.operator.ExpressionDescriptorTest;
 import org.junit.Test;
 
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ExpressionCodeGeneratorTest {
 
     static void write(Code code) {
         try {
-            File file = new File("./src/test/java/" + code.getClassName().replace('.', '/') + ".java");
-            file.getParentFile().mkdirs();
-            FileWriter writer = new FileWriter(file);
+            Path file = Path.of("./src/test/java/" + code.getClassName().replace('.', '/') + ".java");
+            IOHelper.createDirectories(file.getParent());
+            Writer writer = Files.newBufferedWriter(file);
             String source = code.getCharContent(true).toString();
             //System.out.println("source = " + source);
             writer.write(source);

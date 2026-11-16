@@ -16,10 +16,13 @@
 
 package com.bc.ceres.jai.tilecache;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -32,15 +35,15 @@ import java.util.logging.Logger;
  * @author Norman Fomferra
  */
 public class DefaultSwapSpace implements SwapSpace, AutoCloseable {
-    private final File swapDir;
+    private final Path swapDir;
     private final Logger logger;
     private final Map<Object, SwappedTile> swappedTiles;
 
-    public DefaultSwapSpace(File swapDir) {
+    public DefaultSwapSpace(Path swapDir) {
         this(swapDir, Logger.getLogger(System.getProperty("ceres.context", "ceres")));
     }
 
-    public DefaultSwapSpace(File swapDir, Logger logger) {
+    public DefaultSwapSpace(Path swapDir, Logger logger) {
         this.swapDir = swapDir;
         this.logger = logger;
         this.swappedTiles = new HashMap<Object, SwappedTile>(1009); // prime number
@@ -66,7 +69,7 @@ public class DefaultSwapSpace implements SwapSpace, AutoCloseable {
                     final long t1 = System.currentTimeMillis();
                     st.storeTile(mt.getTile());
                     final long t2 = System.currentTimeMillis();
-                    st.getFile().deleteOnExit();
+                    IOHelper.deleteOnExit(st.getFile());
                     logger.log(Level.FINEST, "Tile stored: " + st.getFile() + " (" + (t2 - t1) + " ms)");
                 }
                 swappedTiles.put(mt.getKey(), st);
@@ -100,7 +103,7 @@ public class DefaultSwapSpace implements SwapSpace, AutoCloseable {
     public synchronized boolean deleteTile(RenderedImage owner, int tileX, int tileY) {
         final Object key = hashKey(owner, tileX, tileY);
         final SwappedTile st = swappedTiles.remove(key);
-        if (st == null || !st.getFile().exists()) {
+        if (st == null || !Files.exists(st.getFile())) {
             return false;
         }
         final boolean deleted = st.delete();

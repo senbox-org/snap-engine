@@ -16,6 +16,7 @@
 
 package com.bc.ceres.jai.tilecache;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.sun.media.jai.util.CacheDiagnostics;
 import com.sun.media.jai.util.ImageUtil;
 
@@ -26,7 +27,7 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -63,7 +64,7 @@ public final class SwappingTileCache extends Observable implements TileCache, Ca
     /**
      * The default directory where tiles are stored if they don't fit into memory anymore.
      */
-    public static final File DEFAULT_SWAP_DIR = new File(System.getProperty("java.io.tmpdir"));
+    public static final Path DEFAULT_SWAP_DIR = IOHelper.createATempDir();
 
     /**
      * The hashtable load factor
