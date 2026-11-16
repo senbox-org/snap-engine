@@ -1,6 +1,6 @@
 package org.esa.snap.watermask.util;
 
-import java.io.*;
+import java.nio.file.Path;
 
 /**
  */
@@ -14,7 +14,7 @@ public interface ImageDescriptor {
 
     int getTileHeight();
 
-    File getAuxdataDir();
+    Path getAuxdataDir();
 
     String getZipFileName();
 }

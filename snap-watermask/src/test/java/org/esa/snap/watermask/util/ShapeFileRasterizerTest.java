@@ -1,15 +1,15 @@
 package org.esa.snap.watermask.util;
 
-import org.esa.snap.watermask.operator.WatermaskUtils;
-import org.junit.Test;
-
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.io.File;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.zip.ZipFile;
+import org.esa.snap.watermask.operator.WatermaskUtils;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -18,11 +18,11 @@ public class ShapeFileRasterizerTest  {
 
     @Test
     public void testImageCreation() throws Exception {
-        final File targetDir = new File("");
+        final Path targetDir = IOHelper.createATempDir();
         final ShapeFileRasterizer rasterizer = new ShapeFileRasterizer(targetDir);
         final URL shapeUrl = getClass().getResource("e000n05f.shp");
         final URI uri = new URI(shapeUrl.toString());
-        final File shapeFile = new File(uri.getPath());
+        final Path shapeFile = Path.of(uri);
         final int resolution = WatermaskUtils.computeSideLength(150);
         final BufferedImage image = rasterizer.createImage(shapeFile, resolution);
 
@@ -37,12 +37,12 @@ public class ShapeFileRasterizerTest  {
 
      @Test
     public void testFromZip() throws Exception {
-        final File targetDir = new File("");
+        final Path targetDir = IOHelper.createATempDir();
         final ShapeFileRasterizer rasterizer = new ShapeFileRasterizer(targetDir);
         final URL shapeUrl = getClass().getResource("e000n05f.zip");
          final URI uri = new URI(shapeUrl.toString());
          final int tileSize = WatermaskUtils.computeSideLength(150);
-         final List<File> tempFiles;
+         final List<Path> tempFiles;
          final ZipFile zipFile = new ZipFile(uri.getPath());
          try {
              tempFiles = rasterizer.createTempFiles(zipFile);
@@ -51,8 +51,8 @@ public class ShapeFileRasterizerTest  {
          }
 
          BufferedImage image = null;
-         for (File file : tempFiles) {
-             if (file.getName().endsWith("shp")) {
+         for (Path file : tempFiles) {
+             if (file.getFileName().toString().endsWith("shp")) {
                  image = rasterizer.createImage(file, tileSize);
              }
          }

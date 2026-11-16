@@ -28,7 +28,7 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
@@ -51,12 +51,12 @@ public class SRTMOpImage extends SourcelessOpImage {
     private WritableRaster waterRaster;
     private WritableRaster invalidRaster;
 
-    public static SRTMOpImage create(Properties defaultImageProperties, File zipFile) throws IOException {
+    public static SRTMOpImage create(Properties defaultImageProperties, Path zipFile) throws IOException {
         final ImageHeader imageHeader = ImageHeader.load(defaultImageProperties, null);
         return new SRTMOpImage(imageHeader, zipFile);
     }
 
-    private SRTMOpImage(ImageHeader imageHeader, File zipFile) throws IOException {
+    private SRTMOpImage(ImageHeader imageHeader, Path zipFile) throws IOException {
         super(imageHeader.getImageLayout(),
               null,
               ImageUtils.createSingleBandedSampleModel(DataBuffer.TYPE_BYTE,
@@ -66,7 +66,7 @@ public class SRTMOpImage extends SourcelessOpImage {
               imageHeader.getImageLayout().getMinY(null),
               imageHeader.getImageLayout().getWidth(null),
               imageHeader.getImageLayout().getHeight(null));
-        this.zipFile = new ZipFile(zipFile);
+        this.zipFile = new ZipFile(zipFile.toString());
         missingTiles = new Properties();
         missingTiles.load(getClass().getResourceAsStream("MissingTiles.properties"));
         // this image uses its own tile cache in order not to disturb the GPF tile cache.

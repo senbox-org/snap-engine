@@ -20,12 +20,13 @@ import com.bc.ceres.multilevel.MultiLevelImage;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.ImageUtils;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 
 /**
@@ -80,7 +81,8 @@ public class LandMaskRasterCreator {
                 }
                 image.setData(sourceImage.getTile(tileX, tileY));
                 System.out.println("Writing image " + count + "/" + numXTiles * numYTiles + ".");
-                ImageIO.write(image, "png", new File(targetPath, String.format("%d-%d.png", tileX, tileY)));
+                final Path targetFile = Path.of(targetPath).resolve(String.format("%d-%d.png", tileX, tileY));
+                ImageUtils.writeImage(image, "png", targetFile);
             }
         }
     }
@@ -96,12 +98,12 @@ public class LandMaskRasterCreator {
     }
 
     void validateSourcePath(String sourcePath) {
-        final File path = new File(sourcePath);
-        if (path.isDirectory()) {
+        final Path path = Path.of(sourcePath);
+        if (Files.isDirectory(path)) {
             throw new IllegalArgumentException(MessageFormat.format("Source path ''''{0}'' points to a directory, but " +
                                                                     "must point to a file.", sourcePath));
         }
-        if (!path.exists()) {
+        if (!Files.exists(path)) {
             throw new IllegalArgumentException(MessageFormat.format("Source path ''{0}'' does not exist.", sourcePath));
         }
     }

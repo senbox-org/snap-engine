@@ -16,6 +16,7 @@
 
 package org.esa.snap.watermask.util;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -25,11 +26,11 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.common.reproject.ReprojectionOp;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,18 +59,14 @@ public class ModisProductHandler {
     private void printTargetLocations() throws IOException {
         final String source = "C:\\dev\\MODIS_reproj";
 
-        final String[] files = new File(source).list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".dim");
-            }
-        });
+        Path sourcePath = Path.of(source);
+        final Collection<String> files = IOHelper.list(sourcePath,dir -> dir.getFileName().toString().endsWith(".dim"));
 
         List<String> southProducts = new ArrayList<String>();
         List<String> northProducts = new ArrayList<String>();
 
-        for (String file : files) {
-            final Product product = ProductIO.readProduct(new File(source, file));
+        for (String file : files != null ? files : new ArrayList<String>()) {
+            final Product product = ProductIO.readProduct(sourcePath.resolve(file));
             final GeoCoding geoCoding = product.getSceneGeoCoding();
             PixelPos sceneLL = new PixelPos(0 + 0.5f, product.getSceneRasterHeight() - 1 + 0.5f);
             PixelPos sceneLR = new PixelPos(product.getSceneRasterWidth() - 1 + 0.5f,
@@ -79,7 +76,7 @@ public class ModisProductHandler {
             geoCoding.getGeoPos(sceneLL, gp1);
             geoCoding.getGeoPos(sceneLR, gp2);
             if (gp1.getLat() <= -60.0f || gp2.getLat() <= -60.0f) {
-                southProducts.add(product.getFileLocation().getAbsolutePath());
+                southProducts.add(product.getFileLocation().toAbsolutePath().toString());
                 continue;
             }
             PixelPos sceneUL = new PixelPos(0.5f, 0.5f);
@@ -87,7 +84,7 @@ public class ModisProductHandler {
             geoCoding.getGeoPos(sceneUL, gp1);
             geoCoding.getGeoPos(sceneUR, gp2);
             if (gp1.getLat() >= 60.0f || gp2.getLat() >= 60.0f) {
-                northProducts.add(product.getFileLocation().getAbsolutePath());
+                northProducts.add(product.getFileLocation().toAbsolutePath().toString());
             }
         }
 
@@ -105,9 +102,9 @@ public class ModisProductHandler {
 
     private void getProducts() throws IOException {
         final String inputPath = args[0];
-        final File[] products = new File(inputPath).listFiles();
+        final Collection<Path> products = IOHelper.listFiles(Path.of(inputPath));
         GeoPos gp = new GeoPos();
-        for (File file : products) {
+        for (Path file : products) {
             final Product product = ProductIO.readProduct(file);
             PixelPos sceneLL = new PixelPos(0 + 0.5f, product.getSceneRasterHeight() - 1 + 0.5f);
             final GeoCoding geoCoding = product.getSceneGeoCoding();
@@ -168,7 +165,7 @@ public class ModisProductHandler {
         for (Product reprojectedProduct : reprojectedProducts) {
             System.out.println("Writing product '" + reprojectedProduct + "'.");
             reprojectedProduct.removeBand(reprojectedProduct.getBand("water_mask_QA"));
-            ProductIO.writeProduct(reprojectedProduct, new File(args[1], getProductName(reprojectedProduct)), "BEAM-DIMAP", false);
+            ProductIO.writeProduct(reprojectedProduct, Path.of(args[1], getProductName(reprojectedProduct)), "BEAM-DIMAP", false);
         }
     }
 

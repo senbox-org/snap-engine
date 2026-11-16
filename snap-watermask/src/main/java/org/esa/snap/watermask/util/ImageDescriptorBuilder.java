@@ -1,6 +1,6 @@
 package org.esa.snap.watermask.util;
 
-import java.io.*;
+import java.nio.file.Path;
 
 public class ImageDescriptorBuilder {
 
@@ -8,7 +8,7 @@ public class ImageDescriptorBuilder {
     private int imageHeight;
     private int tileWidth;
     private int tileHeight;
-    private File auxdataDir;
+    private Path auxdataDir;
     private String zipFileName;
 
 
@@ -32,7 +32,7 @@ public class ImageDescriptorBuilder {
         return this;
     }
 
-    public ImageDescriptorBuilder auxdataDir(File auxdataDir) {
+    public ImageDescriptorBuilder auxdataDir(Path auxdataDir) {
         this.auxdataDir = auxdataDir;
         return this;
     }
@@ -60,7 +60,7 @@ public class ImageDescriptorBuilder {
         private int imageHeight;
         private int tileWidth;
         private int tileHeight;
-        private File auxdataDir;
+        private Path auxdataDir;
         private String zipFileName;
 
         @Override
@@ -84,7 +84,7 @@ public class ImageDescriptorBuilder {
         }
 
         @Override
-        public File getAuxdataDir() {
+        public Path getAuxdataDir() {
             return auxdataDir;
         }
 

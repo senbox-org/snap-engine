@@ -19,18 +19,19 @@ package org.esa.snap.watermask.operator;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.engine_utilities.util.ResourceUtils;
 import org.esa.snap.watermask.util.ImageDescriptor;
 import org.esa.snap.watermask.util.ImageDescriptorBuilder;
 import org.geotools.image.util.ImageUtilities;
 
-import javax.imageio.ImageIO;
 import javax.media.jai.NullOpImage;
 import javax.media.jai.OpImage;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Properties;
 
@@ -95,7 +96,7 @@ public class WatermaskClassifier {
 
         if (resolution == 50 || resolution == 150) {
             installAuxdata();
-            File auxdataDir = WatermaskConstants.LOCAL_AUXDATA_PATH.toFile();
+            Path auxdataDir = WatermaskConstants.LOCAL_AUXDATA_PATH;
             SRTMOpImage centerImage = createCenterImage(resolution, auxdataDir);
             ImageDescriptor northDescriptor = getNorthDescriptor(auxdataDir);
             PNGSourceImage northImage = createBorderImage(northDescriptor);
@@ -179,7 +180,7 @@ public class WatermaskClassifier {
         return resolution == 50 || resolution == 150 || resolution == 1000;
     }
 
-    private SRTMOpImage createCenterImage(int resolution, File auxdataDir) throws IOException {
+    private SRTMOpImage createCenterImage(int resolution, Path auxdataDir) throws IOException {
         int tileSize = WatermaskUtils.computeSideLength(resolution);
 
         int width = tileSize * 360;
@@ -192,7 +193,7 @@ public class WatermaskClassifier {
         final URL imageProperties = getClass().getResource("image.properties");
         properties.load(imageProperties.openStream());
 
-        File zipFile = new File(auxdataDir, resolution + "m.zip");
+        Path zipFile = auxdataDir.resolve(resolution + "m.zip");
         return SRTMOpImage.create(properties, zipFile);
     }
 
@@ -209,9 +210,9 @@ public class WatermaskClassifier {
         final URL imageProperties = getClass().getResource("image.properties");
         properties.load(imageProperties.openStream());
 
-        final File auxdataDir = descriptor.getAuxdataDir();
+        final Path auxdataDir = descriptor.getAuxdataDir();
         final String zipFileName = descriptor.getZipFileName();
-        File zipFile = new File(auxdataDir, zipFileName);
+        Path zipFile = auxdataDir.resolve(zipFileName);
         return PNGSourceImage.create(properties, zipFile);
     }
 
@@ -269,7 +270,7 @@ public class WatermaskClassifier {
         return waterMaskSample;
     }
 
-    private static ImageDescriptor getNorthDescriptor(File auxdataDir) {
+    private static ImageDescriptor getNorthDescriptor(Path auxdataDir) {
         return new ImageDescriptorBuilder()
                         .width(GC_IMAGE_WIDTH)
                         .height(GC_IMAGE_HEIGHT)
@@ -346,7 +347,8 @@ public class WatermaskClassifier {
                 return image;
             }
             try {
-                BufferedImage waterImage = ImageIO.read(getClass().getResourceAsStream("water.png"));
+                final Path waterImageFile = ResourceUtils.getTestResourceAsPath("water.png", getClass());
+                final BufferedImage waterImage = ImageUtils.readImage(waterImageFile);
                 image = new NullOpImage(waterImage, ImageUtilities.getImageLayout(waterImage), null, OpImage.OP_COMPUTE_BOUND);
             } catch (IOException e) {
                 e.printStackTrace();

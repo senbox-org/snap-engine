@@ -25,7 +25,7 @@ import javax.media.jai.JAI;
 import javax.media.jai.SourcelessOpImage;
 import java.awt.*;
 import java.awt.image.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
@@ -42,12 +42,12 @@ public class PNGSourceImage extends SourcelessOpImage {
 
     private final ZipFile zipFile;
 
-    static PNGSourceImage create(Properties properties, File zipFile) throws IOException {
+    static PNGSourceImage create(Properties properties, Path zipFile) throws IOException {
         final ImageHeader imageHeader = ImageHeader.load(properties, null);
         return new PNGSourceImage(imageHeader, zipFile);
     }
 
-    private PNGSourceImage(ImageHeader imageHeader, File zipFile) throws IOException {
+    private PNGSourceImage(ImageHeader imageHeader, Path zipFile) throws IOException {
         super(imageHeader.getImageLayout(),
               null,
               ImageUtils.createSingleBandedSampleModel(DataBuffer.TYPE_BYTE,
@@ -57,7 +57,7 @@ public class PNGSourceImage extends SourcelessOpImage {
               imageHeader.getImageLayout().getMinY(null),
               imageHeader.getImageLayout().getWidth(null),
               imageHeader.getImageLayout().getHeight(null));
-        this.zipFile = new ZipFile(zipFile);
+        this.zipFile = new ZipFile(zipFile.toString());
         // this image uses its own tile cache in order not to disturb the GPF tile cache.
         setTileCache(JAI.createTileCache(50L * 1024 * 1024));
     }

@@ -16,6 +16,8 @@
 
 package org.esa.snap.watermask.util;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.watermask.operator.WatermaskUtils;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.data.DataStore;
@@ -29,22 +31,35 @@ import org.geotools.map.MapViewport;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.builder.GridToEnvelopeMapper;
 import org.geotools.renderer.lite.StreamingRenderer;
-import org.geotools.styling.*;
+import org.geotools.styling.FeatureTypeStyle;
+import org.geotools.styling.Fill;
+import org.geotools.styling.PolygonSymbolizer;
+import org.geotools.styling.Rule;
+import org.geotools.styling.Style;
+import org.geotools.styling.StyleFactory;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.FilterFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.datum.PixelInCell;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -58,13 +73,13 @@ import java.util.zip.ZipFile;
  */
 class ShapeFileRasterizer {
 
-    private final File targetDir;
+    private final Path targetDir;
 
     private final String tempDir;
 
-    ShapeFileRasterizer(File targetDir) {
+    ShapeFileRasterizer(Path targetDir) {
         this.targetDir = targetDir;
-        tempDir = System.getProperty("java.io.tmpdir", ".");
+        tempDir = IOHelper.createATempDir().toString();
     }
 
     /**
@@ -75,9 +90,9 @@ class ShapeFileRasterizer {
      * @throws java.io.IOException If some IO error occurs.
      */
     public static void main(String[] args) throws IOException {
-        final File resourceDir = new File(args[0]);
-        final File targetDir = new File(args[1]);
-        targetDir.mkdirs();
+        final Path resourceDir = Path.of(args[0]);
+        final Path targetDir = Path.of(args[1]);
+        IOHelper.createDirectories(targetDir);
         int sideLength = WatermaskUtils.computeSideLength(Integer.parseInt(args[2]));
         boolean createImage = false;
         if (args.length == 4) {
@@ -87,36 +102,26 @@ class ShapeFileRasterizer {
         rasterizer.rasterizeShapeFiles(resourceDir, sideLength, createImage);
     }
 
-    void rasterizeShapeFiles(File directory, int tileSize, boolean createImage) throws IOException {
-        File[] shapeFiles = directory.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".zip");
-            }
-        });
+    void rasterizeShapeFiles(Path directory, int tileSize, boolean createImage) throws IOException {
+        Collection<Path> shapeFiles = IOHelper.listFiles(directory, path -> path.getFileName().toString().endsWith(".zip"));
         if (shapeFiles != null) {
             rasterizeShapeFiles(shapeFiles, tileSize, createImage);
         }
-        File[] subdirs = directory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return pathname.isDirectory();
-            }
-        });
+        Collection<Path> subdirs = IOHelper.listFiles(directory, Files::isDirectory);
         if (subdirs != null) {
-            for (File subDir : subdirs) {
+            for (Path subDir : subdirs) {
                 rasterizeShapeFiles(subDir, tileSize, createImage);
             }
         }
     }
 
-    void rasterizeShapeFiles(File[] zippedShapeFiles, int tileSize, boolean createImage) {
+    void rasterizeShapeFiles(Collection<Path> zippedShapeFiles, int tileSize, boolean createImage) {
         final ExecutorService executorService = Executors.newFixedThreadPool(12);
-        for (int i = 0; i < zippedShapeFiles.length; i++) {
-            File shapeFile = zippedShapeFiles[i];
-            int shapeFileIndex = i + 1;
+        int shapeFileIndex = 0;
+        for (Path shapeFile: zippedShapeFiles) {
+            shapeFileIndex++;
             ShapeFileRunnable runnable = new ShapeFileRunnable(shapeFile, tileSize, shapeFileIndex,
-                    zippedShapeFiles.length, createImage);
+                    zippedShapeFiles.size(), createImage);
             executorService.submit(runnable);
         }
         executorService.shutdown();
@@ -129,9 +134,9 @@ class ShapeFileRasterizer {
         }
     }
 
-    BufferedImage createImage(File shapeFile, int tileSize) throws Exception {
+    BufferedImage createImage(Path shapeFile, int tileSize) throws Exception {
         CoordinateReferenceSystem crs = DefaultGeographicCRS.WGS84;
-        final String shapeFileName = shapeFile.getName();
+        final String shapeFileName = shapeFile.getFileName().toString();
         final ReferencedEnvelope referencedEnvelope = parseEnvelopeFromShapeFileName(shapeFileName, crs);
 
         final MapViewport viewport = new MapViewport();
@@ -142,7 +147,7 @@ class ShapeFileRasterizer {
         MapContent mapContent = new MapContent();
         mapContent.setViewport(viewport);
 
-        final URL shapeFileUrl = shapeFile.toURI().toURL();
+        final URL shapeFileUrl = shapeFile.toUri().toURL();
 
         final FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = getFeatureSource(shapeFileUrl);
         org.geotools.map.FeatureLayer featureLayer = new org.geotools.map.FeatureLayer(featureSource, createPolygonStyle());
@@ -202,29 +207,27 @@ class ShapeFileRasterizer {
         String fileName = getFilenameWithoutExtension(name);
         fileName = fileName.substring(0, fileName.length() - 1);
         String imgFileName = fileName + ".img";
-        File outputFile = new File(targetDir.getAbsolutePath(), imgFileName);
+        Path outputFile = targetDir.toAbsolutePath().resolve(imgFileName);
 
-        FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
-        try {
-            byte[] data = ((DataBufferByte) image.getData().getDataBuffer()).getData();
-            fileOutputStream.write(data);
-            if (createImage) {
-                ImageIO.write(image, "png", new File(targetDir.getAbsolutePath(), fileName + ".png"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
+        try (OutputStream fileOutputStream = Files.newOutputStream(outputFile)) {
             try {
-                fileOutputStream.close();
-            } catch (IOException e) {
+                byte[] data = ((DataBufferByte) image.getData().getDataBuffer()).getData();
+                fileOutputStream.write(data);
+                if (createImage) {
+                    final Path targetFile = targetDir.toAbsolutePath().resolve(fileName + ".png");
+                    ImageUtils.writeImage(image, "png", targetFile.toFile());
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    List<File> createTempFiles(ZipFile zipFile) {
+    List<Path> createTempFiles(ZipFile zipFile) {
         final Enumeration<? extends ZipEntry> entries = zipFile.entries();
-        List<File> tempShapeFiles;
+        List<Path> tempShapeFiles;
         try {
             tempShapeFiles = unzipTempFiles(zipFile, entries);
         } catch (IOException e) {
@@ -234,21 +237,21 @@ class ShapeFileRasterizer {
         return tempShapeFiles;
     }
 
-    private List<File> unzipTempFiles(ZipFile zipFile, Enumeration<? extends ZipEntry> entries) throws
+    private List<Path> unzipTempFiles(ZipFile zipFile, Enumeration<? extends ZipEntry> entries) throws
             IOException {
-        List<File> files = new ArrayList<File>();
+        List<Path> files = new ArrayList<>();
         while (entries.hasMoreElements()) {
             final ZipEntry entry = entries.nextElement();
-            File file = readIntoTempFile(zipFile, entry);
+            Path file = readIntoTempFile(zipFile, entry);
             files.add(file);
         }
         return files;
     }
 
-    private File readIntoTempFile(ZipFile zipFile, ZipEntry entry) throws IOException {
-        File file = new File(tempDir, entry.getName());
+    private Path readIntoTempFile(ZipFile zipFile, ZipEntry entry) throws IOException {
+        Path file = Path.of(tempDir).resolve(entry.getName());
         final InputStream reader = zipFile.getInputStream(entry);
-        final FileOutputStream writer = new FileOutputStream(file);
+        final OutputStream writer = Files.newOutputStream(file);
         try {
             byte[] buffer = new byte[1024 * 1024];
             int bytesRead = reader.read(buffer);
@@ -264,9 +267,9 @@ class ShapeFileRasterizer {
     }
 
     @SuppressWarnings({"ResultOfMethodCallIgnored"})
-    private void deleteTempFiles(List<File> tempFiles) {
-        for (File tempFile : tempFiles) {
-            tempFile.delete();
+    private void deleteTempFiles(List<Path> tempFiles) {
+        for (Path tempFile : tempFiles) {
+            IOHelper.delete(tempFile);
         }
         tempFiles.clear();
     }
@@ -320,13 +323,13 @@ class ShapeFileRasterizer {
 
     private class ShapeFileRunnable implements Runnable {
 
-        private final File shapeFile;
+        private final Path shapeFile;
         private int tileSize;
         private int index;
         private int shapeFileCount;
         private boolean createImage;
 
-        ShapeFileRunnable(File shapeFile, int tileSize, int shapeFileIndex, int shapeFileCount, boolean createImage) {
+        ShapeFileRunnable(Path shapeFile, int tileSize, int shapeFileIndex, int shapeFileCount, boolean createImage) {
             this.shapeFile = shapeFile;
             this.tileSize = tileSize;
             this.index = shapeFileIndex;
@@ -337,21 +340,18 @@ class ShapeFileRasterizer {
         @Override
         public void run() {
             try {
-                List<File> tempShapeFiles;
-                ZipFile zipFile = new ZipFile(shapeFile);
-                try {
+                List<Path> tempShapeFiles;
+                try (ZipFile zipFile = new ZipFile(shapeFile.toFile())) {
                     tempShapeFiles = createTempFiles(zipFile);
-                } finally {
-                    zipFile.close();
                 }
-                for (File file : tempShapeFiles) {
-                    if (file.getName().endsWith("shp")) {
+                for (Path file : tempShapeFiles) {
+                    if (file.getFileName().toString().endsWith("shp")) {
                         final BufferedImage image = createImage(file, tileSize);
-                        writeToFile(image, shapeFile.getName(), createImage);
+                        writeToFile(image, shapeFile.getFileName().toString(), createImage);
                     }
                 }
                 deleteTempFiles(tempShapeFiles);
-                System.out.printf("File %d of %d%n", index, shapeFileCount);
+                System.out.printf("Path %d of %d%n", index, shapeFileCount);
             } catch (Throwable e) {
                 e.printStackTrace();
             }

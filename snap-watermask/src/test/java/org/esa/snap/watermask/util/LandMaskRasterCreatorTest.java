@@ -16,11 +16,13 @@
 
 package org.esa.snap.watermask.util;
 
+import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.engine_utilities.util.ResourceUtils;
 import org.junit.Test;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 
@@ -32,7 +34,8 @@ public class LandMaskRasterCreatorTest {
 
     @Test
     public void testMixedFile() throws Exception {
-        final BufferedImage image = ImageIO.read(getClass().getResource("156-12.png"));
+        final Path imageFile = ResourceUtils.getTestResourceAsPath("156-12.png", getClass());
+        final BufferedImage image = ImageUtils.readImage(imageFile);
         int sample = image.getData().getSample(220, 40, 0);
         assertEquals(0, sample);
 
@@ -50,7 +53,8 @@ public class LandMaskRasterCreatorTest {
 
     @Test
     public void testAllWaterFile() throws Exception {
-        final BufferedImage image = ImageIO.read(getClass().getResource("195-10.png"));
+        final Path imageFile = ResourceUtils.getTestResourceAsPath("195-10.png", getClass());
+        final BufferedImage image = ImageUtils.readImage(imageFile);
         Raster imageData = image.getData();
         for (int x = 0; x < imageData.getWidth(); x++) {
             for (int y = 0; y < imageData.getHeight(); y++) {
@@ -61,7 +65,8 @@ public class LandMaskRasterCreatorTest {
 
     @Test
     public void testAllLandFile() throws Exception {
-        final BufferedImage image = ImageIO.read(getClass().getResource("92-10.png"));
+        final Path imageFile = ResourceUtils.getTestResourceAsPath("92-10.png", getClass());
+        final BufferedImage image = ImageUtils.readImage(imageFile);
         Raster imageData = image.getData();
         for (int x = 0; x < imageData.getWidth(); x++) {
             for (int y = 0; y < imageData.getHeight(); y++) {

@@ -16,15 +16,17 @@
 
 package org.esa.snap.watermask.util;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageHeader;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Properties;
 
 /**
@@ -47,17 +49,13 @@ public class ModisMosaicer {
         } else {
             pathname = "C:\\dev\\projects\\beam-watermask\\MODIS\\south";
         }
-        final File[] files = new File(pathname).listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".dim");
-            }
-        });
+        final Collection<Path> files = IOHelper.listFiles(Path.of(pathname), dir -> dir.getFileName().toString().endsWith(".dim"));
 
-        Product[] products = new Product[files.length];
-        for (int i = 0, filesLength = files.length; i < filesLength; i++) {
-            final Product product = ProductIO.readProduct(files[i]);
-            products[i] = product;
+        Product[] products = files != null ? new Product[files.size()] : new Product[0];
+        int i = 0;
+        for (Path file : files != null ? files : new ArrayList<Path>()) {
+            final Product product = ProductIO.readProduct(file);
+            products[i++] = product;
         }
 
         int width = MODIS_IMAGE_WIDTH;

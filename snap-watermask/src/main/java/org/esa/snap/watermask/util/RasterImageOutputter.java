@@ -16,18 +16,24 @@
 
 package org.esa.snap.watermask.util;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.math.Histogram;
 import org.esa.snap.core.util.math.Range;
 import org.esa.snap.watermask.operator.WatermaskUtils;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -41,18 +47,13 @@ class RasterImageOutputter {
 
     public static void main(String[] args) throws IOException {
 
-        final File file = new File(args[0]);
-        if (file.isDirectory()) {
-            final File[] imgFiles = file.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".img");
-                }
-            });
+        final Path file = Path.of(args[0]);
+        if (Files.isDirectory(file)) {
+            final Collection<Path> imgFiles = IOHelper.listFiles(file, p -> p.getFileName().toString().endsWith(".img"));
             final ExecutorService executorService = Executors.newFixedThreadPool(6);
-            for (File imgFile : imgFiles) {
-                final File outputFile = FileUtils.exchangeExtension(imgFile, ".png");
-                if (!outputFile.exists()) {
+            for (Path imgFile : imgFiles != null ? imgFiles : new ArrayList<Path>()) {
+                final Path outputFile = FileUtils.exchangeExtension(imgFile, ".png");
+                if (!Files.exists(outputFile)) {
                     executorService.submit(new ImageWriterRunnable(imgFile, outputFile));
                 }
             }
@@ -67,20 +68,20 @@ class RasterImageOutputter {
             }
         } else {
             final InputStream inputStream;
-            if (file.getName().toLowerCase().endsWith(".zip")) {
-                ZipFile zipFile = new ZipFile(file);
+            if (file.getFileName().toString().toLowerCase().endsWith(".zip")) {
+                ZipFile zipFile = new ZipFile(file.toFile());
                 String shapefile = args[1];
                 final ZipEntry entry = zipFile.getEntry(shapefile);
                 inputStream = zipFile.getInputStream(entry);
             } else {
-                inputStream = new FileInputStream(file);
+                inputStream = Files.newInputStream(file);
             }
-            writeImage(inputStream, new File(args[args.length - 1]));
+            writeImage(inputStream, Path.of(args[args.length - 1]));
         }
 
     }
 
-    private static boolean writeImage(InputStream inputStream, File outputFile) throws IOException {
+    private static boolean writeImage(InputStream inputStream, Path outputFile) throws IOException {
         WritableRaster targetRaster = Raster.createPackedRaster(0, TILE_WIDTH, TILE_WIDTH, 1, 1,
                                                                 new Point(0, 0));
 
@@ -89,7 +90,7 @@ class RasterImageOutputter {
         final BufferedImage image = new BufferedImage(TILE_WIDTH, TILE_WIDTH, BufferedImage.TYPE_BYTE_BINARY);
         image.setData(targetRaster);
         boolean valid = validateImage(image);
-        ImageIO.write(image, "png", outputFile);
+        ImageUtils.writeImage(image, "png", outputFile);
         return valid;
     }
 
@@ -107,10 +108,10 @@ class RasterImageOutputter {
 
     private static class ImageWriterRunnable implements Runnable {
 
-        private File inputFile;
-        private File outputFile;
+        private Path inputFile;
+        private Path outputFile;
 
-        private ImageWriterRunnable(File inputFile, File outputFile) {
+        private ImageWriterRunnable(Path inputFile, Path outputFile) {
 
             this.inputFile = inputFile;
             this.outputFile = outputFile;
@@ -118,9 +119,7 @@ class RasterImageOutputter {
 
         @Override
         public void run() {
-            InputStream fileInputStream = null;
-            try {
-                fileInputStream = new FileInputStream(inputFile);
+            try (InputStream fileInputStream = Files.newInputStream(inputFile)) {
                 final boolean valid = writeImage(fileInputStream, outputFile);
                 if(!valid) {
                     System.out.printf("Not valid: %s%n", outputFile);
@@ -129,14 +128,6 @@ class RasterImageOutputter {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-            } finally {
-                if (fileInputStream != null) {
-                    try {
-                        fileInputStream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
         }
     }

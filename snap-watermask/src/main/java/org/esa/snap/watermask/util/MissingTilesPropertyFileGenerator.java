@@ -7,11 +7,12 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.watermask.operator.WatermaskClassifier;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.image.Raster;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 
 /* Creates a property file which will contain the land-water classification for all tiles
@@ -33,8 +34,8 @@ class MissingTilesPropertyFileGenerator {
 
     public static void main(String[] args) throws IOException {
         final Properties properties = new Properties();
-        final File directory = new File(args[0]);
-        final Product product = ProductIO.readProduct(new File(args[1]));
+        final Path directory = Path.of(args[0]);
+        final Product product = ProductIO.readProduct(Path.of(args[1]));
         final Band land_water = product.getBandAt(0);
         for (int x = -180; x < 180; x++) {
             for (int y = 89; y >= -90; y--) {
@@ -42,7 +43,7 @@ class MissingTilesPropertyFileGenerator {
                 final String propertyKey = tileFileName.substring(0, tileFileName.indexOf('.'));
                 if (y >= 60 || y <= -60) {
                     properties.setProperty(propertyKey, WatermaskClassifier.INVALID_VALUE + "");
-                } else if (!new File(directory, tileFileName).exists()) {
+                } else if (!Files.exists(directory.resolve(tileFileName))) {
                     System.out.printf("Not existing: %s%n", tileFileName);
                     final int landWater = getLandWaterValue(land_water, x, y);
                     properties.setProperty(propertyKey, String.valueOf(landWater));
@@ -53,12 +54,10 @@ class MissingTilesPropertyFileGenerator {
         properties.setProperty("e034n18", "0");
         properties.setProperty("e019n09", "0");
         properties.setProperty("e026n00", "0");
-        final FileWriter writer = new FileWriter(new File(directory, "MissingTiles.properties"));
 
-        try {
+
+        try (final Writer writer = Files.newBufferedWriter(directory.resolve("MissingTiles.properties"))){
             properties.store(writer, null);
-        } finally {
-            writer.close();
         }
     }
 
