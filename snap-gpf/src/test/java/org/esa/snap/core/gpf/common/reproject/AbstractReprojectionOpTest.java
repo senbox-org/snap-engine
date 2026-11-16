@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.gpf.common.reproject;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -25,12 +26,14 @@ import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,7 +69,7 @@ public abstract class AbstractReprojectionOpTest {
             "AXIS[\"Easting\", EAST]," +
             "AXIS[\"Northing\", NORTH]," +
             "AUTHORITY[\"EPSG\",\"32633\"]]";
-    protected static File wktFile;
+    protected static Path wktFile;
 
     private static final float[] LATS = new float[]{
             50.0f, 50.0f,
@@ -85,7 +88,9 @@ public abstract class AbstractReprojectionOpTest {
 
     @BeforeClass
     public static void setup() throws URISyntaxException {
-        wktFile = new File(AbstractReprojectionOpTest.class.getResource("test.wkt").toURI());
+        final URL fileURL = AbstractReprojectionOpTest.class.getResource("test.wkt");
+        Assert.assertNotNull(fileURL);
+        wktFile = UrlHelper.urlToFile(fileURL);
     }
 
     private void createSourceProduct() throws Exception {

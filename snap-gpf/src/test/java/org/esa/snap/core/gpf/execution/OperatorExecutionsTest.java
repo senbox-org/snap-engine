@@ -1,6 +1,14 @@
 package org.esa.snap.core.gpf.execution;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
@@ -12,17 +20,6 @@ import org.esa.snap.core.gpf.main.GPT;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -136,7 +133,7 @@ public class OperatorExecutionsTest {
                     "    </node>\n" +
                     "\n" +
                     "</graph>";
-    private static File outputDirectory;
+    private static Path outputDirectory;
     private static Operators.InitComputeTileOperatorSpi initComputeTileOperatorSpi;
     private static Operators.InitDoExecuteComputeTileOperatorSpi initDoExecuteComputeTileOperatorSpi;
     private static Operators.InitJAIImageOperatorSpi initJAIImageOperatorSpi;
@@ -150,9 +147,9 @@ public class OperatorExecutionsTest {
 
     @BeforeClass
     public static void setUp() {
-        outputDirectory = new File(GlobalTestConfig.getSnapTestDataOutputDirectory(), "OperatorExecutionsTest");
-        if (!outputDirectory.exists()) {
-            if (!outputDirectory.mkdirs()) {
+        outputDirectory = GlobalTestConfig.getSnapTestDataOutputDirectory().resolve("OperatorExecutionsTest");
+        if (!Files.exists(outputDirectory)) {
+            if (!IOHelper.createDirectories(outputDirectory)) {
                 fail("Unable to create test output directory");
             }
         }
@@ -192,14 +189,10 @@ public class OperatorExecutionsTest {
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(initSetsNoTargetProductOperatorSpi);
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(followUpDoExecuteOperatorSpi);
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(followUpDoExecuteAndComputeTileOperatorSpi);
-        if (outputDirectory.isDirectory()) {
-            Path directoryPath = Paths.get(outputDirectory.toURI());
+        if (Files.isDirectory(outputDirectory)) {
             try {
-                Files.walk(directoryPath)
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            } catch (IOException e) {
+                IOHelper.delete(outputDirectory);
+            } catch (Exception e) {
                 fail("Unable to delete test directory");
             }
         }
@@ -509,10 +502,10 @@ public class OperatorExecutionsTest {
     @Test
     public void testInitAndDoExecuteSetNoTargetProductOperatorWorksWithWriteAndRead() throws IOException {
         String outputFileName = "OperatorExecutionsTest/InitAndDoExecuteSetNoTargetProduct_awr.txt";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         Operators.InitAndDoExecuteSetNoTargetProductOperator operator =
                 new Operators.InitAndDoExecuteSetNoTargetProductOperator();
-        operator.setParameter("outputFilePath", outputFile.getAbsolutePath());
+        operator.setParameter("outputFilePath", outputFile.toAbsolutePath().toString());
         writeProduct(operator, "InitAndDoExecuteSetNoTargetProduct");
         assertExpectedFileExists(outputFile);
     }
@@ -520,27 +513,27 @@ public class OperatorExecutionsTest {
     @Test
     public void testInitAndDoExecuteSetNoTargetProductOperatorWorksWithRunAsSingleOperatorInGpt() throws Exception {
         String outputFileName = "OperatorExecutionsTest/InitAndDoExecuteSetNoTargetProduct_rasoigpt.txt";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         runSingleOperatorInGpt("InitAndDoExecuteSetNoTargetProduct",
-                new String[]{"outputFilePath", outputFile.getAbsolutePath()});
+                new String[]{"outputFilePath", outputFile.toAbsolutePath().toString()});
         assertExpectedFileExists(outputFile);
     }
 
     @Test
     public void testInitAndDoExecuteSetNoTargetProductOperatorWorksWithCreateProductFromGPF() {
         String outputFileName = "OperatorExecutionsTest/InitAndDoExecuteSetNoTargetProduct_cpfgpf.txt";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         createProductFromGPF("InitAndDoExecuteSetNoTargetProduct",
-                new String[]{"outputFilePath", outputFile.getAbsolutePath()});
+                new String[]{"outputFilePath", outputFile.toAbsolutePath().toString()});
         assertExpectedFileExists(outputFile);
     }
 
     @Test
     public void testInitAndDoExecuteSetNoTargetProductOperatorWorksWithRunAsSingleOperatorInGraph() throws Exception {
         String outputFileName = "OperatorExecutionsTest/InitAndDoExecuteSetNoTargetProduct_rasoig.txt";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         String parameter = PARAMETER_PART.replace("{parameter_name}", "outputFilePath").
-                replace("{parameter_value}", outputFile.getAbsolutePath());
+                replace("{parameter_value}", outputFile.toAbsolutePath().toString());
         String parametersPart = PARAMETERS_PART.replace("{parameter}", parameter);
         runAsSingleOperatorInGraph("InitAndDoExecuteSetNoTargetProduct", parametersPart);
         assertExpectedFileExists(outputFile);
@@ -549,9 +542,9 @@ public class OperatorExecutionsTest {
     @Test
     public void testInitSetsNoTargetProductOperatorWorksWithWriteAndRead() throws IOException {
         String outputFileName = "OperatorExecutionsTest/InitSetsNoTargetProduct_awr.txt";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         Operator operator = new Operators.InitSetsNoTargetProductOperator();
-        operator.setParameter("outputFilePath", outputFile.getAbsolutePath());
+        operator.setParameter("outputFilePath", outputFile.toAbsolutePath().toString());
         writeProduct(operator, "InitSetsNoTargetProduct");
         assertExpectedFileExists(outputFile);
     }
@@ -559,9 +552,9 @@ public class OperatorExecutionsTest {
     @Test
     public void testInitSetsNoTargetProductOperatorWorksWithOnlyInitialize() {
         String outputFileName = "OperatorExecutionsTest/InitSetsNoTargetProduct_oi.txt";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         Operator operator = new Operators.InitSetsNoTargetProductOperator();
-        operator.setParameter("outputFilePath", outputFile.getAbsolutePath());
+        operator.setParameter("outputFilePath", outputFile.toAbsolutePath().toString());
         onlyInitializeProduct(operator);
         assertExpectedFileExists(outputFile);
     }
@@ -569,26 +562,26 @@ public class OperatorExecutionsTest {
     @Test
     public void testInitSetsNoTargetProductOperatorWorksWithRunAsSingleOperatorInGpt() throws Exception {
         String outputFileName = "OperatorExecutionsTest/InitSetsNoTargetProduct_rasoigpt.txt";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
-        runSingleOperatorInGpt("InitSetsNoTargetProduct", new String[]{"outputFilePath", outputFile.getAbsolutePath()});
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        runSingleOperatorInGpt("InitSetsNoTargetProduct", new String[]{"outputFilePath", outputFile.toAbsolutePath().toString()});
         assertExpectedFileExists(outputFile);
     }
 
     @Test
     public void testInitSetsNoTargetProductOperatorWorksWithCreateProductFromGPF() {
         String outputFileName = "OperatorExecutionsTest/InitAndDoExecuteSetNoTargetProduct_cpfgpf.txt";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         createProductFromGPF("InitAndDoExecuteSetNoTargetProduct",
-                new String[]{"outputFilePath", outputFile.getAbsolutePath()});
+                new String[]{"outputFilePath", outputFile.toAbsolutePath().toString()});
         assertExpectedFileExists(outputFile);
     }
 
     @Test
     public void testInitSetsNoTargetProductOperatorWorksWithRunAsSingleOperatorInGraph() throws Exception {
         String outputFileName = "OperatorExecutionsTest/InitSetsNoTargetProduct_rasoig.txt";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         String parameter = PARAMETER_PART.replace("{parameter_name}", "outputFilePath").
-                replace("{parameter_value}", outputFile.getAbsolutePath());
+                replace("{parameter_value}", outputFile.toAbsolutePath().toString());
         String parametersPart = PARAMETERS_PART.replace("{parameter}", parameter);
         runAsSingleOperatorInGraph("InitSetsNoTargetProduct", parametersPart);
         assertExpectedFileExists(outputFile);
@@ -596,7 +589,7 @@ public class OperatorExecutionsTest {
 
     private Product writeAndReadProduct(Operator operator, String operatorName) throws IOException {
         String outputFileName = "OperatorExecutionsTest/" + operatorName + "_awr.dim";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         GPF.writeProduct(operator.getTargetProduct(), outputFile, "BEAM-DIMAP", false,
                 ProgressMonitor.NULL);
         return ProductIO.readProduct(outputFile);
@@ -604,7 +597,7 @@ public class OperatorExecutionsTest {
 
     private void writeProduct(Operator operator, String operatorName) throws IOException {
         String outputFileName = "OperatorExecutionsTest/" + operatorName + "_aw.dim";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         GPF.writeProduct(operator.getTargetProduct(), outputFile, "BEAM-DIMAP", false,
                 ProgressMonitor.NULL);
     }
@@ -620,8 +613,8 @@ public class OperatorExecutionsTest {
 
     private String runSingleOperatorInGpt(String operatorName, String[] parameters) throws Exception {
         String outputFileName = "OperatorExecutionsTest/" + operatorName + "_rasoigpt.dim";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
-        String outputFilePath = outputFile.getAbsolutePath();
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.toAbsolutePath().toString();
         ArrayList<String> arguments = new ArrayList<>();
         arguments.add(operatorName);
         for (int i = 0; i < parameters.length; i += 2) {
@@ -650,29 +643,29 @@ public class OperatorExecutionsTest {
         String graph = SINGLE_OPERATOR_GRAPH.replace("{operator_name}", operatorName);
         graph = graph.replace("{parameter_part}", parameterPart);
         String graphFileName = "OperatorExecutionsTest/" + operatorName + "_rasoig.xml";
-        File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
-        PrintWriter printWriter = new PrintWriter(graphFile);
+        Path graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
+        PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(graphFile));
         printWriter.print(graph);
         printWriter.close();
         String outputFileName = "OperatorExecutionsTest/" + operatorName + "_rasoig.dim";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
-        String outputFilePath = outputFile.getAbsolutePath();
-        GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.toAbsolutePath().toString();
+        GPT.run(new String[]{graphFile.toAbsolutePath().toString(), "-t", outputFilePath});
         return outputFilePath;
     }
 
     private void assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_oneBand(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_BAND_MATHS_GRAPH.replace("{operator_name}", operatorName);
         String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_bm.xml";
-        File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
-        PrintWriter printWriter = new PrintWriter(graphFile);
+        Path graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
+        PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(graphFile));
         printWriter.print(graph);
         printWriter.close();
 
         String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_bm.dim";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
-        String outputFilePath = outputFile.getAbsolutePath();
-        GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.toAbsolutePath().toString();
+        GPT.run(new String[]{graphFile.toAbsolutePath().toString(), "-t", outputFilePath});
         Product product = ProductIO.readProduct(outputFilePath);
         Band band = product.getBand("computed_band1");
         assertNotNull(band);
@@ -682,15 +675,15 @@ public class OperatorExecutionsTest {
     private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_oneBand(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_GRAPH.replace("{operator_name}", operatorName);
         String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.xml";
-        File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
-        PrintWriter printWriter = new PrintWriter(graphFile);
+        Path graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
+        PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(graphFile));
         printWriter.print(graph);
         printWriter.close();
 
         String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.dim";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
-        String outputFilePath = outputFile.getAbsolutePath();
-        GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.toAbsolutePath().toString();
+        GPT.run(new String[]{graphFile.toAbsolutePath().toString(), "-t", outputFilePath});
         Product product = ProductIO.readProduct(outputFilePath);
         Band band = product.getBand("computed_band1");
         assertNotNull(band);
@@ -700,15 +693,15 @@ public class OperatorExecutionsTest {
     private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_twoBands(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_GRAPH.replace("{operator_name}", operatorName);
         String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.xml";
-        File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
-        PrintWriter printWriter = new PrintWriter(graphFile);
+        Path graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
+        PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(graphFile));
         printWriter.print(graph);
         printWriter.close();
 
         String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.dim";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
-        String outputFilePath = outputFile.getAbsolutePath();
-        GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.toAbsolutePath().toString();
+        GPT.run(new String[]{graphFile.toAbsolutePath().toString(), "-t", outputFilePath});
         Product product = ProductIO.readProduct(outputFilePath);
         Band band = product.getBand("computed_band1");
         assertNotNull(band);
@@ -721,15 +714,15 @@ public class OperatorExecutionsTest {
     private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_oneBand(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_AND_COMPUTE_TILE_GRAPH.replace("{operator_name}", operatorName);
         String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.xml";
-        File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
-        PrintWriter printWriter = new PrintWriter(graphFile);
+        Path graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
+        PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(graphFile));
         printWriter.print(graph);
         printWriter.close();
 
         String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.dim";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
-        String outputFilePath = outputFile.getAbsolutePath();
-        GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.toAbsolutePath().toString();
+        GPT.run(new String[]{graphFile.toAbsolutePath().toString(), "-t", outputFilePath});
         Product product = ProductIO.readProduct(outputFilePath);
         Band band = product.getBand("computed_band1");
         assertNotNull(band);
@@ -739,15 +732,15 @@ public class OperatorExecutionsTest {
     private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_twoBands(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_AND_COMPUTE_TILE_GRAPH.replace("{operator_name}", operatorName);
         String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.xml";
-        File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
-        PrintWriter printWriter = new PrintWriter(graphFile);
+        Path graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
+        PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(graphFile));
         printWriter.print(graph);
         printWriter.close();
 
         String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.dim";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
-        String outputFilePath = outputFile.getAbsolutePath();
-        GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.toAbsolutePath().toString();
+        GPT.run(new String[]{graphFile.toAbsolutePath().toString(), "-t", outputFilePath});
         Product product = ProductIO.readProduct(outputFilePath);
         Band band = product.getBand("computed_band1");
         assertNotNull(band);
@@ -760,15 +753,15 @@ public class OperatorExecutionsTest {
     private void assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_twoBands(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_BAND_MATHS_GRAPH_2.replace("{operator_name}", operatorName);
         String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig.xml";
-        File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
-        PrintWriter printWriter = new PrintWriter(graphFile);
+        Path graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
+        PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(graphFile));
         printWriter.print(graph);
         printWriter.close();
 
         String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig.dim";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
-        String outputFilePath = outputFile.getAbsolutePath();
-        GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.toAbsolutePath().toString();
+        GPT.run(new String[]{graphFile.toAbsolutePath().toString(), "-t", outputFilePath});
         Product product = ProductIO.readProduct(outputFilePath);
         Band band1 = product.getBand("computed_band1");
         assertNotNull(band1);
@@ -787,8 +780,8 @@ public class OperatorExecutionsTest {
         }
     }
 
-    private void assertExpectedFileExists(File outputFile) {
-        assert (outputFile.exists());
+    private void assertExpectedFileExists(Path outputFile) {
+        assert (Files.exists(outputFile));
     }
 
 

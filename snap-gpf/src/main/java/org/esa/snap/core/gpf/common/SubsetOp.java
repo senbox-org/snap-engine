@@ -50,7 +50,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
 
 import java.awt.Rectangle;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,7 +116,7 @@ public class SubsetOp extends Operator {
             description = "Forces the operator to extend the subset region to the full swath.")
     private boolean fullSwath;
     @Parameter(description = "The file from which the polygon is read.")
-    private File vectorFile;
+    private Path vectorFile;
 
     @Parameter(converter = JtsGeometryConverter.class,
             description = "The subset region in geographical coordinates using WKT-format,\n" +
@@ -219,7 +219,7 @@ public class SubsetOp extends Operator {
                 if (this.polygonRegion != null) {
                     this.productSubsetByPolygon.loadPolygonFromWKTString(this.polygonRegion.toText(), false, productMetadata, ProgressMonitor.NULL);
                 } else {
-                    this.vectorFile = NioPaths.get(this.vectorFile.toString()).toFile();
+                    this.vectorFile = NioPaths.get(this.vectorFile.toString());
                     this.productSubsetByPolygon.loadPolygonFromVectorFile(this.vectorFile, productMetadata, ProgressMonitor.NULL);
                 }
                 if (referenceBand != null) {

@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
-import java.io.File;
+import java.nio.file.Path;
 
 
 public class WriteVirtualBandWithWriteOpTest {
@@ -28,7 +28,7 @@ public class WriteVirtualBandWithWriteOpTest {
             registry.addWriterPlugIn(mockPlugin);
 
             Mockito.when(mockPlugin.getFormatNames()).thenReturn(new String[]{"Dummy-Mock-Format"});
-            Mockito.when(mockPlugin.getOutputTypes()).thenReturn(new Class[]{File.class});
+            Mockito.when(mockPlugin.getOutputTypes()).thenReturn(new Class[]{Path.class});
 
             ProductWriter mockedWriter = Mockito.mock(ProductWriter.class);
             Mockito.when(mockedWriter.shouldWrite(Mockito.any(Band.class))).thenReturn(true);
@@ -38,7 +38,7 @@ public class WriteVirtualBandWithWriteOpTest {
 
             Product productToWrite = new Product("TODO", "TBD", 10, 10);
             productToWrite.addBand(new VirtualBand("virtband", ProductData.TYPE_FLOAT32, 10, 10, "3 * 4"));
-            WriteOp writeOp = new WriteOp(productToWrite, new File("notUsed.nc"), "Dummy-Mock-Format");
+            WriteOp writeOp = new WriteOp(productToWrite, Path.of("notUsed.nc"), "Dummy-Mock-Format");
             writeOp.writeProduct(ProgressMonitor.NULL);
             writeOp.dispose();
 

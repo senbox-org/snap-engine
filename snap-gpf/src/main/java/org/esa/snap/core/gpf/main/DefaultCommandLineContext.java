@@ -18,6 +18,7 @@ package org.esa.snap.core.gpf.main;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.core.PrintWriterConciseProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -36,13 +37,11 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -58,8 +57,8 @@ class DefaultCommandLineContext implements CommandLineContext {
 
     @Override
     public Product readProduct(String productFilePath, Map<String, String> readParams) throws IOException {
-        final File input = new File(productFilePath);
-        if (!input.exists()) {
+        final Path input = Path.of(productFilePath);
+        if (!Files.exists(input)) {
             throw new OperatorException("'" + productFilePath + "' file didn't exist");
         }
         final ProductReader productReader = ProductIO.getProductReaderForInput(input);
@@ -94,7 +93,7 @@ class DefaultCommandLineContext implements CommandLineContext {
 
     @Override
     public void writeProduct(Product targetProduct, String filePath, String formatName, boolean clearCacheAfterRowWrite) throws IOException {
-        GPF.writeProduct(targetProduct, new File(filePath), formatName, clearCacheAfterRowWrite, false, new PrintWriterConciseProgressMonitor(System.out));
+        GPF.writeProduct(targetProduct, Path.of(filePath), formatName, clearCacheAfterRowWrite, false, new PrintWriterConciseProgressMonitor(System.out));
     }
 
     @Override
@@ -126,20 +125,20 @@ class DefaultCommandLineContext implements CommandLineContext {
     }
 
     @Override
-    public Reader createReader(String textFilePath) throws FileNotFoundException {
-        return new FileReader(textFilePath);
+    public Reader createReader(String textFilePath) throws IOException {
+        return Files.newBufferedReader(Path.of(textFilePath));
     }
 
     @Override
     public Writer createWriter(String fileName) throws IOException {
-        return new FileWriter(fileName);
+        return Files.newBufferedWriter(Path.of(fileName));
     }
 
     @Override
     public String[] list(String path) throws IOException {
-        File directory = new File(path);
-        if (directory.exists() && directory.isDirectory()) {
-            return directory.list();
+        Path directory = Path.of(path);
+        if (Files.exists(directory) && Files.isDirectory(directory)) {
+            return IOHelper.list(directory).toArray(new String[0]);
         } else {
             return null;
         }
@@ -147,11 +146,11 @@ class DefaultCommandLineContext implements CommandLineContext {
 
     @Override
     public boolean fileExists(String fileName) {
-        return new File(fileName).exists();
+        return Files.exists(Path.of(fileName));
     }
 
     @Override
     public boolean isFile(String path) {
-        return new File(path).isFile();
+        return Files.isRegularFile(Path.of(path));
     }
 }

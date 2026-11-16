@@ -5,13 +5,10 @@ import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 /**
  * Created by obarrile on 13/04/2019.
@@ -49,10 +46,10 @@ public class ResamplingPreset {
      *
      * @throws IOException if an I/O error occurs
      */
-    public static ResamplingPreset loadResamplingPreset(final File file) throws IOException {
+    public static ResamplingPreset loadResamplingPreset(final Path file) throws IOException {
 
         ArrayList<BandResamplingPreset> bandResamplingPresets = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));) {
+        try (BufferedReader reader = Files.newBufferedReader(file)) {
             while(reader.ready()) {
                 String line = reader.readLine();
                 BandResamplingPreset bandResamplingPreset = BandResamplingPreset.loadBandResamplingPreset(line);
@@ -115,11 +112,9 @@ public class ResamplingPreset {
      * @param file
      * @return true if success
      */
-    public boolean saveToFile(File file) {
-        BufferedWriter writer = null;
+    public boolean saveToFile(Path file) {
         boolean success = true;
-        try {
-            writer = new BufferedWriter(new FileWriter(file, false));
+        try (BufferedWriter writer = Files.newBufferedWriter(file)){
             for(BandResamplingPreset bandResamplingPreset : bandResamplingPresets) {
                 writer.write(bandResamplingPreset.toString());
                 writer.write("\n");
@@ -127,14 +122,6 @@ public class ResamplingPreset {
         } catch (IOException e) {
             //do nothing
             success = false;
-        } finally {
-            if(writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    //ignore
-                }
-            }
         }
         return success;
     }
@@ -145,11 +132,9 @@ public class ResamplingPreset {
      * @param product
      * @return
      */
-    public boolean saveToFile(File file, Product product) {
-        BufferedWriter writer = null;
+    public boolean saveToFile(Path file, Product product) {
         boolean success = true;
-        try {
-            writer = new BufferedWriter(new FileWriter(file, false));
+        try (BufferedWriter writer = new BufferedWriter(Files.newBufferedWriter(file))){
             for(BandResamplingPreset bandResamplingPreset : bandResamplingPresets) {
                 if(product.containsRasterDataNode(bandResamplingPreset.getBandName())) {
                     writer.write(bandResamplingPreset.toString());
@@ -159,14 +144,6 @@ public class ResamplingPreset {
         } catch (IOException e) {
             //do nothing
             success = false;
-        } finally {
-            if(writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    //ignore
-                }
-            }
         }
         return success;
     }

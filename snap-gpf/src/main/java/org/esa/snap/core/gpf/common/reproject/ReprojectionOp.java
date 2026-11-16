@@ -68,7 +68,7 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -152,7 +152,7 @@ public class ReprojectionOp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "A file which contains the target Coordinate Reference System in WKT format.")
-    private File wktFile;
+    private Path wktFile;
 
     @Parameter(description = "A text specifying the target Coordinate Reference System, either in WKT or as an " +
             "authority code. For appropriate EPSG authority codes see (www.epsg-registry.org). " +

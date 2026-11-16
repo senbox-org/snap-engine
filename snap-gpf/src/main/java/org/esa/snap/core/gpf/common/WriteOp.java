@@ -17,8 +17,12 @@
 package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.multilevel.MultiLevelImage;
-import org.esa.snap.core.dataio.*;
+import org.esa.snap.core.dataio.EncodeQualification;
+import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.dimap.DimapProductWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -42,11 +46,17 @@ import org.esa.snap.core.util.math.MathUtils;
 
 import javax.media.jai.JAI;
 import javax.media.jai.TileCache;
-import java.awt.*;
-import java.io.File;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.IOException;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This standard operator is used to store a data product to a specified file location.
@@ -100,7 +110,7 @@ public class WriteOp extends Operator {
     private Product sourceProduct;
 
     @Parameter(description = "The output file to which the data product is written.")
-    private File file;
+    private Path file;
 
     @Parameter(defaultValue = ProductIO.DEFAULT_FORMAT_NAME,
             description = "The name of the output file format.")
@@ -137,7 +147,7 @@ public class WriteOp extends Operator {
         setRequiresAllBands(true);
     }
 
-    public WriteOp(Product sourceProduct, File file, String formatName) {
+    public WriteOp(Product sourceProduct, Path file, String formatName) {
         this();
         Guardian.assertNotNull("file", file);
         this.sourceProduct = sourceProduct;
@@ -145,11 +155,11 @@ public class WriteOp extends Operator {
         this.formatName = formatName;
     }
 
-    public File getFile() {
+    public Path getFile() {
         return file;
     }
 
-    public void setFile(File file) {
+    public void setFile(Path file) {
         this.file = file;
     }
 
@@ -244,7 +254,7 @@ public class WriteOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         targetProduct = sourceProduct;
-        outputFileExists = targetProduct.getFileLocation() != null && targetProduct.getFileLocation().exists();
+        outputFileExists = targetProduct.getFileLocation() != null && Files.exists(targetProduct.getFileLocation());
         productWriter = ProductIO.getProductWriter(formatName);
         if (productWriter == null) {
             throw new OperatorException("No data product writer for the '" + formatName + "' format available");
@@ -332,14 +342,14 @@ public class WriteOp extends Operator {
                     targetProduct.setPreferredTileSize(tileSizes[0]);
                 }
                 // Create not existing directories before writing
-                if (file != null && file.getParentFile() != null) {
-                    file.getParentFile().mkdirs();
+                if (file != null && file.getParent() != null) {
+                    IOHelper.createDirectories(file.getParent());
                 }
                 productWriter.writeProductNodes(targetProduct, file);
             }
             pm.worked(1);
         } catch (Exception ex){
-            throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", ex);
+            throw new OperatorException("Not able to write product file: '" + file.toAbsolutePath() + "'", ex);
         } finally {
             pm.done();
         }
@@ -396,7 +406,7 @@ public class WriteOp extends Operator {
             if (e instanceof OperatorException) {
                 throw (OperatorException) e;
             } else {
-                throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", e);
+                throw new OperatorException("Not able to write product file: '" + file.toAbsolutePath() + "'", e);
             }
         }
     }

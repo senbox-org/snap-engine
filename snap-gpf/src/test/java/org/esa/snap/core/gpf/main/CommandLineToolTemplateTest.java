@@ -1,5 +1,7 @@
 package org.esa.snap.core.gpf.main;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -10,9 +12,9 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import java.io.File;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -29,17 +31,17 @@ public class CommandLineToolTemplateTest {
     private CommandLineTool tool;
     private CommandLineTestContext context;
 
-    private static File sourceFile;
-    private static File targetFile;
+    private static Path sourceFile;
+    private static Path targetFile;
 
     @BeforeClass
     public static void initClass() throws Exception {
-        String tempDir = System.getProperty("java.io.tmpdir");
-        sourceFile = new File(tempDir, "test.testdata");
+        Path tempDir = IOHelper.createATempDir();
+        sourceFile = tempDir.resolve("test.testdata");
         // only run this test if the file could be created or it already exists
-        Assume.assumeTrue(sourceFile.createNewFile() || sourceFile.exists());
-        sourceFile.deleteOnExit();
-        targetFile = new File("20120607-CHL-1D.testdata");
+        Assume.assumeTrue(IOHelper.createFile(sourceFile) || Files.exists(sourceFile));
+        IOHelper.deleteOnExit(sourceFile);
+        targetFile = Path.of("20120607-CHL-1D.testdata");
     }
 
     @Before
@@ -53,9 +55,9 @@ public class CommandLineToolTemplateTest {
     public void testTemplateMergingWithOpName() throws Exception {
         String metadataPath = "test.properties";
         String parameterPath = "params.xml";
-        File templateDir = getTemplateDir();
+        Path templateDir = getTemplateDir();
 
-        TestProductIOPlugIn.INSTANCE.getSourceProducts().put(sourceFile.getCanonicalFile(), createSourceProduct());
+        TestProductIOPlugIn.INSTANCE.getSourceProducts().put(sourceFile.toRealPath(), createSourceProduct());
 
         context.textFiles.put(metadataPath, "" +
                 "processingCenter=BC\n" +
@@ -71,10 +73,10 @@ public class CommandLineToolTemplateTest {
 
         tool.run("Reproject",
                 "-p", parameterPath,
-                "-t", targetFile.getPath(),
+                "-t", targetFile.toString(),
                 "-m", metadataPath,
-                "-v", templateDir.getCanonicalPath(),
-                sourceFile.getCanonicalPath());
+                "-v", templateDir.toRealPath().toString(),
+                sourceFile.toRealPath().toString());
 
         assertNotNull(context.writers.get("20120607-CHL-1D-op-metadata.xml"));
         assertNotNull(context.writers.get("20120607-CHL-1D-op-metadata.html"));
@@ -148,7 +150,7 @@ public class CommandLineToolTemplateTest {
 
         String metadataPath = "test.properties";
         String parameterPath = "params.txt";
-        File templateDir = getTemplateDir();
+        Path templateDir = getTemplateDir();
 
         TestProductIOPlugIn.INSTANCE.getSourceProducts().put(sourceFile, createSourceProduct());
 
@@ -184,10 +186,10 @@ public class CommandLineToolTemplateTest {
                 "pixelSizeY = 0.02\n");
 
         tool.run("graph.xml",
-                "-t", targetFile.getPath(),
+                "-t", targetFile.toString(),
                 "-p", parameterPath,
                 "-m", metadataPath,
-                "-v", templateDir.getCanonicalPath(),
+                "-v", templateDir.toRealPath().toString(),
                 "-Ssrc=" + sourceFile);
 
         final Map<Object, Product> targetProducts = TestProductIOPlugIn.INSTANCE.getTargetProducts();
@@ -284,7 +286,7 @@ public class CommandLineToolTemplateTest {
 
         String metadataPath = "test.properties";
         String parameterPath = "params.txt";
-        File templateDir = getTemplateDir();
+        Path templateDir = getTemplateDir();
 
         String sourceFilePath = "c:\\dummy";
         TestProductIOPlugIn.INSTANCE.getSourceProducts().put(sourceFilePath, createSourceProduct());
@@ -321,10 +323,10 @@ public class CommandLineToolTemplateTest {
 
         try {
             tool.run("graph.xml",
-                    "-t", targetFile.getCanonicalPath(),
+                    "-t", targetFile.toRealPath().toString(),
                     "-p", parameterPath,
                     "-m", metadataPath,
-                    "-v", templateDir.getCanonicalPath(),
+                    "-v", templateDir.toRealPath().toString(),
                     "-Ssrc=" + sourceFilePath);
 
             fail("'file' parameter must exist");
@@ -335,9 +337,12 @@ public class CommandLineToolTemplateTest {
 
     }
 
-    private File getTemplateDir() throws URISyntaxException {
+    private Path getTemplateDir() {
         URL templateUrl = getClass().getResource("graph-metadata.xml.vm");
-        return new File(templateUrl.toURI()).getParentFile();
+        assertNotNull(templateUrl);
+        final Path filePath = UrlHelper.urlToFile(templateUrl);
+        assertNotNull(filePath);
+        return filePath.getParent();
     }
 
     private Product createSourceProduct() throws FactoryException, TransformException {

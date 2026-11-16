@@ -2,13 +2,13 @@ package org.esa.snap.core.gpf.main;
 
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
-import java.io.FilenameFilter;
+import java.nio.file.Path;
+import java.util.function.Predicate;
 
 /**
  * @author Norman Fomferra
  */
-class SourceMetadataFilenameFilter implements FilenameFilter {
+class SourceMetadataFilenameFilter implements Predicate<Path> {
     private final String fileName;
     private final String wantedPrefix;
 
@@ -18,11 +18,10 @@ class SourceMetadataFilenameFilter implements FilenameFilter {
     }
 
     @Override
-    public boolean accept(File dir, String name) {
+    public boolean test(Path dir) {
+        final String name = dir.getFileName().toString();
         if (!name.equalsIgnoreCase(fileName)) {
-            if (name.startsWith(wantedPrefix)) {
-                return true;
-            }
+            return name.startsWith(wantedPrefix);
         }
         return false;
     }

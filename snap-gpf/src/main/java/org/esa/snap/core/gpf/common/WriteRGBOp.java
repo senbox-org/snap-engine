@@ -36,7 +36,7 @@ import javax.media.jai.JAI;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.renderable.ParameterBlock;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +56,7 @@ public class WriteRGBOp extends Operator {
     @Parameter(defaultValue = "png")
     private String formatName;
     @Parameter(description = "The file to which the image is written.")
-    private File file;
+    private Path file;
 
     @SourceProduct(alias = "input")
     private Product sourceProduct;

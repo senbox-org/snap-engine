@@ -25,6 +25,7 @@ import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
 import com.bc.ceres.core.PrintWriterConciseProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.metadata.MetadataResourceEngine;
 import com.bc.ceres.resource.Resource;
 import com.thoughtworks.xstream.io.copy.HierarchicalStreamCopier;
@@ -60,13 +61,23 @@ import org.xmlpull.mxp1.MXParser;
 
 import javax.media.jai.JAI;
 import java.awt.Rectangle;
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -263,12 +274,12 @@ public class CommandLineTool implements GraphProcessingObserver {
 
         // Derived properties (shortcuts).
         // Check if we really want them, if so, we have to maintain them in the future (nf)
-        File targetFile = new File(commandLineArgs.getTargetFilePath());
-        File parentFile = targetFile.getParentFile();
+        Path targetFile = Path.of(commandLineArgs.getTargetFilePath());
+        Path parentFile = targetFile.getParent();
         velocityContext.put("targetFile", targetFile);
-        velocityContext.put("targetDir", parentFile != null ? parentFile : new File("."));
+        velocityContext.put("targetDir", parentFile != null ? parentFile : Path.of("."));
         velocityContext.put("targetBaseName", FileUtils.getFilenameWithoutExtension(targetFile));
-        velocityContext.put("targetName", targetFile.getName());
+        velocityContext.put("targetName", targetFile.getFileName());
         velocityContext.put("targetFormat", commandLineArgs.getTargetFormatName());
 
         // Check if we also put the following into the context?
@@ -440,10 +451,10 @@ public class CommandLineTool implements GraphProcessingObserver {
         executeGraph(graph);
 
         VelocityContext velocityContext = metadataResourceEngine.getVelocityContext();
-        File graphFile = new File(commandLineArgs.getGraphFilePath());
+        Path graphFile = Path.of(commandLineArgs.getGraphFilePath());
         velocityContext.put("graph", graph);
 
-        metadataResourceEngine.readResource("graphXml", graphFile.getPath());
+        metadataResourceEngine.readResource("graphXml", graphFile.toString());
     }
 
     private static Node findWriterNode(final Graph graph) {
@@ -507,7 +518,7 @@ public class CommandLineTool implements GraphProcessingObserver {
     }
 
     private Map<String, Product> getSourceProductMap(Map<String, String> rawParametersMap) throws IOException {
-        SortedMap<File, Product> fileToProductMap = new TreeMap<>();
+        SortedMap<Path, Product> fileToProductMap = new TreeMap<>();
         SortedMap<String, Product> productMap = new TreeMap<>();
         SortedMap<String, String> sourceFilePathsMap = commandLineArgs.getSourceFilePathMap();
         // Check if (and extract) advanced read parameters are set
@@ -535,11 +546,11 @@ public class CommandLineTool implements GraphProcessingObserver {
     }
 
 
-    private Product addProduct(String sourceFilepath, Map<File, Product> fileToProductMap, Map<String, String> readParams) throws IOException {
-        File sourceFile = new File(sourceFilepath).getCanonicalFile();
+    private Product addProduct(String sourceFilepath, Map<Path, Product> fileToProductMap, Map<String, String> readParams) throws IOException {
+        Path sourceFile = Path.of(sourceFilepath).toRealPath();
         Product product = fileToProductMap.get(sourceFile);
         if (product == null) {
-            String s = sourceFile.getPath();
+            String s = sourceFile.toString();
             product = readProduct(s, readParams);
             if (product == null) {
                 throw new IOException("No appropriate product reader found for " + sourceFile);
@@ -576,7 +587,7 @@ public class CommandLineTool implements GraphProcessingObserver {
     }
 
     private Map<String, String> getSourceNodeIdMap() throws IOException {
-        SortedMap<File, String> fileToNodeIdMap = new TreeMap<>();
+        SortedMap<Path, String> fileToNodeIdMap = new TreeMap<>();
         SortedMap<String, String> nodeIdMap = new TreeMap<>();
         SortedMap<String, String> sourceFilePathsMap = commandLineArgs.getSourceFilePathMap();
         for (Entry<String, String> entry : sourceFilePathsMap.entrySet()) {
@@ -589,8 +600,8 @@ public class CommandLineTool implements GraphProcessingObserver {
     }
 
     private String addNodeId(String sourceId, String sourceFilePath,
-                             Map<File, String> fileToNodeId) throws IOException {
-        File sourceFile = new File(sourceFilePath).getCanonicalFile();
+                             Map<Path, String> fileToNodeId) throws IOException {
+        Path sourceFile = Path.of(sourceFilePath).toAbsolutePath().normalize();
         return fileToNodeId.computeIfAbsent(sourceFile, k -> READ_OP_ID_PREFIX + sourceId);
     }
 
@@ -613,17 +624,17 @@ public class CommandLineTool implements GraphProcessingObserver {
 
     private void runVelocityTemplates() {
         String velocityDirPath = commandLineArgs.getVelocityTemplateDirPath();
-        File velocityDir;
+        Path velocityDir;
         boolean velocityDirPathGiven;
         if (velocityDirPath != null) {
-            velocityDir = new File(velocityDirPath);
+            velocityDir = Path.of(velocityDirPath);
             velocityDirPathGiven = true;
         } else {
-            velocityDir = new File(CommandLineArgs.DEFAULT_VELOCITY_TEMPLATE_DIRPATH);
+            velocityDir = Path.of(CommandLineArgs.DEFAULT_VELOCITY_TEMPLATE_DIRPATH);
             velocityDirPathGiven = false;
         }
 
-        String[] templateNames = velocityDir.list((dir, name) -> name.toLowerCase().endsWith(CommandLineArgs.VELOCITY_TEMPLATE_EXTENSION));
+        Collection<String> templateNames = IOHelper.list(velocityDir, path -> path.getFileName().toString().toLowerCase().endsWith(CommandLineArgs.VELOCITY_TEMPLATE_EXTENSION));
 
         Logger logger = commandLineContext.getLogger();
 
@@ -635,7 +646,7 @@ public class CommandLineTool implements GraphProcessingObserver {
             return;
         }
 
-        if (templateNames.length == 0) {
+        if (templateNames.isEmpty()) {
             if (velocityDirPathGiven) {
                 String msgPattern = "Velocity template directory '%s' does not contain any templates (*.vm)";
                 logger.warning(String.format(msgPattern, velocityDir));

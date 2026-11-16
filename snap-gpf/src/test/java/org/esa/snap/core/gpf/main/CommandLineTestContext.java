@@ -1,13 +1,13 @@
 package org.esa.snap.core.gpf.main;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,12 +26,12 @@ public class CommandLineTestContext extends DefaultCommandLineContext {
     final Map<String, StringWriter> writers = new HashMap<>();
 
     @Override
-    public Reader createReader(String filePath) throws FileNotFoundException {
-        File file = new File(filePath);
-        String fileName = file.getName();
+    public Reader createReader(String filePath) throws IOException {
+        final Path file = Path.of(filePath);
+        final String fileName = file.getFileName().toString();
         if (!textFiles.containsKey(fileName)) {
-            if (file.exists()) {
-                return new FileReader(file);
+            if (Files.exists(file)) {
+                return Files.newBufferedReader(file);
             } else {
                 throw new FileNotFoundException(filePath);
             }

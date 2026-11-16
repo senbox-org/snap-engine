@@ -23,8 +23,6 @@ import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.graph.GraphProcessingObserver;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Map;
 import java.util.logging.Logger;
 

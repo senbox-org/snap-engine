@@ -10,17 +10,16 @@ import com.thoughtworks.xstream.converters.basic.AbstractSingleValueConverter;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.StreamException;
-import org.esa.snap.core.gpf.Operator;
-import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.core.util.converters.JavaTypeConverter;
-
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.core.util.converters.JavaTypeConverter;
 
 /**
  * Default implementation of the {@link OperatorDescriptor} interface.
@@ -163,10 +162,10 @@ public class DefaultOperatorDescriptor implements OperatorDescriptor {
      *                    class defined by the {@code operatorClass} tag.
      * @return A new operator descriptor.
      */
-    public static DefaultOperatorDescriptor fromXml(File file, ClassLoader classLoader) throws OperatorException {
-        String resourceName = file.getPath();
+    public static DefaultOperatorDescriptor fromXml(Path file, ClassLoader classLoader) throws OperatorException {
+        String resourceName = file.toString();
         try {
-            try (FileReader reader = new FileReader(file)) {
+            try (Reader reader = Files.newBufferedReader(file)) {
                 return DefaultOperatorDescriptor.fromXml(reader, resourceName, classLoader);
             }
         } catch (IOException e) {

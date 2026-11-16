@@ -51,12 +51,13 @@ import org.opengis.referencing.operation.TransformException;
 
 import javax.swing.SwingUtilities;
 import java.awt.geom.AffineTransform;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.io.Reader;
 import java.io.StreamTokenizer;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -77,7 +78,7 @@ public class ImportVectorOp extends Operator {
     private Product targetProduct = null;
 
     @Parameter(label = "Vector File")
-    private File vectorFile = null;
+    private Path vectorFile = null;
 
     @Parameter(label = "Separate Shapes", defaultValue = "true")
     private boolean separateShapes = true;
@@ -98,7 +99,7 @@ public class ImportVectorOp extends Operator {
             }
 
             if (vectorFile != null) {
-                this.vectorFile = NioPaths.get(this.vectorFile.toString()).toFile();
+                this.vectorFile = NioPaths.get(this.vectorFile.toString());
                 importGeometry(targetProduct, vectorFile);
             }
         } catch (Throwable e) {
@@ -106,7 +107,7 @@ public class ImportVectorOp extends Operator {
         }
     }
 
-    private void importGeometry(final Product product, final File file) {
+    private void importGeometry(final Product product, final Path file) {
 
         final GeoCoding geoCoding = product.getSceneGeoCoding();
         if (isShapefile(file) && (geoCoding == null || !geoCoding.canGetPixelPos())) {
@@ -145,19 +146,19 @@ public class ImportVectorOp extends Operator {
         return name;
     }
 
-    private static boolean isShapefile(final File file) {
-        return file.getName().toLowerCase().endsWith(".shp");
+    private static boolean isShapefile(final Path file) {
+        return file.getFileName().toString().toLowerCase().endsWith(".shp");
     }
 
     interface VectorDataNodeReader {
 
-        VectorDataNode readVectorDataNode(File file, Product product, String helpId, ProgressMonitor pm) throws IOException;
+        VectorDataNode readVectorDataNode(Path file, Product product, String helpId, ProgressMonitor pm) throws IOException;
     }
 
     static class VdnShapefileReader implements VectorDataNodeReader {
 
         @Override
-        public VectorDataNode readVectorDataNode(File file, Product product, String helpId, ProgressMonitor pm) throws IOException {
+        public VectorDataNode readVectorDataNode(Path file, Product product, String helpId, ProgressMonitor pm) throws IOException {
 
             MyFeatureCrsProvider crsProvider = new MyFeatureCrsProvider(helpId);
             FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = FeatureUtils.loadShapefileForProduct(file,
@@ -205,13 +206,12 @@ public class ImportVectorOp extends Operator {
     static class VdnTextReader implements VectorDataNodeReader {
 
         @Override
-        public VectorDataNode readVectorDataNode(File file, Product product, String helpId, ProgressMonitor pm) throws IOException {
+        public VectorDataNode readVectorDataNode(Path file, Product product, String helpId, ProgressMonitor pm) throws IOException {
             final ArrayList<PixelPos> pixelPositions = new ArrayList<>(256);
             final GeoCoding geoCoding = product.getSceneGeoCoding();
 
-            final FileReader fileReader = new FileReader(file);
-            final LineNumberReader reader = new LineNumberReader(fileReader);
-            try {
+            try (final Reader fileReader = Files.newBufferedReader(file);
+                 LineNumberReader reader = new LineNumberReader(fileReader)) {
 
                 final StreamTokenizer st = createConfiguredTokenizer(reader);
 
@@ -299,9 +299,6 @@ public class ImportVectorOp extends Operator {
                         Debug.assertTrue(false);
                     }
                 }
-            } finally {
-                reader.close();
-                fileReader.close();
             }
 
             Geometry geometry = null;

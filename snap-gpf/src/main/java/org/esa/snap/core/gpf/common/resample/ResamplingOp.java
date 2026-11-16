@@ -809,7 +809,7 @@ public class ResamplingOp extends Operator {
         }
 
         try {
-            selectedResamplingPreset = ResamplingPreset.loadResamplingPreset(resamplingPresetPath.toFile());
+            selectedResamplingPreset = ResamplingPreset.loadResamplingPreset(resamplingPresetPath);
         } catch (IOException e) {
             return;
         }

@@ -15,8 +15,8 @@
  */
 package org.esa.snap.core.gpf.common;
 
-import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
@@ -46,7 +46,7 @@ import org.junit.Test;
 import javax.media.jai.JAI;
 import javax.media.jai.TileScheduler;
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.StringReader;
 import java.nio.file.Files;
 
@@ -59,7 +59,7 @@ public class WriteOpTest {
     private static final int RASTER_HEIGHT = 40;
 
     private AlgoOp.Spi algoSpi = new AlgoOp.Spi();
-    private File outputFile;
+    private Path outputFile;
     private int oldParallelism;
 
     @Before
@@ -75,7 +75,7 @@ public class WriteOpTest {
     @After
     public void tearDown() throws Exception {
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(algoSpi);
-        File parentFile = outputFile.getParentFile();
+        Path parentFile = outputFile.getParent();
         FileUtils.deleteTree(parentFile);
 
         TileScheduler tileScheduler = JAI.getDefaultInstance().getTileScheduler();
@@ -101,7 +101,7 @@ public class WriteOpTest {
                 + "      <source refid=\"node1\"/>\n"
                 + "    </sources>\n"
                 + "    <parameters>\n"
-                + "       <file>" + outputFile.getAbsolutePath() + "</file>\n"
+                + "       <file>" + outputFile.toAbsolutePath() + "</file>\n"
                 + "       <deleteOutputOnFailure>false</deleteOutputOnFailure>\n"
                 + "    </parameters>\n"
                 + "  </node>\n"
@@ -135,19 +135,19 @@ public class WriteOpTest {
     }
 
     @Test
-    public void testWritingEmptyProduct() throws Exception {
+    public void testWritingEmptyProduct() {
         Product product = new Product("empty", "EMPTY", 0, 0);
 
-        File testDir = Files.createTempDirectory("WriteOpTestDir").toFile();
+        Path testDir = IOHelper.createATempDir("WriteOpTestDir");
         try {
-            File testOuptutFile = new File(testDir, "file.dim");
+            Path testOuptutFile = testDir.resolve("file.dim");
             WriteOp writeOp = new WriteOp(product, testOuptutFile, "BEAM-DIMAP");
             writeOp.writeProduct(ProgressMonitor.NULL);
 
             // assert that it is not written
-            assertFalse(testOuptutFile.isFile());
+            assertFalse(Files.isRegularFile(testOuptutFile));
         } finally {
-            testDir.deleteOnExit();
+            IOHelper.deleteOnExit(testDir);
         }
 
     }
@@ -171,7 +171,7 @@ public class WriteOpTest {
                 + "      <source refid=\"node1\"/>\n"
                 + "    </sources>\n"
                 + "    <parameters>\n"
-                + "       <file>" + outputFile.getAbsolutePath() + "</file>\n"
+                + "       <file>" + outputFile.toAbsolutePath() + "</file>\n"
                 + "       <deleteOutputOnFailure>false</deleteOutputOnFailure>\n"
                 + "    </parameters>\n"
                 + "  </node>\n"

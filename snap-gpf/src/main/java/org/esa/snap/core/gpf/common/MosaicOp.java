@@ -60,7 +60,7 @@ import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
-import java.io.File;
+import java.nio.file.Path;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -169,12 +169,12 @@ public class MosaicOp extends Operator {
                     final String newIndex = String.valueOf(sourcesElement.getNumAttributes() + i + 1);
                     final Product sourceProduct = sourceProducts[i];
                     final String attributeName = getSourceProductId(sourceProduct).replaceFirst(oldIndex, newIndex);
-                    final File location = sourceProduct.getFileLocation();
+                    final Path location = sourceProduct.getFileLocation();
                     final ProductData attributeValue;
                     if (location == null) {
                         attributeValue = ProductData.createInstance(product.toString());
                     } else {
-                        attributeValue = ProductData.createInstance(location.getPath());
+                        attributeValue = ProductData.createInstance(location.toString());
                     }
                     final MetadataAttribute attribute = new MetadataAttribute(attributeName, attributeValue, true);
                     sourcesElement.addAttribute(attribute);

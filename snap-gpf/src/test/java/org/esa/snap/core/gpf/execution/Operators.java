@@ -1,6 +1,13 @@
 package org.esa.snap.core.gpf.execution;
 
 import com.bc.ceres.core.ProgressMonitor;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.ConstantDescriptor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -13,12 +20,6 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.StringUtils;
-
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.ConstantDescriptor;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 
 public class Operators {
 
@@ -234,10 +235,11 @@ public class Operators {
         public void doExecute(ProgressMonitor pm) throws OperatorException {
             pm.beginTask("Executing InitAndDoExecuteSetNoTargetProduct", 1);
             try {
-                PrintWriter printWriter = new PrintWriter(new File(outputFilePath));
+                final Path outputFile = Paths.get(outputFilePath);
+                PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(outputFile));
                 printWriter.print("something");
                 printWriter.close();
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 throw new OperatorException(e.getMessage());
             }
             pm.done();
@@ -265,10 +267,11 @@ public class Operators {
         public void initialize() throws OperatorException {
             assert(StringUtils.isNotNullAndNotEmpty(outputFilePath));
             try {
-                PrintWriter printWriter = new PrintWriter(new File(outputFilePath));
+                final Path outputFile = Paths.get(outputFilePath);
+                PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(outputFile));
                 printWriter.print("something");
                 printWriter.close();
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 throw new OperatorException(e.getMessage());
             }
             Product dummyProduct = new Product("dummy", "dummy", 1, 1);

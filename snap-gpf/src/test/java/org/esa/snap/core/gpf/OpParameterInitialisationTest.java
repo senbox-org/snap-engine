@@ -16,13 +16,14 @@
 
 package org.esa.snap.core.gpf;
 
+import java.nio.file.Path;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.junit.Test;
 
-import java.io.File;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * Tests the default value initialisation of GPF operators.
@@ -72,10 +73,11 @@ public class OpParameterInitialisationTest {
         final SomeDerivedOp op = new SomeDerivedOp();
         op.setParameterDefaultValues();
         testParameterValues(op, false);
-        assertEquals(new File("/usr/marco"), op.pFile);
+        final Path expectedPath = Path.of("/usr/marco");
+        assertEquals(expectedPath, op.pFile);
         op.getTargetProduct(); // force initialisation through framework
         testParameterValues(op, true);
-        assertEquals(new File("/usr/marco"), op.pFile);
+        assertEquals(expectedPath, op.pFile);
     }
 
     private void testParameterValues(SomeOp op, boolean expectedInitialiseState) {
@@ -166,7 +168,7 @@ public class OpParameterInitialisationTest {
 
     public static class SomeDerivedOp extends SomeOp {
         @Parameter(defaultValue = "/usr/marco")
-        File pFile;
+        Path pFile;
     }
 
 }

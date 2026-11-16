@@ -37,7 +37,7 @@ import org.esa.snap.core.util.Guardian;
 
 import java.awt.Dimension;
 import java.awt.RenderingHints;
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -433,7 +433,7 @@ public class GPF {
      * @param incremental switch the product writer in incremental mode or not.
      * @param pm          a monitor to inform the user about progress
      */
-    public static void writeProduct(Product product, File file, String formatName, boolean incremental, ProgressMonitor pm) {
+    public static void writeProduct(Product product, Path file, String formatName, boolean incremental, ProgressMonitor pm) {
         writeProduct(product, file, formatName, false, incremental, pm);
     }
 
@@ -448,7 +448,7 @@ public class GPF {
       * @param incremental switch the product writer in incremental mode or not.
       * @param pm          a monitor to inform the user about progress
       */
-     public static void writeProduct(Product product, File file, String formatName, boolean clearCacheAfterRowWrite, boolean incremental, ProgressMonitor pm) {
+     public static void writeProduct(Product product, Path file, String formatName, boolean clearCacheAfterRowWrite, boolean incremental, ProgressMonitor pm) {
          WriteOp writeOp = new WriteOp(product, file, formatName);
          writeOp.setDeleteOutputOnFailure(true);
          writeOp.setWriteEntireTileRows(true);

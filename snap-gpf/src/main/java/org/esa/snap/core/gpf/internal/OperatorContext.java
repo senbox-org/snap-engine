@@ -72,7 +72,7 @@ import java.awt.RenderingHints;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
-import java.io.File;
+import java.nio.file.Path;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -463,7 +463,7 @@ public class OperatorContext {
         if (productManager.contains(targetProduct)) {
             return true;
         }
-        final File file = targetProduct.getFileLocation();
+        final Path file = targetProduct.getFileLocation();
         if (file == null) {
             return false;
         }
@@ -670,7 +670,7 @@ public class OperatorContext {
             }
             final String sourceNodeId;
             if (sourceProduct.getFileLocation() != null) {
-                sourceNodeId = sourceProduct.getFileLocation().toURI().toASCIIString();
+                sourceNodeId = sourceProduct.getFileLocation().toUri().toASCIIString();
             } else if (sourceProduct.getProductReader() instanceof OperatorProductReader) {
                 final OperatorProductReader productReader = (OperatorProductReader) sourceProduct.getProductReader();
                 convertOperatorContextToMetadata(productReader.getOperatorContext(), targetGraphME);

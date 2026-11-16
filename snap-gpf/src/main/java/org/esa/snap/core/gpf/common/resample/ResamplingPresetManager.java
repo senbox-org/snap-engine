@@ -1,10 +1,13 @@
 package org.esa.snap.core.gpf.common.resample;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.SystemUtils;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -13,12 +16,12 @@ import java.util.logging.Level;
  */
 public class ResamplingPresetManager {
     private final List<ResamplingPreset> _resamplingPresets;
-    private final static File resamplingPresetsDir;
+    private final static Path resamplingPresetsDir;
 
     static {
-        resamplingPresetsDir = SystemUtils.getAuxDataPath().resolve("resampling_presets").toFile();
-        if (!resamplingPresetsDir.exists()) {
-            resamplingPresetsDir.mkdirs();
+        resamplingPresetsDir = SystemUtils.getAuxDataPath().resolve("resampling_presets");
+        if (!Files.exists(resamplingPresetsDir)) {
+            IOHelper.createDirectories(resamplingPresetsDir);
         }
     }
 
@@ -27,7 +30,7 @@ public class ResamplingPresetManager {
         loadDefaultResamplingPresets();
     }
 
-    public static File getResamplingPresetsDir() {
+    public static Path getResamplingPresetsDir() {
         return resamplingPresetsDir;
     }
 
@@ -72,15 +75,14 @@ public class ResamplingPresetManager {
      * Loads all profiles from the BEAM default RGB profile location.
      */
     private void loadDefaultResamplingPresets() {
-        if (!getResamplingPresetsDir().exists()) {
-            resamplingPresetsDir.mkdirs();
+        if (!Files.exists(getResamplingPresetsDir())) {
+            IOHelper.createDirectories(resamplingPresetsDir);
             SystemUtils.LOG.log(Level.INFO, "Directory for Resampling presets not found: " + getResamplingPresetsDir());
         }
-        final File[] files = getResamplingPresetsDir().listFiles(
-                (dir, name) -> name.endsWith(ResamplingPreset.FILENAME_EXTENSION) || name.endsWith(
+        final Collection<Path> files = IOHelper.listFiles(getResamplingPresetsDir(), path -> path.getFileName().toString().endsWith(ResamplingPreset.FILENAME_EXTENSION) || path.getFileName().toString().endsWith(
                         ResamplingPreset.FILENAME_EXTENSION.toUpperCase()));
         if (files != null) {
-            for (File file : files) {
+            for (Path file : files) {
                 try {
                     addResamplingPreset(ResamplingPreset.loadResamplingPreset(file));
                 } catch (IOException e) {

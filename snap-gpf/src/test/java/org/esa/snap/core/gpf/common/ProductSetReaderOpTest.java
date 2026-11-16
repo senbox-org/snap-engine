@@ -3,6 +3,8 @@ package org.esa.snap.core.gpf.common;
 import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.graph.Graph;
@@ -12,44 +14,43 @@ import org.esa.snap.core.gpf.graph.GraphProcessor;
 import org.esa.snap.core.gpf.graph.Node;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * test ProductSetReader usage in GPF
  */
 public class ProductSetReaderOpTest {
 
-    private static File outputFile;
+    private static Path outputFile;
 
     @BeforeClass
     public static void setup() {
         outputFile = GlobalTestConfig.getSnapTestDataOutputFile("ProductSetReaderOpTest/writtenProduct.dim");
-        outputFile.getParentFile().mkdirs();
+        IOHelper.createDirectories(outputFile.getParent());
     }
 
     @AfterClass
     public static void teardown() {
-        FileUtils.deleteTree(outputFile.getParentFile());
+        FileUtils.deleteTree(outputFile.getParent());
     }
 
     @Test
-    public void testProductSetGraph() throws IOException, GraphException, URISyntaxException {
+    public void testProductSetGraph() throws IOException, GraphException {
         final String graphPath = getTestFilePath("/org/esa/snap/core/gpf/common/productset/ProductSetMosaicGraph.xml");
-        final File product1 = new File(getTestFilePath("/org/esa/snap/core/gpf/common/productset/subset1.dim"));
-        final File product2 = new File(getTestFilePath("/org/esa/snap/core/gpf/common/productset/subset2.dim"));
-        final File[] srcFiles = new File[] { product1, product2 };
+        final Path product1 = Path.of(getTestFilePath("/org/esa/snap/core/gpf/common/productset/subset1.dim"));
+        final Path product2 = Path.of(getTestFilePath("/org/esa/snap/core/gpf/common/productset/subset2.dim"));
+        final Path[] srcFiles = new Path[] { product1, product2 };
 
         Graph graph;
-        try (Reader fileReader = new FileReader(graphPath)) {
+        try (Reader fileReader = Files.newBufferedReader(Path.of(graphPath))) {
             graph = GraphIO.read(fileReader);
         }
 
@@ -60,13 +61,13 @@ public class ProductSetReaderOpTest {
     }
 
     @Test
-    public void testFolderProductSetGraph() throws IOException, GraphException, URISyntaxException {
+    public void testFolderProductSetGraph() throws IOException, GraphException {
         final String graphPath = getTestFilePath("/org/esa/snap/core/gpf/common/productset/ProductSetMosaicGraph.xml");
-        final File product1 = new File(getTestFilePath("/org/esa/snap/core/gpf/common/productset/subset1.dim"));
-        final File[] srcFiles = new File[] { product1.getParentFile() };
+        final Path product1 = Path.of(getTestFilePath("/org/esa/snap/core/gpf/common/productset/subset1.dim"));
+        final Path[] srcFiles = new Path[] { product1.getParent() };
 
         Graph graph;
-        try (Reader fileReader = new FileReader(graphPath)) {
+        try (Reader fileReader = Files.newBufferedReader(Path.of(graphPath))) {
             graph = GraphIO.read(fileReader);
         }
 
@@ -76,14 +77,14 @@ public class ProductSetReaderOpTest {
         processor.executeGraph(graph, ProgressMonitor.NULL);
     }
 
-    private void setIO(final Graph graph, final File[] srcFiles, final File tgtFile, final String format) {
+    private void setIO(final Graph graph, final Path[] srcFiles, final Path tgtFile, final String format) {
         final String readOperatorAlias = OperatorSpi.getOperatorAlias(ProductSetReaderOp.class);
         final Node readerNode = findNode(graph, readOperatorAlias);
         if (readerNode != null) {
             final DomElement param = new DefaultDomElement("parameters");
             String value = "";
-            for(File srcFile : srcFiles) {
-                value += srcFile.getAbsolutePath()+",";
+            for(Path srcFile : srcFiles) {
+                value += srcFile.toAbsolutePath() +",";
             }
             param.createChild("fileList").setValue(value);
             readerNode.setConfiguration(param);
@@ -93,7 +94,7 @@ public class ProductSetReaderOpTest {
         final Node writerNode = findNode(graph, writeOperatorAlias);
         if (writerNode != null && tgtFile != null) {
             final DomElement origParam = writerNode.getConfiguration();
-            origParam.getChild("file").setValue(tgtFile.getAbsolutePath());
+            origParam.getChild("file").setValue(tgtFile.toAbsolutePath().toString());
             if (format != null)
                 origParam.getChild("formatName").setValue(format);
         }
@@ -107,9 +108,11 @@ public class ProductSetReaderOpTest {
         return null;
     }
 
-    private String getTestFilePath(String name) throws URISyntaxException {
+    private String getTestFilePath(String name) {
         URL url = ProductSetReaderOpTest.class.getResource(name);
-        URI uri = new URI(url.toString());
-        return uri.getPath();
+        Assert.assertNotNull(url);
+        final Path filePath = UrlHelper.urlToFile(url);
+        Assert.assertNotNull(filePath);
+        return filePath.toString();
     }
 }

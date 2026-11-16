@@ -17,7 +17,8 @@
 package org.esa.snap.core.gpf.graph;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.GlobalTestConfig;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -42,27 +43,29 @@ import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.TileScheduler;
 import javax.media.jai.operator.ConstantDescriptor;
-import java.io.File;
 import java.io.StringReader;
-import java.net.URI;
+import java.net.URL;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 
 public class ReadDoWriteTest {
 
     private DoOp.Spi doSpi = new DoOp.Spi();
-    private File outputFile;
-    private File inputFile;
+    private Path outputFile;
+    private Path inputFile;
     private int oldParallelism;
 
     @Before
     public void setUp() throws Exception {
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(doSpi);
-        URI inputURI = GPFFacadeTest.class.getResource("test-product.dim").toURI();
-        inputFile = new File(inputURI);
-        outputFile = GlobalTestConfig.getSnapTestDataOutputFile("ReadDoWriteTest/writtenProduct.dim");
-        outputFile.getParentFile().mkdirs();
+        URL inputURI = GPFFacadeTest.class.getResource("test-product.dim");
+        assertNotNull(inputURI);
+        inputFile = UrlHelper.urlToFile(inputURI);
+        outputFile = IOHelper.createATempDir().resolve("ReadDoWriteTest/writtenProduct.dim");
+        IOHelper.createDirectories(outputFile.getParent());
 
         TileScheduler tileScheduler = JAI.getDefaultInstance().getTileScheduler();
         oldParallelism = tileScheduler.getParallelism();
@@ -73,7 +76,7 @@ public class ReadDoWriteTest {
     @After
     public void tearDown() throws Exception {
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(doSpi);
-        File parentFile = outputFile.getParentFile();
+        Path parentFile = outputFile.getParent();
         FileUtils.deleteTree(parentFile);
 
         TileScheduler tileScheduler = JAI.getDefaultInstance().getTileScheduler();
@@ -88,7 +91,7 @@ public class ReadDoWriteTest {
                 + "  <node id=\"node0\">\n"
                 + "    <operator>Read</operator>\n"
                 + "    <parameters>\n"
-                + "       <file>" + inputFile.getAbsolutePath() + "</file>\n"
+                + "       <file>" + inputFile.toAbsolutePath() + "</file>\n"
                 + "    </parameters>\n"                
                 + "  </node>\n"
                 + "  <node id=\"node1\">\n"
@@ -103,7 +106,7 @@ public class ReadDoWriteTest {
                 + "      <source refid=\"node1\"/>\n"
                 + "    </sources>\n"
                 + "    <parameters>\n"
-                + "       <file>" + outputFile.getAbsolutePath() + "</file>\n"
+                + "       <file>" + outputFile.toAbsolutePath() + "</file>\n"
                 + "       <deleteOutputOnFailure>false</deleteOutputOnFailure>\n"
                 + "    </parameters>\n"
                 + "  </node>\n"

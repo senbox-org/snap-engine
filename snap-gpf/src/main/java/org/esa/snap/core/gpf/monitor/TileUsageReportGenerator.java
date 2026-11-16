@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.gpf.monitor;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -22,11 +23,11 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.internal.OperatorImage;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A tile observer which produces tile usage reports from Velocity template files.
@@ -46,18 +48,18 @@ import java.util.Set;
 public class TileUsageReportGenerator extends TileComputationObserver {
     public static final int CHART_WIDTH = 1500;
     private final List<TileComputationEvent> recordedEventList = Collections.synchronizedList(new LinkedList<TileComputationEvent>());
-    private File[] files;
+    private Collection<Path> files;
     private boolean active;
 
     @Override
     public void start() {
-        File cwd = new File(".");
-        files = cwd.listFiles(new VmFilenameFilter());
-        if (files != null && files.length > 0) {
+        Path cwd = Path.of(".");
+        files = IOHelper.listFiles(cwd, new VmFilenameFilter());
+        if (files != null && !files.isEmpty()) {
             getLogger().info("Starting observation of tile computation events.");
             active = true;
         } else {
-            getLogger().warning(String.format("No Velocity template files (*.vm) found in %s", cwd.getAbsolutePath()));
+            getLogger().warning(String.format("No Velocity template files (*.vm) found in %s", cwd.toAbsolutePath()));
         }
     }
 
@@ -108,12 +110,12 @@ public class TileUsageReportGenerator extends TileComputationObserver {
         context.put("events", events);
         context.put("tasks", tasks);
 
-        for (File file : files) {
-            String templateName = file.getName();
+        for (Path file : files) {
+            String templateName = file.getFileName().toString();
             String outputName = templateName.substring(0, templateName.lastIndexOf('.'));
             try {
                 Template temp = ve.getTemplate(templateName);
-                try (Writer writer = new FileWriter(outputName)) {
+                try (Writer writer = Files.newBufferedWriter(Path.of(outputName))) {
                     temp.merge(context, writer);
                 }
                 getLogger().info(String.format("%s written.", outputName));
@@ -235,9 +237,10 @@ public class TileUsageReportGenerator extends TileComputationObserver {
     }
 
 
-    private static class VmFilenameFilter implements FilenameFilter {
+    private static class VmFilenameFilter implements Predicate<Path> {
         @Override
-        public boolean accept(File dir, String name) {
+        public boolean test(Path dir) {
+            final String name = dir.getFileName().toString();
             return name.startsWith("TileComputationObserver.") && name.endsWith(".vm");
         }
     }

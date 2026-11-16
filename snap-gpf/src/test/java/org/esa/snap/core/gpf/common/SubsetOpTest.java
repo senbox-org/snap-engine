@@ -16,13 +16,8 @@
 package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import eu.esa.snap.core.datamodel.group.BandGroup;
-import org.esa.snap.core.util.GeoUtils;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LinearRing;
-import org.locationtech.jts.geom.Polygon;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GcpDescriptor;
@@ -37,18 +32,32 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.graph.GraphException;
+import org.esa.snap.core.util.GeoUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Polygon;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.nio.file.Paths;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 public class SubsetOpTest {
 
@@ -141,13 +150,17 @@ public class SubsetOpTest {
 
     @Test
     @STTM("SNAP-369,SNAP-1608")
-    public void testSetPolygonForSubset1() throws Exception {
+    public void testSetPolygonForSubset1() {
         final Product sp = createTestProduct(100, 100);
 
         SubsetOp op = new SubsetOp();
         op.setParameterDefaultValues();
         op.setSourceProduct(sp);
-        op.setParameter("vectorFile", Paths.get(SubsetOpTest.class.getResource("polygonForSubset.wkt").toURI()).toFile());
+        final URL fileUrl = SubsetOpTest.class.getResource("polygonForSubset.wkt");
+        assertNotNull(fileUrl);
+        final Path filePath = UrlHelper.urlToFile(fileUrl);
+        assertNotNull(filePath);
+        op.setParameter("vectorFile", filePath);
 
         Product targetProduct = op.getTargetProduct();
         assertNotNull(targetProduct);
@@ -209,9 +222,13 @@ public class SubsetOpTest {
 
     @Test
     @STTM("SNAP-369,SNAP-1608")
-    public void testInstantiationWithGPFForPolygonSubset1() throws Exception {
+    public void testInstantiationWithGPFForPolygonSubset1() {
         HashMap<String, Object> parameters = new HashMap<>();
-        parameters.put("vectorFile", Paths.get(SubsetOpTest.class.getResource("polygonForSubset.wkt").toURI()).toFile());
+        final URL fileUrl = SubsetOpTest.class.getResource("polygonForSubset.wkt");
+        assertNotNull(fileUrl);
+        final Path filePath = UrlHelper.urlToFile(fileUrl);
+        assertNotNull(filePath);
+        parameters.put("vectorFile", filePath);
         final String expectedBandName = "radiance_3";
         parameters.put("sourceBands", new String[]{expectedBandName});
         final Product sp = createTestProduct(100, 100);

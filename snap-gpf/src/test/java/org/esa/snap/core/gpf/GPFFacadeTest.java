@@ -17,6 +17,8 @@
 package org.esa.snap.core.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataElement;
@@ -35,9 +37,9 @@ import org.junit.Test;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -128,12 +130,15 @@ public class GPFFacadeTest {
     }
 
     @Test
-    public void testOperatorApi() throws IOException, OperatorException, URISyntaxException {
+    public void testOperatorApi() throws IOException, OperatorException {
 
-        String filePath = GPFFacadeTest.class.getResource("test-product.dim").toURI().getPath();
+        final URL fileURL = GPFFacadeTest.class.getResource("test-product.dim");
+        assertNotNull(fileURL);
+        final Path filePath = UrlHelper.urlToFile(fileURL);
+        assertNotNull(filePath);
 
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("file", new File(filePath));
+        parameters.put("file", filePath);
 
         Product p1 = GPF.createProduct("Read", parameters);
 
@@ -144,7 +149,7 @@ public class GPFFacadeTest {
         assertNotNull(p1.getBand("cropland_abundance"));
 
         assertNotNull(p1.getFileLocation());
-        assertEquals("test-product.dim", p1.getFileLocation().getName());
+        assertEquals("test-product.dim", p1.getFileLocation().getFileName().toString());
 
 
         Product p2 = GPF.createProduct("Foo", GPF.NO_PARAMS, p1);
@@ -166,12 +171,15 @@ public class GPFFacadeTest {
     }
 
     @Test
-    public void testProductName() throws Exception {
+    public void testProductName() {
 
-        String filePath = GPFFacadeTest.class.getResource("test-product.dim").toURI().getPath();
+        final URL fileURL = GPFFacadeTest.class.getResource("test-product.dim");
+        assertNotNull(fileURL);
+        final Path filePath = UrlHelper.urlToFile(fileURL);
+        assertNotNull(filePath);
 
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("file", new File(filePath));
+        parameters.put("file", filePath);
 
         Product p1 = GPF.createProduct("Read", parameters);
 
@@ -191,12 +199,15 @@ public class GPFFacadeTest {
     }
 
     @Test
-    public void testMultiProductsNames() throws Exception {
+    public void testMultiProductsNames() {
 
-        String filePath = GPFFacadeTest.class.getResource("test-product.dim").toURI().getPath();
+        final URL fileURL = GPFFacadeTest.class.getResource("test-product.dim");
+        assertNotNull(fileURL);
+        final Path filePath = UrlHelper.urlToFile(fileURL);
+        assertNotNull(filePath);
 
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("file", new File(filePath));
+        parameters.put("file", filePath);
 
         Product p1 = GPF.createProduct("Read", parameters);
         Product p2 = GPF.createProduct("Foo", GPF.NO_PARAMS, new Product[]{p1});
@@ -350,12 +361,12 @@ public class GPFFacadeTest {
         source.setPreferredTileSize(200, 200);
         stackOp.setSourceProduct(source);
         Product targetProduct = stackOp.getTargetProduct();
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile("GPFFacadeTest/testWriteProduct.dim");
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile("GPFFacadeTest/testWriteProduct.dim");
         try {
-            outputFile.getParentFile().mkdirs();
+            IOHelper.createDirectories(outputFile.getParent());
             GPF.writeProduct(targetProduct, outputFile, "BEAM-DIMAP", false, true, ProgressMonitor.NULL);
         } finally {
-            FileUtils.deleteTree(outputFile.getParentFile());
+            FileUtils.deleteTree(outputFile.getParent());
         }
         assertEquals(5*5, stackOp.computeTileStackCounter.get());
     }
@@ -367,12 +378,12 @@ public class GPFFacadeTest {
         source.setPreferredTileSize(200, 200);
         stackOp.setSourceProduct(source);
         Product targetProduct = stackOp.getTargetProduct();
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile("GPFFacadeTest/testWriteProduct.dim");
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile("GPFFacadeTest/testWriteProduct.dim");
         try {
-            outputFile.getParentFile().mkdirs();
+            IOHelper.createDirectories(outputFile.getParent());
             GPF.writeProduct(targetProduct, outputFile, "BEAM-DIMAP", true, true, ProgressMonitor.NULL);
         } finally {
-            FileUtils.deleteTree(outputFile.getParentFile());
+            FileUtils.deleteTree(outputFile.getParent());
         }
         assertEquals(5*5, stackOp.computeTileStackCounter.get());
     }

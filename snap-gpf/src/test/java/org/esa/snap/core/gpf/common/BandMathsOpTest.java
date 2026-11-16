@@ -22,6 +22,7 @@ import com.bc.ceres.binding.dom.DefaultDomConverter;
 import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
@@ -32,7 +33,11 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.GPFFacadeTest;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.annotations.ParameterDescriptorFactory;
-import org.esa.snap.core.gpf.graph.*;
+import org.esa.snap.core.gpf.graph.Graph;
+import org.esa.snap.core.gpf.graph.GraphException;
+import org.esa.snap.core.gpf.graph.GraphIO;
+import org.esa.snap.core.gpf.graph.GraphProcessor;
+import org.esa.snap.core.gpf.graph.Node;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.geotools.referencing.CRS;
@@ -47,13 +52,22 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.URL;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class BandMathsOpTest {
 
@@ -487,7 +501,9 @@ public class BandMathsOpTest {
         HashMap<String, Object> parameterMap = new HashMap<>();
         Class<BandMathsOp> opType = BandMathsOp.class;
 
-        String filePath = GPFFacadeTest.class.getResource("test-product.dim").toURI().getPath();
+        final URL fileURL = GPFFacadeTest.class.getResource("test-product.dim");
+        assertNotNull(fileURL);
+        final Path filePath = UrlHelper.urlToFile(fileURL);
         String graphOpXml = "<graph id=\"g\">\n" +
                 "    <version>1.0</version>\n" +
                 "    <node id=\"readNode\">\n" +

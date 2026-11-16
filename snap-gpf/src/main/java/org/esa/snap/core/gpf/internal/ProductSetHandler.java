@@ -17,6 +17,7 @@ package org.esa.snap.core.gpf.internal;
 
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.common.ReadOp;
@@ -26,10 +27,13 @@ import org.esa.snap.core.gpf.graph.Node;
 import org.esa.snap.core.gpf.graph.NodeSource;
 import org.esa.snap.vfs.NioPaths;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.function.Predicate;
 
 /**
  * Replace ProductSet operator with ReadOps
@@ -62,9 +66,9 @@ public class ProductSetHandler {
                 final ProductSetData psData = new ProductSetData(n);
 
                 boolean usingFileListPath = false;
-                if(fileListPath != null) {
-                    final File inputFolder = new File(fileListPath);
-                    if(inputFolder.isDirectory() && inputFolder.exists()) {
+                if(fileListPath != null &&  !fileListPath.isEmpty()) {
+                    final Path inputFolder = Path.of(fileListPath);
+                    if(Files.isDirectory(inputFolder) && Files.exists(inputFolder)) {
                         usingFileListPath = true;
                         //ProductFunctions.scanForValidProducts(inputFolder, psData.fileList);
                     }
@@ -105,16 +109,16 @@ public class ProductSetHandler {
         final List<String> toRemove = new ArrayList<>();
         final ValidProductFileFilter dirFilter = new ValidProductFileFilter();
         for(String path : psData.fileList) {
-            final File file = NioPaths.get(path).toFile();
-            if(file.exists() && file.isDirectory()) {
+            final Path file = NioPaths.get(path);
+            if(Files.exists(file) && Files.isDirectory(file)) {
                 toRemove.add(path);
 
-                final File[] files = file.listFiles(dirFilter);
+                final Collection<Path> files = IOHelper.listFiles(file, dirFilter);
                 if(files != null) {
-                    for (File f : files) {
+                    for (Path f : files) {
                         // test with readers
                         if(ProductIO.getProductReaderForInput(f) != null) {
-                            toAdd.add(f.getAbsolutePath());
+                            toAdd.add(f.toAbsolutePath().toString());
                         }
                     }
                 }
@@ -201,13 +205,13 @@ public class ProductSetHandler {
         }
     }
 
-    private static class ValidProductFileFilter implements java.io.FileFilter {
+    private static class ValidProductFileFilter implements Predicate<Path> {
 
         public ValidProductFileFilter() {
         }
 
-        public boolean accept(final File file) {
-            return !file.isDirectory();
+        public boolean test(final Path file) {
+            return !Files.isDirectory(file);
         }
     }
 }

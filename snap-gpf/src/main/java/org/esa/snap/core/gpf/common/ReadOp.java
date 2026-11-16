@@ -21,7 +21,12 @@ import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetByPolygon;
 import org.esa.snap.core.dataio.ProductSubsetDef;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -44,11 +49,11 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
 
 import java.awt.Rectangle;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -80,7 +85,7 @@ import java.util.logging.Level;
 public class ReadOp extends Operator {
 
     @Parameter(description = "The file from which the data product is read.", notNull = true, notEmpty = true)
-    private File file;
+    private Path file;
 
     @Parameter(description = "An (optional) format name.", notNull = false, notEmpty = true)
     private String formatName;
@@ -105,7 +110,7 @@ public class ReadOp extends Operator {
     private Geometry geometryRegion;
 
     @Parameter(description = "The file from which the polygon is read.")
-    private File vectorFile;
+    private Path vectorFile;
 
     @Parameter(converter = JtsGeometryConverter.class,
             description = "The subset region in geographical coordinates using WKT-format,\n" +
@@ -135,8 +140,8 @@ public class ReadOp extends Operator {
         if (this.file == null) {
             throw new OperatorException("The 'file' parameter is not set");
         }
-        this.file = NioPaths.get(this.file.toString()).toFile();
-        if (!this.file.exists()) {
+        this.file = NioPaths.get(this.file.toString());
+        if (!Files.exists(this.file)) {
             throw new OperatorException(String.format("Specified 'file' [%s] does not exist.", this.file));
         }
         if (this.pixelRegion != null && this.geometryRegion != null) {
@@ -193,14 +198,14 @@ public class ReadOp extends Operator {
                 } else {
                     productReader = ProductIO.getProductReaderForInput(this.file);
                     if (productReader == null) {
-                        throw new OperatorException("No product reader found for file '" + this.file.getAbsolutePath() + "'.");
+                        throw new OperatorException("No product reader found for file '" + this.file.toAbsolutePath() + "'.");
                     }
                 }
                 if ((this.vectorFile != null || this.polygonRegion != null) && subsetDef != null) {
                     final MetadataInspector metadataInspector = productReader.getReaderPlugIn().getMetadataInspector();
                     final MetadataInspector.Metadata productMetadata;
                     if (metadataInspector != null) {
-                        productMetadata = metadataInspector.getMetadata(this.file.toPath());
+                        productMetadata = metadataInspector.getMetadata(this.file);
                     } else {
                         if (openedProduct == null){
                             openedProduct = productReader.readProductNodes(this.file, null);
@@ -212,7 +217,7 @@ public class ReadOp extends Operator {
                         if (this.polygonRegion != null) {
                             this.productSubsetByPolygon.loadPolygonFromWKTString(this.polygonRegion.toText(), false, productMetadata, ProgressMonitor.NULL);
                         } else {
-                            this.vectorFile = NioPaths.get(this.vectorFile.toString()).toFile();
+                            this.vectorFile = NioPaths.get(this.vectorFile.toString());
                             this.productSubsetByPolygon.loadPolygonFromVectorFile(this.vectorFile, productMetadata, ProgressMonitor.NULL);
                         }
                         this.polygonRegion = this.productSubsetByPolygon.getSubsetPolygon();
