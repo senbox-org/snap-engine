@@ -17,6 +17,7 @@
 package com.bc.ceres.glayer.jaitests;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import java.awt.Dimension;
@@ -24,8 +25,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 public class ImageDrawingPerformanceRunner {
     private static final String[] BUFFERED_IMAGE_TYPE_NAMES = new String[]{
@@ -57,7 +58,10 @@ public class ImageDrawingPerformanceRunner {
         private BufferedImage image;
 
         private TestCanvas() throws IOException {
-            image = ImageIO.read(new File("src/test/resources/images/image-with-alpha.png"));
+            final Path imagePath = Path.of("src/test/resources/images/image-with-alpha.png");
+            try (final ImageInputStream imageInputStream = ImageIO.createImageInputStream(imagePath)) {
+                image = ImageIO.read(imageInputStream);
+            }
 
         }
 

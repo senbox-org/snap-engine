@@ -56,9 +56,9 @@ import java.awt.image.ColorModel;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Tools {
 
@@ -78,8 +78,8 @@ public class Tools {
 
 
     public static AffineTransform loadWorldFile(String filename) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(filename));
-        try {
+        final Path filePath = Path.of(filename);
+        try (BufferedReader reader = Files.newBufferedReader(filePath)) {
             double[] flatMatrix = new double[6];
             new AffineTransform().getMatrix(flatMatrix); // init with identity
             for (int i = 0; i < flatMatrix.length; i++) {
@@ -96,8 +96,6 @@ public class Tools {
                 }
             }
             return new AffineTransform(flatMatrix);
-        } finally {
-            reader.close();
         }
     }
 
@@ -149,7 +147,7 @@ public class Tools {
         return FileLoadDescriptor.create(filePath, null, true, null);
     }
 
-    public static void displayImage(File location,
+    public static void displayImage(Path location,
                                     String extension,
                                     AffineTransform imageToModelTransform,
                                     int levelCount) {
@@ -164,7 +162,7 @@ public class Tools {
         layerCanvas.setPreferredSize(new Dimension(640, 480));
         layerCanvas.getViewport().setViewBounds(viewportBounds);
         layerCanvas.getViewport().zoom(layer.getModelBounds());
-        openFrame(layerCanvas, location.getPath(), viewportBounds);
+        openFrame(layerCanvas, location.toString(), viewportBounds);
     }
 
     public static void displayImage(String title,
