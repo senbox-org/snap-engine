@@ -72,8 +72,8 @@ public class IOHelper {
     public static final String SEPARATOR = FileSystems.getDefault().getSeparator();
     public static final char SEPARATOR_CHAR = SEPARATOR.charAt(0);
 
-    public static String getBaseName(File archiveFile) {
-        String dirName = archiveFile.getName();
+    public static String getBaseName(Path archiveFile) {
+        String dirName = archiveFile.getFileName().toString();
         int pos = dirName.lastIndexOf((int) '.');
         if (pos > 1) {
             dirName = dirName.substring(0, pos);
@@ -82,14 +82,14 @@ public class IOHelper {
     }
 
     public static String getFileName(URL url) throws UnsupportedEncodingException {
-        return new File(URLDecoder.decode(url.getFile(), "UTF-8")).getName();
+        return Path.of(URLDecoder.decode(url.getFile(), StandardCharsets.UTF_8)).getFileName().toString();
     }
 
-    public static void copy(File source, File target, ProgressMonitor pm) throws IOException, CanceledException {
-        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(source));
-             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(target))) {
-            String taskName = MessageFormat.format("Copying {0}", source.getName());
-            int fileSize = (int) Math.max(source.length(), (long) Integer.MAX_VALUE);
+    public static void copy(Path source, Path target, ProgressMonitor pm) throws IOException, CanceledException {
+        try (InputStream inputStream = new BufferedInputStream(Files.newInputStream(source));
+             OutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(target))) {
+            String taskName = MessageFormat.format("Copying {0}", source.getFileName());
+            int fileSize = (int) Math.max(Files.size(source), Integer.MAX_VALUE);
             copy(inputStream, outputStream, taskName, fileSize, pm);
         }
     }
@@ -120,50 +120,47 @@ public class IOHelper {
         }
     }
 
-    public static void createDirectory(File dir) throws IOException {
-        if (dir.exists()) {
-            return;
+    /**
+     * Creates an empty directory on the given path
+     *
+     * @param dir the path of the new directory
+     * @return {@code true} if the directory was successfully created
+     */
+    public static boolean createDirectory(Path dir) {
+        if (Files.exists(dir)) {
+            return false;
         }
-        if (!dir.mkdir()) {
-            throw new IOException(MessageFormat.format("Failed to create directory ''{0}''", dir));
-        }
-    }
-
-    public static void copy(URLConnection source, File target, ProgressMonitor pm) throws IOException, CanceledException {
-        InputStream inputStream = source.getInputStream();
         try {
-            OutputStream outputStream = new FileOutputStream(target);
-            try {
-                String taskName = MessageFormat.format("Downloading {0}", target.getName());
-                int contentLength = source.getContentLength();
-                copy(inputStream, outputStream, taskName, contentLength, pm);
-            } finally {
-                outputStream.close();
-            }
-        } finally {
-            inputStream.close();
+            Files.createDirectories(dir);
+            return Files.exists(dir);
+        } catch (NoSuchFileException nsfe){
+            return false;
+        } catch (IOException e) {
+            throw new RuntimeException(MessageFormat.format("Failed to create directory ''{0}''", dir), e);
         }
     }
 
-    public static void copy(ZipFile zipFile, ZipEntry source, File target, ProgressMonitor pm) throws IOException, CanceledException {
-        InputStream inputStream = zipFile.getInputStream(source);
-        try {
-            OutputStream outputStream = new FileOutputStream(target);
-            try {
-                String taskName = MessageFormat.format("Unpacking {0}", source.getName());
-                int fileSize = (int) source.getSize();
-                copy(inputStream, outputStream, taskName, fileSize, pm);
-            } finally {
-                outputStream.close();
-            }
-        } finally {
-            inputStream.close();
+    public static void copy(URLConnection source, Path target, ProgressMonitor pm) throws IOException, CanceledException {
+        try (InputStream inputStream = source.getInputStream();
+             OutputStream outputStream = Files.newOutputStream(target)) {
+            String taskName = MessageFormat.format("Downloading {0}", target.getFileName());
+            int contentLength = source.getContentLength();
+            copy(inputStream, outputStream, taskName, contentLength, pm);
         }
     }
 
-    public static List<String> unpack(File sourceZipFile, File targetDir, boolean isNative, ProgressMonitor pm) throws IOException, CanceledException {
-        if (!targetDir.exists()) {
-            targetDir.mkdirs();
+    public static void copy(ZipFile zipFile, ZipEntry source, Path target, ProgressMonitor pm) throws IOException, CanceledException {
+        try (InputStream inputStream = zipFile.getInputStream(source);
+             OutputStream outputStream = Files.newOutputStream(target)) {
+            String taskName = MessageFormat.format("Unpacking {0}", source.getName());
+            int fileSize = (int) source.getSize();
+            copy(inputStream, outputStream, taskName, fileSize, pm);
+        }
+    }
+
+    public static List<String> unpack(Path sourceZipFile, Path targetDir, boolean isNative, ProgressMonitor pm) throws IOException, CanceledException {
+        if (!Files.exists(targetDir)) {
+            Files.createDirectories(targetDir);
         }
 
         Logger logger = Logger.getLogger(System.getProperty("ceres.context", "ceres"));
@@ -173,10 +170,9 @@ public class IOHelper {
                                              sourceZipFile, platform.getId(), platform.getBitCount()));
         }
 
-        ZipFile zipFile = new ZipFile(sourceZipFile);
-        pm.beginTask(MessageFormat.format("Unpacking {0} to {1}", sourceZipFile.getName(), targetDir.getName()),
-                     zipFile.size());
-        try {
+        try (ZipFile zipFile = new ZipFile(sourceZipFile.toFile())) {
+            pm.beginTask(MessageFormat.format("Unpacking {0} to {1}", sourceZipFile.getFileName(), targetDir.getFileName()),
+                    zipFile.size());
             ArrayList<String> entries = new ArrayList<String>(zipFile.size());
             Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
 
@@ -184,11 +180,11 @@ public class IOHelper {
                 checkIOTaskCanceled(pm);
                 final ZipEntry zipEntry = enumeration.nextElement();
                 final String entryName = zipEntry.getName();
-                final File targetFile;
+                final Path targetFile;
 
                 if (platform != null && Platform.isAnyPlatformDir(entryName)) {
                     if (platform.isPlatformDir(entryName)) {
-                        targetFile = new File(targetDir, platform.truncatePlatformDir(entryName));
+                        targetFile = targetDir.resolve(platform.truncatePlatformDir(entryName));
                         logger.info(MessageFormat.format("Archive [{0}]: Unpacking platform dependent entry [{1}]",
                                                          sourceZipFile, entryName));
                     } else {
@@ -197,17 +193,17 @@ public class IOHelper {
                                                          sourceZipFile, entryName));
                     }
                 } else {
-                    targetFile = new File(targetDir, entryName);
+                    targetFile = targetDir.resolve(entryName);
                 }
 
                 if (targetFile != null) {
                     pm.setSubTaskName(entryName);
-                    File parentDir = targetFile.getParentFile();
+                    Path parentDir = targetFile.getParent();
                     if (parentDir != null) {
-                        parentDir.mkdirs();
+                        Files.createDirectories(parentDir);
                     }
                     if (zipEntry.isDirectory()) {
-                        targetFile.mkdir();
+                        Files.createDirectory(targetFile);
                         pm.worked(1);
                     } else {
                         copy(zipFile, zipEntry, targetFile, SubProgressMonitor.create(pm, 1));
@@ -218,35 +214,33 @@ public class IOHelper {
             return entries;
         } finally {
             pm.done();
-            zipFile.close();
         }
     }
 
-    public static List<String> pack(File sourceDir, File targetZipFile, ProgressMonitor pm) throws IOException, CanceledException {
-        if (!sourceDir.exists()) {
-            throw new FileNotFoundException(sourceDir.getPath());
+    public static List<String> pack(Path sourceDir, Path targetZipFile, ProgressMonitor pm) throws IOException, CanceledException {
+        if (!Files.exists(sourceDir)) {
+            throw new FileNotFoundException(sourceDir.toString());
         }
 
         DirScanner dirScanner = new DirScanner(sourceDir, true, true);
         String[] entryNames = dirScanner.scan();
-        ZipOutputStream zipOutputStream = new ZipOutputStream(
-                new BufferedOutputStream(new FileOutputStream(targetZipFile)));
-        zipOutputStream.setMethod(ZipEntry.DEFLATED);
-        pm.beginTask(MessageFormat.format("Packing {0} into {1}", sourceDir.getName(), targetZipFile.getName()),
-                     entryNames.length);
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(
+                new BufferedOutputStream(Files.newOutputStream(targetZipFile)))) {
+            zipOutputStream.setMethod(ZipEntry.DEFLATED);
+            pm.beginTask(MessageFormat.format("Packing {0} into {1}", sourceDir.getFileName(), targetZipFile.getFileName()),
+                    entryNames.length);
 
-        ArrayList<String> entries = new ArrayList<String>(entryNames.length);
-        try {
+            ArrayList<String> entries = new ArrayList<>(entryNames.length);
             for (String entryName : entryNames) {
                 checkIOTaskCanceled(pm);
                 ZipEntry zipEntry = new ZipEntry(entryName.replace('\\', '/'));
 
                 pm.setSubTaskName(entryName);
-                File sourceFile = new File(sourceDir, entryName);
-                try (InputStream inputStream = new BufferedInputStream(new FileInputStream(sourceFile))) {
+                Path sourceFile = sourceDir.resolve(entryName);
+                try (InputStream inputStream = new BufferedInputStream(Files.newInputStream(sourceFile))) {
                     zipOutputStream.putNextEntry(zipEntry);
-                    copy(inputStream, zipOutputStream, entryName, (int) sourceFile.length(),
-                         SubProgressMonitor.create(pm, 1));
+                    copy(inputStream, zipOutputStream, entryName, (int) Files.size(sourceFile),
+                            SubProgressMonitor.create(pm, 1));
                     zipOutputStream.closeEntry();
                     entries.add(entryName);
                 }
@@ -254,7 +248,6 @@ public class IOHelper {
             return entries;
         } finally {
             pm.done();
-            zipOutputStream.close();
         }
     }
 
