@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
@@ -177,10 +177,10 @@ public class ParamEditorsTest {
 
     @Test
     public void testFileEditor() {
-        final ParamProperties properties = new ParamProperties(File.class);
+        final ParamProperties properties = new ParamProperties(Path.class);
         properties.setLabel(LABEL_NAME);
         properties.setPhysicalUnit(UNIT_NAME);
-        properties.setDefaultValue(new File("sabines_home"));
+        properties.setDefaultValue(Path.of("sabines_home"));
         final Parameter parameter = new Parameter(PARAM_NAME, properties);
         ParamEditor editor = parameter.getEditor();
         assertTrue(editor instanceof FileEditor);

@@ -38,9 +38,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -77,7 +77,7 @@ public class FeatureUtils {
         return shapefileStore.getFeatureSource(typeName);
     }
 
-    public static DefaultFeatureCollection loadShapefileForProduct(File file,
+    public static DefaultFeatureCollection loadShapefileForProduct(Path file,
                                                                    Product product,
                                                                    FeatureCrsProvider crsProvider, ProgressMonitor pm) throws IOException {
         pm.beginTask("Loading Shapefile", 100);
@@ -107,9 +107,9 @@ public class FeatureUtils {
                 SubProgressMonitor.create(pm, 80));
     }
 
-    public static FeatureCollection<SimpleFeatureType, SimpleFeature> loadFeatureCollectionFromShapefile(File shapefile) throws IOException {
-        final File cachedShapefile = getCachedVectorFile(shapefile);
-        final URL shapefileUrl = cachedShapefile.toURI().toURL();
+    public static FeatureCollection<SimpleFeatureType, SimpleFeature> loadFeatureCollectionFromShapefile(Path shapefile) throws IOException {
+        final Path cachedShapefile = getCachedVectorFile(shapefile);
+        final URL shapefileUrl = cachedShapefile.toUri().toURL();
 
         FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = null;
         try {
@@ -313,16 +313,16 @@ public class FeatureUtils {
     }
 
 
-    public static File getCachedVectorFile(File shapeFile){
+    public static Path getCachedVectorFile(Path shapeFile){
         if (shapeFile.getClass().getName().contains("vfs")) {
-            final File shpFile = FileUtils.getCachedFile(shapeFile);
-            final File dbfFile = FileUtils.exchangeExtension(shapeFile, ".dbf");
+            final Path shpFile = FileUtils.getCachedFile(shapeFile);
+            final Path dbfFile = FileUtils.exchangeExtension(shapeFile, ".dbf");
             FileUtils.getCachedFile(dbfFile);
-            final File prjFile = FileUtils.exchangeExtension(shapeFile, ".prj");
+            final Path prjFile = FileUtils.exchangeExtension(shapeFile, ".prj");
             FileUtils.getCachedFile(prjFile);
-            final File qpjFile = FileUtils.exchangeExtension(shapeFile, ".qpj");
+            final Path qpjFile = FileUtils.exchangeExtension(shapeFile, ".qpj");
             FileUtils.getCachedFile(qpjFile);
-            final File shxFile = FileUtils.exchangeExtension(shapeFile, ".shx");
+            final Path shxFile = FileUtils.exchangeExtension(shapeFile, ".shx");
             FileUtils.getCachedFile(shxFile);
             return shpFile;
         }

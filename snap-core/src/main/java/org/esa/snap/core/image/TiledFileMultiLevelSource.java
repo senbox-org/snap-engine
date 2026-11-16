@@ -25,7 +25,6 @@ import org.esa.snap.core.util.StringUtils;
 import javax.media.jai.PlanarImage;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,10 +35,6 @@ public class TiledFileMultiLevelSource extends AbstractMultiLevelSource {
 
     private final Path imageDir;
     private final Properties imageProperties;
-
-    public static TiledFileMultiLevelSource create(File imageDir) throws IOException {
-        return create(imageDir.toPath());
-    }
 
     public static TiledFileMultiLevelSource create(Path imageDir) throws IOException {
         Assert.notNull(imageDir);

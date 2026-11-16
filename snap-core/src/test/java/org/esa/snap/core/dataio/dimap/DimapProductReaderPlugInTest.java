@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.dataio.dimap;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.IllegalFileFormatException;
@@ -24,11 +25,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class DimapProductReaderPlugInTest {
 
@@ -59,23 +65,23 @@ public class DimapProductReaderPlugInTest {
 
     @Test
     public void testCanDecodeInput() {
-        File file = GlobalTestConfig.getSnapTestDataOutputFile("DIMAP/test2.dim");
+        Path file = GlobalTestConfig.getSnapTestDataOutputFile("DIMAP/test2.dim");
         try {
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-            final FileWriter writer = new FileWriter(file);
+            IOHelper.createDirectories(file.getParent());
+            IOHelper.createFile(file);
+            final Writer writer = Files.newBufferedWriter(file);
             writer.write("This file must contain the String '<Dimap_Document' to ensure this is a correct file format");
             writer.close();
             assertEquals(DecodeQualification.INTENDED, _plugIn.getDecodeQualification(file));
-            assertEquals(DecodeQualification.INTENDED, _plugIn.getDecodeQualification(file.getPath()));
-            if (!file.delete()) {
-                file.deleteOnExit();
+            assertEquals(DecodeQualification.INTENDED, _plugIn.getDecodeQualification(file.toString()));
+            if (!IOHelper.delete(file)) {
+                IOHelper.deleteOnExit(file);
             }
-            if (!file.getParentFile().delete()) {
-                file.getParentFile().deleteOnExit();
+            if (!IOHelper.delete(file.getParent())) {
+                IOHelper.deleteOnExit(file.getParent());
             }
         } catch (IOException e) {
-            fail("DimapProductReaderPlugInTest: failed to create test file " + file.getPath());
+            fail("DimapProductReaderPlugInTest: failed to create test file " + file);
         }
     }
 
@@ -87,7 +93,7 @@ public class DimapProductReaderPlugInTest {
 
     @Test
     public void testReadProductNodes() {
-        File inputFile = GlobalTestConfig.getSnapTestDataOutputFile("DIMAP/test2.dim");
+        Path inputFile = GlobalTestConfig.getSnapTestDataOutputFile("DIMAP/test2.dim");
         Product product = null;
         try {
             product = _productReader.readProductNodes(inputFile, null);

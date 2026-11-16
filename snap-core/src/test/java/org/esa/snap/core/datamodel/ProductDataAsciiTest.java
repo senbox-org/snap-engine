@@ -16,35 +16,41 @@
 
 package org.esa.snap.core.datamodel;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.GlobalTestConfig;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.FileImageOutputStream;
-import java.io.File;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.ImageOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 public class ProductDataAsciiTest {
 
-    private FileImageOutputStream _outputStream;
-    private FileImageInputStream _inputStream;
+    private ImageOutputStream _outputStream;
+    private ImageInputStream _inputStream;
 
     @Before
     public void setUp() throws IOException {
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile("ProductData");
-        if (!outputFile.mkdirs()) {
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile("ProductData");
+        if (!IOHelper.createDirectories(outputFile)) {
             fail("Unable to create test directory: " + outputFile);
-        };
-        File streamFile = new File(outputFile, "ascii.img");
-        streamFile.createNewFile();
-        _inputStream = new FileImageInputStream(streamFile);
-        _outputStream = new FileImageOutputStream(streamFile);
+        }
+        Path streamFile = outputFile.resolve("ascii.img");
+        IOHelper.createFile(streamFile);
+        _inputStream = ImageUtils.getImageInputStream(streamFile);
+        _outputStream = ImageUtils.getImageOutputStream(streamFile);
         assertNotNull(_inputStream);
         assertNotNull(_outputStream);
     }

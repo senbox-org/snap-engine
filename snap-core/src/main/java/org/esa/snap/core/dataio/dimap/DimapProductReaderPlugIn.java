@@ -20,7 +20,7 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -85,18 +85,18 @@ public class DimapProductReaderPlugIn implements ProductReaderPlugIn {
     /**
      * Checks whether the given object is an acceptable input for this product reader and if so, the method checks if
      * it's content has the BEAM-DIMAP format.
-     * <p> BEAM-DIMAP product readers accept <code>java.lang.String</code> - a file path or a <code>java.io.File</code>
+     * <p> BEAM-DIMAP product readers accept <code>java.lang.String</code> - a file path or a <code>java.nio.file.Path</code>
      * - an abstract file path.
      *
      * @param object the input object
      * @return <code>true</code> if the given input is an object referencing a physical BEAM-DIMAP data source.
      */
     public DecodeQualification getDecodeQualification(Object object) {
-        final File file = getProductFile(object);
-        if (file.getPath().toLowerCase().endsWith(DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION)
-                && file.exists()
-                && file.isFile()) {
-            try (final Reader fr = Files.newBufferedReader(file.toPath())){
+        final Path file = getProductPath(object);
+        if (file.toString().toLowerCase().endsWith(DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION)
+                && Files.exists(file)
+                && Files.isRegularFile(file)) {
+            try (final Reader fr = Files.newBufferedReader(file)){
                 // todo - URGENT: check this code!!! 80 charters are not enough, instead read until "<Dimap_Document" is found or EOF is reached or illegal text characters are detected
                 final char[] cbuf = new char[80];
                 if (fr.read(cbuf) != -1) {
@@ -121,7 +121,7 @@ public class DimapProductReaderPlugIn implements ProductReaderPlugIn {
      * @return an array containing valid input types, never <code>null</code>
      */
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     /**

@@ -24,7 +24,33 @@ import com.bc.ceres.core.VirtualDir;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.grender.support.BufferedImageRendering;
 import eu.esa.snap.core.lib.NotRegularFileException;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.ColorPaletteDef;
+import org.esa.snap.core.datamodel.DensityPlot;
+import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.ImageInfo;
+import org.esa.snap.core.datamodel.IndexCoding;
+import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductNode;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
+import org.esa.snap.core.datamodel.ProductVisitorAdapter;
+import org.esa.snap.core.datamodel.RGBChannelDef;
+import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.Scene;
+import org.esa.snap.core.datamodel.SceneFactory;
+import org.esa.snap.core.datamodel.Stx;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.TimeCoding;
+import org.esa.snap.core.datamodel.VectorDataNode;
+import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.datamodel.WrappedHistogram;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.layer.MaskLayerType;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
@@ -48,19 +74,36 @@ import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.Histogram;
 import javax.media.jai.PlanarImage;
-import java.awt.*;
-import java.awt.geom.*;
-import java.awt.image.*;
-import java.io.File;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class provides many static factory methods to be used in conjunction with data products.
@@ -2491,16 +2534,15 @@ public class ProductUtils {
     }
 
     public static VirtualDir getProductVirtualDir(Object input) {
-        File inputFile = getProductPath(input).toFile();
-        if (inputFile.isFile()) {
-            if (inputFile.getName().toLowerCase().endsWith(".zip")) {
-                final String cachedFilepath = FileUtils.getCachedFilePath(inputFile);
-                inputFile = new File(cachedFilepath);
-            } else if (inputFile.getName().toLowerCase().matches(".*\\.(tar\\.gz|tgz|tar\\.bz|tbz|tar\\.bz2|tbz2|tar)")) {
+        Path inputFile = getProductPath(input);
+        if (inputFile != null && Files.isRegularFile(inputFile)) {
+            if (inputFile.getFileName().toString().toLowerCase().endsWith(".zip")) {
+                inputFile = FileUtils.getCachedFile(inputFile);
+            } else if (inputFile.getFileName().toString().toLowerCase().matches(".*\\.(tar\\.gz|tgz|tar\\.bz|tbz|tar\\.bz2|tbz2|tar)")) {
                 return null;
             } else {
-                final File absoluteFile = inputFile.getAbsoluteFile();
-                inputFile = absoluteFile.getParentFile();
+                final Path absoluteFile = inputFile.toAbsolutePath();
+                inputFile = absoluteFile.getParent();
                 if (inputFile == null) {
                     return null;
                 }
@@ -2525,12 +2567,23 @@ public class ProductUtils {
     }
 
     public static Path getProductPath(Object input){
-        if (input instanceof Path path) {
-            return path;
-        } else if (input instanceof File file) {
-            return file.toPath();
+        return switch (input) {
+            case null -> null;
+            case Path path -> path;
+            case String inputString -> Path.of(inputString);
+            default -> throw new IllegalArgumentException("Unknown input '" + input + "'.");
+        };
+    }
+
+    public static OutputStream getProductOutputStream(Object output) throws IOException {
+        if (output instanceof OutputStream outputStream) {
+            return outputStream;
         } else {
-            return Paths.get(input.toString());
+            final Path productPath = getProductPath(output);
+            if (productPath == null || Files.exists(productPath) && !Files.isRegularFile(productPath)) {
+                throw new NotRegularFileException(productPath + " does not a file.");
+            }
+            return Files.newOutputStream(productPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.SYNC);
         }
     }
 

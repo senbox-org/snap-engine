@@ -16,20 +16,25 @@
 package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.Test;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
-import static org.esa.snap.core.datamodel.ColorPaletteDef.*;
 import static org.esa.snap.core.datamodel.ColorPaletteDef.Point;
-import static org.junit.Assert.*;
+import static org.esa.snap.core.datamodel.ColorPaletteDef.getCenterColor;
+import static org.esa.snap.core.datamodel.ColorPaletteDef.loadColorPaletteDef;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ColorPaletteDefTest {
 
@@ -435,7 +440,7 @@ public class ColorPaletteDefTest {
     @Test
     @STTM("SNAP-3962")
     public void testStoreAndLoadColorPaletteDef_withoutLabels() throws IOException {
-        final Path tempDirectory = Files.createTempDirectory("SNAP");
+        final Path tempDirectory = IOHelper.createATempDir("SNAP");
 
         try {
             final Path cpdFile = tempDirectory.resolve("a_test_spectrum.cpd");
@@ -461,14 +466,14 @@ public class ColorPaletteDefTest {
             assertEquals(new Color(255, 255, 255), points[3].getColor());
             assertEquals("a_test_spectrum.cpd", points[3].getLabel());
         } finally {
-            FileUtils.deleteTree(tempDirectory.toFile());
+            FileUtils.deleteTree(tempDirectory);
         }
     }
 
     @Test
     @STTM("SNAP-3962")
     public void testStoreAndLoadColorPaletteDef_withLabels() throws IOException {
-        final Path tempDirectory = Files.createTempDirectory("SNAP");
+        final Path tempDirectory = IOHelper.createATempDir("SNAP");
 
         try {
             final Path cpdFile = tempDirectory.resolve("a_test_spectrum.cpd");
@@ -494,14 +499,14 @@ public class ColorPaletteDefTest {
             assertEquals(new Color(255, 255, 255), points[3].getColor());
             assertEquals("champagne", points[3].getLabel());
         } finally {
-            FileUtils.deleteTree(tempDirectory.toFile());
+            FileUtils.deleteTree(tempDirectory);
         }
     }
 
     private static Path getResourceAsPath(String resourceName) throws URISyntaxException {
         final URL resource = ColorPaletteDef.class.getResource(resourceName);
         assertNotNull(resource);
-        return Paths.get(resource.toURI());
+        return UrlHelper.urlToFile(resource);
     }
 
     private static class TestScaling implements Scaling {

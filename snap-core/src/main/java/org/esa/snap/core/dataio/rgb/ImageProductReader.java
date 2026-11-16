@@ -36,7 +36,7 @@ import java.awt.RenderingHints;
 import java.awt.color.ColorSpace;
 import java.awt.image.ColorModel;
 import java.awt.image.SampleModel;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -69,7 +69,7 @@ public class ImageProductReader extends AbstractProductReader {
 
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        File file = getProductFile();
+        Path file = getProductPath();
         final InputStream inputStream = getProductInputStream();
         final SeekableStream ss = SeekableStream.wrapInputStream(inputStream, true);
         sourceImage = JAI.create("stream", ss);

@@ -16,12 +16,13 @@
 package org.esa.snap.core.dataop.dem;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
@@ -86,7 +87,7 @@ public class BaseElevationModelEvictionTest {
         CountingFile(BaseElevationModel model) {
             // ElevationFile's ctor dereferences localFile.getParentFile(), so the
             // dummy path must include a parent directory component.
-            super(new File(System.getProperty("java.io.tmpdir"), "dummy.tif"), null);
+            super(IOHelper.createATempDir().resolve("dummy.tif"), null);
             this.model = model;
             // Leave remoteFileExists at its default (true) so that the
             // getTile() short-circuit at "!remoteFileExists && !localFileExists"
@@ -120,7 +121,7 @@ public class BaseElevationModelEvictionTest {
 
         @Override
         protected void createElevationFile(final ElevationFile[][] elevationFiles,
-                                           final int x, final int y, final File demInstallDir) {
+                                           final int x, final int y, final Path demInstallDir) {
             elevationFiles[x][y] = new CountingFile(this);
         }
 
@@ -141,7 +142,7 @@ public class BaseElevationModelEvictionTest {
         @Override public int getNumYTiles() { return 2; }
         @Override public ElevationModel createDem(Resampling resampling) { return null; }
         @Override public boolean canBeDownloaded() { return false; }
-        @Override public File getDemInstallDir() { return new File("."); }
+        @Override public Path getDemInstallDir() { return IOHelper.createATempDir(); }
     }
 
     private static CountingFile fileAt(CountingModel m, int x, int y) {

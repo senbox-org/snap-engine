@@ -15,33 +15,40 @@
  */
 package org.esa.snap.core.datamodel;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.GlobalTestConfig;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.FileImageOutputStream;
-import java.io.File;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.ImageOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ProductDataUByteTest {
 
-    private FileImageInputStream _inputStream;
-    private FileImageOutputStream _outputStream;
+    private ImageInputStream _inputStream;
+    private ImageOutputStream _outputStream;
 
     @Before
     public void setUp() throws IOException {
-        File outputDir = GlobalTestConfig.getSnapTestDataOutputFile("ProductData");
-        Assume.assumeTrue(outputDir.mkdirs() || outputDir.exists());
-        File streamFile = new File(outputDir, "ubyte.img");
-        Assume.assumeTrue(streamFile.createNewFile() || streamFile.exists());
-        _inputStream = new FileImageInputStream(streamFile);
-        _outputStream = new FileImageOutputStream(streamFile);
+        Path outputDir = GlobalTestConfig.getSnapTestDataOutputFile("ProductData");
+        Assume.assumeTrue(IOHelper.createDirectories(outputDir) || Files.exists(outputDir));
+        Path streamFile = outputDir.resolve("ubyte.img");
+        Assume.assumeTrue(IOHelper.createFile(streamFile) || Files.exists(streamFile));
+        _inputStream = ImageUtils.getImageInputStream(streamFile);
+        _outputStream = ImageUtils.getImageOutputStream(streamFile);
         assertNotNull(_inputStream);
         assertNotNull(_outputStream);
     }

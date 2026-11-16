@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.awt.geom.AffineTransform;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -37,7 +37,7 @@ public class DimapWriteAndReadTest {
     private final DimapProductReaderPlugIn _readerPlugIn = new DimapProductReaderPlugIn();
     private DimapProductWriter _writer;
     private DimapProductReader _reader;
-    private File _ioDir;
+    private Path _ioDir;
     private Product _product;
 
     private static String compareProducts(Product expProduct, Product currentProduct) throws IOException {
@@ -332,7 +332,7 @@ public class DimapWriteAndReadTest {
         GlobalTestTools.deleteTestDataOutputDirectory();
         _writer = new DimapProductWriter(_writerPlugIn);
         _reader = new DimapProductReader(_readerPlugIn);
-        _ioDir = new File(GlobalTestConfig.getSnapTestDataOutputDirectory(), "testproduct");
+        _ioDir = GlobalTestConfig.getSnapTestDataOutputDirectory().resolve("testproduct");
         _product = createProduct();
     }
 
@@ -352,7 +352,7 @@ public class DimapWriteAndReadTest {
 
     @Test
     public void testWriteAndReadProductNodes_withoutSubsetInfo() throws IOException {
-        final File file = new File(_ioDir, "testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
+        final Path file = _ioDir.resolve("testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
         _writer.writeProductNodes(_product, file);
         writeAllBandRasterDataFully();
         Product currentProduct = _reader.readProductNodes(file, null);
@@ -364,10 +364,10 @@ public class DimapWriteAndReadTest {
     public void testWriteAndReadProductNodes_GivenFilenameWithoutExtension() throws IOException {
         Product currentProduct;
 
-        File file = new File(_ioDir, "testproduct");
+        Path file = _ioDir.resolve("testproduct");
         _writer.writeProductNodes(_product, file);
         writeAllBandRasterDataFully();
-        file = new File(_ioDir, "testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
+        file = _ioDir.resolve("testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
         currentProduct = _reader.readProductNodes(file, null);
 
         assertEquals("", compareProducts(_product, currentProduct));

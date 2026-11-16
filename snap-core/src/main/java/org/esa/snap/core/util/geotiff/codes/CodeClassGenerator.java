@@ -16,11 +16,12 @@
 package org.esa.snap.core.util.geotiff.codes;
 
 import java.io.BufferedReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class CodeClassGenerator {
 
@@ -54,7 +55,7 @@ public class CodeClassGenerator {
     }
 
     private static void writeJavaClassFile(final String[] fileNames, final String className) throws IOException {
-        PrintWriter writer = new PrintWriter(new FileWriter("./src/com/bc/geotiff/" + className + ".java"));
+        PrintWriter writer = new PrintWriter(Files.newBufferedWriter(Path.of("./src/com/bc/geotiff/" + className + ".java")));
 
         writer.println("package com.bc.geotiff;");
         writer.println();

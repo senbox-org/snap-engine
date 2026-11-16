@@ -25,16 +25,16 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.TreeNode;
 import org.esa.snap.runtime.Config;
 import org.locationtech.jts.geom.Coordinate;
 
-import java.awt.*;
-import java.io.File;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -402,31 +402,31 @@ public abstract class AbstractProductReader implements ProductReader {
      * - id: contains a string representation of the path. For the root node, this is the
      * absolute path to the parent of the file returned by Product.getFileLocation().
      * For all subsequent nodes, the node name.
-     * - content: each node stores as content a java.io.File object that physically defines the node.
+     * - content: each node stores as content a java.nio.file.Path object that physically defines the node.
      * <p>
      * The method returns null when a TreeNode can not be assembled (i.e. in-memory product, created from stream ...)
      *
      * @return the root TreeNode or null
      */
-    public TreeNode<File> getProductComponents() {
+    public TreeNode<Path> getProductComponents() {
         final Object input = getInput();
-        final File inputFile;
-        if (input instanceof File) {
-            inputFile = (File) input;
+        final Path inputFile;
+        if (input instanceof Path) {
+            inputFile = (Path) input;
         } else if (input instanceof String) {
-            inputFile = new File((String) input);
+            inputFile = Path.of((String) input);
         } else {
             return null;
         }
 
-        final File parent = inputFile.getParentFile();
+        final Path parent = inputFile.getParent();
         if (parent == null) {
             return null;
         }
-        final TreeNode<File> result = new TreeNode<>(parent.getName());
+        final TreeNode<Path> result = new TreeNode<>(parent.getFileName().toString());
         result.setContent(parent);
 
-        final TreeNode<File> productFile = new TreeNode<>(inputFile.getName());
+        final TreeNode<Path> productFile = new TreeNode<>(inputFile.getFileName().toString());
         productFile.setContent(inputFile);
         result.addChild(productFile);
         return result;
@@ -602,16 +602,6 @@ public abstract class AbstractProductReader implements ProductReader {
     }
 
     public static Path convertInputToPath(Object input) {
-        if (input == null) {
-            throw new NullPointerException();
-        } else if (input instanceof File) {
-            return ((File) input).toPath();
-        } else if (input instanceof Path) {
-            return (Path) input;
-        } else if (input instanceof String) {
-            return Paths.get((String) input);
-        } else {
-            throw new IllegalArgumentException("Unknown input '" + input + "'.");
-        }
+        return ProductUtils.getProductPath(input);
     }
 }

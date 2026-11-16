@@ -4,21 +4,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class FileUtilsTest_RelativeUri {
 
-    private File root;
+    private Path root;
     private URI rootURI;
 
     @Before
     public void setUp() throws Exception {
-        root = new File(".").getCanonicalFile();
-        rootURI = root.toURI();
+        root = Path.of(".").toAbsolutePath().normalize();
+        rootURI = root.toUri();
     }
 
     @After
@@ -27,7 +26,7 @@ public class FileUtilsTest_RelativeUri {
 
     @Test
     public void testRelativeInTheRootDir() {
-        final File relativeFile = new File(root, "lsmf");
+        final Path relativeFile = root.resolve("lsmf");
 
         final URI uri = FileUtils.getRelativeUri(rootURI, relativeFile);
 
@@ -36,8 +35,8 @@ public class FileUtilsTest_RelativeUri {
 
     @Test
     public void testRelativeOneDirDeeper() {
-        final File relativeDir = new File(root, "oneDirDeeper");
-        final File relativeFile = new File(relativeDir, "lsmf");
+        final Path relativeDir = root.resolve("oneDirDeeper");
+        final Path relativeFile = relativeDir.resolve("lsmf");
 
         final URI uri = FileUtils.getRelativeUri(rootURI, relativeFile);
 
@@ -45,19 +44,19 @@ public class FileUtilsTest_RelativeUri {
     }
 
     @Test
-    public void testRelativeOneDirHigher() throws IOException {
-        final File deeperRootDir = new File(root, "oneDirDeeper");
-        final File twoDeeperRootDir = new File(deeperRootDir, "secondDirDeeper");
-        final File relativeFileTwoDirsHigher = new File(twoDeeperRootDir, "../../lsmf").getCanonicalFile();
+    public void testRelativeOneDirHigher() throws Exception {
+        final Path deeperRootDir = root.resolve("oneDirDeeper");
+        final Path twoDeeperRootDir = deeperRootDir.resolve("secondDirDeeper");
+        final Path relativeFileTwoDirsHigher = twoDeeperRootDir.resolve("../../lsmf").toAbsolutePath().normalize();
 
-        final URI uri = FileUtils.getRelativeUri(twoDeeperRootDir.toURI(), relativeFileTwoDirsHigher);
+        final URI uri = FileUtils.getRelativeUri(twoDeeperRootDir.toUri(), relativeFileTwoDirsHigher);
 
-        final String path = relativeFileTwoDirsHigher.getCanonicalPath().replace("\\", "/");
+        final String path = relativeFileTwoDirsHigher.toAbsolutePath().normalize().toString().replace("\\", "/");
         String expected = "file:" + (path.startsWith("/") ? path : "/" + path);
 
         //Fix when space on path
         expected = expected.replaceAll(" ","%20");
 
-        assertEquals(expected, uri.toString());
+        assertEquals(expected, uri.toURL().toURI().toString());//from Path to URI returns a URI with file:/// (on Windows OS), so the chain .toURL().toURI() fix it
     }
 }

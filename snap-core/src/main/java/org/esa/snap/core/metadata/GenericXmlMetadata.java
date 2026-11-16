@@ -24,7 +24,6 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -312,17 +311,12 @@ public abstract class GenericXmlMetadata {
         return result;
     }
 
-    public static <T extends GenericXmlMetadata> T create(Class<T> clazz, File inputFile) {
-        Assert.notNull(inputFile);
-        return GenericXmlMetadata.create(clazz, inputFile.toPath());
-    }
-
     /**
      * Factory method for creating instances of classes that (at least) extend
      * <code>XmlMetadata</code> class.
      *
      * @param clazz     The actual class of the metadata. It should extend <code>XmlMetadata</code>.
-     * @param inputFile The <code>File</code> object that points to the file to be parsed.
+     * @param inputFile The <code>Path</code> object that points to the file to be parsed.
      * @param <T>       Generic type of the metadata class.
      * @return An instance of <code>T</code> type.
      */

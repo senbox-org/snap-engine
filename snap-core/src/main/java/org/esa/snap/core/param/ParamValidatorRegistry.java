@@ -44,7 +44,7 @@ public class ParamValidatorRegistry {
         registerValidator(java.lang.String[].class, new StringArrayValidator());
         registerValidator(java.lang.Boolean.class, new BooleanValidator());
         registerValidator(java.awt.Color.class, new ColorValidator());
-        registerValidator(java.io.File.class, new FileValidator());
+        registerValidator(java.nio.file.Path.class, new FileValidator());
     }
 
 

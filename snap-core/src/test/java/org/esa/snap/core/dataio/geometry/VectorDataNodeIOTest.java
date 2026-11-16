@@ -17,8 +17,7 @@
 package org.esa.snap.core.dataio.geometry;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.GeometryFactory;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.GeometryDescriptor;
 import org.esa.snap.core.datamodel.Placemark;
 import org.esa.snap.core.datamodel.PlacemarkDescriptor;
@@ -36,18 +35,23 @@ import org.geotools.filter.identity.FeatureIdImpl;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Before;
 import org.junit.Test;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class VectorDataNodeIOTest {
 
@@ -154,11 +158,11 @@ public class VectorDataNodeIOTest {
         vectorDataNode.setDefaultStyleCss("stroke:#ff0000");
 
         VectorDataNodeWriter vectorDataNodeWriter = new VectorDataNodeWriter();
-        File tempFile = File.createTempFile("VectorDataNodeWriterTest_testProperties", "csv");
-        tempFile.deleteOnExit();
+        Path tempFile = IOHelper.createTempFile("VectorDataNodeWriterTest_testProperties", "csv");
+        IOHelper.deleteOnExit(tempFile);
         vectorDataNodeWriter.write(vectorDataNode, tempFile);
 
-        FileReader fileReader = new FileReader(tempFile);
+        Reader fileReader = Files.newBufferedReader(tempFile);
         LineNumberReader lineNumberReader = new LineNumberReader(fileReader);
 
         String firstLine = lineNumberReader.readLine();
@@ -180,7 +184,7 @@ public class VectorDataNodeIOTest {
                 return true;
             }
         };
-        VectorDataNode vectorDataNode2 = VectorDataNodeReader.read("mem", new FileReader(tempFile), createDummyProduct(),
+        VectorDataNode vectorDataNode2 = VectorDataNodeReader.read("mem", Files.newBufferedReader(tempFile), createDummyProduct(),
                                                                    featureCrsProvider, placemarkDescriptorProvider,
                                                                    DefaultGeographicCRS.WGS84, VectorDataNodeIO.DEFAULT_DELIMITER_CHAR, ProgressMonitor.NULL);
 

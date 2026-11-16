@@ -16,39 +16,44 @@
 package org.esa.snap.core.util.io;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.GlobalTestTools;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Objects;
 
 import static org.esa.snap.core.util.io.FileUtils.getFilenameFromPath;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class FileUtilsTest {
 
     @Test
     public void testGetExtension() {
-        assertEquals(null, FileUtils.getExtension(new File("testfile")));
-        assertEquals(".", FileUtils.getExtension(new File("testfile.")));
-        assertEquals(".ext", FileUtils.getExtension(new File("testfile.ext")));
-        assertEquals(".EXT", FileUtils.getExtension(new File("testfile.EXT")));
-        assertEquals(".ext", FileUtils.getExtension(new File("directory\\testfile.ext")));
-        assertEquals(".ext", FileUtils.getExtension(new File("directory/testfile.ext")));
-        assertEquals(".ext", FileUtils.getExtension(new File("directory:testfile.ext")));
+        assertNull(FileUtils.getExtension(Path.of("testfile")));
+        assertEquals(".", FileUtils.getExtension(Path.of("testfile.")));
+        assertEquals(".ext", FileUtils.getExtension(Path.of("testfile.ext")));
+        assertEquals(".EXT", FileUtils.getExtension(Path.of("testfile.EXT")));
+        assertEquals(".ext", FileUtils.getExtension(Path.of("directory\\testfile.ext")));
+        assertEquals(".ext", FileUtils.getExtension(Path.of("directory/testfile.ext")));
+        assertEquals(".ext", FileUtils.getExtension(Path.of("d:testfile.ext")));
     }
 
     @Test
@@ -74,16 +79,16 @@ public class FileUtilsTest {
 
     @Test
     public void testEnsureExtension_FileParameter() {
-        File dirFile = new File("dir.with.dots");
+        Path dirFile = Path.of("dir.with.dots");
 
-        File current = FileUtils.ensureExtension(new File(dirFile, "file.smc"), ".kdt");
+        Path current = FileUtils.ensureExtension(dirFile.resolve("file.smc"), ".kdt");
         assertEquals(GlobalTestTools.createPlatformIndependentFilePath("dir.with.dots/file.smc.kdt"),
                      current.toString());
 
-        current = FileUtils.ensureExtension(new File(dirFile, "file."), ".kdt");
+        current = FileUtils.ensureExtension(dirFile.resolve("file."), ".kdt");
         assertEquals(GlobalTestTools.createPlatformIndependentFilePath("dir.with.dots/file.kdt"), current.toString());
 
-        current = FileUtils.ensureExtension(new File(dirFile, "file"), ".kdt");
+        current = FileUtils.ensureExtension(dirFile.resolve("file"), ".kdt");
         assertEquals(GlobalTestTools.createPlatformIndependentFilePath("dir.with.dots/file.kdt"), current.toString());
     }
 
@@ -102,12 +107,12 @@ public class FileUtilsTest {
 
     @Test
     public void testChangeExtension_FileParameter() {
-        File dirFile = new File("dir.with.dots");
-        File fileWithExtension = new File(dirFile, "file.smc");
-        File fileWithDot = new File(dirFile, "file.");
-        File fileWithoutExtension = new File(dirFile, "file");
+        Path dirFile = Path.of("dir.with.dots");
+        Path fileWithExtension = dirFile.resolve("file.smc");
+        Path fileWithDot = dirFile.resolve( "file.");
+        Path fileWithoutExtension = dirFile.resolve( "file");
 
-        File current = FileUtils.exchangeExtension(fileWithExtension, ".kdt");
+        Path current = FileUtils.exchangeExtension(fileWithExtension, ".kdt");
         assertEquals(GlobalTestTools.createPlatformIndependentFilePath("dir.with.dots/file.kdt"), current.toString());
 
         current = FileUtils.exchangeExtension(fileWithDot, ".kdt");
@@ -142,9 +147,10 @@ public class FileUtilsTest {
         final String expected2 = "tesfile2.dim";
         final String expected3 = "tesfile3.dim";
 
-        final String path1 = "home" + File.separator + "tom" + File.separator + expected1;
-        final String path2 = "C:" + File.separator + "Data" + File.separator + "TestFiles" + File.separator + expected2;
-        final String path3 = File.separator + expected3;
+        final String separator = IOHelper.SEPARATOR;
+        final String path1 = "home" + separator + "tom" + separator + expected1;
+        final String path2 = "C:" + separator + "Data" + separator + "TestFiles" + separator + expected2;
+        final String path3 = separator + expected3;
 
         // check that null is not allowed as argument
         try {
@@ -173,49 +179,50 @@ public class FileUtilsTest {
 
     @Test
     public void testDeleteFileTree() {
-        File treeRoot = GlobalTestConfig.getSnapTestDataOutputDirectory();
-        File firstDir = new File(treeRoot, "firstDir");
-        File firstFile = new File(treeRoot, "firstFile");
-        File secondDir = new File(firstDir, "secondDir");
-        File secondFile = new File(firstDir, "secondFile");
-        File thirdFile = new File(secondDir, "thirdFile");
-        File writeProtectedFile = new File(secondDir, "protFile");
+        Path treeRoot = GlobalTestConfig.getSnapTestDataOutputDirectory();
+        Path firstDir = treeRoot.resolve( "firstDir");
+        Path firstFile = treeRoot.resolve( "firstFile");
+        Path secondDir = firstDir.resolve( "secondDir");
+        Path secondFile = firstDir.resolve( "secondFile");
+        Path thirdFile = secondDir.resolve( "thirdFile");
+        Path writeProtectedFile = secondDir.resolve( "protFile");
 
         try {
-            treeRoot.mkdirs();
-            assertTrue(treeRoot.exists());
+            IOHelper.createDirectories(treeRoot);
+            assertTrue(Files.exists(treeRoot));
 
-            firstDir.mkdirs();
-            assertTrue(firstDir.exists());
+            IOHelper.createDirectories(firstDir);
+            assertTrue(Files.exists(firstDir));
 
-            firstFile.createNewFile();
-            assertTrue(firstFile.exists());
+            IOHelper.createFile(firstFile);
+            assertTrue(Files.exists(firstFile));
 
-            secondDir.mkdirs();
-            assertTrue(secondDir.exists());
+            IOHelper.createDirectories(secondDir);
+            assertTrue(Files.exists(secondDir));
 
-            secondFile.createNewFile();
-            assertTrue(secondFile.exists());
+            IOHelper.createFile(secondFile);
+            assertTrue(Files.exists(secondFile));
 
-            thirdFile.createNewFile();
-            assertTrue(thirdFile.exists());
+            IOHelper.createFile(thirdFile);
+            assertTrue(Files.exists(thirdFile));
 
-            writeProtectedFile.createNewFile();
-            assertTrue(writeProtectedFile.setReadOnly());
-            assertTrue(writeProtectedFile.exists());
+            IOHelper.createFile(writeProtectedFile);
+            
+            assertTrue(IOHelper.setReadOnly(writeProtectedFile));
+            assertTrue(Files.exists(writeProtectedFile));
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             fail("unable to create file");
         }
 
         if (FileUtils.deleteTree(treeRoot)) {
-            assertTrue(!treeRoot.exists());
-            assertTrue(!firstDir.exists());
-            assertTrue(!firstFile.exists());
-            assertTrue(!secondDir.exists());
-            assertTrue(!secondFile.exists());
-            assertTrue(!thirdFile.exists());
-            assertTrue(!writeProtectedFile.exists());
+            assertFalse(Files.exists(treeRoot));
+            assertFalse(Files.exists(firstDir));
+            assertFalse(Files.exists(firstFile));
+            assertFalse(Files.exists(secondDir));
+            assertFalse(Files.exists(secondFile));
+            assertFalse(Files.exists(thirdFile));
+            assertFalse(Files.exists(writeProtectedFile));
         } else {
             System.err.println("Error in FileUtilsTest: FileUtils.deleteTree() failed to delete dir " + treeRoot);
         }
@@ -226,24 +233,24 @@ public class FileUtilsTest {
         try {
             FileUtils.deleteTree(null);
             fail("invalid null argument");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
     }
 
     @Test
-    public void testDeleteFileTree_DeleteEmptyDirectories() {
-        File treeRoot = GlobalTestConfig.getSnapTestDataOutputDirectory();
-        treeRoot.mkdirs();
-        assertTrue("treeRoot exists expected", treeRoot.exists());
-        File firstDir = new File(treeRoot, "firstDir");
-        firstDir.mkdirs();
-        assertTrue("firstDir exists expected", firstDir.exists());
-        File emptyDir = new File(firstDir, "emptyDir");
-        emptyDir.mkdirs();
-        assertTrue("emptyDir exists expected", emptyDir.exists());
+    public void testDeleteFileTree_DeleteEmptyDirectories() throws IOException {
+        Path treeRoot = GlobalTestConfig.getSnapTestDataOutputDirectory();
+        IOHelper.createDirectories(treeRoot);
+        assertTrue("treeRoot exists expected", Files.exists(treeRoot));
+        Path firstDir = treeRoot.resolve( "firstDir");
+        Files.createDirectories(firstDir);
+        assertTrue("firstDir exists expected", Files.exists(firstDir));
+        Path emptyDir = firstDir.resolve( "emptyDir");
+        Files.createDirectories(emptyDir);
+        assertTrue("emptyDir exists expected", Files.exists(emptyDir));
 
         if (FileUtils.deleteTree(treeRoot)) {
-            assertTrue("treeRoot not exists expected", !treeRoot.exists());
+            assertFalse("treeRoot not exists expected", Files.exists(treeRoot));
         } else {
             System.err.println("Error in FileUtilsTest: FileUtils.deleteTree() failed to delete dir " + treeRoot);
         }
@@ -251,33 +258,18 @@ public class FileUtilsTest {
 
     @Test
     public void testGetFileAsURL() throws MalformedURLException {
-        final File file = new File("/dummy/hugo/daten").getAbsoluteFile();
+        final Path file = Path.of("/dummy/hugo/daten").toAbsolutePath();
 
         final URL fileURL = FileUtils.getFileAsUrl(file);
 
-        assertEquals(file.toURL(), fileURL);
-        assertEquals(file.toURI().toURL(), fileURL);
-    }
-
-    @Test
-    public void testGetFileAsURLWithIllegalChars() throws MalformedURLException, URISyntaxException {
-        final File file = new File("/dummy/hu\tgo/daten").getAbsoluteFile();
-
-        final URL fileURL = FileUtils.getFileAsUrl(file);
-
-        final URL url = file.toURL();
-        assertFalse(url.equals(fileURL));
-
-        final String expectedPath = new File("/dummy/hu%09go/daten").toURL().getPath();
-        assertEquals(expectedPath, fileURL.getPath());
-        assertEquals(file, new File(fileURL.toURI()));
+        assertEquals(file.toUri().toURL(), fileURL);
     }
 
     @Test
     public void testThatGetUrlAsFileIsTheInverseOfGetFileAsUrl() throws MalformedURLException,
             URISyntaxException {
-        final File file1 = new File("/dummy/hugo/daten").getAbsoluteFile();
-        final File file2 = FileUtils.getUrlAsFile(FileUtils.getFileAsUrl(file1));
+        final Path file1 = Path.of("/dummy/hugo/daten").toAbsolutePath();
+        final Path file2 = FileUtils.getUrlAsFile(FileUtils.getFileAsUrl(file1));
         assertEquals(file1, file2);
     }
 
@@ -290,14 +282,14 @@ public class FileUtilsTest {
             // ok
         }
         try {
-            FileUtils.getDisplayText(new File("alpha/bravo/charly"), 3);
+            FileUtils.getDisplayText(Path.of("alpha/bravo/charly"), 3);
             fail("IAE expected");
         } catch (IllegalArgumentException e) {
             // ok
         }
         //                   "5432109876543210987654321098765432109876543210987654321"
-        File file = new File("alpha/bravo/charly/delta/echo/foxtrott/golf/hotel/india");
-        char sep = File.separatorChar;
+        Path file = Path.of("alpha/bravo/charly/delta/echo/foxtrott/golf/hotel/india");
+        char sep = IOHelper.SEPARATOR_CHAR;
         assertEquals("...ndia",
                      FileUtils.getDisplayText(file, 7));
         assertEquals(".../india".replace('/', sep),
@@ -310,67 +302,55 @@ public class FileUtilsTest {
 
     @Test
     public void testResolvingDirectories() throws URISyntaxException, IOException {
-        Path folder = Paths.get(getClass().getResource("/resource-testdata/auxdata").toURI());
-        Path folderWithSlash = Paths.get(getClass().getResource("/resource-testdata/auxdata/").toURI());
-        Path file = Paths.get(getClass().getResource("/resource-testdata/auxdata/file-1.txt").toURI());
+        final URL fileURL1 = getClass().getResource("/resource-testdata/auxdata");
+        assertNotNull(fileURL1);
+        Path folder = UrlHelper.urlToFile(fileURL1);
+        assertNotNull(folder);
+        final URL fileURL2 = getClass().getResource("/resource-testdata/auxdata/");
+        assertNotNull(fileURL2);
+        Path folderWithSlash = UrlHelper.urlToFile(fileURL2);
+        assertNotNull(folderWithSlash);
+        final URL fileURL3 = getClass().getResource("/resource-testdata/auxdata/file-1.txt");
+        assertNotNull(fileURL3);
+        Path file = UrlHelper.urlToFile(fileURL3);
+        assertNotNull(file);
         assertEquals("file-1.txt", folder.relativize(file).toString());
         assertEquals("file-1.txt", folderWithSlash.relativize(file).toString());
 
-        final URI jarURI = FileUtils.ensureJarURI(getClass().getResource("/resource-testdata.jar").toURI());
-        FileSystems.newFileSystem(jarURI, Collections.emptyMap());
-        Path folder2 = Paths.get(jarURI).resolve("auxdata");
-        Path folder2WithSlash = Paths.get(jarURI).resolve("auxdata/");
-        String version = System.getProperty("java.version");
-        if (version.startsWith("1.8")) {
-            // the trailing slash makes a difference when used in path within a jar file in Java 8
-            assertFalse(Files.isSameFile(folder2, folder2WithSlash));
-            Path file2 = Paths.get(jarURI).resolve("auxdata").resolve("file-1.txt");
-            assertEquals("file-1.txt", folder2.relativize(file2).toString());
-            assertEquals("../auxdata/file-1.txt", folder2WithSlash.relativize(file2).toString());
-        } else {
-            //In versions from 11 onwards the above behavior is fixed.
-            assertTrue(Files.isSameFile(folder2, folder2WithSlash));
-            Path file2 = Paths.get(jarURI).resolve("auxdata").resolve("file-1.txt");
-            assertEquals("file-1.txt", folder2.relativize(file2).toString());
-            assertEquals("file-1.txt", folder2WithSlash.relativize(file2).toString());
-
+        final URI jarURI = FileUtils.ensureJarURI(Objects.requireNonNull(getClass().getResource("/resource-testdata.jar")).toURI());
+        try (FileSystem fs = FileSystems.newFileSystem(jarURI, Collections.emptyMap())) {
+            Path jarPathFromURI = fs.provider().getPath(jarURI);
+            Path folder2 = jarPathFromURI.resolve("auxdata");
+            Path folder2WithSlash = jarPathFromURI.resolve("auxdata/");
+            String version = System.getProperty("java.version");
+            if (version.startsWith("1.8")) {
+                // the trailing slash makes a difference when used in path within a jar file in Java 8
+                assertFalse(Files.isSameFile(folder2, folder2WithSlash));
+                Path file2 = jarPathFromURI.resolve("auxdata").resolve("file-1.txt");
+                assertEquals("file-1.txt", folder2.relativize(file2).toString());
+                assertEquals("../auxdata/file-1.txt", folder2WithSlash.relativize(file2).toString());
+            } else {
+                //In versions from 11 onwards the above behavior is fixed.
+                assertTrue(Files.isSameFile(folder2, folder2WithSlash));
+                Path file2 = jarPathFromURI.resolve("auxdata").resolve("file-1.txt");
+                assertEquals("file-1.txt", folder2.relativize(file2).toString());
+                assertEquals("file-1.txt", folder2WithSlash.relativize(file2).toString());
+            }
         }
-    }
-
-    @Test
-    public void testToFile() throws Exception {
-        Path relDirPath = Paths.get(".");
-        Path absDirPath = relDirPath.toAbsolutePath().normalize();
-        assertEquals(relDirPath.toFile(), FileUtils.toFile(relDirPath));
-        assertEquals(absDirPath.toFile(), FileUtils.toFile(absDirPath));
-
-        URI fileUri = getClass().getResource("/resource-testdata.jar").toURI();
-        Path jarUriPath;
-        try {
-            // When running this test from IDEA IDE then the following code works:
-            FileSystem fs = FileSystems.newFileSystem(URI.create("jar:" + fileUri), Collections.emptyMap());
-            jarUriPath = fs.getPath("/");
-            fs.close();
-        } catch (FileSystemAlreadyExistsException e1) {
-            // When running this test from Maven (mvn install) we get a FileSystemAlreadyExistsException
-            // so we have to do:
-            jarUriPath = Paths.get(URI.create("jar:" + fileUri + "!/"));
-        }
-        Assert.assertEquals(new File(fileUri), FileUtils.toFile(jarUriPath));
     }
 
     @Test
     public void computeHashForFileTest() throws IOException, URISyntaxException {
         final URL filePathURL = getClass().getResource("/resource-testdata.jar");
         Assert.assertNotNull(filePathURL);
-        Assert.assertEquals("15cabe41b0d09a28f93d9a6d81c9b02683bd24ef31c5efb92c534eea1b9e6430", FileUtils.computeHashForFile(Paths.get(filePathURL.toURI())));
+        Assert.assertEquals("15cabe41b0d09a28f93d9a6d81c9b02683bd24ef31c5efb92c534eea1b9e6430", FileUtils.computeHashForFile(UrlHelper.urlToFile(filePathURL)));
     }
 
     @Test
     public void computeHashForDirectoryTest() throws IOException, URISyntaxException {
         final URL directoryPathURL = getClass().getResource("/resource-testdata/auxdata");
         Assert.assertNotNull(directoryPathURL);
-        Assert.assertEquals("77848723f1da8254229c8cdf46b461857645086610f4c2654afe4c15f248a67e", FileUtils.computeHashForDirectory(Paths.get(directoryPathURL.toURI())));
+        Assert.assertEquals("77848723f1da8254229c8cdf46b461857645086610f4c2654afe4c15f248a67e", FileUtils.computeHashForDirectory(UrlHelper.urlToFile(directoryPathURL)));
     }
 }
 

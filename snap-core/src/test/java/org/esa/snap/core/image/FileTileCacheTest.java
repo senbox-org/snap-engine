@@ -16,17 +16,20 @@
 
 package org.esa.snap.core.image;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.Test;
 
 import javax.media.jai.PlanarImage;
 import javax.media.jai.TiledImage;
-import java.awt.*;
+import java.awt.Point;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.PixelInterleavedSampleModel;
-import java.io.File;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 public class FileTileCacheTest {
 
@@ -39,7 +42,7 @@ public class FileTileCacheTest {
 
     @Test
     public void testGetImageId() {
-        FileTileCache cache = new FileTileCache(new File("."));
+        FileTileCache cache = new FileTileCache(IOHelper.createATempDir());
         TiledImage image1 = createImage();
         TiledImage image2 = createImage();
         TiledImage image3 = createImage();

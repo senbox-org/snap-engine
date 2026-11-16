@@ -15,47 +15,55 @@
  */
 package org.esa.snap.core.util.geotiff;
 
+import org.esa.snap.core.util.ImageUtils;
 import org.jdom2.Element;
 import org.jdom2.input.DOMBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
-import javax.imageio.*;
+import javax.imageio.IIOException;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 
 public class IIOUtils {
 
     /**
-     * Returns a <code>BufferedImage</code> as the result of decoding a supplied <code>File</code> with an
-     * <code>ImageReader</code> chosen automatically from among those currently registered. The <code>File</code> is
+     * Returns a <code>BufferedImage</code> as the result of decoding a supplied <code>Path</code> with an
+     * <code>ImageReader</code> chosen automatically from among those currently registered. The <code>Path</code> is
      * wrapped in an <code>ImageInputStream</code>.  If no registered <code>ImageReader</code> claims to be able to
      * readImage the resulting stream, <code>null</code> is returned.
      * <p> The current cache settings from <code>getUseCache</code>and <code>getCacheDirectory</code> will be used to
      * control caching in the <code>ImageInputStream</code> that is created.
      * <p> Note that there is no <code>readImage</code> method that takes a filename as a <code>String</code>; use this
-     * method instead after creating a <code>File</code> from the filename.
+     * method instead after creating a <code>Path</code> from the filename.
      * <p> This methods does not attempt to locate <code>ImageReader</code>s that can readImage directly from a
-     * <code>File</code>; that may be accomplished using <code>IIORegistry</code> and <code>ImageReaderSpi</code>.
+     * <code>Path</code>; that may be accomplished using <code>IIORegistry</code> and <code>ImageReaderSpi</code>.
      *
-     * @param input a <code>File</code> to readImage from.
+     * @param input a <code>Path</code> to readImage from.
      * @return a <code>BufferedImage</code> containing the decoded contents of the input, or <code>null</code>.
      * @throws IllegalArgumentException if <code>input</code> is <code>null</code>.
      * @throws java.io.IOException      if an error occurs during reading.
      */
-    public static IIOImage readImage(File input) throws IOException {
+    public static IIOImage readImage(Path input) throws IOException {
         if (input == null) {
             throw new IllegalArgumentException("input == null!");
         }
-        if (!input.canRead()) {
+        if (!Files.isReadable(input)) {
             throw new IIOException("Can't readImage input file!");
         }
 
-        ImageInputStream stream = ImageIO.createImageInputStream(input);
+        ImageInputStream stream = ImageUtils.getImageInputStream(input);
         if (stream == null) {
             throw new IIOException("Can't create an ImageInputStream!");
         }
@@ -95,25 +103,25 @@ public class IIOUtils {
 
     /**
      * Writes an image using an arbitrary <code>ImageWriter</code> that supports the given format to a
-     * <code>File</code>.  If there is already a <code>File</code> present, its contents are discarded.
+     * <code>Path</code>.  If there is already a <code>Path</code> present, its contents are discarded.
      *
      * @param iioImage   the image data to be written.
      * @param formatName a <code>String</code> containg the informal name of the format.
-     * @param output     a <code>File</code> to be written to.
+     * @param output     a <code>Path</code> to be written to.
      * @return <code>false</code> if no appropriate writer is found.
      * @throws IllegalArgumentException if any parameter is <code>null</code>.
      * @throws IOException              if an error occurs during writing.
      */
     public static boolean writeImage(IIOImage iioImage,
                                      String formatName,
-                                     File output) throws IOException {
+                                     Path output) throws IOException {
         if (output == null) {
             throw new IllegalArgumentException("output == null!");
         }
         ImageOutputStream stream = null;
         try {
-            output.delete();
-            stream = ImageIO.createImageOutputStream(output);
+            Files.delete(output);
+            stream = ImageUtils.getImageOutputStream(output);
         } catch (IOException e) {
             throw new IIOException("Can't create output stream!", e);
         }

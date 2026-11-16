@@ -33,10 +33,11 @@ import org.esa.snap.core.dataop.maptransf.UTMProjection;
 import org.geotools.referencing.wkt.UnformattableObjectException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * This utility class is used to write ENVI header files.
@@ -77,15 +78,15 @@ public class EnviHeader {
     private static final int _enviMSFOrder = 1;
 
     /**
-     * Writes the header for the <code>RasterDataNode</code> to the <code>File</code>.
+     * Writes the header for the <code>RasterDataNode</code> to the <code>Path</code>.
      *
-     * @param headerFile     - the <code>File</code> destination
+     * @param headerFile     - the <code>Path</code> destination
      * @param rasterDataNode the <code>RasterDataNode</code>
      * @param width          the nodes's width in pixels
      * @param height         the nodes's height in pixels
      * @throws java.io.IOException if an I/O error occurs
      */
-    public static void createPhysicalFile(File headerFile,
+    public static void createPhysicalFile(Path headerFile,
                                           RasterDataNode rasterDataNode,
                                           int width,
                                           int height) throws IOException {
@@ -93,37 +94,37 @@ public class EnviHeader {
     }
 
     /**
-     * Writes the header for the <code>RasterDataNode</code> to the <code>File</code>.
+     * Writes the header for the <code>RasterDataNode</code> to the <code>Path</code>.
      *
-     * @param headerFile     - the <code>File</code> destination
+     * @param headerFile     - the <code>Path</code> destination
      * @param rasterDataNode the <code>RasterDataNode</code>
      * @param width          the nodes's width in pixels
      * @param height         the nodes's height in pixels
      * @param byteorder      the byte ordering
      * @throws java.io.IOException if an I/O error occurs
      */
-    public static void createPhysicalFile(File headerFile,
+    public static void createPhysicalFile(Path headerFile,
                                           RasterDataNode rasterDataNode,
                                           int width,
                                           int height,
                                           int byteorder) throws IOException {
-        FileWriter fileWriter = new FileWriter(headerFile);
-        PrintWriter out = new PrintWriter(fileWriter);
-        writeFileMagic(out);
-        writedescription(out, rasterDataNode);
-        writeBandSize(out, width, height);
-        writeNumBands(out);
-        writeHeaderOffset(out);
-        writeFileType(out);
-        writeDataType(out, rasterDataNode.getDataType());
-        writeInterleave(out);
-        writeByteOrder(out, byteorder);
-        writeBandNames(out, rasterDataNode);
-        writeMapProjectionInfo(out, rasterDataNode);
-        writeWavelength(out, rasterDataNode);
-        writeScalingFactor(out, rasterDataNode);
-        writeScalingOffset(out, rasterDataNode);
-        out.close();
+        try (Writer fileWriter = Files.newBufferedWriter(headerFile);
+             PrintWriter out = new PrintWriter(fileWriter)) {
+            writeFileMagic(out);
+            writedescription(out, rasterDataNode);
+            writeBandSize(out, width, height);
+            writeNumBands(out);
+            writeHeaderOffset(out);
+            writeFileType(out);
+            writeDataType(out, rasterDataNode.getDataType());
+            writeInterleave(out);
+            writeByteOrder(out, byteorder);
+            writeBandNames(out, rasterDataNode);
+            writeMapProjectionInfo(out, rasterDataNode);
+            writeWavelength(out, rasterDataNode);
+            writeScalingFactor(out, rasterDataNode);
+            writeScalingOffset(out, rasterDataNode);
+        }
     }
 
     private static void writedescription(PrintWriter out, RasterDataNode rasterDataNode) {

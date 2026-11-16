@@ -16,9 +16,30 @@
 package org.esa.snap.core.dataio.dimap;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.GlobalTestTools;
-import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.dataop.maptransf.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.ColorPaletteDef;
+import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.GcpGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.ImageInfo;
+import org.esa.snap.core.datamodel.IndexCoding;
+import org.esa.snap.core.datamodel.MapGeoCoding;
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.Stx;
+import org.esa.snap.core.datamodel.StxFactory;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.dataop.maptransf.Datum;
+import org.esa.snap.core.dataop.maptransf.LambertConformalConicDescriptor;
+import org.esa.snap.core.dataop.maptransf.MapInfo;
+import org.esa.snap.core.dataop.maptransf.MapProjection;
+import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.StringUtils;
@@ -28,13 +49,22 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.awt.*;
-import java.io.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class DimapDocumentTest {
 
@@ -113,7 +143,7 @@ public class DimapDocumentTest {
         Product product = createProduct(TIE_POINT_GEOCODING);
         Document dom1 = createDOM(product, _nameDataDirectory);
         String file = DimapProductHelpers.getTiePointDataFile(dom1, product.getTiePointGridNames()[0]);
-        String expected = _nameDataDirectory + File.separator + DimapProductConstants.TIE_POINT_GRID_DIR_NAME + File.separator + product.getTiePointGridNames()[0];
+        String expected = _nameDataDirectory + IOHelper.SEPARATOR + DimapProductConstants.TIE_POINT_GRID_DIR_NAME + IOHelper.SEPARATOR + product.getTiePointGridNames()[0];
         assertEquals(expected + EnviHeader.FILE_EXTENSION, file);
     }
 
@@ -126,7 +156,7 @@ public class DimapDocumentTest {
         final Product product = createProduct(TIE_POINT_GEOCODING);
         final Document dom1 = createDOM(product, _nameDataDirectory);
         final Band[] bands = product.getBands();
-        final File inputDir = new File("inputPath");
+        final Path inputDir = IOHelper.createATempDir().resolve("inputPath");
 
         //Test jDom contains no root element
         final Map emptyMap = DimapProductHelpers.getBandDataFiles(new Document(), product, inputDir);
@@ -138,10 +168,10 @@ public class DimapDocumentTest {
 
         assertEquals(bands.length, bandDataFiles.size());
         for (final Band band : bands) {
-            final String expectedDimapDataFilePath = _nameDataDirectory + File.separator + band.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION;
-            final String expectedCompleteDataFilePath = inputDir.getPath() + File.separator + expectedDimapDataFilePath;
-            final File bandDataFile = (File) bandDataFiles.get(band);
-            assertEquals(expectedCompleteDataFilePath, bandDataFile.getPath());
+            final String expectedDimapDataFilePath = _nameDataDirectory + IOHelper.SEPARATOR + band.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION;
+            final String expectedCompleteDataFilePath = inputDir + IOHelper.SEPARATOR + expectedDimapDataFilePath;
+            final Path bandDataFile = (Path) bandDataFiles.get(band);
+            assertEquals(expectedCompleteDataFilePath, bandDataFile.toString());
         }
 
         final Band firstBand = bands[0];
@@ -1044,7 +1074,7 @@ public class DimapDocumentTest {
         private String getProductFilename() {
             String productFilename;
             if (getProduct().getFileLocation() != null) {
-                productFilename = getProduct().getFileLocation().getName();
+                productFilename = getProduct().getFileLocation().getFileName().toString();
             } else {
                 productFilename = getProduct().getName() + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION;
             }

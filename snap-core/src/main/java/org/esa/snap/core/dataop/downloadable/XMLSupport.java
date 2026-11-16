@@ -32,10 +32,12 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,10 +53,9 @@ public final class XMLSupport {
     public static void SaveXML(final Document doc, final String filePath) throws IOException {
 
         final XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
-        try (final FileWriter writer = new FileWriter(filePath)){
+        try (final Writer writer = Files.newBufferedWriter(Path.of(filePath))){
 
             outputter.output(doc, writer);
-            writer.close();
         }
     }
 

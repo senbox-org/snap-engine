@@ -23,7 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
@@ -65,7 +65,7 @@ public class DimapProductWriterPlugInTest {
     @Test
     public void testWriteProductNodes() {
         Product product = new Product("test", "TEST", 10, 10);
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile("DIMAP/test.dim");
+        Path outputFile = GlobalTestConfig.getSnapTestDataOutputFile("DIMAP/test.dim");
         try {
             _productWriter.writeProductNodes(product, outputFile);
         } catch (IOException e) {

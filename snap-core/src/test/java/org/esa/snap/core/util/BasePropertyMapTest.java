@@ -136,14 +136,14 @@ public abstract class BasePropertyMapTest {
         assertEquals(0, prop.getPropertyInt("a"));  // test default
         assertEquals(8, (int) prop.getPropertyInt("a", 8));
         assertEquals(null, prop.getPropertyInt("a", null));
-        assertEquals(new Integer(8), prop.getPropertyInt("a", 8));
+        assertEquals(Integer.valueOf(8), prop.getPropertyInt("a", 8));
 
         // "b" is in the set and 23
         prop.setPropertyInt("b", 23);
         assertEquals(23, prop.getPropertyInt("b"));
         assertEquals(23, (int) prop.getPropertyInt("b", 43));
-        assertEquals(new Integer(23), prop.getPropertyInt("b", 43));
-        assertEquals(new Integer(23), prop.getPropertyInt("b", null));
+        assertEquals(Integer.valueOf(23), prop.getPropertyInt("b", 43));
+        assertEquals(Integer.valueOf(23), prop.getPropertyInt("b", null));
     }
 
     /**

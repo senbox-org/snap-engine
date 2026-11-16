@@ -36,22 +36,23 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.operation.MathTransform;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.zip.ZipFile;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.referencing.operation.MathTransform;
 
 /**
  * This class provides the core components for the new subset feature, that is Polygon Subset.
@@ -109,7 +110,7 @@ public class ProductSubsetByPolygon {
      * @param pm                    the progress monitor object to show the progress of the operation
      * @throws Exception when an error occurs while loading the polygon from the vector file
      */
-    public void loadPolygonFromVectorFile(File vectorFile, MetadataInspector.Metadata targetProductMetadata, ProgressMonitor pm) throws Exception {
+    public void loadPolygonFromVectorFile(Path vectorFile, MetadataInspector.Metadata targetProductMetadata, ProgressMonitor pm) throws Exception {
         this.subsetPolygon = readPolygonFromVectorFile(vectorFile, targetProductMetadata, pm);
         this.polygonGeocoding = targetProductMetadata.getGeoCoding();
     }
@@ -189,7 +190,7 @@ public class ProductSubsetByPolygon {
         return subsetPolygon;
     }
 
-    private static Polygon readPolygonFromVectorFile(File vectorFile, MetadataInspector.Metadata targetProductMetadata, ProgressMonitor pm) throws Exception {
+    private static Polygon readPolygonFromVectorFile(Path vectorFile, MetadataInspector.Metadata targetProductMetadata, ProgressMonitor pm) throws Exception {
         if (targetProductMetadata == null) {
             throw new IllegalArgumentException("missing product metadata.");
         }
@@ -219,11 +220,11 @@ public class ProductSubsetByPolygon {
         return readPolygonFromWKTString(wktString, pixelCoordinates, geoCoding, productDimension, pm);
     }
 
-    private static Polygon readPolygonFromShapeFile(File file, GeoCoding geoCoding, ProgressMonitor pm) throws Exception {
+    private static Polygon readPolygonFromShapeFile(Path file, GeoCoding geoCoding, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading Shapefile", 100);
         try {
-            final File cachedVectorFile = FeatureUtils.getCachedVectorFile(file);
-            final FileDataStore fileDataStore = FileDataStoreFinder.getDataStore(cachedVectorFile);
+            final Path cachedVectorFile = FeatureUtils.getCachedVectorFile(file);
+            final FileDataStore fileDataStore = FileDataStoreFinder.getDataStore(cachedVectorFile.toFile());
             pm.worked(10);
             final SimpleFeatureCollection simpleFeatureCollection = fileDataStore.getFeatureSource().getFeatures();
             pm.worked(50);
@@ -246,9 +247,9 @@ public class ProductSubsetByPolygon {
         }
     }
 
-    private static Polygon readPolygonFromPlacemarkFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
+    private static Polygon readPolygonFromPlacemarkFile(Path file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading placemark file", 100);
-        try (Reader reader = Files.newBufferedReader(file.toPath())) {
+        try (Reader reader = Files.newBufferedReader(file)) {
             final List<Placemark> placemarks = PlacemarkIO.readPlacemarks(reader, geoCoding, PinDescriptor.getInstance());
             if (placemarks.size() < 3) {
                 throw new IllegalArgumentException("Cannot create a polygon. 3 or more points are required.");
@@ -272,10 +273,10 @@ public class ProductSubsetByPolygon {
         }
     }
 
-    private static Polygon readPolygonFromWKTFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
+    private static Polygon readPolygonFromWKTFile(Path file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading WKT file", 100);
         final StringBuilder wktInput = new StringBuilder();
-        try (final BufferedReader reader = Files.newBufferedReader(file.toPath())) {
+        try (final BufferedReader reader = Files.newBufferedReader(file)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 wktInput.append(line);
@@ -314,9 +315,9 @@ public class ProductSubsetByPolygon {
         return wktInputGeometry.getCoordinates();
     }
 
-    private static Polygon readPolygonFromKMLFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
+    private static Polygon readPolygonFromKMLFile(Path file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading KML file", 100);
-        try (InputStream kmlInputStream = Files.newInputStream(file.toPath())) {
+        try (InputStream kmlInputStream = Files.newInputStream(file)) {
             return readPolygonFromKMLInputStream(kmlInputStream, geoCoding, productDimension, pm);
         } finally {
             pm.worked(100);
@@ -324,10 +325,10 @@ public class ProductSubsetByPolygon {
         }
     }
 
-    private static Polygon readPolygonFromKMZFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
+    private static Polygon readPolygonFromKMZFile(Path file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading KMZ file", 100);
-        final File cachedKmzFile = FileUtils.getCachedFile(file);
-        try (ZipFile kmzFile = new ZipFile(cachedKmzFile)) {
+        final Path cachedKmzFile = FileUtils.getCachedFile(file);
+        try (ZipFile kmzFile = new ZipFile(cachedKmzFile.toFile())) {
             try (InputStream kmlInputStream = kmzFile.getInputStream(kmzFile.getEntry("overlay.kml"))) {
                 return readPolygonFromKMLInputStream(kmlInputStream, geoCoding, productDimension, pm);
             }
@@ -337,11 +338,11 @@ public class ProductSubsetByPolygon {
         }
     }
 
-    private static Polygon readPolygonFromGeoJsonFile(File file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
+    private static Polygon readPolygonFromGeoJsonFile(Path file, GeoCoding geoCoding, Dimension productDimension, ProgressMonitor pm) throws Exception {
         pm.beginTask("Loading GeoJSON file", 100);
         final GeometryJSON gJson = new GeometryJSON();
         final Polygon vectorFileContent;
-        try (InputStream geoJsonInputStream = Files.newInputStream(file.toPath())) {
+        try (InputStream geoJsonInputStream = Files.newInputStream(file)) {
             final MultiPolygon multiPolygon = gJson.readMultiPolygon(geoJsonInputStream);
             pm.worked(40);
             if (multiPolygon.getNumGeometries() > 1) {

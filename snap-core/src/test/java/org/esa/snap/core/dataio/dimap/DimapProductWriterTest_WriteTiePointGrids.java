@@ -21,31 +21,35 @@ import org.esa.snap.GlobalTestTools;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.imageio.stream.FileImageInputStream;
-import java.io.File;
+import javax.imageio.stream.ImageInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class DimapProductWriterTest_WriteTiePointGrids {
 
     private final DimapProductWriterPlugIn _writerPlugIn = new DimapProductWriterPlugIn();
     private DimapProductWriter _productWriter;
-    private File _outputDir;
-    private File _outputFile;
+    private Path _outputDir;
+    private Path _outputFile;
 
     @Before
     public void setUp() {
         GlobalTestTools.deleteTestDataOutputDirectory();
         _productWriter = new DimapProductWriter(_writerPlugIn);
-        _outputDir = new File(GlobalTestConfig.getSnapTestDataOutputDirectory(), "testproduct");
-        _outputFile = new File(_outputDir, "testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
+        _outputDir = GlobalTestConfig.getSnapTestDataOutputDirectory().resolve("testproduct");
+        _outputFile = _outputDir.resolve("testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
     }
 
     @After
@@ -96,13 +100,11 @@ public class DimapProductWriterTest_WriteTiePointGrids {
     }
 
     private float[] getCurrentByteArray(TiePointGrid grid) {
-        FileImageInputStream inputStream = createInputStream(grid);
-        int fileLength = Long.valueOf(inputStream.length()).intValue();
+        int fileLength = Long.valueOf(getSize(grid)).intValue();
         int arrayLength = fileLength / ProductData.getElemSize(ProductData.TYPE_FLOAT32);
         float[] currentFloats = new float[arrayLength];
-        try {
+        try (ImageInputStream inputStream = createInputStream(grid)){
             inputStream.readFully(currentFloats, 0, arrayLength);
-            inputStream.close();
         } catch (FileNotFoundException e) {
             fail("FileNotFoundException not expected");
         } catch (IOException e) {
@@ -111,13 +113,12 @@ public class DimapProductWriterTest_WriteTiePointGrids {
         return currentFloats;
     }
 
-    private FileImageInputStream createInputStream(TiePointGrid grid) {
-        File tiePointGridDir = new File(createDataDir(), DimapProductConstants.TIE_POINT_GRID_DIR_NAME);
-        File file = new File(tiePointGridDir, grid.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION);
-        assertTrue(file.exists());
-        FileImageInputStream inputStream = null;
+    private ImageInputStream createInputStream(TiePointGrid grid) {
+        Path file = getFile(grid);
+        assertTrue(Files.exists(file));
+        ImageInputStream inputStream = null;
         try {
-            inputStream = new FileImageInputStream(file);
+            inputStream = ImageUtils.getImageInputStream(file);
         } catch (FileNotFoundException e) {
             fail("FileNotFoundException not expected");
         } catch (IOException e) {
@@ -126,8 +127,23 @@ public class DimapProductWriterTest_WriteTiePointGrids {
         return inputStream;
     }
 
-    private File createDataDir() {
+    private Path createDataDir() {
         final String nameWithoutExtension = FileUtils.getFilenameWithoutExtension(_outputFile);
-        return new File(_outputDir, nameWithoutExtension + ".data");
+        return _outputDir.resolve(nameWithoutExtension + ".data");
     }
+
+    private long getSize(TiePointGrid grid){
+        final Path file = getFile(grid);
+        try {
+            return Files.size(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Path getFile(TiePointGrid grid){
+        final Path tiePointGridDir = createDataDir().resolve(DimapProductConstants.TIE_POINT_GRID_DIR_NAME);
+        return tiePointGridDir.resolve(grid.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION);
+    }
+
 }

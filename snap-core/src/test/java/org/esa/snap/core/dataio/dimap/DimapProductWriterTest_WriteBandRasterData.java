@@ -22,32 +22,36 @@ import org.esa.snap.GlobalTestTools;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.imageio.stream.FileImageInputStream;
-import java.io.File;
+import javax.imageio.stream.ImageInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class DimapProductWriterTest_WriteBandRasterData {
 
     private final DimapProductWriterPlugIn _writerPlugIn = new DimapProductWriterPlugIn();
     private DimapProductWriter _productWriter;
-    private File _outputDir;
-    private File _outputFile;
+    private Path _outputDir;
+    private Path _outputFile;
 
     @Before
     public void setUp() {
         GlobalTestTools.deleteTestDataOutputDirectory();
         _productWriter = (DimapProductWriter) _writerPlugIn.createWriterInstance();
-        _outputDir = new File(GlobalTestConfig.getSnapTestDataOutputDirectory(), "testproduct");
-        _outputFile = new File(_outputDir, "testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
+        _outputDir = GlobalTestConfig.getSnapTestDataOutputDirectory().resolve("testproduct");
+        _outputFile = _outputDir.resolve("testproduct" + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
     }
 
     @After
@@ -251,12 +255,10 @@ public class DimapProductWriterTest_WriteBandRasterData {
     }
 
     private byte[] getCurrentByteArray(Band band) {
-        FileImageInputStream inputStream = createInputStream(band);
-        int fileLength = Long.valueOf(inputStream.length()).intValue();
+        int fileLength = Long.valueOf(getFileSize(band)).intValue();
         byte[] currentBytes = new byte[fileLength];
-        try {
+        try (ImageInputStream inputStream = createInputStream(band)) {
             inputStream.readFully(currentBytes);
-            inputStream.close();
         } catch (FileNotFoundException e) {
             fail("FileNotFoundException not expected");
         } catch (IOException e) {
@@ -265,19 +267,32 @@ public class DimapProductWriterTest_WriteBandRasterData {
         return currentBytes;
     }
 
-    private FileImageInputStream createInputStream(Band band) {
-        final String nameWithoutExtension = FileUtils.getFilenameWithoutExtension(_outputFile);
-        File dataDir = new File(_outputDir, nameWithoutExtension + ".data");
-        File file = new File(dataDir, band.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION);
-        assertTrue(file.exists());
-        FileImageInputStream inputStream = null;
+    private ImageInputStream createInputStream(Band band) {
+        Path file = getFile(band);
+        assertTrue(Files.exists(file));
+        ImageInputStream inputStream = null;
         try {
-            inputStream = new FileImageInputStream(file);
+            inputStream = ImageUtils.getImageInputStream(file);
         } catch (FileNotFoundException e) {
             fail("FileNotFoundException not expected");
         } catch (IOException e) {
             fail("IOException not expected");
         }
         return inputStream;
+    }
+
+    private long getFileSize(Band band) {
+        final Path file = getFile(band);
+        try {
+            return Files.size(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Path getFile(Band band) {
+        final String nameWithoutExtension = FileUtils.getFilenameWithoutExtension(_outputFile);
+        Path dataDir = _outputDir.resolve(nameWithoutExtension + ".data");
+        return dataDir.resolve(band.getName() + DimapProductConstants.IMAGE_FILE_EXTENSION);
     }
 }

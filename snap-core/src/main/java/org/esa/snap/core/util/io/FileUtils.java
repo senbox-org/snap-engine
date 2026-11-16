@@ -17,25 +17,36 @@ package org.esa.snap.core.util.io;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.VirtualDir;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import eu.esa.snap.core.lib.NotRegularFileException;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -61,9 +72,9 @@ public class FileUtils {
      * @return the extension string which always includes a leading dot. Returns {@code null} if the file has
      * no extension.
      */
-    public static String getExtension(File file) {
+    public static String getExtension(Path file) {
         Guardian.assertNotNull("file", file);
-        return getExtension(file.getPath());
+        return getExtension(file.toString());
     }
 
     /**
@@ -88,8 +99,8 @@ public class FileUtils {
      * @param file the file whose filename is to be extracted.
      * @return the filename without its extension.
      */
-    public static String getFilenameWithoutExtension(File file) {
-        return getFilenameWithoutExtension(file.getName());
+    public static String getFilenameWithoutExtension(Path file) {
+        return getFilenameWithoutExtension(file.getFileName().toString());
     }
 
     /**
@@ -189,33 +200,6 @@ public class FileUtils {
     }
 
     /**
-     * Returns a file with the given new extension. If the given file have no extension, the given extension will be
-     * added.
-     * <p>
-     * Example1:
-     * <pre> "tie.point.grids\tpg1.hdr" </pre>
-     * results to
-     * <pre> "tie.point.grids\tpg1.raw" </pre>
-     * <p>
-     * Example2:
-     * <pre> "tie.point.grids\tpg1" </pre>
-     * results to
-     * <pre> "tie.point.grids\tpg1.raw" </pre>
-     *
-     * @param file      the file to change the extension
-     * @param extension the new file extension including a leading dot (e.g. {@code ".raw"}).
-     * @throws java.lang.IllegalArgumentException if one of the parameter strings are null or empty.
-     */
-    public static File exchangeExtension(File file, String extension) {
-        Guardian.assertNotNull("file", file);
-        String path = file.getPath();
-        if (path.endsWith(extension)) {
-            return file;
-        }
-        return exchangeExtension(file.toPath(), extension).toFile();
-    }
-
-    /**
      * Returns a file with the given extension. If the given path have no extension or the extension are not equal to
      * the given extension, the given extension will be added.
      * <p>
@@ -275,13 +259,13 @@ public class FileUtils {
      * @param extension the new file extension including a leading dot (e.g. {@code ".raw"}).
      * @throws java.lang.IllegalArgumentException if one of the parameter strings are null or empty.
      */
-    public static File ensureExtension(File file, String extension) {
+    public static Path ensureExtension(Path file, String extension) {
         Guardian.assertNotNull("file", file);
-        String path = file.getPath();
+        String path = file.toString();
         if (path.endsWith(extension)) {
             return file;
         }
-        return new File(ensureExtension(path, extension));
+        return Path.of(ensureExtension(path, extension));
     }
 
     public static int getExtensionDotPos(String path) {
@@ -323,46 +307,53 @@ public class FileUtils {
     /**
      * Lists the files with the specified extension contained in the given directory.
      *
-     * @see java.io.File#listFiles()
-     * @see java.io.File#listFiles(java.io.FilenameFilter)
+     * @see com.bc.ceres.core.runtime.internal.IOHelper#listFiles(Path)
+     * @see com.bc.ceres.core.runtime.internal.IOHelper#listFiles(Path, Predicate)
      */
-    public static File[] listFilesWithExtension(File dir, String extension) {
+    public static Path[] listFilesWithExtension(Path dir, String extension) {
         if (dir == null) {
             return null;
         }
+        final Collection<Path> files;
         if (extension != null && !extension.isEmpty()) {
-            return dir.listFiles(createExtensionFilenameFilter(extension));
+            files = IOHelper.listFiles(dir, createExtensionFilenameFilter(extension));
         } else {
-            return dir.listFiles();
+            files = IOHelper.listFiles(dir);
         }
+        return files != null ? files.toArray(new Path[0]) : null;
     }
 
     /**
      * Lists the filenames with the specified extension contained in the given directory.
      *
-     * @see java.io.File#list()
-     * @see java.io.File#list(java.io.FilenameFilter)
+     * @see com.bc.ceres.core.runtime.internal.IOHelper#list(Path)
+     * @see com.bc.ceres.core.runtime.internal.IOHelper#list(Path, Predicate)
      */
-    public static String[] listFilePathsWithExtension(File dir, String extension) {
+    public static String[] listFilePathsWithExtension(Path dir, String extension) {
         if (dir == null) {
             return null;
         }
+        final Collection<String> files;
         if (extension != null && !extension.isEmpty()) {
-            return dir.list(createExtensionFilenameFilter(extension));
+            files = IOHelper.list(dir, createExtensionFilenameFilter(extension));
         } else {
-            return dir.list();
+            files = IOHelper.list(dir);
         }
+        return files != null ? files.toArray(new String[0]) : null;
     }
 
     /**
      * Creates a file filter which only lets files through which have the given extension.
      *
-     * @see java.io.FilenameFilter
+     * @see java.util.function.Predicate
      */
-    public static FilenameFilter createExtensionFilenameFilter(String extension) {
+    public static Predicate<Path> createExtensionFilenameFilter(String extension) {
         final String extensionLC = extension.toLowerCase();
-        return (dir, name) -> name.length() > extensionLC.length()
-                && name.toLowerCase().endsWith(extensionLC);
+        return (path) -> {
+            final String name = path.getFileName().toString();
+            return name.length() > extensionLC.length()
+                    && name.toLowerCase().endsWith(extensionLC);
+        };
     }
 
     /**
@@ -379,43 +370,41 @@ public class FileUtils {
 
     /**
      * Gets a normalized URL representation for the given file.
-     * <p>Unlike the  {@link java.io.File#toURL() File.toURL()} method,
-     * this method automatically escapes characters that are illegal in URLs.
      * It converts the given abstract pathname into a URL by first converting it into a
-     * URI, via the {@link java.io.File#toURI() File.toURI()} method, and then converting the URI
+     * URI, via the {@link java.nio.file.Path#toUri() Path.toUri()} method, and then converting the URI
      * into a URL via the {@link java.net.URI#toURL() URI.toURL} method.
      * .
-     * <p>See also the 'Usage Note' of the {@link java.io.File#toURL()} API documentation.
+     * <p>See also the 'Usage Note' of the {@link java.nio.file.Path#toUri()} API documentation.
      *
      * @param file the file
      * @return a normalized URL representation
      */
-    public static URL getFileAsUrl(File file) throws MalformedURLException {
-        final URI uri = file.toURI();
+    public static URL getFileAsUrl(Path file) throws MalformedURLException {
+        final URI uri = file.toUri();
         return uri.toURL();
     }
 
     /**
-     * Inverse of {@link #getFileAsUrl(java.io.File)}.
+     * Inverse of {@link #getFileAsUrl(java.nio.file.Path)}.
      *
      * @param url the URL
      * @return the file
      */
-    public static File getUrlAsFile(URL url) throws URISyntaxException {
-        return new File(url.toURI());
+    public static Path getUrlAsFile(URL url) {
+        return UrlHelper.urlToFile(url);
     }
 
-    public static String getDisplayText(File file, int maxLength) {
+    public static String getDisplayText(Path file, int maxLength) {
         Assert.notNull(file, "file");
         Assert.argument(maxLength >= 4, "maxLength >= 4");
 
-        String text = file.getPath();
+        String text = file.toString();
         if (text.length() <= maxLength) {
             return text;
         }
 
         while (text.length() + 3 > maxLength) {
-            int pos = text.indexOf(File.separator, text.startsWith(File.separator) ? 1 : 0);
+            int pos = text.indexOf(IOHelper.SEPARATOR, text.startsWith(IOHelper.SEPARATOR) ? 1 : 0);
             if (pos == -1) {
                 return "..." + text.substring(text.length() - maxLength + 3);
             }
@@ -424,8 +413,8 @@ public class FileUtils {
         return "..." + text;
     }
 
-    public static String readText(File file) throws IOException {
-        try (FileReader reader1 = new FileReader(file, StandardCharsets.UTF_8)) {
+    public static String readText(Path file) throws IOException {
+        try (Reader reader1 = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             return readText(reader1);
         }
     }
@@ -448,28 +437,17 @@ public class FileUtils {
      * @return {@code true} if and only if the file or directory is
      * successfully deleted; {@code false} otherwise
      */
-    public static boolean deleteTree(File tree) {
+    public static boolean deleteTree(Path tree) {
         Guardian.assertNotNull("tree", tree);
 
-        File[] files = tree.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    deleteTree(file);
-                } else {
-                    file.delete();
-                }
-            }
-        }
-
-        return tree.delete();
+        return IOHelper.deleteFileTree(tree);
     }
 
-    public static URI getRelativeUri(URI rootURI, File file) {
+    public static URI getRelativeUri(URI rootURI, Path file) {
         if (file == null) {
             return null;
         }
-        URI uri = file.toURI();
+        URI uri = file.toUri();
         if (rootURI == null) {
             return uri;
         }
@@ -497,35 +475,6 @@ public class FileUtils {
     }
 
     /**
-     * Converts the given path object into a file object.
-     * If opposite to {@link Path#toFile()}, the method unwraps paths that have a "jar" URI.
-     *
-     * @param path The path.
-     * @return The file object.
-     */
-    public static File toFile(Path path) {
-        URI uri = path.toUri();
-        if ("jar".equals(uri.getScheme())) {
-            // get the ZIP file from URI of form "jar:file:<path>!/"
-            String schemeSpecificPart = uri.getSchemeSpecificPart();
-            if (schemeSpecificPart != null && schemeSpecificPart.startsWith("file:")) {
-                int pos = schemeSpecificPart.lastIndexOf('!');
-                if (pos > 0) {
-                    if ("/".equals(schemeSpecificPart.substring(pos + 1))) {
-                        String fileUriString = schemeSpecificPart.substring(0, pos);
-                        if (fileUriString.startsWith("file:")) {
-                            return new File(URI.create(fileUriString));
-                        }
-                    }
-                } else {
-                    return new File(URI.create(schemeSpecificPart));
-                }
-            }
-        }
-        return path.toFile();
-    }
-
-    /**
      * Ensures that the given URI is a path into a jar file.
      * If the given URI points to a file and ends with '.jar' and starts with 'file:' the given URI is changed.
      * 'jar:' is prepended and '!/' appended to the uri.
@@ -537,7 +486,7 @@ public class FileUtils {
     public static URI ensureJarURI(URI uri) throws IOException {
         Path basePath = getPathFromURI(uri);
         String baseUri = uri.toString();
-        if (baseUri.startsWith("file:") && baseUri.endsWith(".jar") && basePath.toFile().isFile()) {
+        if (baseUri.startsWith("file:") && baseUri.endsWith(".jar") && Files.isRegularFile(basePath)) {
             uri = URI.create("jar:" + baseUri + "!/");
         }
         return uri;
@@ -585,17 +534,13 @@ public class FileUtils {
         }
     }
 
-    public static File getCachedFile(File inputFile){
-        return new File(getCachedFilePath(inputFile));
-    }
-
-    public static String getCachedFilePath(File inputFile){
+    public static Path getCachedFile(Path inputFile){
         if (inputFile.getClass().getName().contains("vfs")) {
-            if (LOCAL_FILES_CACHE.containsKey(inputFile.getAbsolutePath())) {
-                return LOCAL_FILES_CACHE.get(inputFile.getAbsolutePath());
+            if (LOCAL_FILES_CACHE.containsKey(inputFile.toAbsolutePath().toString())) {
+                return Path.of(LOCAL_FILES_CACHE.get(inputFile.toAbsolutePath().toString()));
             }
-            final String vfsRelativePath = extractVFSRelativePath(inputFile.toPath());
-            final Path tmp = Paths.get(getCacheFolder()).resolve(vfsRelativePath);
+            final String vfsRelativePath = extractVFSRelativePath(inputFile);
+            final Path tmp = getCacheFolder().resolve(vfsRelativePath);
             try {
                 if (!Files.exists(tmp)) {
                     Files.createDirectories(tmp);
@@ -611,36 +556,36 @@ public class FileUtils {
                     throw new IllegalStateException(e);
                 }
             }
-            LOCAL_FILES_CACHE.put(inputFile.getAbsolutePath(), tmp.toString());
-            return tmp.toString();
+            LOCAL_FILES_CACHE.put(inputFile.toAbsolutePath().toString(), tmp.toString());
+            return tmp;
         }
-        return inputFile.toString();
+        return inputFile;
     }
 
     private static String extractVFSRelativePath(Path path){
         return path.toString().replace(path.getRoot().toString() + "/", "");
     }
 
-    private static String getCacheFolder() {
+    private static Path getCacheFolder() {
         try {
             if (SNAP_CACHE_DIR != null && Files.exists(Paths.get(SNAP_CACHE_DIR))) {
-                return SNAP_CACHE_DIR;
+                return Path.of(SNAP_CACHE_DIR);
             }
-            final File localTempFolder = VirtualDir.createUniqueTempDir();
-            localTempFolder.deleteOnExit(); // request to delete the temporary/cache directory when the SNAP application is closed
-            SNAP_CACHE_DIR = localTempFolder.getAbsolutePath();
+            final Path localTempFolder = VirtualDir.createUniqueTempDir();
+            IOHelper.deleteOnExit(localTempFolder); // request to delete the temporary/cache directory when the SNAP application is closed
+            SNAP_CACHE_DIR = localTempFolder.toAbsolutePath().toString();
         } catch (IOException e) {
-            final File localTempFolder = new File(System.getProperty("user.home", "."), ".snap/temp/snap_cache");
+            final Path localTempFolder = Path.of(System.getProperty("user.home", "."), ".snap/temp/snap_cache");
             try {
-                Files.deleteIfExists(localTempFolder.toPath());
+                Files.deleteIfExists(localTempFolder);
             } catch (IOException ignore) {
             }
-            if (localTempFolder.mkdirs()) {
-                LOG.fine("successfully created the SNAP cache dir: " + localTempFolder.getAbsolutePath());
+            if (IOHelper.createDirectories(localTempFolder)) {
+                LOG.fine("successfully created the SNAP cache dir: " + localTempFolder.toAbsolutePath());
             }
-            localTempFolder.deleteOnExit(); // request to delete the temporary/cache directory when the SNAP application is closed
-            SNAP_CACHE_DIR = localTempFolder.getAbsolutePath();
+            IOHelper.deleteOnExit(localTempFolder); // request to delete the temporary/cache directory when the SNAP application is closed
+            SNAP_CACHE_DIR = localTempFolder.toAbsolutePath().toString();
         }
-        return SNAP_CACHE_DIR;
+        return Path.of(SNAP_CACHE_DIR);
     }
 }

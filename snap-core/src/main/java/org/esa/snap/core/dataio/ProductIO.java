@@ -35,7 +35,6 @@ import javax.media.jai.PlanarImage;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.Raster;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -148,14 +147,14 @@ public class ProductIO {
      *
      * @throws IOException if an I/O error occurs
      * @see #readProduct(String)
-     * @see #readProduct(File)
+     * @see #readProduct(Path)
      * @since 4.9
      */
-    public static Product readProduct(File file, String... formatNames) throws IOException {
+    public static Product readProduct(Path file, String... formatNames) throws IOException {
         Guardian.assertNotNull("file", file);
 
-        if (!file.exists()) {
-            throw new FileNotFoundException("File not found: " + file.getPath());
+        if (!Files.exists(file)) {
+            throw new FileNotFoundException("File not found: " + file);
         }
 
         final ProductIOPlugInManager registry = ProductIOPlugInManager.getInstance();
@@ -201,10 +200,10 @@ public class ProductIO {
      *         appropriate reader was found for the given product file
      *
      * @throws IOException if an I/O error occurs
-     * @see #readProduct(File)
+     * @see #readProduct(Path)
      */
     public static Product readProduct(String filePath) throws IOException {
-        return readProductImpl(new File(filePath), null);
+        return readProductImpl(Path.of(filePath), null);
     }
 
     /**
@@ -223,7 +222,7 @@ public class ProductIO {
      * @throws IOException if an I/O error occurs
      * @see #readProduct(String)
      */
-    public static Product readProduct(File file) throws IOException {
+    public static Product readProduct(Path file) throws IOException {
         return readProductImpl(file, null);
     }
 
@@ -243,14 +242,14 @@ public class ProductIO {
      *
      * @throws IOException if an I/O error occurs
      */
-    public static Product readProduct(File file, ProductSubsetDef subsetDef) throws IOException {
+    public static Product readProduct(Path file, ProductSubsetDef subsetDef) throws IOException {
         return readProductImpl(file, subsetDef);
     }
 
-    private static Product readProductImpl(File file, ProductSubsetDef subsetDef) throws IOException {
+    private static Product readProductImpl(Path file, ProductSubsetDef subsetDef) throws IOException {
         Guardian.assertNotNull("file", file);
-        if (!file.exists()) {
-            throw new FileNotFoundException("File not found: " + file.getPath());
+        if (!Files.exists(file)) {
+            throw new FileNotFoundException("File not found: " + file);
         }
         final ProductReader productReader = getProductReaderForInput(file);
         if (productReader != null) {
@@ -265,7 +264,7 @@ public class ProductIO {
      * registered product reader can handle the given {@code input} value.
      * <p>
      * The {@code input} may be of any type, but most likely it will be a file path given by a {@code String} or
-     * {@code File} value. Some readers may also directly support an {@link javax.imageio.stream.ImageInputStream} object.
+     * {@code Path} value. Some readers may also directly support an {@link javax.imageio.stream.ImageInputStream} object.
      *
      * @param input the input object.
      *
@@ -330,7 +329,7 @@ public class ProductIO {
     public static void writeProduct(Product product,
                                     String filePath,
                                     String formatName) throws IOException {
-        writeProduct(product, new File(filePath), formatName, false, ProgressMonitor.NULL);
+        writeProduct(product, Path.of(filePath), formatName, false, ProgressMonitor.NULL);
     }
 
     /**
@@ -376,7 +375,7 @@ public class ProductIO {
                                     String filePath,
                                     String formatName,
                                     ProgressMonitor pm) throws IOException {
-        writeProduct(product, new File(filePath), formatName, false, pm);
+        writeProduct(product, Path.of(filePath), formatName, false, pm);
     }
 
     /**
@@ -397,7 +396,7 @@ public class ProductIO {
      * @throws IOException if an IOException occurs
      */
     public static void writeProduct(Product product,
-                                    File file,
+                                    Path file,
                                     String formatName,
                                     boolean incremental) throws IOException {
         writeProduct(product, file, formatName, incremental, ProgressMonitor.NULL);
@@ -422,7 +421,7 @@ public class ProductIO {
      * @throws IOException if an IOException occurs
      */
     public static void writeProduct(Product product,
-                                    File file,
+                                    Path file,
                                     String formatName,
                                     boolean incremental,
                                     ProgressMonitor pm) throws IOException {
@@ -444,7 +443,7 @@ public class ProductIO {
         writeProduct(product, file, productWriter, pm);
     }
 
-    static void writeProduct(Product product, File file, ProductWriter productWriter, ProgressMonitor pm) throws IOException {
+    static void writeProduct(Product product, Path file, ProductWriter productWriter, ProgressMonitor pm) throws IOException {
         ProductWriter productWriterOld = product.getProductWriter();
         product.setProductWriter(productWriter);
 
@@ -456,7 +455,7 @@ public class ProductIO {
             productWriter.writeProductNodes(product, file);
             e = System.currentTimeMillis();
             long t1 = e - s;
-            SystemUtils.LOG.fine("write product nodes to " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1));
+            SystemUtils.LOG.fine("write product nodes to " + file.toAbsolutePath() + " took " + StopWatch.getTimeString(t1));
 
             s = System.currentTimeMillis();
             writeAllBands(product, pm);
@@ -470,8 +469,8 @@ public class ProductIO {
             }
             e = System.currentTimeMillis();
             long t3 = e - s;
-            SystemUtils.LOG.fine("write all bands of product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t2));
-            SystemUtils.LOG.fine("Write entire product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1 + t2 + t3));
+            SystemUtils.LOG.fine("write all bands of product " + file.toAbsolutePath() + " took " + StopWatch.getTimeString(t2));
+            SystemUtils.LOG.fine("Write entire product " + file.toAbsolutePath() + " took " + StopWatch.getTimeString(t1 + t2 + t3));
         } catch (IOException e) {
             ioException = e;
         } finally {

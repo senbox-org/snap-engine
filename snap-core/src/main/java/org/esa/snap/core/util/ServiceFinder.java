@@ -1,10 +1,11 @@
 package org.esa.snap.core.util;
 
 import com.bc.ceres.core.ResourceLocator;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
@@ -153,7 +154,7 @@ public class ServiceFinder {
 
     private void addSearchPathsFromPreferencesValue(String extraPaths) {
         if (extraPaths != null) {
-            addSearchPaths(Stream.of(extraPaths.split(File.pathSeparator))
+            addSearchPaths(Stream.of(extraPaths.split(IOHelper.PATH_SEPARATOR))
                     .map(Paths::get)
                     .toArray(Path[]::new));
         }

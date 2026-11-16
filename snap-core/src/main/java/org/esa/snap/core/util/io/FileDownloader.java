@@ -19,13 +19,13 @@ import javax.swing.ProgressMonitor;
 import java.awt.Component;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * A utility class for downloading files from the internet.
@@ -42,10 +42,10 @@ public class FileDownloader {
      * @param parentComponent the parent component to be used by the progress monitor
      * @throws IOException if an I/O error occurs
      */
-    public static File downloadFile(final URL fileUrl,
-                                    final File targetDir,
+    public static Path downloadFile(final URL fileUrl,
+                                    final Path targetDir,
                                     final Component parentComponent) throws IOException {
-        final File outputFile = new File(targetDir, new File(fileUrl.getFile()).getName());
+        final Path outputFile = targetDir.resolve(Path.of(fileUrl.getFile()).getFileName());
         final URLConnection urlConnection = fileUrl.openConnection();
         final int contentLength = urlConnection.getContentLength();
         final String message = "Downloading data from " + fileUrl + " to " + outputFile;   /*I18N*/
@@ -53,7 +53,7 @@ public class FileDownloader {
         final InputStream is = new BufferedInputStream(new ObservableInputStream(urlConnection.getInputStream(), contentLength, new ProgressMonitorInputStreamObserver(progressMonitor)));
         final OutputStream os;
         try {
-            os = new BufferedOutputStream(new FileOutputStream(outputFile));
+            os = new BufferedOutputStream(Files.newOutputStream(outputFile));
         } catch (IOException e) {
             is.close();
             throw e;
@@ -62,7 +62,7 @@ public class FileDownloader {
         try {
             IOUtils.copyBytesAndClose(is, os);
         } catch (IOException e) {
-            outputFile.delete();
+            Files.delete(outputFile);
             throw e;
         } finally {
             progressMonitor.close();

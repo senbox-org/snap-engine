@@ -18,6 +18,7 @@
 
 package org.esa.snap.core.dataio.dimap;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.GlobalTestConfig;
 import org.esa.snap.GlobalTestTools;
 import org.esa.snap.core.datamodel.Product;
@@ -27,12 +28,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Collection;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -42,7 +40,7 @@ public class DimapDiscontinuity_ReadAndWriteTest {
     private Product product;
     private DimapProductWriterPlugIn writerPlugin;
     private DimapProductReaderPlugIn readerPlugIn;
-    private File outDir;
+    private Path outDir;
 
     @Before
     public void setUp() throws Exception {
@@ -57,7 +55,7 @@ public class DimapDiscontinuity_ReadAndWriteTest {
         product.addTiePointGrid(new TiePointGrid("dis360", 10, 15, .5f, .5f, 2, 2, data0to360, TiePointGrid.DISCONT_AT_360));
         writerPlugin = new DimapProductWriterPlugIn();
         readerPlugIn = new DimapProductReaderPlugIn();
-        outDir = new File(GlobalTestConfig.getSnapTestDataOutputDirectory(), this.getClass().getSimpleName());
+        outDir = GlobalTestConfig.getSnapTestDataOutputDirectory().resolve(this.getClass().getSimpleName());
     }
 
     @After
@@ -71,10 +69,10 @@ public class DimapDiscontinuity_ReadAndWriteTest {
         assertThat(product.getTiePointGrid("dis180").getDiscontinuity(), is(TiePointGrid.DISCONT_AT_180));
         assertThat(product.getTiePointGrid("dis360").getDiscontinuity(), is(TiePointGrid.DISCONT_AT_360));
 
-        final File productFile = new File(outDir, "prod.dim");
+        final Path productFile = outDir.resolve("prod.dim");
         writerPlugin.createWriterInstance().writeProductNodes(product, productFile);
 
-        final List<Path> collect = Files.list(outDir.toPath()).collect(Collectors.toList());
+        final Collection<Path> collect = IOHelper.listFiles(outDir);
         assertThat(collect.size(), is(2));
 
         final Product product = readerPlugIn.createReaderInstance().readProductNodes(productFile, null);

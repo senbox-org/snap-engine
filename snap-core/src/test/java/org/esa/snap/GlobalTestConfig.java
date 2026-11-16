@@ -15,66 +15,67 @@
  */
 package org.esa.snap;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.esa.snap.core.util.SystemUtils;
 
-import java.io.File;
-
 public class GlobalTestConfig {
 
+    public static final char SEPARATOR_CHAR = FileSystems.getDefault().getSeparator().charAt(0);
     public static final String SNAP_TEST_DATA_INPUT_DIR_PROPERTY_NAME = "org.esa.snap.testdata.in";
     public static final String SNAP_TEST_DATA_OUTPUT_DIR_PROPERTY_NAME = "org.esa.snap.testdata.out";
-    public static final String SNAP_TEST_DATA_INPUT_DIR_DEFAULT_PATH = "testdata" + File.separatorChar + "in";
-    public static final String SNAP_TEST_DATA_OUTPUT_DIR_DEFAULT_PATH = "testdata" + File.separatorChar + "out";
+    public static final String SNAP_TEST_DATA_INPUT_DIR_DEFAULT_PATH = "testdata" + SEPARATOR_CHAR + "in";
+    public static final String SNAP_TEST_DATA_OUTPUT_DIR_DEFAULT_PATH = "testdata" + SEPARATOR_CHAR + "out";
 
-    public static File getSnapTestDataInputDirectory() {
+    public static Path getSnapTestDataInputDirectory() {
         return getDirectory(SNAP_TEST_DATA_INPUT_DIR_PROPERTY_NAME,
                 SNAP_TEST_DATA_INPUT_DIR_DEFAULT_PATH);
     }
 
-    public static File getSnapTestDataInputFile(String relPath) {
-        return new File(getSnapTestDataInputDirectory(),
+    public static Path getSnapTestDataInputFile(String relPath) {
+        return getSnapTestDataInputDirectory().resolve(
                         SystemUtils.convertToLocalPath(relPath));
     }
 
-    public static File getSnapTestDataOutputDirectory() {
+    public static Path getSnapTestDataOutputDirectory() {
         return getDirectory(SNAP_TEST_DATA_OUTPUT_DIR_PROPERTY_NAME,
                 SNAP_TEST_DATA_OUTPUT_DIR_DEFAULT_PATH);
     }
 
-    public static File getSnapTestDataOutputFile(String relPath) {
-        return new File(getSnapTestDataOutputDirectory(),
-                        SystemUtils.convertToLocalPath(relPath));
+    public static Path getSnapTestDataOutputFile(String relPath) {
+        return getSnapTestDataOutputDirectory().resolve(SystemUtils.convertToLocalPath(relPath));
     }
 
-    public static Test createTest(final Class testClass, final File inputFile) {
-        if (!inputFile.exists()) {
+    public static Test createTest(final Class testClass, final Path inputFile) {
+        if (!Files.exists(inputFile)) {
             return createEmptyTest(testClass, inputFile);
         } else {
             return new TestSuite(testClass);
         }
     }
 
-    private static Test createEmptyTest(final Class testClass, final File inputFile) {
+    private static Test createEmptyTest(final Class testClass, final Path inputFile) {
         return new TestCase(testClass.getName()) {
 
             @Override
             public void runTest() {
                 System.out.println();
                 System.out.println(testClass.getName() + ": warning: test will not be performed: testdata not found: ");
-                System.out.println(inputFile.getPath());
+                System.out.println(inputFile.toString());
             }
         };
     }
 
-    private static File getDirectory(String propertyName, String snapRelDefaultPath) {
+    private static Path getDirectory(String propertyName, String snapRelDefaultPath) {
         String filePath = System.getProperty(propertyName);
         if (filePath != null) {
-            return new File(filePath);
+            return Path.of(filePath);
         }
-        return new File(SystemUtils.getApplicationHomeDir(),
+        return SystemUtils.getApplicationHomeDir().resolve(
                         SystemUtils.convertToLocalPath(snapRelDefaultPath));
     }
 }

@@ -1,14 +1,16 @@
 package eu.esa.snap.core.datamodel.group;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.SystemUtils;
 import org.json.simple.parser.ParseException;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -26,8 +28,7 @@ public class BandGroupsManager {
         if (instance == null) {
             if (groupsConfigFile == null) {
                 // @todo 2 tb/tb move this to engine initialisation 2024-07-11
-                final File appDataDir = SystemUtils.getApplicationDataDir();
-                final Path appDataPath = Paths.get(appDataDir.getAbsolutePath());
+                final Path appDataPath = SystemUtils.getApplicationDataDir();
                 final Path configDir = appDataPath.resolve("config");
                 initialize(configDir);
             }
@@ -45,7 +46,7 @@ public class BandGroupsManager {
 
     public static void initialize(Path groupsDir) throws IOException {
         if (!Files.isDirectory(groupsDir)) {
-            Files.createDirectories(groupsDir);
+            IOHelper.createDirectories(groupsDir);
         }
 
         groupsConfigFile = groupsDir.resolve(CONFIG_FILE_NAME);
@@ -56,7 +57,7 @@ public class BandGroupsManager {
 
     static Path createEmptyConfigFile(Path configFile) throws IOException {
         Files.createFile(configFile);
-        try (FileWriter fileWriter = new FileWriter(configFile.toFile(), StandardCharsets.UTF_8)) {
+        try (Writer fileWriter = Files.newBufferedWriter(configFile, StandardCharsets.UTF_8)) {
             fileWriter.write("{\"bandGroups\" : []}");
             fileWriter.flush();
         }
@@ -71,7 +72,7 @@ public class BandGroupsManager {
 
     void load(Path groupsConfigFile) throws IOException {
         try {
-            final BandGroup[] groups = BandGroupIO.read(new FileInputStream(groupsConfigFile.toFile()));
+            final BandGroup[] groups = BandGroupIO.read(Files.newInputStream(groupsConfigFile));
             Collections.addAll(userGroups, groups);
         } catch (ParseException e) {
             throw new IOException(e);
@@ -80,7 +81,7 @@ public class BandGroupsManager {
 
     public void save() throws IOException {
         final BandGroup[] bandGroups = userGroups.toArray(new BandGroup[0]);
-        try (FileOutputStream fileOutputStream = new FileOutputStream(groupsConfigFile.toFile())) {
+        try (OutputStream fileOutputStream = Files.newOutputStream(groupsConfigFile)) {
             BandGroupIO.write(bandGroups, fileOutputStream);
         }
     }

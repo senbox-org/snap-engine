@@ -1,7 +1,7 @@
 package org.esa.snap.core.datamodel;
 
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 /**
@@ -25,14 +25,14 @@ public class ColorSchemeInfo {
     private boolean enabled;
     private boolean divider;
     private boolean primary;
-    private File colorPaletteDir;
+    private Path colorPaletteDir;
     private boolean duplicateEntry = false;
 
     private boolean useDisplayName = true;
 
 
     public ColorSchemeInfo(String name, boolean primary, boolean divider, String displayName, String description, String cpdFilenameStandard, double minValue, double maxValue,
-                           boolean isLogScaled, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, File colorPaletteDir) {
+                           boolean isLogScaled, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, Path colorPaletteDir) {
         this.setName(name);
 
         this.primary = primary;
@@ -65,7 +65,7 @@ public class ColorSchemeInfo {
 
 
     public ColorPaletteDef getColorPaletteDef(boolean useColorBlindPalette) {
-        File cpdFile = new File(colorPaletteDir, getCpdFilename(useColorBlindPalette));
+        Path cpdFile = colorPaletteDir.resolve(getCpdFilename(useColorBlindPalette));
         try {
             return ColorPaletteDef.loadColorPaletteDef(cpdFile);
 
@@ -184,11 +184,11 @@ public class ColorSchemeInfo {
     }
 
 
-    public File getColorPaletteDir() {
+    public Path getColorPaletteDir() {
         return colorPaletteDir;
     }
 
-    public void setColorPaletteDir(File colorPaletteDir) {
+    public void setColorPaletteDir(Path colorPaletteDir) {
         this.colorPaletteDir = colorPaletteDir;
     }
 

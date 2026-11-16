@@ -23,8 +23,11 @@ import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.math.LogLinearTransform;
 import org.esa.snap.core.util.math.MathUtils;
 
-import java.awt.*;
-import java.io.*;
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -268,20 +271,6 @@ public class ColorPaletteDef implements Cloneable {
         return (ColorPaletteDef) clone();
     }
 
-
-    /**
-     * Loads a color palette definition from the given file
-     *
-     * @param file the file
-     * @return the color palette definition, never null
-     * @throws IOException if an I/O error occurs
-     */
-    @Deprecated()
-    // use loadColorPaletteDef(Path path) instead
-    public static ColorPaletteDef loadColorPaletteDef(File file) throws IOException {
-        return loadColorPaletteDef(file.toPath());
-    }
-
     /**
      * Loads a color palette definition from the given file path
      *
@@ -339,17 +328,17 @@ public class ColorPaletteDef implements Cloneable {
      * @throws IOException if an I/O error occurs
      * @author Daniel Knowles
      */
-    public static ColorPaletteDef loadCpt(File file) throws IOException {
+    public static ColorPaletteDef loadCpt(Path file) throws IOException {
 
         if (file == null) {
             throw new IOException("Null file in loadCpt");
         }
 
-        if (!file.exists()) {
-            throw new IOException("File='" + file.getName() + "'does not exist");
+        if (!Files.exists(file)) {
+            throw new IOException("File='" + file.getFileName() + "'does not exist");
         }
 
-        String label = file.getName();
+        String label = file.getFileName().toString();
         Point lastPoint = null;
 
         ArrayList<Point> pointsArrayList = new ArrayList<Point>();
@@ -462,39 +451,18 @@ public class ColorPaletteDef implements Cloneable {
     }
 
 
-    public static ArrayList<String> readFileIntoArrayList(File file) throws IOException {
+    public static ArrayList<String> readFileIntoArrayList(Path file) throws IOException {
         String lineData;
         ArrayList<String> fileContents = new ArrayList<String>();
-        BufferedReader moFile = null;
-        try {
-            moFile = new BufferedReader(new FileReader(file));
+        try (BufferedReader moFile = Files.newBufferedReader(file)) {
             while ((lineData = moFile.readLine()) != null) {
 
                 fileContents.add(lineData);
             }
         } catch (IOException e) {
-            throw new IOException("Error reading file='" + file.getName() + "' in loadCpt");
-        } finally {
-            try {
-                moFile.close();
-            } catch (Exception e) {
-                //Ignore
-            }
+            throw new IOException("Error reading file='" + file.getFileName() + "' in loadCpt");
         }
         return fileContents;
-    }
-
-    /**
-     * Stores this color palette definition in the given file
-     *
-     * @param colorPaletteDef thje color palette definition
-     * @param file            the file
-     * @throws IOException if an I/O error occurs
-     */
-    @Deprecated
-    // use storeColorPaletteDef(ColorPaletteDef colorPaletteDef, Path path) instead
-    public static void storeColorPaletteDef(ColorPaletteDef colorPaletteDef, File file) throws IOException {
-        storeColorPaletteDef(colorPaletteDef, file.toPath());
     }
 
     public static void storeColorPaletteDef(ColorPaletteDef colorPaletteDef, Path path) throws IOException {
@@ -524,7 +492,7 @@ public class ColorPaletteDef implements Cloneable {
      * @param file            the file
      * @throws IOException if an I/O error occurs
      */
-    public static void storePal(ColorPaletteDef colorPaletteDef, File file) throws IOException {
+    public static void storePal(ColorPaletteDef colorPaletteDef, Path file) throws IOException {
 
         ArrayList<String> fileContents = new ArrayList<String>();
         String DELIMITER = " ";
@@ -556,7 +524,7 @@ public class ColorPaletteDef implements Cloneable {
      * @param file            the file
      * @throws IOException if an I/O error occurs
      */
-    public static void storeCpt(ColorPaletteDef colorPaletteDef, File file) throws IOException {
+    public static void storeCpt(ColorPaletteDef colorPaletteDef, Path file) throws IOException {
 
         ArrayList<String> cptFileContents = new ArrayList<String>();
         String DELIMITER = " \t";
@@ -637,11 +605,9 @@ public class ColorPaletteDef implements Cloneable {
 
     }
 
-    private static void printStringArrayListToFile(File file, String header, ArrayList<String> contentsArrayList) {
+    private static void printStringArrayListToFile(Path file, String header, ArrayList<String> contentsArrayList) {
 
-        BufferedWriter bos = null;
-        try {
-            bos = new BufferedWriter(new FileWriter(file));
+        try (BufferedWriter bos = Files.newBufferedWriter(file)) {
 
             bos.write("#" + header);
             bos.newLine();
@@ -650,8 +616,6 @@ public class ColorPaletteDef implements Cloneable {
                 bos.write(currLine);
                 bos.newLine();
             }
-
-            bos.close();
 
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

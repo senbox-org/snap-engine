@@ -15,11 +15,13 @@
  */
 package org.esa.snap.core.dataop.dem;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.SystemUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,19 +40,19 @@ public abstract class AbstractElevationModelDescriptor implements ElevationModel
     private final static String INSTALL_DIR_PROPERTY_NAME = "dem.installDir";
     private final static Logger LOG = Logger.getLogger(AbstractElevationModelDescriptor.class.getName());
 
-    private final File demInstallDir;
+    private final Path demInstallDir;
     private final Properties properties;
 
     protected AbstractElevationModelDescriptor() {
-        File demPropertiesDir = new File(SystemUtils.getAuxDataPath().resolve("dem").toFile(), getName());
-        if (!demPropertiesDir.exists()) {
-            demPropertiesDir.mkdirs();
+        Path demPropertiesDir = SystemUtils.getAuxDataPath().resolve("dem").resolve(getName());
+        if (!Files.exists(demPropertiesDir)) {
+            IOHelper.createDirectories(demPropertiesDir);
         }
-        properties = loadProperties(new File(demPropertiesDir, PROPERTIES_FILE_NAME));
+        properties = loadProperties(demPropertiesDir.resolve(PROPERTIES_FILE_NAME));
         demInstallDir = getDemInstallDir(demPropertiesDir);
     }
 
-    public File getDemInstallDir() {
+    public Path getDemInstallDir() {
         return demInstallDir;
     }
 
@@ -61,10 +63,10 @@ public abstract class AbstractElevationModelDescriptor implements ElevationModel
     /**
      * Loads DEM properties from the specified file.
      */
-    private Properties loadProperties(File propertiesFile) {
+    private Properties loadProperties(Path propertiesFile) {
         final Properties properties = new Properties();
-        if (propertiesFile.exists()) {
-            try (FileInputStream stream = new FileInputStream(propertiesFile)) {
+        if (Files.exists(propertiesFile)) {
+            try (InputStream stream = Files.newInputStream(propertiesFile)) {
                 properties.load(stream);
             } catch (IOException ioe) {
                 LOG.log(Level.WARNING, String.format("Could not load properties from '%s'", propertiesFile), ioe);
@@ -73,11 +75,11 @@ public abstract class AbstractElevationModelDescriptor implements ElevationModel
         return properties;
     }
 
-    private File getDemInstallDir(File defaultDirectory) {
+    private Path getDemInstallDir(Path defaultDirectory) {
         final String installDirPath = getProperty(INSTALL_DIR_PROPERTY_NAME);
         if (installDirPath != null && installDirPath.length() > 0) {
-            final File installDir = new File(installDirPath);
-            if (installDir.exists()) {
+            final Path installDir = Path.of(installDirPath);
+            if (Files.exists(installDir)) {
                 return installDir;
             }
         }

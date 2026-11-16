@@ -38,7 +38,6 @@ import java.awt.image.DataBufferShort;
 import java.awt.image.DataBufferUShort;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -58,10 +57,6 @@ public class TiledFileOpImage extends SourcelessOpImage {
     private ImageInputStreamFactory inputStreamFactory;
     private boolean disposed;
     private ImageHeader imageHeader;
-
-    public static TiledFileOpImage create(File imageDir, Properties defaultImageProperties) throws IOException {
-        return create(imageDir.toPath(), defaultImageProperties);
-    }
 
     public static TiledFileOpImage create(VirtualDir imageDir, Properties defaultImageProperties) throws IOException {
         return create(Paths.get(imageDir.getBasePath()), defaultImageProperties);
@@ -281,7 +276,7 @@ public class TiledFileOpImage extends SourcelessOpImage {
     static class RawZipImageInputStreamFactory implements ImageInputStreamFactory {
 
         private final Path imageDir;
-        private File tmpDir;
+        private Path tmpDir;
 
         RawZipImageInputStreamFactory(Path imageDir) throws IOException {
             this.imageDir = imageDir;
@@ -295,7 +290,7 @@ public class TiledFileOpImage extends SourcelessOpImage {
             final URI uri = URI.create(entryPathString);
             Path entryZip = FileUtils.getPathFromURI(uri);
             InputStream stream = Files.newInputStream(entryZip.resolve(entryName));
-            return new FileCacheImageInputStream(stream, tmpDir);
+            return new FileCacheImageInputStream(stream, tmpDir.toFile());
         }
 
         String createEntryPathString(String entryName) {
@@ -305,7 +300,7 @@ public class TiledFileOpImage extends SourcelessOpImage {
 
     private class ZipInputStreamFactory implements ImageInputStreamFactory {
 
-        private File tmpDir;
+        private Path tmpDir;
 
         private ZipInputStreamFactory() throws IOException {
             tmpDir = VirtualDir.createUniqueTempDir();
@@ -317,7 +312,7 @@ public class TiledFileOpImage extends SourcelessOpImage {
             Stream<Path> list = Files.list(imageDir);
             Optional<Path> first = list.filter(path -> path.getFileName().startsWith(entryName)).findFirst();
             if(first.isPresent()) {
-                return new FileCacheImageInputStream(Files.newInputStream(first.get()), tmpDir);
+                return new FileCacheImageInputStream(Files.newInputStream(first.get()), tmpDir.toFile());
             } else {
                 throw new IOException("No tile for coordinates " + tileX + ", " + tileY + ".");
             }

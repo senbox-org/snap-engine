@@ -16,8 +16,12 @@
 
 package org.esa.snap.core.util.io;
 
-import java.io.File;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -55,17 +59,19 @@ public class WildcardMatcher {
         return windowsFs;
     }
 
-    public static File[] glob(String filePattern) throws IOException {
-        Set<File> fileSet = new TreeSet<>();
+    public static Path[] glob(String filePattern) throws IOException {
+        Set<Path> fileSet = new TreeSet<>();
         glob(filePattern, fileSet);
-        return fileSet.toArray(new File[0]);
+        return fileSet.toArray(new Path[0]);
     }
 
-    public static void glob(String filePattern, Set<File> fileSet) throws IOException {
-        final File patternFile = new File(filePattern);
-        if (patternFile.exists()) {
-            fileSet.add(patternFile.getCanonicalFile());
-            return;
+    public static void glob(String filePattern, Set<Path> fileSet) throws IOException {
+        if (!filePattern.contains("*")) {
+            final Path patternFile = Path.of(filePattern);
+            if (Files.exists(patternFile)) {
+                fileSet.add(patternFile.toRealPath());
+                return;
+            }
         }
         boolean windowsOs = isWindowsOs();
         String[] patternSplit = splitBasePath(filePattern, windowsOs);
@@ -75,31 +81,31 @@ public class WildcardMatcher {
             // no pattern given, but no file exist
             return;
         }
-        File canonicalBaseFile = new File(basePath).getCanonicalFile();
+        Path canonicalBaseFile = Path.of(basePath).toRealPath();
 
-        String newpattern = canonicalBaseFile.getPath() + "/" + patternPath;
+        String newpattern = canonicalBaseFile + "/" + patternPath;
         WildcardMatcher matcher = new WildcardMatcher(newpattern);
-        HashSet<File> visitedDirs = new HashSet<>();
+        HashSet<Path> visitedDirs = new HashSet<>();
         collectFiles(matcher, canonicalBaseFile, fileSet, visitedDirs);
 
     }
 
-    private static void collectFiles(WildcardMatcher matcher,  File dir, Set<File> fileSet, Set<File> visitedDirs) throws IOException {
-        if (visitedDirs.contains(dir.getCanonicalFile())) {
+    private static void collectFiles(WildcardMatcher matcher,  Path dir, Set<Path> fileSet, Set<Path> visitedDirs) throws IOException {
+        if (visitedDirs.contains(dir.toRealPath())) {
             return;
         } else {
-            visitedDirs.add(dir.getCanonicalFile());
+            visitedDirs.add(dir.toRealPath());
         }
-        File[] files = dir.listFiles();
+        Collection<Path> files = IOHelper.listFiles(dir);
         if (files == null) {
             throw new IOException(String.format("Failed to access directory '%s'", dir));
         }
-        for (File file : files) {
+        for (Path file : files) {
             // check for both to catch symlinks as well
-            if (matcher.matches(file.getCanonicalPath()) || matcher.matches(file.getPath())) {
-                fileSet.add(file.getCanonicalFile());
+            if (matcher.matches(file.toRealPath().toString()) || matcher.matches(file.toString())) {
+                fileSet.add(file.toRealPath());
             }
-            if (file.isDirectory()) {
+            if (Files.isDirectory(file)) {
                 collectFiles(matcher, file, fileSet, visitedDirs);
             }
         }

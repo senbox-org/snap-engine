@@ -31,7 +31,7 @@ import org.junit.Test;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -582,8 +582,8 @@ public class BandTest extends AbstractRasterDataNodeTest {
         bandFloat64.setPixels(0, 0, 3, 2, testFloat64s);
         product.addBand(bandFloat64);
 
-        final File outputDirectory = GlobalTestConfig.getSnapTestDataOutputDirectory();
-        final File file = new File(outputDirectory, name + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
+        final Path outputDirectory = GlobalTestConfig.getSnapTestDataOutputDirectory();
+        final Path file = outputDirectory.resolve(name + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
         ProductIO.writeProduct(product,
                 file,
                 DimapProductConstants.DIMAP_FORMAT_NAME,

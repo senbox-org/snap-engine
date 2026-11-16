@@ -16,9 +16,10 @@
 
 package org.esa.snap.core.util;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
@@ -83,10 +84,10 @@ public class SystemUtilsTest {
 
     @Test
     public void testGetApplicationDataDir() {
-        final File applicationDataDir = SystemUtils.getApplicationDataDir();
+        final Path applicationDataDir = SystemUtils.getApplicationDataDir();
         assertNotNull(applicationDataDir);
-        final String prefix = SystemUtils.getUserHomeDir().getPath();
-        assertTrue(applicationDataDir.getPath().startsWith(prefix));
+        final String prefix = SystemUtils.getUserHomeDir().toString();
+        assertTrue(applicationDataDir.toString().startsWith(prefix));
     }
 
     @Test
@@ -108,7 +109,7 @@ public class SystemUtilsTest {
 
     @Test
     public void testConvertPath() {
-        String s = File.separator;
+        String s = IOHelper.SEPARATOR;
         String expected = s + "a" + s + "b" + s + "cdef" + s + "g";
         assertEquals(expected, SystemUtils.convertToLocalPath("/a/b/cdef/g"));
     }

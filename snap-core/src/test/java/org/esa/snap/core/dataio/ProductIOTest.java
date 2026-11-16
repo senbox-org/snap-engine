@@ -17,6 +17,7 @@
 package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.dimap.DimapProductWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -25,14 +26,14 @@ import org.esa.snap.core.util.DummyProductBuilder;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class ProductIOTest {
 
@@ -45,7 +46,7 @@ public class ProductIOTest {
     @Test
     public void testReadProductArgsChecking() {
         try {
-            ProductIO.readProduct((File) null);
+            ProductIO.readProduct((Path) null).close();
             fail();
         } catch (IOException expected) {
             fail();
@@ -62,18 +63,18 @@ public class ProductIOTest {
     @Test
     public void testHeaderIsRewrittenIfModified() throws IOException {
         final Product product = new DummyProductBuilder().create();
-        final Path tempDirectory = Files.createTempDirectory("test-dir");
+        final Path tempDirectory = IOHelper.createATempDir("test-dir");
         try {
-            verifyHeaderRewrite(product, tempDirectory.resolve("test1.dim").toFile(), 1);
+            verifyHeaderRewrite(product, tempDirectory.resolve("test1.dim"), 1);
 
             addBandWhichSetsProductToModifed(product);
-            verifyHeaderRewrite(product, tempDirectory.resolve("test2.dim").toFile(), 2);
+            verifyHeaderRewrite(product, tempDirectory.resolve("test2.dim"), 2);
         } finally {
-            FileUtils.deleteTree(tempDirectory.toFile());
+            FileUtils.deleteTree(tempDirectory);
         }
     }
 
-    private void verifyHeaderRewrite(Product product, File file, int numberOfInvocations) throws IOException {
+    private void verifyHeaderRewrite(Product product, Path file, int numberOfInvocations) throws IOException {
         final DimapProductWriter writer = mock(DimapProductWriter.class);
         ProductIO.writeProduct(product, file, writer, ProgressMonitor.NULL);
         verify(writer, times(numberOfInvocations)).writeProductNodes(product, file);

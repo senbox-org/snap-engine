@@ -19,8 +19,8 @@ package org.esa.snap.core.image;
 import com.bc.ceres.multilevel.MultiLevelSource;
 import com.bc.ceres.multilevel.support.DefaultMultiLevelModel;
 import com.bc.ceres.multilevel.support.DefaultMultiLevelSource;
+import org.esa.snap.core.util.ImageUtils;
 
-import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import javax.media.jai.Interpolation;
@@ -182,7 +182,7 @@ public class PyramidBuilder {
             zipOutputStream.close();
         } else {
             final Path file = levelDir.resolve(baseName);
-            FileImageOutputStream outputStream = new FileImageOutputStream(file.toFile());
+            ImageOutputStream outputStream = ImageUtils.getImageOutputStream(file);
             outputStream.writeInts(data, 0, data.length);
             outputStream.close();
         }

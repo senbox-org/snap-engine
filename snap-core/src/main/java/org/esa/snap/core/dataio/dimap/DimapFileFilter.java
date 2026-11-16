@@ -19,7 +19,8 @@ package org.esa.snap.core.dataio.dimap;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.esa.snap.core.dataio.dimap.DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION;
 import static org.esa.snap.core.dataio.dimap.DimapProductConstants.DIMAP_FORMAT_NAME;
@@ -33,28 +34,28 @@ public class DimapFileFilter extends SnapFileFilter {
     }
 
     @Override
-    public boolean accept(File file) {
-        if (file.isFile() && hasHeaderExt(file)) {
-            return FileUtils.exchangeExtension(file, DIMAP_DATA_DIRECTORY_EXTENSION).isDirectory();
+    public boolean accept(Path file) {
+        if (Files.isRegularFile(file) && hasHeaderExt(file)) {
+            return Files.isDirectory(FileUtils.exchangeExtension(file, DIMAP_DATA_DIRECTORY_EXTENSION));
         } else {
-            return file.isDirectory() && !isDataDir(file);
+            return Files.isDirectory(file) && !isDataDir(file);
         }
     }
 
     @Override
-    public boolean isCompoundDocument(File dir) {
+    public boolean isCompoundDocument(Path dir) {
         return isDataDir(dir);
     }
 
-    private boolean isDataDir(File dir) {
-        return hasDataExt(dir) && FileUtils.exchangeExtension(dir, DIMAP_HEADER_FILE_EXTENSION).isFile();
+    private boolean isDataDir(Path dir) {
+        return hasDataExt(dir) && Files.isRegularFile(FileUtils.exchangeExtension(dir, DIMAP_HEADER_FILE_EXTENSION));
     }
 
-    private boolean hasHeaderExt(File file) {
-        return file.getName().endsWith(DIMAP_HEADER_FILE_EXTENSION);
+    private boolean hasHeaderExt(Path file) {
+        return file.getFileName().toString().endsWith(DIMAP_HEADER_FILE_EXTENSION);
     }
 
-    private boolean hasDataExt(File file) {
-        return file.getName().endsWith(DIMAP_DATA_DIRECTORY_EXTENSION);
+    private boolean hasDataExt(Path file) {
+        return file.getFileName() != null && file.getFileName().toString().endsWith(DIMAP_DATA_DIRECTORY_EXTENSION);
     }
 }

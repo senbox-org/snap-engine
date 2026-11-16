@@ -18,6 +18,7 @@ package org.esa.snap.core.util.geotiff;
 import com.sun.media.imageio.plugins.tiff.BaselineTIFFTagSet;
 import com.sun.media.imageio.plugins.tiff.GeoTIFFTagSet;
 import org.esa.snap.core.util.Debug;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -26,39 +27,43 @@ import org.jdom2.Parent;
 import org.jdom2.input.DOMBuilder;
 import org.jdom2.output.DOMOutputter;
 
-import javax.imageio.*;
+import javax.imageio.IIOException;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOInvalidTreeException;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.RenderedImage;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class GeoTIFF {
 
     /**
      * Writes an image using an arbitrary <code>ImageWriter</code> that supports the GeoTIFF format to a
-     * <code>File</code>.  If there is already a <code>File</code> present, its contents are discarded.
+     * <code>Path</code>.  If there is already a <code>Path</code> present, its contents are discarded.
      *
      * @param image           a <code>RenderedImage</code> to be written. name of the format.
-     * @param outputFile      a <code>File</code> to be written to.
+     * @param outputFile      a <code>Path</code> to be written to.
      * @param geoTIFFMetadata the GeoTIFF specific metadata
      * @return <code>false</code> if no appropriate image I/O writer was found.
      * @throws IllegalArgumentException if any parameter is <code>null</code>.
      * @throws java.io.IOException      if an error occurs during writing.
      */
     public static boolean writeImage(final RenderedImage image,
-                                     final File outputFile,
+                                     final Path outputFile,
                                      final GeoTIFFMetadata geoTIFFMetadata) throws IOException {
         if (outputFile == null) {
             throw new IllegalArgumentException("outputFile == null!");
         }
 
-        outputFile.delete();
+        Files.delete(outputFile);
 
         final ImageOutputStream stream;
         try {
-            stream = ImageIO.createImageOutputStream(outputFile);
+            stream = ImageUtils.getImageOutputStream(outputFile);
         } catch (IIOException e) {
             throw e;
         } catch (IOException e) {

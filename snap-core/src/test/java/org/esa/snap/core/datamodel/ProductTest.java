@@ -32,7 +32,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.RenderedImage;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -383,24 +383,26 @@ public class ProductTest {
 
         assertEquals(null, product.getFileLocation());
 
-        product.setFileLocation(new File("test1.nc"));
-        assertEquals(new File("test1.nc"), product.getFileLocation());
+        final Path testFile1 = Path.of("test1.nc");
+        product.setFileLocation(testFile1);
+        assertEquals(testFile1, product.getFileLocation());
         assertEquals("fileLocation", listener.events.get(0).getPropertyName());
         assertEquals(null, listener.events.get(0).getOldValue());
-        assertEquals(new File("test1.nc"), listener.events.get(0).getNewValue());
+        assertEquals(testFile1, listener.events.getFirst().getNewValue());
 
-        product.setFileLocation(new File("test2.nc"));
-        assertEquals(new File("test2.nc"), product.getFileLocation());
+        final Path testFile2 = Path.of("test2.nc");
+        product.setFileLocation(testFile2);
+        assertEquals(testFile2, product.getFileLocation());
         assertEquals(2, listener.events.size());
         assertEquals("fileLocation", listener.events.get(1).getPropertyName());
-        assertEquals(new File("test1.nc"), listener.events.get(1).getOldValue());
-        assertEquals(new File("test2.nc"), listener.events.get(1).getNewValue());
+        assertEquals(testFile1, listener.events.get(1).getOldValue());
+        assertEquals(testFile2, listener.events.get(1).getNewValue());
 
         product.setFileLocation(null);
         assertEquals(null, product.getFileLocation());
         assertEquals(3, listener.events.size());
         assertEquals("fileLocation", listener.events.get(2).getPropertyName());
-        assertEquals(new File("test2.nc"), listener.events.get(2).getOldValue());
+        assertEquals(testFile2, listener.events.get(2).getOldValue());
         assertEquals(null, listener.events.get(2).getNewValue());
     }
 
@@ -807,7 +809,7 @@ public class ProductTest {
         final Product product = new Product("p", "t", 10, 10);
         final VirtualBand virtualBand = new VirtualBand("vb", ProductData.TYPE_FLOAT32, 10, 10,
                                                         "band1 + band2 - band3");
-        final File fileLocation = new File("dummy.dim");
+        final Path fileLocation = Path.of("dummy.dim");
         product.setFileLocation(fileLocation);
         product.addBand(virtualBand);
         product.addBand("band1", ProductData.TYPE_FLOAT32);

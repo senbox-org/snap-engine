@@ -1,5 +1,6 @@
 package org.esa.snap.core.util.io;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,7 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TreeCopierTest {
 
@@ -20,7 +22,7 @@ public class TreeCopierTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        tempDirectory = Files.createTempDirectory(TreeCopierTest.class.getName());
+        tempDirectory = IOHelper.createATempDir(TreeCopierTest.class.getName());
         URI uri = TreeCopierTest.class.getResource("testZip.zip").toURI();
         URI zipUri = URI.create("jar:file:" + uri.getPath().replaceAll(" ","%20") + "!/");
         FileSystems.newFileSystem(zipUri, Collections.emptyMap());
@@ -29,7 +31,7 @@ public class TreeCopierTest {
 
     @AfterClass
     public static void tearDownClass() throws Exception {
-        FileUtils.deleteTree(tempDirectory.toFile());
+        FileUtils.deleteTree(tempDirectory);
     }
 
     @Test

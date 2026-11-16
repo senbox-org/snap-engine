@@ -27,7 +27,7 @@ import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.dataop.maptransf.MapInfo;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -467,7 +467,7 @@ public class DimapProductWriterPlugIn implements ProductWriterPlugIn {
      * @see AbstractProductWriter#writeProductNodes
      */
     public Class[] getOutputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     /**

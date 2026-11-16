@@ -15,13 +15,14 @@
  */
 package org.esa.snap.core.dataop.downloadable;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.util.SystemUtils;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -57,8 +58,8 @@ public class TestFTPDownloader {
             final FtpDownloader ftp = new FtpDownloader(server, "speedtest", "speedtest");
             final Map<String, Long> fileSizeMap = FtpDownloader.readRemoteFileList(ftp, server, remotePath);
 
-            final File localFile = new File(SystemUtils.getCacheDir(), "test100k.db");
-            final String remoteFileName = localFile.getName();
+            final Path localFile = SystemUtils.getCacheDir().resolve("test100k.db");
+            final String remoteFileName = localFile.getFileName().toString();
             final Long fileSize = fileSizeMap.get(remoteFileName);
 
             Exception exception = null;
@@ -67,7 +68,7 @@ public class TestFTPDownloader {
                 try {
                     result = ftp.retrieveFile(remotePath + remoteFileName, localFile, fileSize);
                     if (result == FtpDownloader.FTPError.OK) {
-                        localFile.delete();
+                        IOHelper.delete(localFile);
                         return;
                     }
                 } catch (Exception ex) {

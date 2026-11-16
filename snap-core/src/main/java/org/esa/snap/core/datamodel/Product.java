@@ -58,9 +58,9 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
@@ -125,7 +125,7 @@ public class Product extends ProductNode implements Closeable {
     /**
      * The location file of this product.
      */
-    private File fileLocation;
+    private Path fileLocation;
     /**
      * The reader for this product. Once the reader is set, and can never be changed again.
      */
@@ -523,7 +523,7 @@ public class Product extends ProductNode implements Closeable {
      *
      * @return the file location, may be {@code null}
      */
-    public File getFileLocation() {
+    public Path getFileLocation() {
         return fileLocation;
     }
 
@@ -532,9 +532,9 @@ public class Product extends ProductNode implements Closeable {
      *
      * @param fileLocation the file location, may be {@code null}
      */
-    public void setFileLocation(final File fileLocation) {
+    public void setFileLocation(final Path fileLocation) {
         if (!ObjectUtils.equalObjects(this.fileLocation, fileLocation)) {
-            File oldValue = this.fileLocation;
+            Path oldValue = this.fileLocation;
             this.fileLocation = fileLocation;
             fireNodeChanged(this, PROPERTY_NAME_FILE_LOCATION, oldValue, fileLocation);
         }
@@ -622,7 +622,7 @@ public class Product extends ProductNode implements Closeable {
      * <p>Writes the header of a data product.<p>
      *
      * @param output an object representing a valid output for this writer, might be a {@code ImageOutputStream}
-     *               or a {@code File} or other {@code Object} to use for future decoding.
+     *               or a {@code Path} or other {@code Object} to use for future decoding.
      * @throws IllegalArgumentException if {@code output} is {@code null} or it's type is none of the
      *                                  supported output types.
      * @throws IOException              if an I/O error occurs

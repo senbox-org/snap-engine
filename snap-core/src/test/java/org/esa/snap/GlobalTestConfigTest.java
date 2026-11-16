@@ -20,7 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Properties;
 
 import static org.junit.Assert.*;
@@ -41,7 +41,7 @@ public class GlobalTestConfigTest {
 
     @Test
     public void testGetEnvisatTestDataDir() {
-        File file = null;
+        Path file = null;
         try {
             file = GlobalTestConfig.getSnapTestDataInputDirectory();
         } catch (SecurityException e) {
@@ -56,7 +56,7 @@ public class GlobalTestConfigTest {
         } catch (SecurityException e) {
             fail("SecurityException not expected");
         }
-        assertEquals(new File(SystemUtils.convertToLocalPath("C:/envi/test/data/")), file);
+        assertEquals(Path.of(SystemUtils.convertToLocalPath("C:/envi/test/data/")), file);
 
         System.getProperties().remove(GlobalTestConfig.SNAP_TEST_DATA_INPUT_DIR_PROPERTY_NAME);
         try {
@@ -64,7 +64,7 @@ public class GlobalTestConfigTest {
         } catch (SecurityException e) {
             fail("SecurityException not expected");
         }
-        final File defaultFile = new File(SystemUtils.getApplicationHomeDir(),
+        final Path defaultFile = SystemUtils.getApplicationHomeDir().resolve(
                 SystemUtils.convertToLocalPath(
                         GlobalTestConfig.SNAP_TEST_DATA_INPUT_DIR_DEFAULT_PATH));
         assertEquals(defaultFile, file);

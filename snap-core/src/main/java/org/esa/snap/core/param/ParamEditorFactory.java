@@ -25,7 +25,7 @@ import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
 
 import java.awt.Color;
-import java.io.File;
+import java.nio.file.Path;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -92,7 +92,7 @@ public final class ParamEditorFactory {
             editor = new BooleanEditor(parameter);
         } else if (parameter.isTypeOf(Color.class)) {
             editor = new ColorEditor(parameter);
-        } else if (parameter.isTypeOf(File.class)) {
+        } else if (parameter.isTypeOf(Path.class)) {
             editor = new FileEditor(parameter);
         } else if (paramProps.getValueSet() != null
                    && paramProps.getValueSet().length > 0) {

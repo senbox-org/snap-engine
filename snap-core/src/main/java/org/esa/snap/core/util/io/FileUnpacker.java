@@ -15,16 +15,18 @@
  */
 package org.esa.snap.core.util.io;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+
 import javax.swing.ProgressMonitor;
 import java.awt.Component;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -49,10 +51,10 @@ public class FileUnpacker {
      * @param parentComponent the parent component to be used by the progress monitor
      * @throws IOException if an I/O error occurs
      */
-    public static void unpackZip(final File archiveFile,
-                                 final File targetDir,
+    public static void unpackZip(final Path archiveFile,
+                                 final Path targetDir,
                                  final Component parentComponent) throws IOException {
-        final ZipFile zipFile = new ZipFile(archiveFile);
+        final ZipFile zipFile = new ZipFile(archiveFile.toFile());
         final List entryList = extractZipEntries(zipFile);
         final List createdFileList = new ArrayList(entryList.size());
         final List createdDirList = new ArrayList(entryList.size());
@@ -80,7 +82,7 @@ public class FileUnpacker {
     }
 
     private static void extractZipEntries(final ZipFile zipFile,
-                                          final File targetDir,
+                                          final Path targetDir,
                                           final ProgressMonitor progressMonitor,
                                           final List entryList,
                                           final List createdFileList,
@@ -94,14 +96,14 @@ public class FileUnpacker {
                 throw new InterruptedIOException();
             }
 
-            final String zipName = zipEntry.getName().replace('/', File.separatorChar);
-            final File outputFile = new File(targetDir, zipName);
+            final String zipName = zipEntry.getName().replace('/', IOHelper.SEPARATOR_CHAR);
+            final Path outputFile = targetDir.resolve(zipName);
             if (zipEntry.isDirectory()) {
                 ensureExistingDir(outputFile, createdDirList);
             } else {
                 final String note = "Writing file " + outputFile;   /*I18N*/
                 progressMonitor.setNote(note);
-                final File parentDir = outputFile.getParentFile();
+                final Path parentDir = outputFile.getParent();
                 if (parentDir != null) {
                     ensureExistingDir(parentDir, createdDirList);
                 }
@@ -114,13 +116,13 @@ public class FileUnpacker {
 
     private static void writeOutputFile(final ZipFile zipFile,
                                         final ZipEntry zipEntry,
-                                        final File outputFile,
+                                        final Path outputFile,
                                         final List createdFileList) throws IOException {
-        final boolean outputFileExists = outputFile.exists();
+        final boolean outputFileExists = Files.exists(outputFile);
         final InputStream is = new BufferedInputStream(zipFile.getInputStream(zipEntry));
         final OutputStream os;
         try {
-            os = new BufferedOutputStream(new FileOutputStream(outputFile));
+            os = new BufferedOutputStream(Files.newOutputStream(outputFile));
         } catch (IOException e) {
             is.close();
             throw e;
@@ -134,9 +136,9 @@ public class FileUnpacker {
         }
     }
 
-    private static void ensureExistingDir(final File outputDir,
+    private static void ensureExistingDir(final Path outputDir,
                                           final List createdDirList) throws IOException {
-        final boolean created = IOUtils.createDir(outputDir);
+        final boolean created = IOHelper.createDirectory(outputDir);
         if (created) {
             createdDirList.add(outputDir);
         }
@@ -144,8 +146,8 @@ public class FileUnpacker {
 
     private static void deleteFilesInList(final List createdFileList) {
         for (int i = createdFileList.size() - 1; i >= 0; i--) {
-            File outputFile = (File) createdFileList.get(i);
-            outputFile.delete();
+            Path outputFile = (Path) createdFileList.get(i);
+            IOHelper.delete(outputFile);
         }
     }
 }

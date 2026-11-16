@@ -1,28 +1,33 @@
 package eu.esa.snap.core.datamodel.group;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static eu.esa.snap.core.datamodel.group.BandGroupsManager.CONFIG_FILE_NAME;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class BandGroupsManagerTest {
 
-    @Rule
-    public TemporaryFolder tempDir = new TemporaryFolder();
+    public Path tempDir = IOHelper.createATempDir();
 
     @After
     public void tearDown() {
@@ -32,32 +37,33 @@ public class BandGroupsManagerTest {
     @Test
     @STTM("SNAP-3702")
     public void testInitialize() throws IOException {
-        final File groupsDir = initialize();
+        final Path groupsDir = initialize();
 
-        assertTrue(new File(groupsDir, CONFIG_FILE_NAME).isFile());
+        assertTrue(Files.isRegularFile(groupsDir.resolve(CONFIG_FILE_NAME)));
     }
 
     @Test
     @STTM("SNAP-3702")
     public void testInitialize_createsDir() throws IOException {
-        final File groupsDir = tempDir.newFolder("bandGroups");
-        final File subDir = new File(groupsDir, "sub_directory");
+        final Path groupsDir = tempDir.resolve("bandGroups");
+        IOHelper.createDirectory(groupsDir);
+        final Path subDir = groupsDir.resolve("sub_directory");
 
-        BandGroupsManager.initialize(Paths.get(subDir.getAbsolutePath()));
+        BandGroupsManager.initialize(subDir);
 
-        assertTrue(new File(subDir, CONFIG_FILE_NAME).isFile());
+        assertTrue(Files.isRegularFile(subDir.resolve(CONFIG_FILE_NAME)));
     }
 
     @Test
     @STTM("SNAP-3702")
     public void testCreateEmptyConfigFile() throws IOException {
-        final File configFile = new File(tempDir.getRoot(), "test.json");
-        assertFalse(configFile.isFile());
+        final Path configFile = tempDir.resolve("test.json");
+        assertFalse(Files.isRegularFile(configFile));
 
-        BandGroupsManager.createEmptyConfigFile(Paths.get(configFile.getAbsolutePath()));
-        assertTrue(configFile.isFile());
+        BandGroupsManager.createEmptyConfigFile(configFile);
+        assertTrue(Files.isRegularFile(configFile));
 
-        try (FileInputStream fileInputStream = new FileInputStream(configFile)) {
+        try (InputStream fileInputStream = Files.newInputStream(configFile)) {
             final byte[] bytes = fileInputStream.readAllBytes();
             assertEquals("{\"bandGroups\" : []}", new String(bytes, StandardCharsets.UTF_8));
         }
@@ -81,7 +87,7 @@ public class BandGroupsManagerTest {
     @Test
     @STTM("SNAP-3702")
     public void testGetInstance_withGroups() throws IOException {
-        final File userDir = initialize();
+        final Path userDir = initialize();
         writeGroupsFile(userDir);
 
         final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
@@ -354,14 +360,14 @@ public class BandGroupsManagerTest {
     @Test
     @STTM("SNAP-3702")
     public void testSave_empty() throws IOException {
-        final File targetDir = initialize();
+        final Path targetDir = initialize();
 
         final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
 
         bandGroupsManager.save();
 
-        final File configFile = new File(targetDir, CONFIG_FILE_NAME);
-        try (FileInputStream fileInputStream = new FileInputStream(configFile)) {
+        final Path configFile = targetDir.resolve(CONFIG_FILE_NAME);
+        try (InputStream fileInputStream = Files.newInputStream(configFile)) {
             final byte[] bytes = fileInputStream.readAllBytes();
             assertEquals("{\"bandGroups\":[]}", new String(bytes, StandardCharsets.UTF_8));
         }
@@ -370,7 +376,7 @@ public class BandGroupsManagerTest {
     @Test
     @STTM("SNAP-3702")
     public void testSave_twoBandGroups() throws IOException {
-        final File targetDir = initialize();
+        final Path targetDir = initialize();
 
         final BandGroupsManager bandGroupsManager = BandGroupsManager.getInstance();
 
@@ -382,8 +388,8 @@ public class BandGroupsManagerTest {
 
         bandGroupsManager.save();
 
-        final File configFile = new File(targetDir, CONFIG_FILE_NAME);
-        try (FileInputStream fileInputStream = new FileInputStream(configFile)) {
+        final Path configFile = targetDir.resolve(CONFIG_FILE_NAME);
+        try (InputStream fileInputStream = Files.newInputStream(configFile)) {
             final byte[] bytes = fileInputStream.readAllBytes();
             assertEquals("{\"bandGroups\":[{\"paths\":[[\"FAPAR#FAPAR\",\"LAI#LAI\"]],\"name\":\"veggie\"},{\"paths\":[[\"Oa*_radiance\"],[\"Oa*_radiance_unc\"],[\"Oa*_radiance_err\"]],\"name\":\"\"}]}", new String(bytes, StandardCharsets.UTF_8));
         }
@@ -431,16 +437,17 @@ public class BandGroupsManagerTest {
         assertTrue(String.join(",", bandNames2).contains("radiance_11"));
     }
 
-    private File initialize() throws IOException {
-        final File groupsDir = tempDir.newFolder("bandGroups");
+    private Path initialize() throws IOException {
+        final Path groupsDir = tempDir.resolve("bandGroups");
+        IOHelper.createDirectory(groupsDir);
 
-        BandGroupsManager.initialize(Paths.get(groupsDir.getAbsolutePath()));
+        BandGroupsManager.initialize(groupsDir);
         return groupsDir;
     }
 
-    private static void writeGroupsFile(File targetDir) throws IOException {
-        final File configFile = new File(targetDir, CONFIG_FILE_NAME);
-        final FileWriter fileWriter = new FileWriter(configFile, StandardCharsets.UTF_8);
+    private static void writeGroupsFile(Path targetDir) throws IOException {
+        final Path configFile = targetDir.resolve(CONFIG_FILE_NAME);
+        final Writer fileWriter = Files.newBufferedWriter(configFile, StandardCharsets.UTF_8);
 
         final String outData = "{\"bandGroups\" : [" +
                 "  {" +

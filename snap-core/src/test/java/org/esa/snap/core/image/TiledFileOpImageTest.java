@@ -1,25 +1,26 @@
 package org.esa.snap.core.image;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import java.awt.Rectangle;
 import java.awt.image.Raster;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class TiledFileOpImageTest {
     private static String mlibStatus;
-    @Rule
-    public TemporaryFolder testDir = new TemporaryFolder();
+    public Path testDir = IOHelper.createATempDir();
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -35,9 +36,11 @@ public class TiledFileOpImageTest {
     @STTM("SNAP-3446")
     @Test
     public void testCreate() throws Exception {
-        Path outputPath = testDir.newFolder("test-dir").toPath();
+        Path outputPath = testDir.resolve("test-dir");
         Files.createDirectories(outputPath);
-        final Path imageFile = Path.of(getClass().getResource("PyramidBuilderTestInput.jpg").toURI());
+        final URL fileURL = getClass().getResource("PyramidBuilderTestInput.jpg");
+        assertNotNull(fileURL);
+        final Path imageFile = UrlHelper.urlToFile(fileURL);
         PyramidBuilder builder = new PyramidBuilder();
         builder.doit(imageFile, outputPath, "jpeg", 4, 100, 100);
 

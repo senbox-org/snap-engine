@@ -22,7 +22,7 @@ import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Locale;
 
 /**
@@ -49,7 +49,7 @@ public class ImageProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public DecodeQualification getDecodeQualification(Object object) {
-        File file = getProductFile(object);
+        Path file = getProductPath(object);
         String fileExt = FileUtils.getExtension(file);
         if (fileExt != null && StringUtils.contains(getDefaultFileExtensions(), fileExt.toLowerCase())) {
             return DecodeQualification.SUITABLE;
@@ -59,7 +59,7 @@ public class ImageProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     @Override

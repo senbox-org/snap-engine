@@ -17,19 +17,19 @@
 package org.esa.snap.core.util;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class ImageUtilsTest {
@@ -42,9 +42,9 @@ public class ImageUtilsTest {
         // Callers that open a fresh stream per tile and seek to increasing offsets
         // (DimapProductReader) then become O(n^2). A File input must yield a
         // random-access FileImageInputStream so seek() is O(1).
-        final File tmp = File.createTempFile("imageutils-randomaccess", ".img");
+        final Path tmp = IOHelper.createTempFile("imageutils-randomaccess", ".img");
         try {
-            try (DataOutputStream out = new DataOutputStream(new FileOutputStream(tmp))) {
+            try (DataOutputStream out = new DataOutputStream(Files.newOutputStream(tmp))) {
                 for (int i = 0; i < 1000; i++) {
                     out.writeShort(i);
                 }
@@ -52,7 +52,7 @@ public class ImageUtilsTest {
 
             try (ImageInputStream iis = ImageUtils.getImageInputStream(tmp)) {
                 assertTrue("expected random-access FileImageInputStream, got " + iis.getClass().getName(),
-                        iis instanceof FileImageInputStream);
+                        iis.getClass().getName().contains("FileImageInputStream") && !iis.isCached());
 
                 // seek far forward then read - must return the right sample
                 iis.seek(900L * 2);
@@ -62,7 +62,7 @@ public class ImageUtilsTest {
                 assertEquals(10, iis.readShort());
             }
         } finally {
-            Files.deleteIfExists(tmp.toPath());
+            Files.deleteIfExists(tmp);
         }
     }
 

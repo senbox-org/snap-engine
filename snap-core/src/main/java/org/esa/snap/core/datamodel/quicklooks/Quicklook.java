@@ -29,9 +29,9 @@ import org.esa.snap.runtime.Config;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.prefs.Preferences;
 
@@ -46,8 +46,8 @@ public class Quicklook extends ProductNode implements Thumbnail {
 
     private BufferedImage image;
     private Product product;
-    private File productFile;
-    private final File browseFile;
+    private Path productFile;
+    private final Path browseFile;
     private Band[] quicklookBands;
     private final Path productQuicklookFolder;
     private final boolean productCanAppendFiles;
@@ -55,7 +55,7 @@ public class Quicklook extends ProductNode implements Thumbnail {
 
     private String quicklookLink = null;
 
-    public Quicklook(final File productFile) {
+    public Quicklook(final Path productFile) {
         this(null, DEFAULT_QUICKLOOK_NAME);
         this.productFile = productFile;
     }
@@ -77,7 +77,7 @@ public class Quicklook extends ProductNode implements Thumbnail {
      * @param name       the name of the quicklook
      * @param browseFile the preview or browse image from a product
      */
-    public Quicklook(final Product product, final String name, final File browseFile) {
+    public Quicklook(final Product product, final String name, final Path browseFile) {
         this(product, name, browseFile, false, null, null);
     }
 
@@ -101,7 +101,7 @@ public class Quicklook extends ProductNode implements Thumbnail {
      * @param productCanAppendFiles  true when files may be written to the product
      * @param productQuicklookFolder where to write the quicklook files
      */
-    public Quicklook(final Product product, final String name, final File browseFile,
+    public Quicklook(final Product product, final String name, final Path browseFile,
                      final boolean productCanAppendFiles, final Path productQuicklookFolder,
                      final Band[] quicklookBands) {
         super(name);
@@ -128,7 +128,7 @@ public class Quicklook extends ProductNode implements Thumbnail {
         return product != null;
     }
 
-    public File getProductFile() {
+    public Path getProductFile() {
         return productFile;
     }
 
@@ -167,8 +167,8 @@ public class Quicklook extends ProductNode implements Thumbnail {
     public boolean hasCachedImage() {
         if (productQuicklookFolder != null) {
             // load from product
-            final File quickLookFile = productQuicklookFolder.resolve(getQLFileName(0)).toFile();
-            if (quickLookFile.exists()) {
+            final Path quickLookFile = productQuicklookFolder.resolve(getQLFileName(0));
+            if (Files.exists(quickLookFile)) {
                 return true;
             }
         }
@@ -177,8 +177,8 @@ public class Quicklook extends ProductNode implements Thumbnail {
 
             int id = QuicklookDB.instance().getQuicklookId(productFile);
             if (id != QuicklookDB.QL_NOT_FOUND) {
-                final File quickLookFile = QuicklookDB.getQuicklookCacheDir().resolve(getQLFileName(id)).toFile();
-                return quickLookFile.exists();
+                final Path quickLookFile = QuicklookDB.getQuicklookCacheDir().resolve(getQLFileName(id));
+                return Files.exists(quickLookFile);
             }
         }
         return false;
@@ -223,8 +223,8 @@ public class Quicklook extends ProductNode implements Thumbnail {
         return image;
     }
 
-    private static Product readBrowseProduct(final File file) throws IOException {
-        final String filename = file.getName().toLowerCase();
+    private static Product readBrowseProduct(final Path file) throws IOException {
+        final String filename = file.getFileName().toString().toLowerCase();
         ProductReader productReader = null;
         if (filename.endsWith("tif")) {
             productReader = ProductIO.getProductReader("GeoTIFF");
@@ -242,7 +242,7 @@ public class Quicklook extends ProductNode implements Thumbnail {
         if (productQuicklookFolder != null) {
             // load from product
 
-            final File quickLookFile = productQuicklookFolder.resolve(getQLFileName(0)).toFile();
+            final Path quickLookFile = productQuicklookFolder.resolve(getQLFileName(0));
             image = QuicklookGenerator.loadImage(quickLookFile);
         }
         if (quicklookLink != null) {
@@ -262,8 +262,8 @@ public class Quicklook extends ProductNode implements Thumbnail {
 
                 int id = QuicklookDB.instance().getQuicklookId(productFile);
                 if (id != QuicklookDB.QL_NOT_FOUND) {
-                    final File quickLookFile = QuicklookDB.getQuicklookCacheDir().resolve(getQLFileName(id)).toFile();
-                    if(quickLookFile.exists()) {
+                    final Path quickLookFile = QuicklookDB.getQuicklookCacheDir().resolve(getQLFileName(id));
+                    if(Files.exists(quickLookFile)) {
                         image = QuicklookGenerator.loadImage(quickLookFile);
                     }
                 }
@@ -279,7 +279,7 @@ public class Quicklook extends ProductNode implements Thumbnail {
             // save with product
 
             if (productQuicklookFolder != null) {
-                final File quickLookFile = productQuicklookFolder.resolve(getQLFileName(0)).toFile();
+                final Path quickLookFile = productQuicklookFolder.resolve(getQLFileName(0));
 
                 if (QuicklookGenerator.writeImage(bufferedImage, quickLookFile))
                     return;
@@ -290,7 +290,7 @@ public class Quicklook extends ProductNode implements Thumbnail {
             // save to database
 
             int id = QuicklookDB.instance().addQuickLookId(productFile);
-            final File quickLookFile = QuicklookDB.getQuicklookCacheDir().resolve(getQLFileName(id)).toFile();
+            final Path quickLookFile = QuicklookDB.getQuicklookCacheDir().resolve(getQLFileName(id));
             QuicklookGenerator.writeImage(bufferedImage, quickLookFile);
         }
     }

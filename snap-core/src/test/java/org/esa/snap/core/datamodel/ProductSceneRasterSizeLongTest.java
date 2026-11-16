@@ -16,13 +16,13 @@
 
 package org.esa.snap.core.datamodel;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.junit.Test;
 
 import javax.media.jai.operator.ConstantDescriptor;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -71,7 +71,7 @@ public class ProductSceneRasterSizeLongTest {
 
         product.setSceneGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
 
-        File file = new File("multisize_product.dim");
+        final Path file = IOHelper.createATempDir().resolve("multisize_product.dim");
         try {
             ProductIO.writeProduct(product, file, "BEAM-DIMAP", false);
             Product product2 = ProductIO.readProduct(file);
@@ -87,10 +87,10 @@ public class ProductSceneRasterSizeLongTest {
             assertEquals(1000, product2.getTiePointGrid("TPG2").getGridWidth());
             assertEquals(2, product2.getTiePointGrid("TPG2").getGridHeight());
         } finally {
-            if (file.exists()) {
-                Files.delete(file.toPath());
-                File dataDir = new File(file.getAbsolutePath().replaceAll("dim", "data"));
-                Files.walkFileTree(dataDir.toPath(), new PathTreeDeleter());
+            if (Files.exists(file)) {
+                IOHelper.delete(file);
+                final Path dataDir = Path.of(file.toAbsolutePath().toString().replace("dim", "data"));
+                IOHelper.delete(dataDir);
             }
         }
     }

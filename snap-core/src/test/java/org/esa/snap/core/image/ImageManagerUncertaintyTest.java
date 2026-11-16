@@ -102,8 +102,8 @@ public class ImageManagerUncertaintyTest {
         valueBand.addAncillaryVariable(errorBand, "error");
 
         /*
-        File file = new File("SNAP-5.dim");
-        if (!file.exists()) {
+        Path file = Path.of("SNAP-5.dim");
+        if (!Files.exists(file)) {
             ProductIO.writeProduct(product, file, "BEAM-DIMAP", false);
         }
         */

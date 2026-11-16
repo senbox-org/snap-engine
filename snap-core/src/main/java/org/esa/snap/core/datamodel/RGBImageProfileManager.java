@@ -15,11 +15,14 @@
  */
 package org.esa.snap.core.datamodel;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.SystemUtils;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -31,12 +34,12 @@ import java.util.logging.Level;
 public class RGBImageProfileManager {
 
     private final List<RGBImageProfile> _profiles;
-    private final static File profilesDir;
+    private final static Path profilesDir;
 
     static {
-        profilesDir = SystemUtils.getAuxDataPath().resolve("rgb_profiles").toFile();
-        if (!profilesDir.exists()) {
-            profilesDir.mkdirs();
+        profilesDir = SystemUtils.getAuxDataPath().resolve("rgb_profiles");
+        if (!Files.exists(profilesDir)) {
+            IOHelper.createDirectories(profilesDir);
         }
     }
 
@@ -45,7 +48,7 @@ public class RGBImageProfileManager {
         loadDefaultProfiles();
     }
 
-    public static File getProfilesDir() {
+    public static Path getProfilesDir() {
         return profilesDir;
     }
 
@@ -81,15 +84,17 @@ public class RGBImageProfileManager {
      * Loads all profiles from the BEAM default RGB profile location.
      */
     private void loadDefaultProfiles() {
-        if (!getProfilesDir().exists()) {
-            profilesDir.mkdirs();
+        if (!Files.exists(getProfilesDir())) {
+            IOHelper.createDirectories(profilesDir);
             SystemUtils.LOG.log(Level.INFO, "Directory for RGB-image profiles not found: " + getProfilesDir());
         }
-        final File[] files = getProfilesDir().listFiles(
-                (dir, name) -> name.endsWith(RGBImageProfile.FILENAME_EXTENSION) || name.endsWith(
-                        RGBImageProfile.FILENAME_EXTENSION.toUpperCase()));
+        final Collection<Path> files = IOHelper.listFiles(getProfilesDir(), path -> {
+            final String name = path.getFileName().toString();
+            return name.endsWith(RGBImageProfile.FILENAME_EXTENSION) || name.endsWith(
+                    RGBImageProfile.FILENAME_EXTENSION.toUpperCase());
+        });
         if (files != null) {
-            for (File file : files) {
+            for (Path file : files) {
                 try {
                     addProfile(RGBImageProfile.loadProfile(file));
                 } catch (IOException e) {

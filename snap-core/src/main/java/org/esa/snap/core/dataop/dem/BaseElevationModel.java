@@ -22,7 +22,7 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import eu.esa.snap.core.util.ProgressMonitorContext;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -212,7 +212,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     }
 
     protected abstract void createElevationFile(final ElevationFile[][] elevationFiles,
-                                                final int x, final int y, final File demInstallDir);
+                                                final int x, final int y, final Path demInstallDir);
 
     protected static ProductReaderPlugIn getReaderPlugIn(final String formatName) {
         final Iterator readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns(formatName);
@@ -221,7 +221,7 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
 
     private ElevationFile[][] createElevationFiles() {
         final ElevationFile[][] elevationFiles = new ElevationFile[NUM_X_TILES][NUM_Y_TILES];
-        final File demInstallDir = descriptor.getDemInstallDir();
+        final Path demInstallDir = descriptor.getDemInstallDir();
         for (int x = 0; x < elevationFiles.length; x++) {
             for (int y = 0; y < elevationFiles[x].length; y++) {
 

@@ -15,10 +15,10 @@
  */
 package org.esa.snap;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.io.FileUtils;
 
 import javax.imageio.stream.ImageOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -71,9 +71,9 @@ public class GlobalTestTools {
 
     public static String createPlatformIndependentFilePath(String path) {
         if (path.indexOf('/') > 0) {
-            path = path.replace('/', File.separatorChar);
+            path = path.replace('/', IOHelper.SEPARATOR_CHAR);
         } else if (path.indexOf('\\') > 0) {
-            path = path.replace('\\', File.separatorChar);
+            path = path.replace('\\', IOHelper.SEPARATOR_CHAR);
         }
         return path;
     }

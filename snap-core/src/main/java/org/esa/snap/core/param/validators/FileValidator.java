@@ -23,7 +23,7 @@ import org.esa.snap.core.param.ParamValidateException;
 import org.esa.snap.core.param.Parameter;
 import org.esa.snap.core.util.Debug;
 
-import java.io.File;
+import java.nio.file.Path;
 
 //@todo 1 se/** - add (more) class documentation
 
@@ -41,11 +41,11 @@ public class FileValidator extends AbstractParamValidator {
             return null;
         }
 
-        return new File(trimedText);
+        return Path.of(trimedText);
     }
 
     /**
-     * Returns the given {@link File file} value as a string, according to the rules of the {@link Parameter parameter}.
+     * Returns the given {@link Path file} value as a string, according to the rules of the {@link Parameter parameter}.
      * If the value is <code>null</code> and {@link #isAllowedNullValue null value is allowed},
      * this method returns an empty string, otherwise a {@link ParamFormatException} will be thrown.
      *
@@ -56,7 +56,7 @@ public class FileValidator extends AbstractParamValidator {
      *
      * @throws ParamFormatException if the value is <code>null</code> and
      *                              {@link #isAllowedNullValue null value is not allowed}
-     *                              or the value is not an instance of {@link File}.
+     *                              or the value is not an instance of {@link Path}.
      */
     public String format(Parameter parameter, Object value) throws ParamFormatException {
 
@@ -64,19 +64,19 @@ public class FileValidator extends AbstractParamValidator {
             return "";
         }
 
-        File fValue = castToFile(value);
+        Path fValue = castToFile(value);
         if (fValue == null) {
             throw new ParamFormatException(parameter, ParamConstants.ERR_MSG_NOT_FILE);
         }
 
-        return fValue.getPath();
+        return fValue.toString();
     }
 
     public void validate(Parameter parameter, Object value) throws ParamValidateException {
 
         validateThatNullValueIsAllowed(parameter, value);
 
-        File fValue = castToFile(value);
+        Path fValue = castToFile(value);
         if (fValue == null) {
             throw new ParamValidateException(parameter, ParamConstants.ERR_MSG_MUST_BE_FILE); /*I18N*/
         }
@@ -92,8 +92,8 @@ public class FileValidator extends AbstractParamValidator {
     @Override
     public boolean equalValues(Parameter parameter, Object value1, Object value2) {
 
-        File f1 = castToFile(value1);
-        File f2 = castToFile(value2);
+        Path f1 = castToFile(value1);
+        Path f2 = castToFile(value2);
 
         if (f1 == f2) {
             return true;
@@ -111,7 +111,7 @@ public class FileValidator extends AbstractParamValidator {
     }
 
 
-    protected static File castToFile(Object value) {
-        return (value instanceof File) ? (File) value : null;
+    protected static Path castToFile(Object value) {
+        return (value instanceof Path) ? (Path) value : null;
     }
 }

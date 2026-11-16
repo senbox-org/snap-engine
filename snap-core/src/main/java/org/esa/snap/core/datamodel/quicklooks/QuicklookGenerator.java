@@ -17,11 +17,20 @@ package org.esa.snap.core.datamodel.quicklooks;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import net.coobird.thumbnailator.makers.FixedSizeThumbnailMaker;
 import org.esa.snap.core.dataio.ProductSubsetDef;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.ImageInfo;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.RGBImageProfile;
+import org.esa.snap.core.datamodel.RGBImageProfileManager;
+import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.jexp.ParseException;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
@@ -31,9 +40,12 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
-import java.awt.*;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -335,12 +347,10 @@ public class QuicklookGenerator {
         return b;
     }
 
-    static BufferedImage loadImage(final File quickLookFile) {
-        if (quickLookFile.exists()) {
+    static BufferedImage loadImage(final Path quickLookFile) {
+        if (Files.exists(quickLookFile)) {
             try {
-                try (BufferedInputStream fis = new BufferedInputStream(new FileInputStream(quickLookFile))) {
-                    return ImageIO.read(fis);
-                }
+                return ImageUtils.readImage(quickLookFile);
             } catch (Exception e) {
                 SystemUtils.LOG.severe("Unable to load quicklook: " + quickLookFile);
             }
@@ -348,14 +358,14 @@ public class QuicklookGenerator {
         return null;
     }
 
-    public static boolean writeImage(final BufferedImage bufferedImage, final File quickLookFile) {
+    public static boolean writeImage(final BufferedImage bufferedImage, final Path quickLookFile) {
         try {
             touch(quickLookFile);
 
             ImageWriter jpgWriter = ImageIO.getImageWritersByFormatName("jpg").next();
             ImageWriteParam jpgWriteParam = jpgWriter.getDefaultWriteParam();
 
-            ImageOutputStream outputStream = ImageIO.createImageOutputStream(quickLookFile);
+            ImageOutputStream outputStream = ImageUtils.getImageOutputStream(quickLookFile);
             jpgWriter.setOutput(outputStream);
             IIOImage outputImage = new IIOImage(ensureOpaque(bufferedImage), null, null);
             jpgWriter.write(null, outputImage, jpgWriteParam);
@@ -380,13 +390,13 @@ public class QuicklookGenerator {
         return bi2;
     }
 
-    private static void touch(final File file) throws IOException {
-        if (!file.exists()) {
-            if (!file.getParentFile().exists())
-                file.getParentFile().mkdirs();
-            new FileOutputStream(file).close();
+    private static void touch(final Path file) throws IOException {
+        if (!Files.exists(file)) {
+            if (!Files.exists(file.getParent()))
+                IOHelper.createDirectories(file.getParent());
+            Files.newOutputStream(file).close();
         } else {
-            file.setLastModified(System.currentTimeMillis());
+            Files.setLastModifiedTime(file, FileTime.fromMillis(System.currentTimeMillis()));
         }
     }
 

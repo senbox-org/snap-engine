@@ -62,7 +62,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -121,13 +121,13 @@ public class DimapProductHelpers {
      *
      * @throws IllegalArgumentException if one of the parameters is null.
      */
-    public static Map<Band, File> getBandDataFiles(final Document dom, final Product product,
-                                                   final File inputDir) throws IllegalArgumentException {
+    public static Map<Band, Path> getBandDataFiles(final Document dom, final Product product,
+                                                   final Path inputDir) throws IllegalArgumentException {
         Guardian.assertNotNull("dom", dom);
         Guardian.assertNotNull("product", product);
         Guardian.assertNotNull("inputDir", inputDir);
 
-        final Map<Band, File> dataFilesMap = new HashMap<>();
+        final Map<Band, Path> dataFilesMap = new HashMap<>();
         if (!dom.hasRootElement()) {
             return dataFilesMap;
         }
@@ -153,8 +153,8 @@ public class DimapProductHelpers {
                         final String localHeaderFilePath = SystemUtils.convertToLocalPath(bandHeaderFilePath);
                         final String bandDataFilePath = FileUtils.exchangeExtension(localHeaderFilePath,
                                 DimapProductConstants.IMAGE_FILE_EXTENSION);
-                        final File bandDataFile = inputDir.toPath().resolve(bandDataFilePath).toFile();
-                        final File cachedBandDataFile = FileUtils.getCachedFile(bandDataFile);
+                        final Path bandDataFile = inputDir.resolve(bandDataFilePath);
+                        final Path cachedBandDataFile = FileUtils.getCachedFile(bandDataFile);
                         dataFilesMap.put(band, cachedBandDataFile);
                     }
                 }

@@ -60,10 +60,10 @@ import org.jdom2.Element;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.geom.AffineTransform;
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
@@ -80,7 +80,7 @@ public final class DimapHeaderWriter extends XmlWriter {
     private final Persistence persistence = new Persistence();
     private final JdomLanguageSupport jdomLanguageSupport = new JdomLanguageSupport();
 
-    public DimapHeaderWriter(Product product, File file, String dataDirectory) throws IOException {
+    public DimapHeaderWriter(Product product, Path file, String dataDirectory) throws IOException {
         super(file);
         this.product = product;
         this.dataDirectory = dataDirectory;

@@ -27,10 +27,12 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,8 +50,12 @@ public class VectorDataNodeWriter {
 
     private static long id = System.nanoTime();
 
-    public void write(VectorDataNode vectorDataNode, File file) throws IOException {
-        try (FileWriter writer = new FileWriter(file)) {
+    public void write(VectorDataNode vectorDataNode, Path file) throws IOException {
+        try (Writer writer = Files.newBufferedWriter(
+                file,
+                StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING)) {
             writeNodeProperties(vectorDataNode, writer);
             writeFeatures(vectorDataNode.getFeatureCollection(), writer);
         }

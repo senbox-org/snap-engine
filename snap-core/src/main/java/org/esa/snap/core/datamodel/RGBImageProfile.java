@@ -27,13 +27,12 @@ import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.math.Range;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -396,9 +395,9 @@ public class RGBImageProfile implements ConfigurableExtension {
      * @throws IOException if an I/O error occurs
      * @see #setProperties(java.util.Properties)
      */
-    public static RGBImageProfile loadProfile(final File file) throws IOException {
+    public static RGBImageProfile loadProfile(final Path file) throws IOException {
         Properties properties = new Properties();
-        try (InputStream inStream = new FileInputStream(file)) {
+        try (InputStream inStream = Files.newInputStream(file)) {
             properties.load(inStream);
         }
         final String defaultName = FileUtils.getFilenameWithoutExtension(file);
@@ -436,8 +435,8 @@ public class RGBImageProfile implements ConfigurableExtension {
      * @throws IOException if an I/O error occurs
      * @see #getProperties(java.util.Properties)
      */
-    public void store(final File file) throws IOException {
-        try (OutputStream outStream = new FileOutputStream(file)) {
+    public void store(final Path file) throws IOException {
+        try (OutputStream outStream = Files.newOutputStream(file)) {
             final Properties properties = new Properties();
             getProperties(properties);
             properties.store(outStream, "RGB-Image Profile");

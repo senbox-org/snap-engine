@@ -20,7 +20,14 @@ import org.jdom2.Text;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Utility class for writing XML.
@@ -35,8 +42,8 @@ public class XmlWriter {
     private final PrintWriter _pWriter;
     private static XMLOutputter _xmlOutputter;
 
-    public XmlWriter(File file) throws IOException {
-        this(new FileWriter(file), true);
+    public XmlWriter(Path file) throws IOException {
+        this(Files.newBufferedWriter(file), true);
     }
 
     public XmlWriter(Writer writer, boolean initHeadline) {

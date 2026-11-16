@@ -1,8 +1,8 @@
 package eu.esa.snap.core.lib;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.SystemUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -60,7 +60,7 @@ public class NativeLibraryTools {
     public static URL getLoaderFilePathFromSources() {
         final String loaderFileDirectoryFromSources = "auxdata/" + LOADER_LIBRARY_FILE;
         try {
-            return NativeLibraryTools.class.getClassLoader().getResource(loaderFileDirectoryFromSources.replace(File.separator, "/"));
+            return NativeLibraryTools.class.getClassLoader().getResource(loaderFileDirectoryFromSources.replace(IOHelper.SEPARATOR, "/"));
         } catch (Exception ignored) {
             return null;
         }

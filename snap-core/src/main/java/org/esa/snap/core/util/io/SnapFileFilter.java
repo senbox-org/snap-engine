@@ -20,7 +20,8 @@ import org.esa.snap.core.util.StringUtils;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -178,8 +179,8 @@ public class SnapFileFilter extends FileFilter {
      * @return <code>true</code> if the given file path ends with one of the registered extensions, <code>false</code>
      *         otherwise.
      */
-    public boolean checkExtension(File file) {
-        return file != null && checkExtension(file.getName());
+    public boolean checkExtension(Path file) {
+        return file != null && checkExtension(file.getFileName().toString());
     }
 
     /**
@@ -223,13 +224,25 @@ public class SnapFileFilter extends FileFilter {
      * @return <code>true</code> if given file is accepted by this filter
      */
     @Override
-    public boolean accept(File file) {
+    public boolean accept(java.io.File file) {
+        return accept(file.toPath());
+    }
+
+    /**
+     * Tests whether or not the given file is accepted by this filter. The default implementation returns
+     * <code>true</code> if the given file is a directory or the path string ends with one of the registered extensions.
+     * if no extension are defined, the method always returns <code>true</code>
+     *
+     * @param file the file to be or not be accepted.
+     * @return <code>true</code> if given file is accepted by this filter
+     */
+    public boolean accept(Path file) {
         if (!hasExtensions()) {
             return true;
         }
 
         // directories are accepted right away
-        if (file.isDirectory()) {
+        if (Files.isDirectory(file)) {
             return true;
         }
 
@@ -248,7 +261,7 @@ public class SnapFileFilter extends FileFilter {
      * @return {@code true} If the given directory represents a compound document.
      * @since BEAM 4.6.1
      */
-    public boolean isCompoundDocument(File dir) {
+    public boolean isCompoundDocument(Path dir) {
         return false;
     }
 

@@ -15,12 +15,12 @@
  */
 package org.esa.snap.core.util;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
+import org.geotools.referencing.factory.epsg.hsql.HsqlEpsgDatabase;
 import org.geotools.util.factory.GeoTools;
 import org.geotools.util.factory.Hints;
-import org.geotools.referencing.factory.epsg.hsql.HsqlEpsgDatabase;
-import org.geotools.util.logging.Log4JLoggerFactory;
 import org.geotools.util.logging.LoggerFactory;
 import org.geotools.util.logging.Logging;
 
@@ -37,7 +37,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -104,8 +103,8 @@ public class SystemUtils {
      *
      * @return the current working directory, never <code>null</code>
      */
-    public static File getUserHomeDir() {
-        return new File(System.getProperty("user.home", "."));
+    public static Path getUserHomeDir() {
+        return Path.of(System.getProperty("user.home", "."));
     }
 
     /**
@@ -125,7 +124,7 @@ public class SystemUtils {
      * @return the current user's application data directory
      * @since BEAM 4.2
      */
-    public static File getApplicationDataDir() {
+    public static Path getApplicationDataDir() {
         return getApplicationDataDir(false);
     }
 
@@ -136,7 +135,7 @@ public class SystemUtils {
      * @since SNAP 2.0
      */
     public static Path getAuxDataPath() {
-        return getApplicationDataDir().toPath().resolve(AUXDATA_DIR_NAME);
+        return getApplicationDataDir().resolve(AUXDATA_DIR_NAME);
     }
 
     /**
@@ -149,10 +148,10 @@ public class SystemUtils {
      * @return the cache directory
      * @since SNAP 2
      */
-    public static File getCacheDir() {
+    public static Path getCacheDir() {
         String cacheDirPath = Config.instance().preferences().get(SNAP_CACHE_DIR_PROPERTY_NAME, null);
         if (cacheDirPath != null) {
-            return new File(cacheDirPath);
+            return Path.of(cacheDirPath);
         }
         return getDefaultCacheDir();
     }
@@ -163,8 +162,8 @@ public class SystemUtils {
      * @return the default cache directory
      * @see #getCacheDir()
      */
-    public static File getDefaultCacheDir() {
-        return new File(new File(getApplicationDataDir(), "var"), "cache");
+    public static Path getDefaultCacheDir() {
+        return getApplicationDataDir().resolve( "var").resolve( "cache");
     }
 
     /**
@@ -174,10 +173,10 @@ public class SystemUtils {
      * @return the current user's application data directory
      * @since BEAM 4.2
      */
-    public static File getApplicationDataDir(boolean force) {
-        File dir = Config.instance().userDir().toFile();
-        if (force && !dir.exists()) {
-            dir.mkdirs();
+    public static Path getApplicationDataDir(boolean force) {
+        Path dir = Config.instance().userDir();
+        if (force && !Files.exists(dir)) {
+            IOHelper.createDirectories(dir);
         }
         return dir;
     }
@@ -214,8 +213,8 @@ public class SystemUtils {
      *
      * @return the current working directory, never <code>null</code>
      */
-    public static File getCurrentWorkingDir() {
-        return new File(System.getProperty("user.dir", "."));
+    public static Path getCurrentWorkingDir() {
+        return Path.of(System.getProperty("user.dir", "."));
     }
 
     /**
@@ -227,16 +226,16 @@ public class SystemUtils {
      *
      * @return all files in the current class path, never <code>null</code>
      */
-    public static File[] getClassPathFiles() {
+    public static Path[] getClassPathFiles() {
         String classPath = System.getProperty("java.class.path");
         if (classPath == null) {
-            return new File[0];
+            return new Path[0];
         }
-        StringTokenizer st = new StringTokenizer(classPath, File.pathSeparator);
-        File[] files = new File[st.countTokens()];
+        StringTokenizer st = new StringTokenizer(classPath, IOHelper.PATH_SEPARATOR);
+        Path[] files = new Path[st.countTokens()];
         try {
             for (int i = 0; i < files.length; i++) {
-                files[i] = new File(st.nextToken());
+                files[i] = Path.of(st.nextToken());
             }
         } catch (NoSuchElementException e) {
             // ignore
@@ -249,8 +248,8 @@ public class SystemUtils {
      *
      * @return an assumption of an application's home directory, never <code>null</code>
      */
-    public static File getApplicationHomeDir() {
-        return Config.instance().installDir().toFile();
+    public static Path getApplicationHomeDir() {
+        return Config.instance().installDir();
     }
 
     /**
@@ -283,10 +282,10 @@ public class SystemUtils {
      */
     public static String convertToLocalPath(String urlPath) {
         Guardian.assertNotNull("urlPath", urlPath);
-        if (File.separatorChar != _URL_DIR_SEPARATOR_CHAR
+        if (IOHelper.SEPARATOR_CHAR != _URL_DIR_SEPARATOR_CHAR
                 && urlPath.indexOf(_URL_DIR_SEPARATOR_CHAR) >= 0) {
             return urlPath.replace(_URL_DIR_SEPARATOR_CHAR,
-                                   File.separatorChar);
+                                   IOHelper.SEPARATOR_CHAR);
         }
         return urlPath;
     }
@@ -417,8 +416,8 @@ public class SystemUtils {
         GeoTools.init(new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true));
 
         // Must store EPSG database in application data dir, otherwise it will be deleted from default temp location (Unix!, Windows?)
-        File epsgDir = new File(SystemUtils.getApplicationDataDir(true), EPSG_DATABASE_DIR_NAME);
-        System.setProperty(HsqlEpsgDatabase.DIRECTORY_KEY, epsgDir.getAbsolutePath());
+        Path epsgDir = SystemUtils.getApplicationDataDir(true).resolve( EPSG_DATABASE_DIR_NAME);
+        System.setProperty(HsqlEpsgDatabase.DIRECTORY_KEY, epsgDir.toAbsolutePath().toString());
 
         // disable unwanted logging messages from hsqldb
         System.setProperty("hsqldb.db.level", Level.WARNING.getName());
@@ -510,7 +509,7 @@ public class SystemUtils {
      */
     public static String getReleaseVersion() {
         String version = null;
-        Path versionFile = getApplicationHomeDir().toPath().resolve("VERSION.txt");
+        Path versionFile = getApplicationHomeDir().resolve("VERSION.txt");
         if (Files.exists(versionFile)) {
             try {
                 List<String> versionInfo = Files.readAllLines(versionFile);

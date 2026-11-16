@@ -19,7 +19,6 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.ProductUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -85,10 +84,6 @@ public interface ProductReader {
 
     default InputStream getProductInputStream() throws IOException {
         return getProductInputStream(getInput());
-    }
-
-    default File getProductFile(){
-        return getProductPath().toFile();
     }
 
     default Path getProductPath(){

@@ -16,8 +16,8 @@
 
 package org.esa.snap.core.image;
 
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.FileImageOutputStream;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import org.esa.snap.core.util.ImageUtils;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import javax.media.jai.CachedTile;
@@ -33,9 +33,9 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -70,7 +70,7 @@ import java.util.WeakHashMap;
  */
 public class FileTileCache implements TileCache {
 
-    private final File cacheDir;
+    private final Path cacheDir;
     private long memoryCapacity;
     private long memoryInUse;
     private float memoryThreshold;
@@ -78,7 +78,7 @@ public class FileTileCache implements TileCache {
     private Map<TileId, CachedTileImpl> tileMap;
     private Map<RenderedImage, String> idMap;
 
-    public FileTileCache(File cacheDir) {
+    public FileTileCache(Path cacheDir) {
         this.cacheDir = cacheDir;
         this.tileMap = new HashMap<TileId, CachedTileImpl>(1024);
         this.idMap = new WeakHashMap<RenderedImage, String>(128);
@@ -130,7 +130,7 @@ public class FileTileCache implements TileCache {
                 }
             } catch (IOException e) {
                 // todo - log warning
-                cachedTile.file.delete();
+                IOHelper.delete(cachedTile.file);
             }
         }
     }
@@ -410,7 +410,7 @@ public class FileTileCache implements TileCache {
     private synchronized void removeTile(TileId tileId) {
         CachedTileImpl cachedTile = tileMap.get(tileId);
         if (cachedTile != null) {
-            cachedTile.file.delete();
+            IOHelper.delete(cachedTile.file);
         }
         tileMap.remove(tileId);
         RenderedImage image = tileId.owner.get();
@@ -456,21 +456,15 @@ public class FileTileCache implements TileCache {
         return tileComparator != null ? new TileCacheMetricComparator(tileComparator) : new DefaultTileComparator();
     }
 
-    static DataBuffer readTileData(File file, SampleModel sampleModel) throws IOException {
-        ImageInputStream stream = new FileImageInputStream(file);
-        try {
+    static DataBuffer readTileData(Path file, SampleModel sampleModel) throws IOException {
+        try (ImageInputStream stream = ImageUtils.getImageInputStream(file)) {
             return readTile(stream, sampleModel);
-        } finally {
-            stream.close();
         }
     }
 
-    static void writeTile(File file, Raster tile) throws IOException {
-        ImageOutputStream stream = new FileImageOutputStream(file);
-        try {
+    static void writeTile(Path file, Raster tile) throws IOException {
+        try (ImageOutputStream stream = ImageUtils.getImageOutputStream(file)) {
             writeTile(stream, tile);
-        } finally {
-            stream.close();
         }
     }
 
@@ -591,7 +585,7 @@ public class FileTileCache implements TileCache {
     final class CachedTileImpl implements CachedTile {
 
         final TileId tileId;
-        final File file;
+        final Path file;
         final Object tileCacheMetric;
         final SampleModel sampleModel;
         final long tileSize;
@@ -601,7 +595,7 @@ public class FileTileCache implements TileCache {
 
         CachedTileImpl(TileId tileId, Raster tile, Object tileCacheMetric) {
             this.tileId = tileId;
-            this.file = new File(cacheDir, getImageId(tileId.owner.get()) + "-" + tileId.tileX + "-" + tileId.tileY);
+            this.file = cacheDir.resolve(getImageId(tileId.owner.get()) + "-" + tileId.tileX + "-" + tileId.tileY);
             this.tileCacheMetric = tileCacheMetric;
             this.sampleModel = tile.getSampleModel();
             this.tileSize = sampleModel.getNumDataElements() * DataBuffer.getDataTypeSize(sampleModel.getTransferType());

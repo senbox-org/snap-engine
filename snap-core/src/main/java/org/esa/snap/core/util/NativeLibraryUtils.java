@@ -1,9 +1,8 @@
 package org.esa.snap.core.util;
 
-import org.apache.commons.io.FileUtils;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.apache.commons.io.IOUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,8 +44,8 @@ public class NativeLibraryUtils {
             if (StringUtils.isNullOrEmpty(propertyValue)) {
                 continue;
             }
-            if (!propertyValue.contains(path) || propertyValue.contains(path + File.separator)) {
-                builder.append(path).append(File.pathSeparator);
+            if (!propertyValue.contains(path) || propertyValue.contains(path + IOHelper.SEPARATOR)) {
+                builder.append(path).append(IOHelper.PATH_SEPARATOR);
             }
         }
         if (!StringUtils.isNullOrEmpty(propertyValue)) {
@@ -93,7 +92,7 @@ public class NativeLibraryUtils {
         if (path.startsWith("/")) {
             path = path.substring(1);
         }
-        path = path.replace('/', File.separatorChar);
+        path = path.replace('/', IOHelper.SEPARATOR_CHAR);
         if (path.contains(".jar")) {
             int contentsSeparatorIndex = path.indexOf("!");
             String jarPath = path.substring(0, contentsSeparatorIndex);
@@ -111,8 +110,8 @@ public class NativeLibraryUtils {
                     throw new IOException(String.format("Library %s could not be found in the jar file %s", libraryName, path));
                 }
                 try (InputStream in = jarFile.getInputStream(jarEntry)) {
-                    Path tmpPath = Paths.get(System.getProperty("java.io.tmpdir"), "lib", getOSFamily(), mappedLibName);
-                    try (OutputStream out = FileUtils.openOutputStream(tmpPath.toFile())) {
+                    Path tmpPath = IOHelper.createATempDir().resolve("lib").resolve(getOSFamily()).resolve(mappedLibName);
+                    try (OutputStream out = Files.newOutputStream(tmpPath)) {
                         IOUtils.copy(in, out);
                     }
                     path = tmpPath.toAbsolutePath().toString();

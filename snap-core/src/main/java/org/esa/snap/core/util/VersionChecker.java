@@ -113,7 +113,7 @@ public class VersionChecker {
      */
     public Version getLocalVersion() {
         if (localVersion.get() == null) {
-            Path versionFile = SystemUtils.getApplicationHomeDir().toPath().resolve(VersionChecker.VERSION_FILE_NAME);
+            Path versionFile = SystemUtils.getApplicationHomeDir().resolve(VersionChecker.VERSION_FILE_NAME);
             try {
                 if (localVersionStream != null) {
                     localVersion.set(readVersionFromStream(localVersionStream));

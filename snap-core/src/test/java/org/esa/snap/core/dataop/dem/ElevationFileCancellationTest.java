@@ -2,12 +2,10 @@ package org.esa.snap.core.dataop.dem;
 
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
-import org.junit.Rule;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -15,6 +13,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.CancellationException;
 
 import static org.junit.Assert.assertFalse;
@@ -22,8 +22,7 @@ import static org.junit.Assert.assertThrows;
 
 public class ElevationFileCancellationTest {
 
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public Path temporaryFolder = IOHelper.createATempDir();
 
     @Test
     @STTM("SNAP-4209")
@@ -31,12 +30,12 @@ public class ElevationFileCancellationTest {
         SlowHttpServer server = new SlowHttpServer("tile.zip");
         server.start();
         try {
-            TestElevationFile elevationFile = new TestElevationFile(new File(temporaryFolder.getRoot(), "tile.dat"));
+            TestElevationFile elevationFile = new TestElevationFile(temporaryFolder.resolve("tile.dat"));
             ProgressMonitor progressMonitor = new CancelAfterChecksProgressMonitor(1);
 
             assertThrows(CancellationException.class, () -> elevationFile.download(server.getBaseUrl(), progressMonitor));
 
-            assertFalse(new File(temporaryFolder.getRoot(), "tile.zip").exists());
+            assertFalse(Files.exists(temporaryFolder.resolve("tile.zip")));
         } finally {
             server.close();
         }
@@ -44,7 +43,7 @@ public class ElevationFileCancellationTest {
 
     private static class TestElevationFile extends ElevationFile {
 
-        TestElevationFile(File localFile) {
+        TestElevationFile(Path localFile) {
             super(localFile, null);
         }
 

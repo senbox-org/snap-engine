@@ -16,6 +16,7 @@
 package org.esa.snap.core.dataop.downloadable;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -28,8 +29,12 @@ import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.SocketException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,11 +99,11 @@ public final class FtpDownloader {
         }
     }
 
-    public FTPError retrieveFile(final String remotePath, final File localFile, final Long fileSize) throws Exception {
+    public FTPError retrieveFile(final String remotePath, final Path localFile, final Long fileSize) throws Exception {
         return retrieveFile(remotePath, localFile, fileSize, ProgressMonitorContext.getCurrentProgressMonitor());
     }
 
-    public FTPError retrieveFile(final String remotePath, final File localFile, final Long fileSize,
+    public FTPError retrieveFile(final String remotePath, final Path localFile, final Long fileSize,
                                  ProgressMonitor progressMonitor) throws Exception {
         BufferedOutputStream fos = null;
         InputStream fis = null;
@@ -117,14 +122,14 @@ public final class FtpDownloader {
                     return FTPError.READ_ERROR;
             }
 
-            final File parentFolder = localFile.getParentFile();
-            if (!parentFolder.exists()) {
-                parentFolder.mkdirs();
+            final Path parentFolder = localFile.getParent();
+            if (!Files.exists(parentFolder)) {
+                IOHelper.createDirectories(parentFolder);
             }
-            fos = new BufferedOutputStream(new FileOutputStream(localFile.getAbsolutePath()));
+            fos = new BufferedOutputStream(Files.newOutputStream(localFile.toAbsolutePath()));
 
             if(fileSize != null) {
-                progressListenerList.fireProcessStarted("Downloading " + localFile.getName() + "... ", 0, fileSize.intValue());
+                progressListenerList.fireProcessStarted("Downloading " + localFile.getFileName() + "... ", 0, fileSize.intValue());
             }
 
             final int size = 4096;
@@ -169,7 +174,7 @@ public final class FtpDownloader {
                 SystemUtils.LOG.severe("Unable to close input stream " + e.getMessage());
             }
             if (canceled) {
-                localFile.delete();
+                IOHelper.delete(localFile);
             }
         }
     }
@@ -206,8 +211,8 @@ public final class FtpDownloader {
     public static Map<String, Long> readRemoteFileList(final FtpDownloader ftp, final String server, final String remotePath) {
 
         boolean useCachedListing = true;
-        final File listingFile = new File(SystemUtils.getCacheDir(), server + ".listing.xml");
-        if (!listingFile.exists())
+        final Path listingFile = SystemUtils.getCacheDir().resolve(server + ".listing.xml");
+        if (!Files.exists(listingFile))
             useCachedListing = false;
 
         final Map<String, Long> fileSizeMap = new HashMap<>(900);
@@ -215,7 +220,7 @@ public final class FtpDownloader {
         if (useCachedListing) {
             Document doc = null;
             try {
-                doc = XMLSupport.LoadXML(listingFile.getAbsolutePath());
+                doc = XMLSupport.LoadXML(listingFile.toAbsolutePath().toString());
             } catch (IOException e) {
                 useCachedListing = false;
             }
@@ -276,7 +281,7 @@ public final class FtpDownloader {
     }
 
     private static void writeRemoteFileList(final FTPFile[] remoteFileList, final String server,
-                                            final String remotePath, final File file) {
+                                            final String remotePath, final Path file) {
 
         final Element root = new Element("remoteFileListing");
         root.setAttribute("server", server);
@@ -293,9 +298,9 @@ public final class FtpDownloader {
             remotePathElem.addContent(fileElem);
         }
         try {
-            XMLSupport.SaveXML(doc, file.getAbsolutePath());
+            XMLSupport.SaveXML(doc, file.toAbsolutePath().toString());
         } catch (IOException e) {
-            SystemUtils.LOG.warning("Unable to save " + file.getAbsolutePath());
+            SystemUtils.LOG.warning("Unable to save " + file.toAbsolutePath());
         }
     }
 

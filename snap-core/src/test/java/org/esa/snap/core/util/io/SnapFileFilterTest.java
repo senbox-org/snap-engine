@@ -18,7 +18,7 @@ package org.esa.snap.core.util.io;
 
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
@@ -49,10 +49,10 @@ public class SnapFileFilterTest {
         assertEquals(".xml", fileFilter.getExtensions()[0]);
         assertEquals(".xml", fileFilter.getDefaultExtension());
         assertEquals("X files (*.xml)", fileFilter.getDescription());
-        assertTrue(fileFilter.accept(new File(".")));
-        assertTrue(fileFilter.accept(new File("./a.xml")));
-        assertFalse(fileFilter.accept(new File("./a.zip")));
-        assertFalse(fileFilter.accept(new File("./a.txt")));
+        assertTrue(fileFilter.accept(Path.of(".")));
+        assertTrue(fileFilter.accept(Path.of("./a.xml")));
+        assertFalse(fileFilter.accept(Path.of("./a.zip")));
+        assertFalse(fileFilter.accept(Path.of("./a.txt")));
     }
 
     private void testMultiExt(SnapFileFilter fileFilter) {
@@ -63,10 +63,10 @@ public class SnapFileFilterTest {
         assertEquals(".zip", fileFilter.getExtensions()[1]);
         assertEquals(".xml", fileFilter.getDefaultExtension());
         assertEquals("X files (*.xml,*.zip)", fileFilter.getDescription());
-        assertTrue(fileFilter.accept(new File(".")));
-        assertTrue(fileFilter.accept(new File("./a.xml")));
-        assertTrue(fileFilter.accept(new File("./a.zip")));
-        assertFalse(fileFilter.accept(new File("./a.txt")));
+        assertTrue(fileFilter.accept(Path.of(".")));
+        assertTrue(fileFilter.accept(Path.of("./a.xml")));
+        assertTrue(fileFilter.accept(Path.of("./a.zip")));
+        assertFalse(fileFilter.accept(Path.of("./a.txt")));
     }
 
     private void testNoExt(SnapFileFilter fileFilter) {
@@ -75,10 +75,10 @@ public class SnapFileFilterTest {
         assertEquals(0, fileFilter.getExtensions().length);
         assertNull(fileFilter.getDefaultExtension());
         assertEquals("X files", fileFilter.getDescription());
-        assertTrue(fileFilter.accept(new File(".")));
-        assertTrue(fileFilter.accept(new File("./a.xml")));
-        assertTrue(fileFilter.accept(new File("./a.zip")));
-        assertTrue(fileFilter.accept(new File("./a.txt")));
+        assertTrue(fileFilter.accept(Path.of(".")));
+        assertTrue(fileFilter.accept(Path.of("./a.xml")));
+        assertTrue(fileFilter.accept(Path.of("./a.zip")));
+        assertTrue(fileFilter.accept(Path.of("./a.txt")));
     }
 
     @Test
@@ -162,32 +162,32 @@ public class SnapFileFilterTest {
     public void testSingleExtIgnoreCase() {
         final SnapFileFilter f = new SnapFileFilter("RALLA", ".ral", "RALLA Files");
 
-        assertTrue(f.accept(new File("my_ralla.ral")));
-        assertTrue(f.accept(new File("my_ralla.RAL")));
-        assertTrue(f.accept(new File("my_ralla.Ral")));
+        assertTrue(f.accept(Path.of("my_ralla.ral")));
+        assertTrue(f.accept(Path.of("my_ralla.RAL")));
+        assertTrue(f.accept(Path.of("my_ralla.Ral")));
     }
 
     @Test
     public void testMultipleExtIgnoreCase() {
         final SnapFileFilter f = new SnapFileFilter("RALLA", new String[]{".ral", ".lar"}, "RALLA Files");
 
-        assertTrue(f.accept(new File("my_ralla.ral")));
-        assertTrue(f.accept(new File("my_ralla.RAL")));
-        assertTrue(f.accept(new File("my_ralla.Ral")));
-        assertTrue(f.accept(new File("my_ralla.lar")));
-        assertTrue(f.accept(new File("my_ralla.LAR")));
-        assertTrue(f.accept(new File("my_ralla.Lar")));
+        assertTrue(f.accept(Path.of("my_ralla.ral")));
+        assertTrue(f.accept(Path.of("my_ralla.RAL")));
+        assertTrue(f.accept(Path.of("my_ralla.Ral")));
+        assertTrue(f.accept(Path.of("my_ralla.lar")));
+        assertTrue(f.accept(Path.of("my_ralla.LAR")));
+        assertTrue(f.accept(Path.of("my_ralla.Lar")));
     }
 
     @Test
     public void testThatExtensionsIgnoreCase() {
         final SnapFileFilter f = new SnapFileFilter("RALLA", new String[]{".ral", ".ral.zip"}, "RALLA Files");
 
-        assertTrue(f.accept(new File("my_ralla.ral")));
-        assertTrue(f.accept(new File("my_ralla.RAL")));
-        assertTrue(f.accept(new File("my_ralla.Ral")));
-        assertTrue(f.accept(new File("my_ralla.ral.zip")));
-        assertTrue(f.accept(new File("my_ralla.ral.ZIP")));
-        assertTrue(f.accept(new File("my_ralla.RAL.Zip")));
+        assertTrue(f.accept(Path.of("my_ralla.ral")));
+        assertTrue(f.accept(Path.of("my_ralla.RAL")));
+        assertTrue(f.accept(Path.of("my_ralla.Ral")));
+        assertTrue(f.accept(Path.of("my_ralla.ral.zip")));
+        assertTrue(f.accept(Path.of("my_ralla.ral.ZIP")));
+        assertTrue(f.accept(Path.of("my_ralla.RAL.Zip")));
     }
 }

@@ -17,7 +17,7 @@ package org.esa.snap.core.dataop.dem;
 
 import org.esa.snap.core.dataop.resamp.Resampling;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * An <code>ElevationModel</code> is used to obtain an elevation above a
@@ -117,6 +117,6 @@ public interface ElevationModelDescriptor {
      *
      * @return the DEM file directory
      */
-    File getDemInstallDir();
+    Path getDemInstallDir();
 
 }

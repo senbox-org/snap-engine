@@ -383,19 +383,19 @@ public class ParamProperties {
     }
 
     public void setPropertyValue(String key, int value) {
-        setPropertyValue(key, new Integer(value));
+        setPropertyValue(key, Integer.valueOf(value));
     }
 
     public void setPropertyValue(String key, long value) {
-        setPropertyValue(key, new Long(value));
+        setPropertyValue(key, Long.valueOf(value));
     }
 
     public void setPropertyValue(String key, float value) {
-        setPropertyValue(key, new Float(value));
+        setPropertyValue(key, Float.valueOf(value));
     }
 
     public void setPropertyValue(String key, double value) {
-        setPropertyValue(key, new Double(value));
+        setPropertyValue(key, Double.valueOf(value));
     }
 
     public void setPropertyValue(String key, Object value) {

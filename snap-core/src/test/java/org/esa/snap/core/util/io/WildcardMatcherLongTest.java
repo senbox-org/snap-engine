@@ -16,12 +16,15 @@
 
 package org.esa.snap.core.util.io;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.test.LongTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -33,27 +36,27 @@ public class WildcardMatcherLongTest {
     @Test
     public void testGlobInCwd() throws Exception {
 
-        File cwd = new File(".").getCanonicalFile();
-        File[] alreadyExistingTxtFiles = cwd.listFiles((dir, name) -> name.endsWith(".txt"));
-        final File[] testFiles = {
-                /*0*/new File(cwd, "WildcardMatcherTest-1.txt"),
-                /*1*/new File(cwd, "WildcardMatcherTest-2.txt"),
-                /*2*/new File(cwd, "WildcardMatcherTest-3.dat"),
-                /*3*/new File(cwd, "WildcardMatcherTest-4.txt"),
-                /*4*/new File(cwd, "WildcardMatcherTest-5.dat"),
+        Path cwd = Path.of(".").toRealPath();
+        Collection<Path> alreadyExistingTxtFiles = IOHelper.listFiles(cwd,path -> path.getFileName().toString().endsWith(".txt"));
+        final Path[] testFiles = {
+                /*0*/cwd.resolve("WildcardMatcherTest-1.txt"),
+                /*1*/cwd.resolve("WildcardMatcherTest-2.txt"),
+                /*2*/cwd.resolve("WildcardMatcherTest-3.dat"),
+                /*3*/cwd.resolve("WildcardMatcherTest-4.txt"),
+                /*4*/cwd.resolve("WildcardMatcherTest-5.dat"),
         };
-        int expectedTxtFileCount = alreadyExistingTxtFiles.length + 3;
+        int expectedTxtFileCount = alreadyExistingTxtFiles.size() + 3;
 
         try {
-            for (File file : testFiles) {
-                if (!file.createNewFile()) {
+            for (Path file : testFiles) {
+                if (!IOHelper.createFile(file)) {
                     System.out.println("Warning: test file could not be created: " + file);
                     System.out.println("Warning: testGlobInCwd() not performed");
                     return;
                 }
             }
 
-            File[] files = WildcardMatcher.glob("*.txt");
+            Path[] files = WildcardMatcher.glob("*.txt");
             assertNotNull(files);
             assertEquals(expectedTxtFileCount, files.length);
             assertTrue(containsFile(files, testFiles[0]));
@@ -72,19 +75,19 @@ public class WildcardMatcherLongTest {
             assertTrue(getIndexOf(testFiles[1], files) < getIndexOf(testFiles[3], files));
 
         } finally {
-            for (File file : testFiles) {
-                if (file.exists() && !file.delete()) {
+            for (Path file : testFiles) {
+                if (Files.exists(file) && !IOHelper.delete(file)) {
                     System.out.println("Warning: test file could not be deleted: " + file);
                 }
             }
         }
     }
 
-    private boolean containsFile(File[] searchIn, File toFind) {
+    private boolean containsFile(Path[] searchIn, Path toFind) {
         return getIndexOf(toFind, searchIn) >= 0;
     }
 
-    private int getIndexOf(File item, File[] searchIn) {
+    private int getIndexOf(Path item, Path[] searchIn) {
         return Arrays.binarySearch(searchIn, item);
     }
 

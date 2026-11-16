@@ -17,13 +17,25 @@ package org.esa.snap.core.dataio.dimap;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.IllegalFileFormatException;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeIO;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeReader;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.FilterBand;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeometryDescriptor;
+import org.esa.snap.core.datamodel.PlacemarkDescriptor;
+import org.esa.snap.core.datamodel.PlacemarkDescriptorRegistry;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.VectorDataNode;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.FeatureUtils;
 import org.esa.snap.core.util.ImageUtils;
@@ -37,9 +49,14 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import javax.imageio.stream.ImageInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -60,12 +77,12 @@ public class DimapProductReader extends AbstractProductReader {
 
     private Product product;
 
-    private File inputDir;
-    private File inputFile;
+    private Path inputDir;
+    private Path inputFile;
     private Map<Band, ImageInputStream> bandInputStreams;
     private Map<TiePointGrid, TpgDomInfo> tiePointGridInfoMap;
 
-    private Map<Band, File> bandDataFiles;
+    private Map<Band, Path> bandDataFiles;
     private Set<ReaderExtender> readerExtenders;
 
     /**
@@ -81,11 +98,11 @@ public class DimapProductReader extends AbstractProductReader {
         return product;
     }
 
-    public File getInputDir() {
+    public Path getInputDir() {
         return inputDir;
     }
 
-    public File getInputFile() {
+    public Path getInputFile() {
         return inputFile;
     }
 
@@ -179,8 +196,8 @@ public class DimapProductReader extends AbstractProductReader {
             if (band instanceof VirtualBand || band instanceof FilterBand) {
                 continue;
             }
-            final File dataFile = bandDataFiles.get(band);
-            if (dataFile == null || !dataFile.canRead()) {
+            final Path dataFile = bandDataFiles.get(band);
+            if (dataFile == null || !Files.isReadable(dataFile)) {
                 SystemUtils.LOG.warning(
                         "DimapProductReader: Unable to read file '" + dataFile + "' referenced by '" + band.getName() + "'.");
                 SystemUtils.LOG.warning(
@@ -190,10 +207,10 @@ public class DimapProductReader extends AbstractProductReader {
     }
 
     private static class TpgDomInfo {
-        final File inputFile;
+        final Path inputFile;
         final int dataType;
 
-        private TpgDomInfo(File inputFile, int dataType) {
+        private TpgDomInfo(Path inputFile, int dataType) {
             this.inputFile = inputFile;
             this.dataType = dataType;
         }
@@ -207,7 +224,7 @@ public class DimapProductReader extends AbstractProductReader {
             String dataFile = DimapProductHelpers.getTiePointDataFile(jDomDocument, tiePointGrid.getName());
             final int dataType = DimapProductHelpers.getTiePointDataType(jDomDocument.getRootElement(), tiePointGrid.getName());
             dataFile = FileUtils.exchangeExtension(dataFile, DimapProductConstants.IMAGE_FILE_EXTENSION);
-            final File inputFile = inputDir.toPath().resolve(dataFile).toFile();
+            final Path inputFile = inputDir.resolve(dataFile);
             tpgInfoMap.put(tiePointGrid, new TpgDomInfo(inputFile, dataType));
         }
         return tpgInfoMap;
@@ -229,17 +246,11 @@ public class DimapProductReader extends AbstractProductReader {
     }
 
     private void initInput() {
-        if (getInput() instanceof String) {
-            inputFile = new File((String) getInput());
-        } else if (getInput() instanceof File) {
-            inputFile = (File) getInput();
-        } else {
-            throw new IllegalArgumentException("unsupported input source: " + getInput());  /*I18N*/
-        }
+        inputFile = getProductPath();
         Debug.assertNotNull(inputFile); // super.readProductNodes should have checked getInput() != null already
-        inputDir = inputFile.getParentFile();
+        inputDir = inputFile.getParent();
         if (inputDir == null) {
-            inputDir = new File(".");
+            inputDir = Path.of(".");
         }
     }
 
@@ -277,7 +288,7 @@ public class DimapProductReader extends AbstractProductReader {
                                           ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
 
-        final File dataFile = bandDataFiles.get(destBand);
+        final Path dataFile = bandDataFiles.get(destBand);
 
 
         pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceHeight);
@@ -398,18 +409,18 @@ public class DimapProductReader extends AbstractProductReader {
     private void readVectorData(final CoordinateReferenceSystem modelCrs, final boolean onlyGCPs) {
         String dataDirName = FileUtils.getFilenameWithoutExtension(
                 inputFile) + DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION;
-        File dataDir = inputDir.toPath().resolve(dataDirName).toFile();
-        File vectorDataDir = dataDir.toPath().resolve("vector_data").toFile();
-        if (vectorDataDir.exists()) {
-            File[] vectorFiles = getVectorDataFiles(vectorDataDir, onlyGCPs);
-            for (File vectorFile : vectorFiles) {
+        Path dataDir = inputDir.resolve(dataDirName);
+        Path vectorDataDir = dataDir.resolve("vector_data");
+        if (Files.exists(vectorDataDir)) {
+            final Collection<Path> vectorFiles = getVectorDataFiles(vectorDataDir, onlyGCPs);
+            for (Path vectorFile : vectorFiles) {
                 addVectorDataToProduct(vectorFile, modelCrs);
             }
         }
     }
 
-    private void addVectorDataToProduct(File vectorFile, final CoordinateReferenceSystem modelCrs) {
-        try (final Reader reader = Files.newBufferedReader(vectorFile.toPath())) {
+    private void addVectorDataToProduct(Path vectorFile, final CoordinateReferenceSystem modelCrs) {
+        try (final Reader reader = Files.newBufferedReader(vectorFile)) {
             FeatureUtils.FeatureCrsProvider crsProvider = new FeatureUtils.FeatureCrsProvider() {
                 @Override
                 public CoordinateReferenceSystem getFeatureCrs(Product product) {
@@ -422,7 +433,7 @@ public class DimapProductReader extends AbstractProductReader {
                 }
             };
             OptimalPlacemarkDescriptorProvider descriptorProvider = new OptimalPlacemarkDescriptorProvider();
-            VectorDataNode vectorDataNode = VectorDataNodeReader.read(vectorFile.getName(), reader, product,
+            VectorDataNode vectorDataNode = VectorDataNodeReader.read(vectorFile.getFileName().toString(), reader, product,
                     crsProvider, descriptorProvider, modelCrs,
                     VectorDataNodeIO.DEFAULT_DELIMITER_CHAR,
                     ProgressMonitor.NULL);
@@ -439,9 +450,10 @@ public class DimapProductReader extends AbstractProductReader {
         }
     }
 
-    private File[] getVectorDataFiles(File vectorDataDir, final boolean onlyGCPs) {
-        return vectorDataDir.listFiles((dir, name) -> {
-            if (name.endsWith(VectorDataNodeIO.FILENAME_EXTENSION)) {
+    private Collection<Path> getVectorDataFiles(Path vectorDataDir, final boolean onlyGCPs) {
+        return IOHelper.listFiles(vectorDataDir, path -> {
+            final String name = path.getFileName().toString();
+            if (Files.isRegularFile(path) && name.endsWith(VectorDataNodeIO.FILENAME_EXTENSION)) {
                 if (onlyGCPs) {
                     return "ground_control_points.csv".equals(name);
                 } else {

@@ -21,10 +21,11 @@ import org.esa.snap.core.util.SystemUtils;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
- * An editor for parameters of type {@link File}. This editor is composed of a text
+ * An editor for parameters of type {@link Path}. This editor is composed of a text
  * field and a button labeled "...", which opens a file chooser.
  */
 public class FileEditor extends TextFieldXEditor {
@@ -40,8 +41,8 @@ public class FileEditor extends TextFieldXEditor {
 
     @Override
     protected void invokeXEditor() {
-        File lastDir = getLastDir();
-        File file = getParameterFileValue();
+        Path lastDir = getLastDir();
+        Path file = getParameterFileValue();
         JFileChooser fileChooser;
         int fsm = getParameter().getProperties().getFileSelectionMode();
         if (fsm == ParamProperties.FSM_DIRECTORIES_ONLY) {
@@ -53,8 +54,8 @@ public class FileEditor extends TextFieldXEditor {
             fileChooser = createFileChooser(lastDir);
         }
         fileChooser.setFileSelectionMode(fsm);
-        if (file != null && file.exists()) {
-            fileChooser.setSelectedFile(file);
+        if (file != null && Files.exists(file)) {
+            fileChooser.setSelectedFile(file.toFile());
         }
 
         fileChooser.setDialogTitle(getXEditorTitle());
@@ -77,58 +78,57 @@ public class FileEditor extends TextFieldXEditor {
         } else {
             option = fileChooser.showDialog(getEditorComponent(), _DEFAULT_APPROVE_BUTTON_TEXT);
         }
-        setLastDir(fileChooser.getCurrentDirectory());
+        setLastDir(fileChooser.getCurrentDirectory().toPath());
         if (option == JFileChooser.APPROVE_OPTION) {
-            file = fileChooser.getSelectedFile();
+            file = fileChooser.getSelectedFile() == null ? null : fileChooser.getSelectedFile().toPath();
             if (file != null) {
                 setParameterFileValue(file);
             }
         }
     }
 
-    private File getParameterFileValue() {
-        return (File) getParameter().getValue();
+    private Path getParameterFileValue() {
+        return (Path) getParameter().getValue();
     }
 
-    private void setParameterFileValue(File file) {
+    private void setParameterFileValue(Path file) {
         getParameter().setValue(file, null);
         updateLastDir();
     }
 
     private void updateLastDir() {
-        File file = (File) getParameter().getValue();
+        Path file = (Path) getParameter().getValue();
         if (file != null) {
-            File parentFile = file.getParentFile();
+            Path parentFile = file.getParent();
             if (parentFile != null) {
                 setLastDir(parentFile);
             }
         }
     }
 
-    private File getLastDir() {
-        if (getParameter().getValue() instanceof File) {
-            File file = (File) getParameter().getValue();
-            final File parentDir = file.getParentFile();
-            if (parentDir != null && parentDir.isDirectory()) {
+    private Path getLastDir() {
+        if (getParameter().getValue() instanceof Path file) {
+            final Path parentDir = file.getParent();
+            if (parentDir != null && Files.isDirectory(parentDir)) {
                 return parentDir;
             }
         }
-        return (File) getParameter().getProperties().getPropertyValue(ParamProperties.LAST_DIR_KEY,
+        return (Path) getParameter().getProperties().getPropertyValue(ParamProperties.LAST_DIR_KEY,
                                                                       SystemUtils.getApplicationHomeDir());
     }
 
-    private void setLastDir(final File lastDir) {
+    private void setLastDir(final Path lastDir) {
         getParameter().getProperties().setPropertyValue(ParamProperties.LAST_DIR_KEY, lastDir);
     }
 
-    public JFileChooser createFileChooser(File currentDirectory) {
-        JFileChooser fileChooser = new JFileChooser(currentDirectory);
+    public JFileChooser createFileChooser(Path currentDirectory) {
+        JFileChooser fileChooser = new JFileChooser(currentDirectory.toFile());
         fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         return fileChooser;
     }
 
-    public JFileChooser createDirChooser(File currentDirectory) {
-        JFileChooser dirChooser = new JFileChooser(currentDirectory);
+    public JFileChooser createDirChooser(Path currentDirectory) {
+        JFileChooser dirChooser = new JFileChooser(currentDirectory.toFile());
         dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         return dirChooser;
     }

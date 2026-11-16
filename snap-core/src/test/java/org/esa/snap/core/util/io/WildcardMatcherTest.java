@@ -16,11 +16,11 @@
 
 package org.esa.snap.core.util.io;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.junit.Test;
 
-import java.io.File;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -36,15 +36,15 @@ public class WildcardMatcherTest {
 
     @Test
     public void testMatchesFileAssumptions() throws Exception {
-        String baseDir = new File("").getCanonicalPath();
-        assertEquals(baseDir, new File(".").getCanonicalPath());
-        assertEquals(baseDir, new File("./").getCanonicalPath());
-        assertEquals(baseDir + File.separator + "test.txt",
-                     new File("./test.txt").getCanonicalPath());
-        assertEquals(baseDir + File.separator + "test.txt",
-                     new File("sub/../test.txt").getCanonicalPath());
-        assertEquals(baseDir + File.separator + "sub" + File.separator + "test.txt",
-                     new File("sub/./test.txt").getCanonicalPath());
+        Path baseDir = Path.of("").toAbsolutePath().normalize();
+        assertEquals(baseDir, Path.of(".").toAbsolutePath().normalize());
+        assertEquals(baseDir, Path.of("./").toAbsolutePath().normalize());
+        assertEquals(baseDir.resolve("test.txt"),
+                     Path.of("./test.txt").toAbsolutePath().normalize());
+        assertEquals(baseDir.resolve("test.txt"),
+                     Path.of("sub/../test.txt").toAbsolutePath().normalize());
+        assertEquals(baseDir.resolve("sub").resolve("test.txt"),
+                     Path.of("sub/./test.txt").toAbsolutePath().normalize());
     }
 
 
@@ -228,86 +228,74 @@ public class WildcardMatcherTest {
 
     @Test
     public void testGlobWithDoubleStar() throws Exception {
-        String dir = getTestdataDir();
-        File[] files = WildcardMatcher.glob(dir + "/**/*.txt");
+        Path dir = Path.of(getTestdataDir());
+        Path[] files = WildcardMatcher.glob(dir + "/**/*.txt");
         assertNotNull(files);
-        for (File file : files) {
-            //System.out.println("file = " + file);
-        }
         assertEquals(3, files.length);
         Arrays.sort(files);
-        assertEquals(new File(dir, "foo/bar/test1.txt"), files[0]);
-        assertEquals(new File(dir, "foo/bar/test3.txt"), files[1]);
-        assertEquals(new File(dir, "foo/test1.txt"), files[2]);
+        assertEquals(dir.resolve("foo/bar/test1.txt"), files[0]);
+        assertEquals(dir.resolve("foo/bar/test3.txt"), files[1]);
+        assertEquals(dir.resolve("foo/test1.txt"), files[2]);
     }
 
     @Test
     public void testGlobStarAtEnd() throws Exception {
-        String dir = getTestdataDir();
-        File[] files = WildcardMatcher.glob(dir + "/foo/bar/*");
+        Path dir = Path.of(getTestdataDir());
+        Path[] files = WildcardMatcher.glob(dir + "/foo/bar/*");
         assertNotNull(files);
-        for (File file : files) {
-            //System.out.println("file = " + file);
-        }
         assertEquals(3, files.length);
         Arrays.sort(files);
-        assertEquals(new File(dir, "foo/bar/test1.txt"), files[0]);
-        assertEquals(new File(dir, "foo/bar/test2.dat"), files[1]);
-        assertEquals(new File(dir, "foo/bar/test3.txt"), files[2]);
+        assertEquals(dir.resolve("foo/bar/test1.txt"), files[0]);
+        assertEquals(dir.resolve("foo/bar/test2.dat"), files[1]);
+        assertEquals(dir.resolve("foo/bar/test3.txt"), files[2]);
     }
 
     @Test
     public void testGlobDoubleStarAtEnd() throws Exception {
-        String dir = getTestdataDir();
-        File[] files = WildcardMatcher.glob(dir + "/foo/**");
+        Path dir = Path.of(getTestdataDir());
+        Path[] files = WildcardMatcher.glob(dir + "/foo/**");
         assertNotNull(files);
-        for (File file : files) {
-            //System.out.println("file = " + file);
-        }
         assertEquals(7, files.length);
         Arrays.sort(files);
-        assertEquals(new File(dir, "foo/bar"), files[0]);
-        assertEquals(new File(dir, "foo/bar/test1.txt"), files[1]);
-        assertEquals(new File(dir, "foo/bar/test2.dat"), files[2]);
-        assertEquals(new File(dir, "foo/bar/test3.txt"), files[3]);
-        assertEquals(new File(dir, "foo/test1.txt"), files[4]);
-        assertEquals(new File(dir, "foo/test2.dat"), files[5]);
-        assertEquals(new File(dir, "foo/test3.dat"), files[6]);
+        assertEquals(dir.resolve("foo/bar"), files[0]);
+        assertEquals(dir.resolve("foo/bar/test1.txt"), files[1]);
+        assertEquals(dir.resolve("foo/bar/test2.dat"), files[2]);
+        assertEquals(dir.resolve("foo/bar/test3.txt"), files[3]);
+        assertEquals(dir.resolve("foo/test1.txt"), files[4]);
+        assertEquals(dir.resolve("foo/test2.dat"), files[5]);
+        assertEquals(dir.resolve("foo/test3.dat"), files[6]);
     }
 
     @Test
     public void testGlobAllFiles() throws Exception {
-        String dir = getTestdataDir();
-        File[] files = WildcardMatcher.glob(dir + "/foo/**/*.*");
+        Path dir = Path.of(getTestdataDir());
+        Path[] files = WildcardMatcher.glob(dir + "/foo/**/*.*");
         assertNotNull(files);
-        for (File file : files) {
-            //System.out.println("file = " + file);
-        }
         assertEquals(6, files.length);
         Arrays.sort(files);
-        assertEquals(new File(dir, "foo/bar/test1.txt"), files[0]);
-        assertEquals(new File(dir, "foo/bar/test2.dat"), files[1]);
-        assertEquals(new File(dir, "foo/bar/test3.txt"), files[2]);
-        assertEquals(new File(dir, "foo/test1.txt"), files[3]);
-        assertEquals(new File(dir, "foo/test2.dat"), files[4]);
-        assertEquals(new File(dir, "foo/test3.dat"), files[5]);
+        assertEquals(dir.resolve("foo/bar/test1.txt"), files[0]);
+        assertEquals(dir.resolve("foo/bar/test2.dat"), files[1]);
+        assertEquals(dir.resolve("foo/bar/test3.txt"), files[2]);
+        assertEquals(dir.resolve("foo/test1.txt"), files[3]);
+        assertEquals(dir.resolve("foo/test2.dat"), files[4]);
+        assertEquals(dir.resolve("foo/test3.dat"), files[5]);
     }
 
     @Test
     public void testGlobExistingDir() throws Exception {
-        String dir = getTestdataDir();
-        File[] files = WildcardMatcher.glob(dir + "/foo");
+        Path dir = Path.of(getTestdataDir());
+        Path[] files = WildcardMatcher.glob(dir + "/foo");
         assertNotNull(files);
-        for (File file : files) {
-            //System.out.println("file = " + file);
-        }
         assertEquals(1, files.length);
-        assertEquals(new File(dir, "foo"), files[0]);
+        assertEquals(dir.resolve("foo"), files[0]);
     }
 
-    private String getTestdataDir() throws URISyntaxException {
-        URL resource = WildcardMatcherTest.class.getResource("WildcardMatcherTest");
-        return new File(resource.toURI()).getPath();
+    private String getTestdataDir() {
+        final URL resource = WildcardMatcherTest.class.getResource("WildcardMatcherTest");
+        assertNotNull(resource);
+        final Path testDataDir = UrlHelper.urlToFile(resource);
+        assertNotNull(testDataDir);
+        return testDataDir.toString();
     }
 
     @Test

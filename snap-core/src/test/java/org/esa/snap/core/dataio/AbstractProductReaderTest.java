@@ -18,24 +18,29 @@ package org.esa.snap.core.dataio;
 
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.DummyImageInputStream;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.TreeNode;
+import org.esa.snap.core.util.io.FileUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 
-import java.awt.*;
-import java.io.File;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class AbstractProductReaderTest {
 
@@ -79,42 +84,43 @@ public class AbstractProductReaderTest {
     }
 
     @Test
-    public void testGetProductComponents_inputFile() throws IOException {
+    public void testGetProductComponents_inputFile() throws Exception {
         URL location = AbstractProductReaderTest.class.getProtectionDomain().getCodeSource().getLocation();
-        File file = new File(location.getFile());
+        Path file = FileUtils.getPathFromURI(location.toURI());
 
         reader.readProductNodes(file, null);
 
-        TreeNode<File> productComponents = reader.getProductComponents();
+        TreeNode<Path> productComponents = reader.getProductComponents();
         assertNotNull(productComponents);
 
-        File parent = file.getParentFile();
-        assertEquals(parent.getName(), productComponents.getId());
+        Path parent = file.getParent();
+        assertEquals(parent.getFileName().toString(), productComponents.getId());
         assertEquals(parent, productComponents.getContent());
 
-        TreeNode<File>[] treeNodes = productComponents.getChildren();
+        TreeNode<Path>[] treeNodes = productComponents.getChildren();
         assertEquals(1, treeNodes.length);
-        assertEquals(file.getName(), treeNodes[0].getId());
+        assertEquals(file.getFileName().toString(), treeNodes[0].getId());
         assertEquals(file, treeNodes[0].getContent());
     }
 
     @Test
-    public void testGetProductComponents_inputString() throws IOException {
+    public void testGetProductComponents_inputString() throws Exception {
         URL location = AbstractProductReaderTest.class.getProtectionDomain().getCodeSource().getLocation();
 
-        reader.readProductNodes(location.getFile(), null);
+        Path file = UrlHelper.urlToFile(location);
+        Assert.assertNotNull(file);
+        reader.readProductNodes(file, null);
 
-        File file = new File(location.getFile());
-        TreeNode<File> productComponents = reader.getProductComponents();
+        TreeNode<Path> productComponents = reader.getProductComponents();
         assertNotNull(productComponents);
 
-        File parent = file.getParentFile();
-        assertEquals(parent.getName(), productComponents.getId());
+        Path parent = file.getParent();
+        assertEquals(parent.getFileName().toString(), productComponents.getId());
         assertEquals(parent, productComponents.getContent());
 
-        TreeNode<File>[] treeNodes = productComponents.getChildren();
+        TreeNode<Path>[] treeNodes = productComponents.getChildren();
         assertEquals(1, treeNodes.length);
-        assertEquals(file.getName(), treeNodes[0].getId());
+        assertEquals(file.getFileName().toString(), treeNodes[0].getId());
         assertEquals(file, treeNodes[0].getContent());
     }
 
@@ -122,7 +128,7 @@ public class AbstractProductReaderTest {
     public void testGetProductComponents_unsupportedInputObject() throws IOException {
         reader.readProductNodes(new DummyImageInputStream(), null);
 
-        TreeNode<File> productComponents = reader.getProductComponents();
+        TreeNode<Path> productComponents = reader.getProductComponents();
         assertNull(productComponents);
     }
 

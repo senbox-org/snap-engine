@@ -15,13 +15,14 @@
  */
 package org.esa.snap.core.datamodel.quicklooks;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.DefaultPropertyMap;
 import org.esa.snap.core.util.PropertyMap;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -54,15 +55,15 @@ public class QuicklookDB {
     }
 
     private QuicklookDB() {
-        final File cacheDir = qlCacheDir.toFile();
-        if (!cacheDir.exists() && !cacheDir.mkdirs()) {
+        final Path cacheDir = qlCacheDir;
+        if (!Files.exists(cacheDir) && !IOHelper.createDirectories(cacheDir) ) {
             SystemUtils.LOG.severe("Unable to create quicklook cache folder: " + qlCacheDir);
         }
 
         propertyMap = new DefaultPropertyMap();
         propertyMapFile = qlCacheDir.resolve(QUICKLOOK_PROPERTY_MAP_FILENAME);
         try {
-            if (propertyMapFile.toFile().exists()) {
+            if (Files.exists(propertyMapFile)) {
                 propertyMap.load(propertyMapFile);
                 index = propertyMap.getPropertyInt(QUICKLOOK_PROPERTY_MAP_LAST_INDEX);
             }
@@ -77,22 +78,22 @@ public class QuicklookDB {
     public static Path getQuicklookCacheDir() {
         String cacheDirPath = Config.instance().preferences().get(PREFERENCE_KEY_QUICKLOOKS_CACHE_DIR, null);
         if (cacheDirPath != null) {
-            return new File(cacheDirPath).toPath();
+            return Path.of(cacheDirPath);
         }
         return getDefaultQuicklookCacheDir();
     }
 
     private static Path getDefaultQuicklookCacheDir() {
-        return SystemUtils.getApplicationDataDir().toPath().resolve("var").resolve("quicklooks_cache");
+        return SystemUtils.getApplicationDataDir().resolve("var").resolve("quicklooks_cache");
     }
 
-    public int getQuicklookId(final File file) {
-        return propertyMap.getPropertyInt(file.getAbsolutePath(), QL_NOT_FOUND);
+    public int getQuicklookId(final Path file) {
+        return propertyMap.getPropertyInt(file.toAbsolutePath().toString(), QL_NOT_FOUND);
     }
 
-    public synchronized int addQuickLookId(final File file) {
+    public synchronized int addQuickLookId(final Path file) {
         ++index;
-        propertyMap.setPropertyInt(file.getAbsolutePath(), index);
+        propertyMap.setPropertyInt(file.toAbsolutePath().toString(), index);
         propertyMap.setPropertyInt(QUICKLOOK_PROPERTY_MAP_LAST_INDEX, index);
         needsSaving = true;
 
