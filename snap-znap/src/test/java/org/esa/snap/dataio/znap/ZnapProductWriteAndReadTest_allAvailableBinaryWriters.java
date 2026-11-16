@@ -18,24 +18,25 @@
 
 package org.esa.snap.dataio.znap;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Properties;
+import java.util.prefs.Preferences;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.util.io.TreeDeleter;
 import org.esa.snap.dataio.bigtiff.BigGeoTiffProductWriterPlugIn;
 import org.esa.snap.dataio.envi.EnviProductWriterPlugIn;
 import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdf4WriterPlugIn;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
-import org.junit.*;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
-import java.util.prefs.Preferences;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import static com.bc.ceres.core.ProgressMonitor.NULL;
 import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_CONTAINER_EXTENSION;
@@ -55,27 +56,16 @@ public class ZnapProductWriteAndReadTest_allAvailableBinaryWriters {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        final String tmpDir = System.getProperty("java.io.tmpdir");
+        final Path tmpDir = IOHelper.createATempDir();
         Engine.start();
         // deleting temp directory in @After or @AfterClass method didn't work reliable. Probably sometimes some
         // files were still in use at the time delete was called. So we try, delete on exit with a shutdown hook.
         // We have one common test dir. Each test creates its own folder
-        baseTestPath = Paths.get(tmpDir, ZnapProductWriteAndReadTest_allAvailableBinaryWriters.class.getCanonicalName());
-        deleteRemainingsOfPreviousRun();
+        baseTestPath = tmpDir.resolve(ZnapProductWriteAndReadTest_allAvailableBinaryWriters.class.getCanonicalName());
+        IOHelper.delete(baseTestPath);
         Files.createDirectories(baseTestPath);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                TreeDeleter.deleteDir(baseTestPath);
-            } catch (IOException ignore) {
-            }
-        }));
-    }
-
-    private static void deleteRemainingsOfPreviousRun() throws IOException {
-        if (Files.isDirectory(baseTestPath)) {
-            TreeDeleter.deleteDir(baseTestPath);
-        }
+        IOHelper.deleteOnExit(baseTestPath);
     }
 
     @Before

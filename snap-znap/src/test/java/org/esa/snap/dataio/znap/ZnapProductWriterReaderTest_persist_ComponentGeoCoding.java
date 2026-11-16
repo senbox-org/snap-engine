@@ -18,6 +18,7 @@
 
 package org.esa.snap.dataio.znap;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.geocoding.ComponentFactory;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ForwardCoding;
@@ -29,7 +30,6 @@ import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
 import org.junit.After;
@@ -218,8 +218,8 @@ public class ZnapProductWriterReaderTest_persist_ComponentGeoCoding {
         assertNull(readIn.getSceneGeoCoding());
     }
 
-    private Path createTempDirectory() throws IOException {
-        final Path tempDirectory = Files.createTempDirectory("1111_out_" + getClass().getSimpleName());
+    private Path createTempDirectory() {
+        final Path tempDirectory = IOHelper.createATempDir("1111_out_" + getClass().getSimpleName());
         tempDirectories.add(tempDirectory);
         return tempDirectory;
     }

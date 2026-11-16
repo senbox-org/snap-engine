@@ -822,7 +822,7 @@ public class ZnapProductWriter extends AbstractProductWriter {
             final Band binaryBand = binaryProduct.addBand("data", getSnapDataType(zarrArray.getDataType()).getValue());
             final String fileExtension = binaryWriterPlugIn.getDefaultFileExtensions()[0];
             final Path path = outputRoot.resolve(name).resolve(name + fileExtension);
-            writer.writeProductNodes(binaryProduct, path.toFile());
+            writer.writeProductNodes(binaryProduct, path);
             binaryProduct.setProductWriter(writer);
             binaryBand.writeRasterData(0, 0, shape[IDX_WIDTH], shape[IDX_HEIGHT], gridData);
             binaryProduct.dispose();
@@ -901,7 +901,7 @@ public class ZnapProductWriter extends AbstractProductWriter {
             final Band binaryBand = binaryProduct.addBand("data", getSnapDataType(zarrArray.getDataType()).getValue());
             final String fileExtension = binaryWriterPlugIn.getDefaultFileExtensions()[0];
             final Path path = outputRoot.resolve(name).resolve(name + fileExtension);
-            writer.writeProductNodes(binaryProduct, path.toFile());
+            writer.writeProductNodes(binaryProduct, path);
             binaryProduct.setProductWriter(writer);
             binaryWriter = new UserDefinedBinaryWriter(binaryBand);
         }

@@ -18,15 +18,11 @@
 
 package org.esa.snap.dataio.znap;
 
-import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.*;
-import static com.bc.zarr.ZarrConstants.*;
-
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileVisitOption;
@@ -37,6 +33,14 @@ import java.util.Locale;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.bc.zarr.ZarrConstants.FILENAME_DOT_ZARRAY;
+import static com.bc.zarr.ZarrConstants.FILENAME_DOT_ZGROUP;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.FORMAT_NAME;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.IO_TYPES;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_CONTAINER_EXTENSION;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.ZNAP_ZIP_CONTAINER_EXTENSION;
+import static org.esa.snap.dataio.znap.ZnapConstantsAndUtils.convertToPath;
 
 public class ZnapProductReaderPlugIn implements ProductReaderPlugIn {
 
@@ -122,33 +126,36 @@ public class ZnapProductReaderPlugIn implements ProductReaderPlugIn {
         return new SnapFileFilter(getFormatNames()[0], getDefaultFileExtensions(), getDescription(null)) {
 
             @Override
-            public boolean accept(File file) {
-                return file != null && (file.isDirectory() || isZnapZipArchive(file) || isFileInZnapRootDir(file));
+            public boolean accept(Path file) {
+                return file != null && (Files.isDirectory(file) || isZnapZipArchive(file) || isFileInZnapRootDir(file));
             }
 
             @Override
-            public boolean isCompoundDocument(File dir) {
-                return dir != null && isZnapRootDir(dir.getParentFile());
+            public boolean isCompoundDocument(Path dir) {
+                return dir != null && isZnapRootDir(dir.getParent());
             }
 
-            private boolean isFileInZnapRootDir(File file) {
-                return file != null && isZnapRootDir(file.getParentFile());
+            private boolean isFileInZnapRootDir(Path file) {
+                return file != null && isZnapRootDir(file.getParent());
             }
 
-            private boolean isZnapZipArchive(File file) {
-                return file.isFile() && hasZipArchiveExtension(file);
+            private boolean isZnapZipArchive(Path file) {
+                return Files.isRegularFile(file) && hasZipArchiveExtension(file);
             }
 
-            private boolean isZnapRootDir(File file) {
-                return file != null && file.isDirectory() && hasContainerExtension(file);
+            private boolean isZnapRootDir(Path file) {
+                return file != null && Files.isDirectory(file) && hasContainerExtension(file);
             }
 
-            private boolean hasZipArchiveExtension(File file) {
-                return file.getName().endsWith(ZNAP_ZIP_CONTAINER_EXTENSION);
+            private boolean hasZipArchiveExtension(Path file) {
+                return file.getFileName().toString().endsWith(ZNAP_ZIP_CONTAINER_EXTENSION);
             }
 
-            private boolean hasContainerExtension(File file) {
-                return file.getName().endsWith(ZNAP_CONTAINER_EXTENSION);
+            private boolean hasContainerExtension(Path file) {
+                if (file.getFileName() == null) {
+                    return false;
+                }
+                return file.getFileName().toString().endsWith(ZNAP_CONTAINER_EXTENSION);
             }
         };
     }

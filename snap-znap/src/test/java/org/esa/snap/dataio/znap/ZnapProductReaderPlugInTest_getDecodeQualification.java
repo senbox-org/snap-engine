@@ -18,17 +18,14 @@
 
 package org.esa.snap.dataio.znap;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.zarr.ZarrConstants;
-import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import org.esa.snap.core.dataio.DecodeQualification;
-import org.esa.snap.core.util.io.TreeDeleter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -52,7 +49,7 @@ public class ZnapProductReaderPlugInTest_getDecodeQualification {
     @Before
     public void setUp() throws Exception {
         plugIn = new ZnapProductReaderPlugIn();
-        testPath = Files.createTempDirectory("temporary-snap-development-test-path");
+        testPath = IOHelper.createATempDir("temporary-snap-development-test-path");
         Files.createDirectories(testPath);
         productRoot = testPath.resolve("snap_zarr_product_root_dir.znap");
         zarrRootHeader = productRoot.resolve(ZarrConstants.FILENAME_DOT_ZGROUP);
@@ -61,8 +58,8 @@ public class ZnapProductReaderPlugInTest_getDecodeQualification {
     }
 
     @After
-    public void tearDown() throws IOException {
-        TreeDeleter.deleteDir(testPath);
+    public void tearDown() {
+        IOHelper.delete(testPath);
     }
 
     @Test
@@ -82,7 +79,7 @@ public class ZnapProductReaderPlugInTest_getDecodeQualification {
         Files.createFile(zarrRootHeader);
         Files.createFile(zarrHeaderFile);
 
-        final Object input = this.productRoot.toFile();
+        final Object input = this.productRoot;
         assertThat(plugIn.getDecodeQualification(input),
                 is(equalTo(DecodeQualification.INTENDED)));
     }

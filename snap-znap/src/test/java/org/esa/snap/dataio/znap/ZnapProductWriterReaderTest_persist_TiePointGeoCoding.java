@@ -18,12 +18,12 @@
 
 package org.esa.snap.dataio.znap;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
 import org.esa.snap.runtime.Config;
 import org.junit.After;
 import org.junit.Before;
@@ -41,7 +41,12 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 public class ZnapProductWriterReaderTest_persist_TiePointGeoCoding {
 
@@ -149,8 +154,8 @@ public class ZnapProductWriterReaderTest_persist_TiePointGeoCoding {
         }
     }
 
-    private Path createTempDirectory() throws IOException {
-        final Path tempDirectory = Files.createTempDirectory("1111_out_" + getClass().getSimpleName());
+    private Path createTempDirectory() {
+        final Path tempDirectory = IOHelper.createATempDir("1111_out_" + getClass().getSimpleName());
         tempDirectories.add(tempDirectory);
         return tempDirectory;
     }

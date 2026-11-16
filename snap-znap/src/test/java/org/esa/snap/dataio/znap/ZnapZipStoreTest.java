@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.znap;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 public class ZnapZipStoreTest {
 
@@ -19,7 +20,7 @@ public class ZnapZipStoreTest {
     @STTM("SNAP-3872")
     public void testZnapZipStoreHandlesSpacesInPath() throws IOException {
 
-        Path tempDir = Files.createTempDirectory("znap_test");
+        Path tempDir = IOHelper.createATempDir("znap_test");
         Path zipFilePath = tempDir.resolve("test file with spaces.znap.zip");
 
         HashMap<String, String> env = new HashMap<>();

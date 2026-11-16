@@ -40,7 +40,7 @@ import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -134,13 +134,13 @@ final class ZnapConstantsAndUtils {
 
     static final Class<?>[] IO_TYPES = new Class[]{
             Path.class,
-            File.class,
+            Path.class,
             String.class
     };
 
     private static final OutputConverter[] IO_CONVERTERS = new OutputConverter[]{
             output -> (Path) output,
-            output -> ((File) output).toPath(),
+            output -> ((Path) output),
             output -> Paths.get((String) output)
     };
 

@@ -18,11 +18,16 @@
 
 package org.esa.snap.dataio.znap;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.prefs.Preferences;
+import javax.media.jai.operator.ConstantDescriptor;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.util.io.TreeDeleter;
 import org.esa.snap.runtime.Config;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -30,13 +35,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import javax.media.jai.operator.ConstantDescriptor;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.prefs.Preferences;
 
 import static org.esa.snap.dataio.znap.preferences.ZnapPreferencesConstants.PROPERTY_NAME_USE_ZIP_ARCHIVE;
 
@@ -52,26 +50,15 @@ public class ProgressMonitoringThreadSafeteyTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        final String tmpDir = System.getProperty("java.io.tmpdir");
+        final Path tmpDir = IOHelper.createATempDir();
         // deleting temp directory in @After or @AfterClass method didn't work reliable. Probably sometimes some
         // files were still in use at the time delete was called. So we try, delete on exit with a shutdown hook.
         // We have one common test dir. Each test creates its own folder
-        baseTestPath = Paths.get(tmpDir, ZnapProductWriterTest_writeToArchiveOrFolder.class.getCanonicalName());
-        deleteRemainingsOfPreviousRun();
+        baseTestPath = tmpDir.resolve(ZnapProductWriterTest_writeToArchiveOrFolder.class.getCanonicalName());
+        IOHelper.delete(baseTestPath);
         Files.createDirectories(baseTestPath);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                TreeDeleter.deleteDir(baseTestPath);
-            } catch (IOException ignore) {
-            }
-        }));
-    }
-
-    private static void deleteRemainingsOfPreviousRun() throws IOException {
-        if (Files.isDirectory(baseTestPath)) {
-            TreeDeleter.deleteDir(baseTestPath);
-        }
+        IOHelper.deleteOnExit(baseTestPath);
     }
 
     @Before
@@ -85,10 +72,7 @@ public class ProgressMonitoringThreadSafeteyTest {
 
     @After
     public void tearDown() {
-        try {
-            TreeDeleter.deleteDir(baseTestPath);
-        } catch (IOException ignore) {
-        }
+        IOHelper.delete(baseTestPath);
     }
 
     @AfterClass
@@ -104,7 +88,7 @@ public class ProgressMonitoringThreadSafeteyTest {
     @Test
     public void testMethod() throws IOException {
         final Path testDir = baseTestPath.resolve("writeToFolder");
-        ProductIO.writeProduct(dummy, testDir.resolve("testName").toFile(), "ZNAP", false);
+        ProductIO.writeProduct(dummy, testDir.resolve("testName"), "ZNAP", false);
     }
 
     private Product createDummyProduct() {

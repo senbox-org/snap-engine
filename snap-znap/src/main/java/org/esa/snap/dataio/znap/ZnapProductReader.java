@@ -241,7 +241,7 @@ public class ZnapProductReader extends AbstractProductReader {
         initTiepointGridsAndBands(productAttributes);
         initMasks(productAttributes);
         initFilterBands(productAttributes);
-        product.setFileLocation(rootPath.toFile());
+        product.setFileLocation(rootPath);
         product.setProductReader(this);
         product.setModified(false);
         addGeocodings(productAttributes);
@@ -287,7 +287,7 @@ public class ZnapProductReader extends AbstractProductReader {
                     if (first.isPresent()) {
                         final Path srcPath = first.get();
                         final ProductReader reader = binaryReaderPlugIn.createReaderInstance();
-                        final Product binaryProduct = reader.readProductNodes(srcPath.toFile(), null);
+                        final Product binaryProduct = reader.readProductNodes(srcPath, null);
                         binaryProduct.setProductReader(reader);
                         final Band dataBand = binaryProduct.getBand("data");
                         dataBand.readPixels(0, 0, width, height, dataBuffer);
@@ -329,7 +329,7 @@ public class ZnapProductReader extends AbstractProductReader {
                     if (first.isPresent()) {
                         final Path srcPath = first.get();
                         final ProductReader reader = binaryReaderPlugIn.createReaderInstance();
-                        final Product binaryProduct = reader.readProductNodes(srcPath.toFile(), null);
+                        final Product binaryProduct = reader.readProductNodes(srcPath, null);
                         binaryProduct.setProductReader(reader);
                         final Band dataBand = binaryProduct.getBand("data");
                         band.setSourceImage(dataBand.getSourceImage());
