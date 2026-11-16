@@ -4,7 +4,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Calendar;
 
 import static org.junit.Assert.*;
@@ -21,18 +21,18 @@ public class FilenameDateExtractorTest {
     @Test
     public void testIsValidFilename() {
         // execute valid case
-        assertEquals(true, filenameDateExtractor.isValidFilename(new File("20020304_blah.shp")));
+        assertEquals(true, filenameDateExtractor.isValidFilename(Path.of("20020304_blah.shp")));
 
         // execute invalid cases
-        assertEquals(false, filenameDateExtractor.isValidFilename(new File("20020304_blah.InvalidExtension")));
-        assertEquals(false, filenameDateExtractor.isValidFilename(new File("TextInFrontOfDate_20020304_blah.shp")));
-        assertEquals(false, filenameDateExtractor.isValidFilename(new File("2002_03_04_InvalidDateFormat.shp")));
+        assertEquals(false, filenameDateExtractor.isValidFilename(Path.of("20020304_blah.InvalidExtension")));
+        assertEquals(false, filenameDateExtractor.isValidFilename(Path.of("TextInFrontOfDate_20020304_blah.shp")));
+        assertEquals(false, filenameDateExtractor.isValidFilename(Path.of("2002_03_04_InvalidDateFormat.shp")));
     }
 
     @Test
     public void testGetDate() {
         //execution
-        ProductData.UTC date = filenameDateExtractor.getDate(new File("20020304_blah.shp"));
+        ProductData.UTC date = filenameDateExtractor.getDate(Path.of("20020304_blah.shp"));
 
         //verification
         assertNotNull(date);
@@ -47,7 +47,7 @@ public class FilenameDateExtractorTest {
     @Test
     public void testGetDate_null_if_invalid_filename() {
         //execution
-        ProductData.UTC date = filenameDateExtractor.getDate(new File("invalid_20020304_blah.shp"));
+        ProductData.UTC date = filenameDateExtractor.getDate(Path.of("invalid_20020304_blah.shp"));
 
         //verification
         assertNull(date);

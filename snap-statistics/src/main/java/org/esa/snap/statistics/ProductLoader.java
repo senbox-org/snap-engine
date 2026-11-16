@@ -3,12 +3,12 @@ package org.esa.snap.statistics;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 public class ProductLoader {
 
-    public Product loadProduct(File path) throws IOException {
+    public Product loadProduct(Path path) throws IOException {
         try {
             return ProductIO.readProduct(path);
         } catch (IllegalArgumentException e) {

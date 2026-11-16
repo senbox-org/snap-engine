@@ -19,8 +19,6 @@ package org.esa.snap.statistics;
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 import com.bc.ceres.core.ProgressMonitor;
-import java.util.Calendar;
-import java.util.Collection;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.HistogramStxOp;
 import org.esa.snap.core.datamodel.Product;
@@ -43,18 +41,21 @@ import org.esa.snap.statistics.output.MetadataWriter;
 import org.esa.snap.statistics.output.StatisticsOutputContext;
 import org.esa.snap.statistics.output.StatisticsOutputter;
 import org.esa.snap.statistics.output.Util;
+import org.esa.snap.statistics.tools.TimeInterval;
 
 import javax.media.jai.Histogram;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +64,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
-import org.esa.snap.statistics.tools.TimeInterval;
 
 /**
  * An operator that is used to compute statistics for any number of source products, restricted to time intervals and
@@ -126,7 +126,7 @@ public class StatisticsOp extends Operator {
 
     @Parameter(description = "An ESRI shapefile, providing the considered geographical region(s) given as polygons. " +
             "If null, all pixels are considered.")
-    File shapefile;
+    Path shapefile;
 
     @Parameter(description = "The name of the attribute in the ESRI shapefile that shall be used to identify features" +
             "in the output. If none is given or if the shapefile does not have the attribute, the feature id will be" +
@@ -152,12 +152,12 @@ public class StatisticsOp extends Operator {
     @Parameter(description = "The target file for shapefile output. Shapefile output will only be written if this " +
             "parameter is set. The band mapping file will have the suffix _band_mapping.txt.",
             notNull = false)
-    File outputShapefile;
+    Path outputShapefile;
 
     @Parameter(description = "The target file for ASCII output." +
             "The metadata file will have the suffix _metadata.txt.\n" +
             "ASCII output will only be written if this parameter is set.", notNull = false)
-    File outputAsciiFile;
+    Path outputAsciiFile;
 
     @Parameter(description = "The percentile levels that shall be created. Must be in the interval [0..100]",
             notNull = false, defaultValue = DEFAULT_PERCENTILES)
@@ -329,8 +329,8 @@ public class StatisticsOp extends Operator {
         }
     }
 
-    private File[] getProductsToLoad() {
-        SortedSet<File> fileSet = new TreeSet<File>();
+    private Path[] getProductsToLoad() {
+        SortedSet<Path> fileSet = new TreeSet<>();
         if (sourceProductPaths != null) {
             for (String filePattern : sourceProductPaths) {
                 if (filePattern == null) {
@@ -343,7 +343,7 @@ public class StatisticsOp extends Operator {
                 }
             }
         }
-        return fileSet.toArray(new File[fileSet.size()]);
+        return fileSet.toArray(new Path[0]);
     }
 
     /* package local for testing*/
@@ -517,16 +517,16 @@ public class StatisticsOp extends Operator {
 
     /* package local for testing */
     @SuppressWarnings("WeakerAccess")
-    static File getOutputFile(File origFile, int qualifier) {
+    static Path getOutputFile(Path origFile, int qualifier) {
         if (origFile == null) {
             return null;
         }
         if (qualifier == QUALITATIVE_MEASURES) {
-            return new File(origFile.getParent(),
+            return origFile.getParent().resolve(
                     FileUtils.getFilenameWithoutExtension(origFile) + "_categorical" +
                             FileUtils.getExtension(origFile));
         } else if (qualifier == QUANTITATIVE_MEASURES) {
-            return new File(origFile.getParent(),
+            return origFile.getParent().resolve(
                     FileUtils.getFilenameWithoutExtension(origFile) + "_quantitative" +
                             FileUtils.getExtension(origFile));
         }
@@ -535,34 +535,34 @@ public class StatisticsOp extends Operator {
 
     private void setupOutputters(int qualifier) {
         Set<StatisticsOutputter> outputters = statisticsOutputters[qualifier];
-        File asciiFile = getOutputFile(outputAsciiFile, qualifier);
+        Path asciiFile = getOutputFile(outputAsciiFile, qualifier);
         if (asciiFile != null) {
             try {
-                final File metadataFile = new File(asciiFile.getParent(),
+                final Path metadataFile = asciiFile.getParent().resolve(
                         FileUtils.getFilenameWithoutExtension(asciiFile) + "_metadata.txt");
-                metadataOutputStreams[qualifier] = new PrintStream(new FileOutputStream(metadataFile));
-                csvOutputStreams[qualifier] = new PrintStream(new FileOutputStream(asciiFile));
+                metadataOutputStreams[qualifier] = new PrintStream(Files.newOutputStream(metadataFile));
+                csvOutputStreams[qualifier] = new PrintStream(Files.newOutputStream(asciiFile));
                 outputters.add(new CsvStatisticsWriter(csvOutputStreams[qualifier]));
                 outputters.add(new MetadataWriter(metadataOutputStreams[qualifier]));
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 throw new OperatorException(e);
             }
         }
-        File shapeFileOut = getOutputFile(outputShapefile, qualifier);
+        Path shapeFileOut = getOutputFile(outputShapefile, qualifier);
         if (shapeFileOut != null) {
             try {
                 final String baseName = FileUtils.getFilenameWithoutExtension(shapeFileOut);
-                final File bandMappingFile = new File(shapeFileOut.getParent(), baseName + "_band_mapping.txt");
-                final FileOutputStream bandMappingFOS = new FileOutputStream(bandMappingFile);
+                final Path bandMappingFile = shapeFileOut.getParent().resolve(baseName + "_band_mapping.txt");
+                final OutputStream bandMappingFOS = Files.newOutputStream(bandMappingFile);
                 bandMappingOutputStreams[qualifier] = new PrintStream(bandMappingFOS);
                 BandNameCreator bandNameCreator = new BandNameCreator(bandMappingOutputStreams[qualifier]);
                 outputters.add(
-                        FeatureStatisticsWriter.createFeatureStatisticsWriter(shapefile.toURI().toURL(), shapeFileOut.getAbsolutePath(),
+                        FeatureStatisticsWriter.createFeatureStatisticsWriter(shapefile.toUri().toURL(), shapeFileOut.toAbsolutePath().toString(),
                                 bandNameCreator));
             } catch (MalformedURLException e) {
                 throw new OperatorException(
-                        "Unable to create shapefile outputter: shapefile '" + shapefile.getName() + "' is invalid.", e);
-            } catch (FileNotFoundException e) {
+                        "Unable to create shapefile outputter: shapefile '" + shapefile.getFileName() + "' is invalid.", e);
+            } catch (IOException e) {
                 throw new OperatorException("Unable to create shapefile outputter: maybe shapefile output directory does not exist?", e);
             }
         }
@@ -617,18 +617,18 @@ public class StatisticsOp extends Operator {
         if (interval != null && interval.amount < 1) {
             throw new OperatorException("interval amount must be larger than 0.");
         }
-        if (outputAsciiFile != null && outputAsciiFile.isDirectory()) {
+        if (outputAsciiFile != null && Files.isDirectory(outputAsciiFile)) {
             throw new OperatorException("Parameter 'outputAsciiFile' must not point to a directory.");
         }
         if (outputShapefile != null) {
-            if (outputShapefile.isDirectory()) {
+            if (Files.isDirectory(outputShapefile)) {
                 throw new OperatorException("Parameter 'outputShapefile' must point to a file.");
             }
             if (shapefile == null) {
                 throw new OperatorException("Parameter 'shapefile' must be provided if an output shapefile shall be created.");
             }
         }
-        if (shapefile != null && shapefile.isDirectory()) {
+        if (shapefile != null && Files.isDirectory(shapefile)) {
             throw new OperatorException("Parameter 'shapefile' must point to a file.");
         }
 
@@ -642,9 +642,9 @@ public class StatisticsOp extends Operator {
         }
     }
 
-    static boolean isProductAlreadyOpened(List<Product> products, File file) {
+    static boolean isProductAlreadyOpened(List<Product> products, Path file) {
         for (Product product : products) {
-            if (product.getFileLocation().getAbsolutePath().equals(file.getAbsolutePath())) {
+            if (product.getFileLocation().toAbsolutePath().equals(file.toAbsolutePath())) {
                 return true;
             }
         }

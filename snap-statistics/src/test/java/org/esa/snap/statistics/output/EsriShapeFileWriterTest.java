@@ -16,8 +16,8 @@
 
 package org.esa.snap.statistics.output;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.FeatureUtils;
-import org.esa.snap.statistics.TestUtil;
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.junit.After;
@@ -25,37 +25,38 @@ import org.junit.Test;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Thomas Storm
  */
 public class EsriShapeFileWriterTest {
 
-    private static File testdataDir;
+    private static Path testdataDir;
 
     @After
     public void tearDown() throws Exception {
-        TestUtil.deleteTreeOnExit(testdataDir);
+        IOHelper.deleteOnExit(testdataDir);
     }
 
     @Test
     public void testSingleShape() throws Exception {
         // preparation
-        testdataDir = new File("target/statistics-test-io_1");
-        final File targetShapefile = getTestFile("4_pixels_output.shp").getAbsoluteFile();
+        testdataDir = IOHelper.createATempDir().resolve("statistics-test-io_1");
+        final Path targetShapefile = getTestFile("4_pixels_output.shp").toAbsolutePath();
         final List<SimpleFeature> featureWithAdaptedStatistic = get4PixelsFeaturesWithAdaptedStatistic();
 
         // execution
         EsriShapeFileWriter.write(featureWithAdaptedStatistic, targetShapefile);
 
         // verification
-        final FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = FeatureUtils.getFeatureSource(targetShapefile.toURI().toURL());
+        final FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = FeatureUtils.getFeatureSource(targetShapefile.toUri().toURL());
         final FeatureCollection<SimpleFeatureType, SimpleFeature> features = featureSource.getFeatures();
 
         assertEquals(1, features.size());
@@ -87,8 +88,8 @@ public class EsriShapeFileWriterTest {
         return featureStatisticsWriter.getFeatures();
     }
 
-    private static File getTestFile(String fileName) {
-        testdataDir.mkdirs();
-        return new File(testdataDir, fileName);
+    private static Path getTestFile(String fileName) {
+        IOHelper.createDirectories(testdataDir);
+        return testdataDir.resolve(fileName);
     }
 }

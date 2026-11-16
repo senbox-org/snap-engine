@@ -29,7 +29,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import javax.media.jai.Histogram;
 import java.awt.Shape;
 import java.awt.image.DataBuffer;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -50,14 +50,14 @@ public class StatisticComputer {
     private final TimeInterval[] timeIntervals;
     private String featureId;
 
-    public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount,
+    public StatisticComputer(Path shapefile, BandConfiguration[] bandConfigurations, int initialBinCount,
                              String featureId, Logger logger) {
         this(shapefile, bandConfigurations, initialBinCount,
                 new TimeInterval[]{new TimeInterval(0, new ProductData.UTC(0), new ProductData.UTC(1000000))},
                 featureId, logger);
     }
 
-    public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount,
+    public StatisticComputer(Path shapefile, BandConfiguration[] bandConfigurations, int initialBinCount,
                              TimeInterval[] timeIntervals, String featureId, Logger logger) {
         this.initialBinCount = initialBinCount;
         this.timeIntervals = timeIntervals;
@@ -66,7 +66,7 @@ public class StatisticComputer {
             try {
                 features = FeatureUtils.loadFeatureCollectionFromShapefile(shapefile);
             } catch (IOException e) {
-                throw new OperatorException("Unable to load shapefile '" + shapefile.getAbsolutePath() + "'", e);
+                throw new OperatorException("Unable to load shapefile '" + shapefile.toAbsolutePath() + "'", e);
             }
         } else {
             features = null;

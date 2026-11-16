@@ -19,7 +19,8 @@ package org.esa.snap.statistics;
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.dataio.ProductIO;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -33,28 +34,35 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Thomas Storm
  */
 public class StatisticsOpTest {
 
-    private static final File TESTDATA_DIR = new File("target/statistics-test-io");
+    private static final Path TESTDATA_DIR = Path.of("target/statistics-test-io");
 
     @Before
     public void setUp() throws Exception {
-        TESTDATA_DIR.mkdirs();
-        if (!TESTDATA_DIR.isDirectory()) {
+        IOHelper.createDirectories(TESTDATA_DIR);
+        if (!Files.isDirectory(TESTDATA_DIR)) {
             fail("Can't create test I/O directory: " + TESTDATA_DIR);
         }
     }
@@ -80,7 +88,7 @@ public class StatisticsOpTest {
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
         final URL resource = getClass().getResource("4_pixels.shp");
         final URI uri = new URI(resource.toString());
-        statisticsOp.shapefile = new File(uri.getPath());
+        statisticsOp.shapefile = Path.of(uri);
         final MyOutputter outputter = new MyOutputter();
         statisticsOp.allStatisticsOutputters.add(outputter);
 
@@ -109,7 +117,7 @@ public class StatisticsOpTest {
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
         final URL resource = getClass().getResource("4_pixels.shp");
         final URI uri = new URI(resource.toString());
-        statisticsOp.shapefile = new File(uri.getPath());
+        statisticsOp.shapefile = Path.of(uri);
         statisticsOp.accuracy = 6;
 
         final MyOutputter outputter = new MyOutputter();
@@ -140,7 +148,7 @@ public class StatisticsOpTest {
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
         final URL resource = getClass().getResource("4_pixels.shp");
         final URI uri = new URI(resource.toString());
-        statisticsOp.shapefile = new File(uri.getPath());
+        statisticsOp.shapefile = Path.of(uri);
         statisticsOp.accuracy = 6;
         statisticsOp.percentiles = null;
 
@@ -174,7 +182,7 @@ public class StatisticsOpTest {
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
         final URL resource = getClass().getResource("4_pixels.shp");
         final URI uri = new URI(resource.toString());
-        statisticsOp.shapefile = new File(uri.getPath());
+        statisticsOp.shapefile = Path.of(uri);
 
         final MyOutputter outputter = new MyOutputter();
         statisticsOp.allStatisticsOutputters.add(outputter);
@@ -205,7 +213,7 @@ public class StatisticsOpTest {
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
         final URL resource = getClass().getResource("4_pixels.shp");
         final URI uri = new URI(resource.toString());
-        statisticsOp.shapefile = new File(uri.getPath());
+        statisticsOp.shapefile = Path.of(uri);
 
         final MyOutputter outputter = new MyOutputter();
         statisticsOp.allStatisticsOutputters.add(outputter);
@@ -249,18 +257,20 @@ public class StatisticsOpTest {
         parameters.put("outputShapefile", getTestFile("statisticsShapefile.shp"));
         parameters.put("doOutputAsciiFile", true);
         parameters.put("doOutputShapefile", true);
-        parameters.put("shapefile", new File(getClass().getResource("4_pixels.shp").toURI()));
+        URL fileURL = getClass().getResource("4_pixels.shp");
+        assertNotNull(fileURL);
+        parameters.put("shapefile", UrlHelper.urlToFile(fileURL));
         parameters.put("bandConfigurations", new BandConfiguration[]{
                 bandConfiguration_1,
         });
         Product statisticsProduct = GPF.createProduct("StatisticsOp", parameters, TestUtil.getTestProduct());
-        GPF.writeProduct(statisticsProduct, new File(TESTDATA_DIR, "test.dim"), "BEAM-DIMAP",
+        GPF.writeProduct(statisticsProduct, TESTDATA_DIR.resolve("test.dim"), "BEAM-DIMAP",
                 true, true, ProgressMonitor.NULL);
 
-        assertFalse(getTestFile("statisticsOutput.put").exists());
-        assertTrue(getTestFile("statisticsOutput.out").exists());
-        assertTrue(getTestFile("statisticsOutput_metadata.txt").exists());
-        assertTrue(getTestFile("statisticsShapefile.shp").exists());
+        assertFalse(Files.exists(getTestFile("statisticsOutput.put")));
+        assertTrue(Files.exists(getTestFile("statisticsOutput.out")));
+        assertTrue(Files.exists(getTestFile("statisticsOutput_metadata.txt")));
+        assertTrue(Files.exists(getTestFile("statisticsShapefile.shp")));
     }
 
     @Test
@@ -272,7 +282,7 @@ public class StatisticsOpTest {
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
         final URL resource = getClass().getResource("4_pixels.shp");
         final URI uri = new URI(resource.toString());
-        statisticsOp.shapefile = new File(uri.getPath());
+        statisticsOp.shapefile = Path.of(uri);
         statisticsOp.percentiles = new int[]{20, 51, 90};
 
         final MyOutputter outputter = new MyOutputter();
@@ -313,7 +323,7 @@ public class StatisticsOpTest {
 
     @Test
     public void testProductAlreadyOpened() {
-        final File file = new File("test.file");
+        final Path file = Path.of("test.file");
 
         final Product product = new Product("name", "type", 20, 40);
         product.setFileLocation(file);
@@ -322,7 +332,7 @@ public class StatisticsOpTest {
         products.add(product);
 
         assertTrue(StatisticsOp.isProductAlreadyOpened(products, file));
-        assertFalse(StatisticsOp.isProductAlreadyOpened(products, new File("other.path")));
+        assertFalse(StatisticsOp.isProductAlreadyOpened(products, Path.of("other.path")));
     }
 
     @Test
@@ -431,18 +441,18 @@ public class StatisticsOpTest {
         assertNull(StatisticsOp.getOutputFile(null, StatisticsOp.QUALITATIVE_MEASURES));
         assertNull(StatisticsOp.getOutputFile(null, StatisticsOp.QUANTITATIVE_MEASURES));
 
-        File origFile = new File("origFile.txt");
-        File expectedQualitativeFile = new File("origFile_categorical.txt");
-        File expectedQuantitativeFile = new File("origFile_quantitative.txt");
+        Path origFile = Path.of("origFile.txt");
+        Path expectedQualitativeFile = Path.of("origFile_categorical.txt");
+        Path expectedQuantitativeFile = Path.of("origFile_quantitative.txt");
 
-        File allMeasures_outputFile = StatisticsOp.getOutputFile(origFile, StatisticsOp.ALL_MEASURES);
-        assertEquals(origFile.getAbsolutePath(), allMeasures_outputFile.getAbsolutePath());
+        Path allMeasures_outputFile = StatisticsOp.getOutputFile(origFile, StatisticsOp.ALL_MEASURES);
+        assertEquals(origFile.toAbsolutePath(), allMeasures_outputFile.toAbsolutePath());
 
-        File qualitativeMeasures_outputFile = StatisticsOp.getOutputFile(origFile, StatisticsOp.QUALITATIVE_MEASURES);
-        assertEquals(expectedQualitativeFile.getAbsolutePath(), qualitativeMeasures_outputFile.getAbsolutePath());
+        Path qualitativeMeasures_outputFile = StatisticsOp.getOutputFile(origFile, StatisticsOp.QUALITATIVE_MEASURES);
+        assertEquals(expectedQualitativeFile.toAbsolutePath(), qualitativeMeasures_outputFile.toAbsolutePath());
 
-        File quantitativeMeasures_outputFile = StatisticsOp.getOutputFile(origFile, StatisticsOp.QUANTITATIVE_MEASURES);
-        assertEquals(expectedQuantitativeFile.getAbsolutePath(), quantitativeMeasures_outputFile.getAbsolutePath());
+        Path quantitativeMeasures_outputFile = StatisticsOp.getOutputFile(origFile, StatisticsOp.QUANTITATIVE_MEASURES);
+        assertEquals(expectedQuantitativeFile.toAbsolutePath(), quantitativeMeasures_outputFile.toAbsolutePath());
     }
 
     private StatisticsOp createStatisticsOp() {
@@ -525,7 +535,7 @@ public class StatisticsOpTest {
         }
     }
 
-    static File getTestFile(String fileName) {
-        return new File(TESTDATA_DIR, fileName);
+    static Path getTestFile(String fileName) {
+        return TESTDATA_DIR.resolve(fileName);
     }
 }

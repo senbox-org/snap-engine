@@ -27,7 +27,7 @@ import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -250,7 +250,7 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
      */
     @Override
     public void finaliseOutput() throws IOException {
-        EsriShapeFileWriter.write(features, new File(targetShapefile));
+        EsriShapeFileWriter.write(features, Path.of(targetShapefile));
     }
 
     /**

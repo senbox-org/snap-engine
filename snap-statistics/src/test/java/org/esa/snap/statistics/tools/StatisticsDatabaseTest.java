@@ -1,5 +1,6 @@
 package org.esa.snap.statistics.tools;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.FeatureUtils;
 import org.esa.snap.statistics.StatisticsOp;
@@ -11,17 +12,18 @@ import org.junit.Test;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class StatisticsDatabaseTest {
 
@@ -36,11 +38,11 @@ public class StatisticsDatabaseTest {
     @Test
     public void testDatabaseWithRealData() throws IOException, URISyntaxException {
         //preparation
-        final File shapeFile = new File(getResourceFilePath("20070504_out_cwbody_desh_gk3.shp"));
-        final File mappingFile = new File(getResourceFilePath("20070504_out_cwbody_desh_gk3_band_mapping.txt"));
+        final Path shapeFile = Path.of(getResourceFilePath("20070504_out_cwbody_desh_gk3.shp"));
+        final Path mappingFile = Path.of(getResourceFilePath("20070504_out_cwbody_desh_gk3_band_mapping.txt"));
         final FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = FeatureUtils.loadFeatureCollectionFromShapefile(shapeFile);
         final Properties mapping = new Properties();
-        mapping.load(new FileReader(mappingFile));
+        mapping.load(Files.newBufferedReader(mappingFile));
         final FilenameDateExtractor filenameDateExtractor = new FilenameDateExtractor();
         final ProductData.UTC utc = filenameDateExtractor.getDate(shapeFile);
 
@@ -124,7 +126,9 @@ public class StatisticsDatabaseTest {
 
     private String getResourceFilePath(String name) throws URISyntaxException {
         final URL resource = getClass().getResource(name);
-        final URI uri = new URI(resource.toString());
-        return uri.getPath();
+        assertNotNull(resource);
+        final Path file = UrlHelper.urlToFile(resource);
+        assertNotNull(file);
+        return file.toAbsolutePath().toString();
     }
 }

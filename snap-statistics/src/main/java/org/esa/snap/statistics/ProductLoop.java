@@ -4,7 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ public class ProductLoop {
         oldestDate = null;
     }
 
-    public void loop(Product[] alreadyLoadedProducts, File[] productFilesToLoad) {
+    public void loop(Product[] alreadyLoadedProducts, Path[] productFilesToLoad) {
         int alreadyLoadedProductsLength = alreadyLoadedProducts == null ? 0 : alreadyLoadedProducts.length;
         int productFilesToLoadLength = productFilesToLoad == null ? 0 : productFilesToLoad.length;
         progressMonitor.beginTask("Looping over products ...", alreadyLoadedProductsLength + productFilesToLoadLength);
@@ -48,7 +48,7 @@ public class ProductLoop {
             progressMonitor.worked(1);
         }
         for (int i = 0; i < productFilesToLoadLength; i++) {
-            File productFile = productFilesToLoad[i];
+            Path productFile = productFilesToLoad[i];
             progressMonitor.worked(1);
             if (productFile == null) {
                 continue;
@@ -64,7 +64,7 @@ public class ProductLoop {
         return productNames.toArray(new String[productNames.size()]);
     }
 
-    private void loadProductAndCompute(File productFile) {
+    private void loadProductAndCompute(Path productFile) {
         try {
             final Product product = loader.loadProduct(productFile);
             if (product == null) {
@@ -87,7 +87,7 @@ public class ProductLoop {
         }
         final String path;
         if (product.getFileLocation() != null) {
-            path = product.getFileLocation().getAbsolutePath();
+            path = product.getFileLocation().toAbsolutePath().toString();
         } else {
             path = product.getName();
         }
@@ -107,21 +107,21 @@ public class ProductLoop {
         logger.fine("        product: " + path);
     }
 
-    private void logReadProductError(File productFile) {
+    private void logReadProductError(Path productFile) {
         logger.severe(String.format("Failed to read from '%s' (not a data product or reader missing)", productFile));
     }
 
-    static boolean isProductAlreadyOpened(Product[] alreadyLoadedProducts, File file) {
+    static boolean isProductAlreadyOpened(Product[] alreadyLoadedProducts, Path file) {
         if (alreadyLoadedProducts != null) {
             for (Product product : alreadyLoadedProducts) {
                 if (product == null) {
                     continue;
                 }
-                final File fileLocation = product.getFileLocation();
+                final Path fileLocation = product.getFileLocation();
                 if (fileLocation == null) {
                     continue;
                 }
-                if (fileLocation.getAbsolutePath().equals(file.getAbsolutePath())) {
+                if (fileLocation.toAbsolutePath().equals(file.toAbsolutePath())) {
                     return true;
                 }
             }

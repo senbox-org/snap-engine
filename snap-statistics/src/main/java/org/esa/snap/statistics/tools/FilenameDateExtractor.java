@@ -4,7 +4,7 @@ import com.bc.ceres.binding.ValidationException;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.TimeStampExtractor;
 
-import java.io.File;
+import java.nio.file.Path;
 
 public class FilenameDateExtractor {
 
@@ -14,19 +14,19 @@ public class FilenameDateExtractor {
         timeStampExtractor = new TimeStampExtractor("yyyyMMdd", "${startDate}_*.shp");
     }
 
-    public boolean isValidFilename(File file) {
+    public boolean isValidFilename(Path file) {
         try {
-            timeStampExtractor.extractTimeStamps(file.getName());
+            timeStampExtractor.extractTimeStamps(file.getFileName().toString());
             return true;
         } catch (ValidationException ignored) {
             return false;
         }
     }
 
-    public ProductData.UTC getDate(File file) {
+    public ProductData.UTC getDate(Path file) {
         try {
             if (isValidFilename(file)) {
-                return timeStampExtractor.extractTimeStamps(file.getName())[0];
+                return timeStampExtractor.extractTimeStamps(file.getFileName().toString())[0];
             }
         } catch (ValidationException ignored) {
         }

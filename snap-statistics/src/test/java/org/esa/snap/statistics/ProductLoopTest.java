@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -47,7 +47,7 @@ public class ProductLoopTest {
         final Product[] loadedProducts = {validProductMock1, validProductMock2};
 
         // execution
-        productLoop.loop(loadedProducts, new File[0]);
+        productLoop.loop(loadedProducts, new Path[0]);
 
         // verification
         final InOrder inOrder = inOrder(statisticComputerMock);
@@ -60,11 +60,11 @@ public class ProductLoopTest {
     @Test
     public void testThatLoadedProductsShouldBeDisposedAfterStatisticComputation() throws IOException {
         // preparation
-        final File file1 = new File("1");
-        final File file2 = new File("2");
+        final Path file1 = Path.of("1");
+        final Path file2 = Path.of("2");
         when(productLoaderMock.loadProduct(file1)).thenReturn(validProductMock1);
         when(productLoaderMock.loadProduct(file2)).thenReturn(validProductMock2);
-        final File[] productFilesToLoad = {file1, file2};
+        final Path[] productFilesToLoad = {file1, file2};
 
         // execution
         productLoop.loop(new Product[0], productFilesToLoad);
@@ -80,11 +80,11 @@ public class ProductLoopTest {
     @Test
     public void testThatFilesWhichPointToAnAlreadyLoadedProductShouldNotBeOpenedTwice() throws IOException {
         // preparation
-        final File file1 = validProductMock1.getFileLocation();
-        final File file2 = validProductMock2.getFileLocation(); // points to productMock2
+        final Path file1 = validProductMock1.getFileLocation();
+        final Path file2 = validProductMock2.getFileLocation(); // points to productMock2
         when(productLoaderMock.loadProduct(file1)).thenReturn(validProductMock1);
         final Product[] alreadyLoadedProducts = {validProductMock2};
-        final File[] productFilesToLoad = {file1, file2};
+        final Path[] productFilesToLoad = {file1, file2};
 
         // execution
         productLoop.loop(alreadyLoadedProducts, productFilesToLoad);
@@ -102,7 +102,7 @@ public class ProductLoopTest {
     @Test
     public void testThatNoOperatorExceptionOccursIfNoProductsAreComputed() {
         try {
-            productLoop.loop(new Product[0], new File[0]);
+            productLoop.loop(new Product[0], new Path[0]);
             assertEquals(0, productLoop.getProductNames().length);
         } catch (OperatorException expected) {
             assertEquals("No input products found.", expected.getMessage());
@@ -112,12 +112,12 @@ public class ProductLoopTest {
     @Test
     public void testThatFilesWhichCanNotBeOpenedAreLogged() throws IOException {
         //preparation
-        final File file1 = validProductMock1.getFileLocation();
-        final File file2 = new File("No reader available"); // no reader found
+        final Path file1 = validProductMock1.getFileLocation();
+        final Path file2 = Path.of("No reader available"); // no reader found
         when(productLoaderMock.loadProduct(file1)).thenReturn(validProductMock1);
         when(productLoaderMock.loadProduct(file2)).thenReturn(null); // no reader found
         final Product[] alreadyLoadedProducts = {};
-        final File[] productFilesToLoad = {file1, file2};
+        final Path[] productFilesToLoad = {file1, file2};
 
         //execution
         productLoop.loop(alreadyLoadedProducts, productFilesToLoad);
@@ -125,19 +125,19 @@ public class ProductLoopTest {
         //verification
         verify(loggerMock).severe("Failed to read from 'No reader available' (not a data product or reader missing)");
         verify(statisticComputerMock, times(1)).computeStatistic(validProductMock1);
-        verify(productLoaderMock, times(2)).loadProduct(any(File.class));
+        verify(productLoaderMock, times(2)).loadProduct(any(Path.class));
         verifyNoMoreInteractions(statisticComputerMock, productLoaderMock);
     }
 
     @Test
     public void testThatIOExceptionsAreLogged() throws IOException {
         //preparation
-        final File file1 = validProductMock1.getFileLocation();
-        final File file2 = new File("Causes IO Exception"); // IO Exception
+        final Path file1 = validProductMock1.getFileLocation();
+        final Path file2 = Path.of("Causes IO Exception"); // IO Exception
         when(productLoaderMock.loadProduct(file1)).thenReturn(validProductMock1);
         when(productLoaderMock.loadProduct(file2)).thenThrow(new IOException()); // IO Exception
         final Product[] alreadyLoadedProducts = {};
-        final File[] productFilesToLoad = {file1, file2};
+        final Path[] productFilesToLoad = {file1, file2};
 
         //execution
         productLoop.loop(alreadyLoadedProducts, productFilesToLoad);
@@ -145,7 +145,7 @@ public class ProductLoopTest {
         //verification
         verify(loggerMock).severe("Failed to read from 'Causes IO Exception' (not a data product or reader missing)");
         verify(statisticComputerMock, times(1)).computeStatistic(validProductMock1);
-        verify(productLoaderMock, times(2)).loadProduct(any(File.class));
+        verify(productLoaderMock, times(2)).loadProduct(any(Path.class));
         verifyNoMoreInteractions(statisticComputerMock, productLoaderMock);
     }
 
@@ -159,7 +159,7 @@ public class ProductLoopTest {
         when(validatorMock.isValid(productMockAfter)).thenReturn(false);
 
         //execution
-        productLoop.loop(alreadyLoadedProducts, new File[0]);
+        productLoop.loop(alreadyLoadedProducts, new Path[0]);
 
         //verification
         verify(statisticComputerMock).computeStatistic(validProductMock1);
@@ -172,16 +172,16 @@ public class ProductLoopTest {
     @Test
     public void testThatProductsToBeLoadedAreSkippedIfOutOfDateRange() throws IOException {
         //preparation
-        final File file1 = new File("before");
-        final File file2 = new File("after");
-        final File file3 = validProductMock1.getFileLocation();
+        final Path file1 = Path.of("before");
+        final Path file2 = Path.of("after");
+        final Path file3 = validProductMock1.getFileLocation();
         final Product productMockBefore = createProductMock(4, 2, true, false);
         final Product productMockAfter = createProductMock(4, 2, false, true);
         when(productLoaderMock.loadProduct(file1)).thenReturn(productMockBefore);
         when(productLoaderMock.loadProduct(file2)).thenReturn(productMockAfter);
         when(productLoaderMock.loadProduct(file3)).thenReturn(validProductMock1);
         final Product[] alreadyLoadedProducts = {};
-        final File[] productFilesToLoad = new File[]{file1, file2, file3};
+        final Path[] productFilesToLoad = new Path[]{file1, file2, file3};
         when(validatorMock.isValid(productMockBefore)).thenReturn(false);
         when(validatorMock.isValid(productMockAfter)).thenReturn(false);
 
@@ -199,11 +199,11 @@ public class ProductLoopTest {
     @Test
     public void testThatLoopWorksIfAlreadyLoadedProductsIsNull() throws IOException {
         //preparation
-        File file = validProductMock1.getFileLocation();
+        Path file = validProductMock1.getFileLocation();
         when(productLoaderMock.loadProduct(file)).thenReturn(validProductMock1);
 
         //execution
-        productLoop.loop(null, new File[]{file});
+        productLoop.loop(null, new Path[]{file});
 
         //verification
         verify(statisticComputerMock).computeStatistic(validProductMock1);
@@ -216,7 +216,7 @@ public class ProductLoopTest {
         final Product[] alreadyLoadedProducts = {validProductMock1, null, validProductMock2};
 
         //execution
-        productLoop.loop(alreadyLoadedProducts, new File[0]);
+        productLoop.loop(alreadyLoadedProducts, new Path[0]);
 
         //verification
         verify(statisticComputerMock).computeStatistic(validProductMock1);
@@ -225,16 +225,16 @@ public class ProductLoopTest {
         verify(validProductMock2, never()).dispose();
         final String[] productNames = productLoop.getProductNames();
         assertEquals(2, productNames.length);
-        assertTrue(productNames[0].endsWith(validProductMock1.getFileLocation().getName()));
-        assertTrue(productNames[1].endsWith(validProductMock2.getFileLocation().getName()));
+        assertTrue(productNames[0].endsWith(validProductMock1.getFileLocation().getFileName().toString()));
+        assertTrue(productNames[1].endsWith(validProductMock2.getFileLocation().getFileName().toString()));
     }
 
     @Test
     public void testThatLoopWorksIfProductFilesToLoadContainsNullValues() throws IOException {
         //preparation
-        final File file1 = validProductMock1.getFileLocation();
-        final File file2 = validProductMock2.getFileLocation();
-        final File[] productFilesToLoad = new File[]{file1, file2};
+        final Path file1 = validProductMock1.getFileLocation();
+        final Path file2 = validProductMock2.getFileLocation();
+        final Path[] productFilesToLoad = new Path[]{file1, file2};
         when(productLoaderMock.loadProduct(file1)).thenReturn(validProductMock1);
         when(productLoaderMock.loadProduct(file2)).thenReturn(validProductMock2);
 
@@ -251,8 +251,8 @@ public class ProductLoopTest {
         verify(validProductMock2, times(1)).dispose();
         final String[] productNames = productLoop.getProductNames();
         assertEquals(2, productNames.length);
-        assertTrue(productNames[0].endsWith(file1.getName()));
-        assertTrue(productNames[1].endsWith(file2.getName()));
+        assertTrue(productNames[0].endsWith(file1.getFileName().toString()));
+        assertTrue(productNames[1].endsWith(file2.getFileName().toString()));
     }
 
     @Test
@@ -265,7 +265,7 @@ public class ProductLoopTest {
         when(validProductMock2.getEndTime()).thenReturn(null);
 
         //execution
-        productLoop.loop(alreadyLoadedProducts, new File[0]);
+        productLoop.loop(alreadyLoadedProducts, new Path[0]);
 
         //verification
         verify(statisticComputerMock).computeStatistic(validProductMock1);
@@ -275,8 +275,8 @@ public class ProductLoopTest {
         verify(validProductMock2, never()).dispose();
         final String[] productNames = productLoop.getProductNames();
         assertEquals(2, productNames.length);
-        assertTrue(productNames[0].endsWith(validProductMock1.getFileLocation().getName()));
-        assertTrue(productNames[1].endsWith(validProductMock2.getFileLocation().getName()));
+        assertTrue(productNames[0].endsWith(validProductMock1.getFileLocation().getFileName().toString()));
+        assertTrue(productNames[1].endsWith(validProductMock2.getFileLocation().getFileName().toString()));
     }
 
     private Product createTimeValidProductMock(int startOffset, int numObservationDays) {
@@ -286,13 +286,13 @@ public class ProductLoopTest {
     private Product createProductMock(int startOffset, int numObservationDays, boolean before_startDate, boolean after_endDate) {
         final ProductData.UTC startTime = getStartTime(startOffset, numObservationDays, before_startDate, after_endDate);
         final ProductData.UTC endTime = new ProductData.UTC(startTime.getMJD() + numObservationDays);
-        final File fileLocation = getFileLocation(startOffset, numObservationDays, before_startDate, after_endDate);
+        final Path fileLocation = getFileLocation(startOffset, numObservationDays, before_startDate, after_endDate);
 
         final Product mock = mock(Product.class);
         when(mock.getStartTime()).thenReturn(startTime);
         when(mock.getEndTime()).thenReturn(endTime);
         when(mock.getFileLocation()).thenReturn(fileLocation);
-        when(mock.getName()).thenReturn(fileLocation.getName());
+        when(mock.getName()).thenReturn(fileLocation.getFileName().toString());
         return mock;
     }
 
@@ -308,7 +308,7 @@ public class ProductLoopTest {
         return startTime;
     }
 
-    private File getFileLocation(int startOffset, int numObservationDays, boolean before, boolean after) {
+    private Path getFileLocation(int startOffset, int numObservationDays, boolean before, boolean after) {
         final StringBuilder location = new StringBuilder();
         location.append("mock_loc_");
         if (before) {
@@ -318,7 +318,7 @@ public class ProductLoopTest {
         }
         location.append(startOffset).append("_");
         location.append(numObservationDays);
-        return new File(location.toString());
+        return Path.of(location.toString());
     }
 
 }

@@ -8,7 +8,7 @@ import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.opengis.feature.simple.SimpleFeature;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
@@ -19,18 +19,18 @@ class EsriShapeFileWriter {
 
     private static final String FILE_EXTENSION_SHAPEFILE = ".shp";
 
-    static void write(List<SimpleFeature> features, File file) throws IOException {
+    static void write(List<SimpleFeature> features, Path file) throws IOException {
         if(features.isEmpty()) {
             return;
         }
-        String basename = file.getName();
+        String basename = file.getFileName().toString();
         if (basename.endsWith(FILE_EXTENSION_SHAPEFILE)) {
             basename = basename.substring(0, basename.length() - 4);
         }
-        File shapefile = new File(file.getParentFile(), basename + FILE_EXTENSION_SHAPEFILE);
+        Path shapefile = file.getParent().resolve(basename + FILE_EXTENSION_SHAPEFILE);
 
         ShapefileDataStoreFactory factory = new ShapefileDataStoreFactory();
-        Map<String, Serializable> map = Collections.singletonMap("url", shapefile.toURI().toURL());
+        Map<String, Serializable> map = Collections.singletonMap("url", shapefile.toUri().toURL());
         ShapefileDataStore dataStore = (ShapefileDataStore) factory.createNewDataStore(map);
         SimpleFeature simpleFeature = features.get(0);
         dataStore.createSchema(simpleFeature.getType());

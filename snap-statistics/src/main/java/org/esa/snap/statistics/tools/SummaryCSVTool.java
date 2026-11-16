@@ -1,5 +1,6 @@
 package org.esa.snap.statistics.tools;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -16,13 +17,15 @@ import org.geotools.feature.FeatureCollection;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -57,12 +60,12 @@ public class SummaryCSVTool {
             System.exit(-1);
         }
 
-        final File inputDir = new File(commandLine.getOptionValue("input"));
+        final Path inputDir = Path.of(commandLine.getOptionValue("input"));
 
         ensureDirectory(inputDir);
-        final File outputDir;
+        final Path outputDir;
         if (commandLine.hasOption("output")) {
-            outputDir = new File(commandLine.getOptionValue("output"));
+            outputDir = Path.of(commandLine.getOptionValue("output"));
             ensureDirectory(outputDir);
         } else {
             outputDir = inputDir;
@@ -84,9 +87,9 @@ public class SummaryCSVTool {
         summaryCSVTool.putOutSummerizedData(outputDir);
     }
 
-    private static void ensureDirectory(File directory) throws IOException {
-        if (!directory.isDirectory()) {
-            throw new IOException("'" + directory.getAbsolutePath() + "' is not a directory");
+    private static void ensureDirectory(Path directory) throws IOException {
+        if (!Files.isDirectory(directory)) {
+            throw new IOException("'" + directory.toAbsolutePath() + "' is not a directory");
         }
     }
 
@@ -127,27 +130,17 @@ public class SummaryCSVTool {
         helpFormatter.printHelp("SummaryCSVTool", options, true);
     }
 
-    private void putOutSummerizedData(File outputDir) throws IOException {
+    private void putOutSummerizedData(Path outputDir) throws IOException {
         final ObservationYear[] years = statisticsDatabase.getYears();
         for (ObservationYear year : years) {
             final ParameterName[] parameterNames = statisticsDatabase.getParameterNames(year);
             for (ParameterName parameterName : parameterNames) {
-                final File outputFile = new File(outputDir, "WFD_stat_" + year + "_" + parameterName + ".txt");
-                FileOutputStream fileOutputStream = null;
-                PrintWriter writer = null;
-                try {
-                    fileOutputStream = new FileOutputStream(outputFile);
-                    writer = new PrintWriter(fileOutputStream);
+                final Path outputFile = outputDir.resolve("WFD_stat_" + year + "_" + parameterName + ".txt");
+                try (OutputStream fileOutputStream = Files.newOutputStream(outputFile);
+                     PrintWriter writer = new PrintWriter(fileOutputStream)) {
                     final DatabaseRecord[] databaseRecords = statisticsDatabase.getData(year, parameterName);
                     printHeader(databaseRecords, writer, parameterName);
                     printData(databaseRecords, writer);
-                } finally {
-                    if (writer != null) {
-                        writer.close();
-                    }
-                    if (fileOutputStream != null) {
-                        fileOutputStream.close();
-                    }
                 }
             }
         }
@@ -234,19 +227,22 @@ public class SummaryCSVTool {
         pw.println();
     }
 
-    void summarize(File inputDir) {
-        final File[] shapeFiles = inputDir.listFiles((dir, name) -> {return name.toLowerCase().endsWith(".shp");});
+    void summarize(Path inputDir) {
+        final Collection<Path> shapeFiles = IOHelper.listFiles(inputDir, dir -> dir.getFileName().toString().toLowerCase().endsWith(".shp"));
+        if (shapeFiles == null) {
+            return;
+        }
 
-        for (File shapeFile : shapeFiles) {
+        for (Path shapeFile : shapeFiles) {
             if (!isValidDateExtractableFileName(shapeFile)) {
                 continue;
             }
-            final File mappingFile = new File(inputDir, FileUtils.getFilenameWithoutExtension(shapeFile).concat("_band_mapping.txt"));
-            if (!mappingFile.isFile()) {
+            final Path mappingFile = inputDir.resolve(FileUtils.getFilenameWithoutExtension(shapeFile).concat("_band_mapping.txt"));
+            if (!Files.isRegularFile(mappingFile)) {
                 continue;
             }
 
-            try (FileReader fileReader = new FileReader(mappingFile)) {
+            try (Reader fileReader = Files.newBufferedReader(mappingFile)) {
                 final ProductData.UTC date = filenameDateExtractor.getDate(shapeFile);
                 final FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = shapeFileReader.read(shapeFile);
                 final Properties properties = new Properties();
@@ -259,10 +255,10 @@ public class SummaryCSVTool {
         }
     }
 
-    private boolean isValidDateExtractableFileName(File shapeFile) {
+    private boolean isValidDateExtractableFileName(Path shapeFile) {
         final boolean validFilename = filenameDateExtractor.isValidFilename(shapeFile);
         if (!validFilename) {
-            logger.log(Level.WARNING, "The filename '" + shapeFile.getName() + "' does not match the pattern " +
+            logger.log(Level.WARNING, "The filename '" + shapeFile.getFileName() + "' does not match the pattern " +
                     FILENAME_PATTERN_SHAPEFILE + ".");
             logger.log(Level.INFO, "Continuing with next ESRI shapefile.");
         }
@@ -282,6 +278,6 @@ public class SummaryCSVTool {
 
     public interface ShapeFileReader {
 
-        FeatureCollection<SimpleFeatureType, SimpleFeature> read(File shapeFile) throws IOException;
+        FeatureCollection<SimpleFeatureType, SimpleFeature> read(Path shapeFile) throws IOException;
     }
 }
