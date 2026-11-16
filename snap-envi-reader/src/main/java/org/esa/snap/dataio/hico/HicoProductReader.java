@@ -16,8 +16,9 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dataio.envi.EnviProductReaderPlugIn;
 
 import java.awt.Color;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.EnumMap;
 
 /**
@@ -55,8 +56,8 @@ class HicoProductReader extends AbstractProductReader {
 
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        File[] hdrFiles = HicoProductReaderPlugin.findHdrFiles(getInput());
-        if (hdrFiles.length > 0) {
+        final Collection<Path> hdrFiles = HicoProductReaderPlugin.findHdrFiles(getInput());
+        if (!hdrFiles.isEmpty()) {
             return createProduct(hdrFiles);
         }
         throw new ProductIOException("Failed reading HICO product");
@@ -70,19 +71,19 @@ class HicoProductReader extends AbstractProductReader {
         }
     }
 
-    private Product createProduct(File[] hdrFiles) throws IOException {
+    private Product createProduct(Collection<Path> hdrFiles) throws IOException {
         ProductReaderPlugIn enviProductReaderPlugIn = new EnviProductReaderPlugIn();
         int sceneWidth = 0;
         int sceneHeight = 0;
         HicoFilename genericHicoFilename = null;
-        for (File hdrFile : hdrFiles) {
+        for (Path hdrFile : hdrFiles) {
             ProductReader enviProductReader = enviProductReaderPlugIn.createReaderInstance();
             Product product = enviProductReader.readProductNodes(hdrFile, null);
             if (sceneHeight == 0) {
                 sceneHeight = product.getSceneRasterHeight();
                 sceneWidth = product.getSceneRasterWidth();
             }
-            HicoFilename hicoFilename = HicoFilename.create(hdrFile.getName());
+            HicoFilename hicoFilename = HicoFilename.create(hdrFile.getFileName().toString());
             if (genericHicoFilename == null) {
                 genericHicoFilename = hicoFilename;
             }

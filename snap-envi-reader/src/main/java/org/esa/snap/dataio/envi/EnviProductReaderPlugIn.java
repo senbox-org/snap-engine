@@ -9,7 +9,7 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -24,7 +24,7 @@ public class EnviProductReaderPlugIn implements ProductReaderPlugIn {
         if (input instanceof ImageInputStream) {
             return checkDecodeQualificationOnStream((ImageInputStream) input);
         } else if(input != null){
-            return checkDecodeQualificationOnFile(getProductFile(input));
+            return checkDecodeQualificationOnFile(getProductPath(input));
         }
         return DecodeQualification.UNABLE;
     }
@@ -46,7 +46,7 @@ public class EnviProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     @Override
@@ -63,13 +63,13 @@ public class EnviProductReaderPlugIn implements ProductReaderPlugIn {
     /////// END OF PUBLIC
     ///////////////////////////////////////////////////////////////////////////
 
-    static File getInputFile(Object input) {
-        return new File(input.toString());
+    static Path getInputFile(Object input) {
+        return Path.of(input.toString());
     }
 
 
-    static boolean isCompressedFile(File file) {
-        return file.getPath().lastIndexOf(EnviConstants.ZIP_EXTENSION) > -1;
+    static boolean isCompressedFile(Path file) {
+        return file.toString().lastIndexOf(EnviConstants.ZIP_EXTENSION) > -1;
     }
 
     static InputStream getHeaderStreamFromZip(ZipFile productZip) throws IOException {
@@ -102,9 +102,9 @@ public class EnviProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
 
-    private static DecodeQualification checkDecodeQualificationOnFile(File inputFile) {
+    private static DecodeQualification checkDecodeQualificationOnFile(Path inputFile) {
         try {
-            final String fileName = inputFile.getName().toLowerCase();
+            final String fileName = inputFile.getFileName().toString().toLowerCase();
             boolean validExt = false;
             for(String ext : EnviConstants.VALID_EXTENSIONS) {
                 if(fileName.endsWith(ext)) {
@@ -115,7 +115,7 @@ public class EnviProductReaderPlugIn implements ProductReaderPlugIn {
             if(!validExt) return DecodeQualification.UNABLE;
 
             if (isCompressedFile(inputFile)) {
-                final ZipFile productZip = new ZipFile(inputFile, ZipFile.OPEN_READ);
+                final ZipFile productZip = new ZipFile(inputFile.toFile(), ZipFile.OPEN_READ);
 
                 if (productZip.size() != 2) {
                     productZip.close();

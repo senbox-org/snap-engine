@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.envi;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
@@ -18,14 +19,16 @@ import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
 
-import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
@@ -37,8 +40,8 @@ public class EnviProductWriter extends AbstractProductWriter {
 
     private final static String SYSPROP_USE_CACHE = "snap.dataio.writer.envi.useCache";
 
-    protected File outputDir;
-    protected File outputFile;
+    protected Path outputDir;
+    protected Path outputFile;
     private Map<Band, ImageOutputStream> bandOutputStreams;
     private boolean incremental = true;
 
@@ -75,7 +78,7 @@ public class EnviProductWriter extends AbstractProductWriter {
         Guardian.assertEquals("sourceWidth * sourceHeight", actualBufferSize, expectedBufferSize);  /*I18N*/
     }
 
-    private static void createPhysicalImageFile(Band band, File file) throws IOException {
+    private static void createPhysicalImageFile(Band band, Path file) throws IOException {
         createPhysicalFile(file, getImageFileSize(band));
     }
 
@@ -85,14 +88,12 @@ public class EnviProductWriter extends AbstractProductWriter {
                 (long) band.getRasterHeight();
     }
 
-    private static void createPhysicalFile(File file, long fileSize) throws IOException {
-        final File parentDir = file.getParentFile();
+    private static void createPhysicalFile(Path file, long fileSize) throws IOException {
+        final Path parentDir = file.getParent();
         if (parentDir != null) {
-            parentDir.mkdirs();
+            IOHelper.createDirectories(parentDir);
         }
-        final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-        randomAccessFile.setLength(fileSize);
-        randomAccessFile.close();
+        IOHelper.createFile(file, fileSize);
     }
 
     // @todo 3 tb/tb duplicated code -  tb 2020-07-07
@@ -111,12 +112,7 @@ public class EnviProductWriter extends AbstractProductWriter {
     protected void writeProductNodesImpl() throws IOException {
         final Object output = getOutput();
 
-        File outputFile = null;
-        if (output instanceof String) {
-            outputFile = new File((String) output);
-        } else if (output instanceof File) {
-            outputFile = (File) output;
-        }
+        Path outputFile = ProductUtils.getProductPath(output);
         Debug.assertNotNull(outputFile); // super.writeProductNodes should have checked this already
         initDirs(outputFile);
 
@@ -134,15 +130,15 @@ public class EnviProductWriter extends AbstractProductWriter {
      *
      * @param outputFile the dimap header file location.
      */
-    protected void initDirs(final File outputFile) {
+    protected void initDirs(final Path outputFile) {
         final String name = FileUtils.getFilenameWithoutExtension(outputFile);
-        outputDir = outputFile.getParentFile();
+        outputDir = outputFile.getParent();
         if (outputDir == null) {
-            outputDir = new File(".");
+            outputDir = Path.of(".");
         }
-        outputDir = new File(outputDir, name);
-        outputDir.mkdirs();
-        this.outputFile = new File(outputDir, outputFile.getName());
+        outputDir = outputDir.resolve(name);
+        IOHelper.createDirectories(outputDir);
+        this.outputFile = outputDir.resolve(outputFile.getFileName().toString());
     }
 
     protected void ensureNamingConvention() {
@@ -206,8 +202,8 @@ public class EnviProductWriter extends AbstractProductWriter {
     public void deleteOutput() throws IOException {
         flush();
         close();
-        if (outputFile != null && outputFile.exists() && outputFile.isFile()) {
-            outputFile.delete();
+        if (outputFile != null && Files.exists(outputFile) && Files.isRegularFile(outputFile)) {
+            Files.delete(outputFile);
         }
     }
 
@@ -272,11 +268,11 @@ public class EnviProductWriter extends AbstractProductWriter {
      * right size. Also ensures a recreate if the file not exists or the file have a different file size. A new envi
      * header file was written every call.
      */
-    protected File getValidImageFile(Band band) throws IOException {
+    protected Path getValidImageFile(Band band) throws IOException {
         writeEnviHeader(band); // always (re-)write ENVI header
-        final File file = getImageFile(band);
-        if (file.exists()) {
-            if (file.length() != getImageFileSize(band)) {
+        final Path file = getImageFile(band);
+        if (Files.exists(file)) {
+            if (Files.size(file) != getImageFileSize(band)) {
                 createPhysicalImageFile(band, file);
             }
         } else {
@@ -293,19 +289,19 @@ public class EnviProductWriter extends AbstractProductWriter {
     }
 
     protected ImageOutputStream createImageOutputStream(Band band) throws IOException {
-        return new FileImageOutputStream(getValidImageFile(band));
+        return ImageUtils.getImageOutputStream(getValidImageFile(band));
     }
 
-    protected File getEnviHeaderFile(Band band) {
-        return new File(outputDir, createEnviHeaderFilename(band));
+    protected Path getEnviHeaderFile(Band band) {
+        return outputDir.resolve(createEnviHeaderFilename(band));
     }
 
     protected String createEnviHeaderFilename(Band band) {
         return band.getName() + EnviHeader.FILE_EXTENSION;
     }
 
-    private File getImageFile(Band band) {
-        return new File(outputDir, createImageFilename(band));
+    private Path getImageFile(Band band) {
+        return outputDir.resolve(createImageFilename(band));
     }
 
     protected String createImageFilename(Band band) {
@@ -329,8 +325,8 @@ public class EnviProductWriter extends AbstractProductWriter {
         if (!(node instanceof Band)) {
             return true;
         }
-        final File imageFile = getImageFile((Band) node);
-        return !(imageFile != null && imageFile.exists());
+        final Path imageFile = getImageFile((Band) node);
+        return !Files.exists(imageFile);
     }
 
     /**
@@ -376,24 +372,27 @@ public class EnviProductWriter extends AbstractProductWriter {
         if (band != null) {
             final String headerFilename = createEnviHeaderFilename(band);
             final String imageFilename = createImageFilename(band);
-            File[] files = null;
-            if (outputDir != null && outputDir.exists()) {
-                files = outputDir.listFiles();
+            Collection<Path> files = null;
+            if (outputDir != null && Files.exists(outputDir)) {
+                files = IOHelper.listFiles(outputDir, Files::isRegularFile);
             }
             if (files == null) {
                 return;
             }
             String name;
-            for (File file : files) {
-                name = file.getName();
-                if (file.isFile() && (name.equals(headerFilename) || name.equals(imageFilename))) {
-                    file.delete();
+            for (Path file : files) {
+                name = file.getFileName().toString();
+                if (Files.isRegularFile(file) && (name.equals(headerFilename) || name.equals(imageFilename))) {
+                    try {
+                        Files.delete(file);
+                    } catch (IOException ignored) {
+                    }
                 }
             }
         }
     }
 
-    protected File getOutputDir() {
+    protected Path getOutputDir() {
         return outputDir;
     }
 }

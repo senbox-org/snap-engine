@@ -1,16 +1,18 @@
 package org.esa.snap.dataio.envi;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 public class EnviProductReaderAcceptanceTest {
 
@@ -53,8 +55,8 @@ public class EnviProductReaderAcceptanceTest {
     /////// END OF PUBLIC
     ///////////////////////////////////////////////////////////////////////////
 
-    private File headerFile;
-    private File imageFile;
+    private Path headerFile;
+    private Path imageFile;
 
     @Before
     public void setUp() throws Exception {
@@ -65,32 +67,32 @@ public class EnviProductReaderAcceptanceTest {
     @After
     public void tearDown() throws Exception {
         if (headerFile != null) {
-            if (!headerFile.delete()) {
-                fail("unable to delete: " + headerFile.getCanonicalPath());
+            if (!Files.deleteIfExists(headerFile)) {
+                fail("unable to delete: " + headerFile.toRealPath());
             }
         }
         if (imageFile != null) {
-            if (!imageFile.delete()) {
-                fail("unable to delete: " + imageFile.getCanonicalPath());
+            if (!Files.deleteIfExists(imageFile)) {
+                fail("unable to delete: " + imageFile.toRealPath());
             }
         }
     }
 
     private void writeHeaderFile(StringBuffer headerContent) throws IOException {
-        headerFile = new File("test_1.hdr");
-        headerFile.createNewFile();
+        headerFile = IOHelper.createATempDir().resolve("test_1.hdr");
+        IOHelper.createFile(headerFile);
 
-        final FileOutputStream headerOut = new FileOutputStream(headerFile);
+        final OutputStream headerOut = Files.newOutputStream(headerFile);
         headerOut.write(headerContent.toString().getBytes());
         headerOut.flush();
         headerOut.close();
     }
 
     private void writeImageFile(byte[] content) throws IOException {
-        imageFile = new File("test_1.img");
-        imageFile.createNewFile();
+        imageFile = IOHelper.createATempDir().resolve("test_1.img");
+        IOHelper.createFile(imageFile);
 
-        final FileOutputStream headerOut = new FileOutputStream(imageFile);
+        final OutputStream headerOut = Files.newOutputStream(imageFile);
         headerOut.write(content);
         headerOut.flush();
         headerOut.close();

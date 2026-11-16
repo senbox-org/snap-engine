@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.envi;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Band;
@@ -31,15 +32,16 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -58,33 +60,33 @@ public class EnviProductReader extends AbstractProductReader {
         super(readerPlugIn);
     }
 
-    public static File getEnviImageFile(File headerFile) throws IOException {
-        final String hdrName = headerFile.getName();
+    public static Path getEnviImageFile(Path headerFile) throws IOException {
+        final String hdrName = headerFile.getFileName().toString();
         final String imgName = hdrName.substring(0, hdrName.indexOf('.'));
-        final File parentFolder = headerFile.getParentFile();
+        final Path parentFolder = headerFile.getParent();
 
         for (final String ext : EnviConstants.IMAGE_EXTENSIONS) {
-            final File imgFileLowerCase = new File(parentFolder, imgName + ext);
-            if (imgFileLowerCase.exists()) {
+            final Path imgFileLowerCase = parentFolder.resolve(imgName + ext);
+            if (Files.exists(imgFileLowerCase)) {
                 return imgFileLowerCase;
             }
 
-            final File imgFileUpperCase = new File(parentFolder, imgName + ext.toUpperCase());
-            if (imgFileUpperCase.exists()) {
+            final Path imgFileUpperCase = parentFolder.resolve(imgName + ext.toUpperCase());
+            if (Files.exists(imgFileUpperCase)) {
                 return imgFileUpperCase;
             }
         }
 
-        final File[] files = parentFolder.listFiles();
+        final Collection<Path> files = IOHelper.listFiles(parentFolder);
         if (files != null) {
-            for (File file : files) {
-                if (!Files.isSameFile(file.toPath(), headerFile.toPath()) && file.getName().startsWith(imgName)) {
+            for (Path file : files) {
+                if (!Files.isSameFile(file, headerFile) && file.getFileName().startsWith(imgName)) {
                     return file;
                 }
             }
         }
 
-        throw new IOException("No matching ENVI image file found for header file: " + headerFile.getPath());
+        throw new IOException("No matching ENVI image file found for header file: " + headerFile);
     }
 
     @Override
@@ -98,11 +100,11 @@ public class EnviProductReader extends AbstractProductReader {
     }
 
     private Product innerReadProductNodes() throws IOException {
-        final File inputFile = getProductFile();
+        final Path inputFile = getProductPath();
 
         final BufferedReader headerReader = getHeaderReader(inputFile);
 
-        final String inputFileName = inputFile.getName();
+        final String inputFileName = inputFile.getFileName().toString();
         String[] splittedInputFileName = inputFileName.split("!");
         String productName = splittedInputFileName.length > 1 ? splittedInputFileName[1] : splittedInputFileName[0];
         int dotIndex = productName.lastIndexOf('.');
@@ -251,20 +253,20 @@ public class EnviProductReader extends AbstractProductReader {
     }
 
     @Override
-    public TreeNode<File> getProductComponents() {
+    public TreeNode<Path> getProductComponents() {
         try {
-            final File headerFile = getProductFile();
-            File parentDir = headerFile.getParentFile();
-            final TreeNode<File> root = new TreeNode<>(parentDir.getCanonicalPath());
+            final Path headerFile = getProductPath();
+            Path parentDir = headerFile.getParent();
+            final TreeNode<Path> root = new TreeNode<>(parentDir.toRealPath().toString());
             root.setContent(parentDir);
 
-            final TreeNode<File> header = new TreeNode<>(headerFile.getName());
+            final TreeNode<Path> header = new TreeNode<>(headerFile.getFileName().toString());
             header.setContent(headerFile);
             root.addChild(header);
 
             if (productZip == null) {
-                final File imageFile = getEnviImageFile(headerFile);
-                final TreeNode<File> image = new TreeNode<>(imageFile.getName());
+                final Path imageFile = getEnviImageFile(headerFile);
+                final TreeNode<Path> image = new TreeNode<>(imageFile.getFileName().toString());
                 image.setContent(imageFile);
                 root.addChild(image);
             }
@@ -276,7 +278,7 @@ public class EnviProductReader extends AbstractProductReader {
         }
     }
 
-    private ImageInputStream initializeInputStreamForBandData(File inputFile, ByteOrder byteOrder) throws IOException {
+    private ImageInputStream initializeInputStreamForBandData(Path inputFile, ByteOrder byteOrder) throws IOException {
         ImageInputStream imageInputStream;
         if (EnviProductReaderPlugIn.isCompressedFile(inputFile)) {
             imageInputStream = createImageStreamFromZip(inputFile);
@@ -312,16 +314,16 @@ public class EnviProductReader extends AbstractProductReader {
         }
     }
 
-    private ImageInputStream createImageStreamFromZip(File file) throws IOException {
-        String filePath = file.getAbsolutePath();
+    private ImageInputStream createImageStreamFromZip(Path file) throws IOException {
+        String filePath = file.toAbsolutePath().toString();
         String innerHdrZipPath;
         if (filePath.contains("!")) {
             // headerFile is in zip
             String[] splittedHeaderFile = filePath.split("!");
-            productZip = new ZipFile(new File(splittedHeaderFile[0]));
+            productZip = new ZipFile(Path.of(splittedHeaderFile[0]).toFile());
             innerHdrZipPath = splittedHeaderFile[1].replace("\\", "/");
         } else {
-            productZip = new ZipFile(file, ZipFile.OPEN_READ);
+            productZip = new ZipFile(file.toFile(), ZipFile.OPEN_READ);
             innerHdrZipPath = findFirstHeader(productZip).getName();
         }
 
@@ -356,8 +358,8 @@ public class EnviProductReader extends AbstractProductReader {
         throw new IOException("Not able to initialise band input stream.");
     }
 
-    private static ImageInputStream createImageStreamFromFile(final File file) throws IOException {
-        final File imageFile = getEnviImageFile(file);
+    private static ImageInputStream createImageStreamFromFile(final Path file) throws IOException {
+        final Path imageFile = getEnviImageFile(file);
         return ImageUtils.getImageInputStream(imageFile);
     }
 
@@ -431,17 +433,17 @@ public class EnviProductReader extends AbstractProductReader {
      *
      * @throws IOException on disk IO failures
      */
-    protected BufferedReader getHeaderReader(File inputFile) throws IOException {
+    protected BufferedReader getHeaderReader(Path inputFile) throws IOException {
         if (EnviProductReaderPlugIn.isCompressedFile(inputFile)) {
             ZipFile zipFile;
             ZipEntry zipEntry;
 
-            if (inputFile.getPath().toLowerCase().endsWith(EnviConstants.ZIP_EXTENSION)) {
-                zipFile = new ZipFile(inputFile);
+            if (inputFile.toString().toLowerCase().endsWith(EnviConstants.ZIP_EXTENSION)) {
+                zipFile = new ZipFile(inputFile.toFile());
                 zipEntry = findFirstHeader(zipFile);
             } else {
-                String[] splittedHeaderFile = inputFile.getAbsolutePath().split("!");
-                zipFile = new ZipFile(new File(splittedHeaderFile[0]));
+                String[] splittedHeaderFile = inputFile.toAbsolutePath().toString().split("!");
+                zipFile = new ZipFile(Path.of(splittedHeaderFile[0]).toFile());
                 final String innerZipPath = splittedHeaderFile[1].replace("\\", "/");
                 zipEntry = zipFile.getEntry(innerZipPath);
             }
@@ -451,7 +453,7 @@ public class EnviProductReader extends AbstractProductReader {
             InputStream inputStream = zipFile.getInputStream(zipEntry);
             return new BufferedReader(new InputStreamReader(inputStream));
         } else {
-            return Files.newBufferedReader(inputFile.toPath());
+            return Files.newBufferedReader(inputFile);
         }
     }
 
@@ -466,7 +468,7 @@ public class EnviProductReader extends AbstractProductReader {
         return null;
     }
 
-    protected void initBands(File inputFile, Product product, Header header) throws IOException {
+    protected void initBands(Path inputFile, Product product, Header header) throws IOException {
         final int enviDataType = header.getDataType();
         final int dataType = DataTypeUtils.toBeam(enviDataType);
         Double dataIgnoreValue = header.getDataIgnoreValue();

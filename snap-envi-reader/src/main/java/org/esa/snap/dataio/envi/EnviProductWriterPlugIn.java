@@ -8,7 +8,7 @@ import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Locale;
 
 /**
@@ -64,7 +64,7 @@ public class EnviProductWriterPlugIn implements ProductWriterPlugIn {
      * @see AbstractProductWriter#writeProductNodes
      */
     public Class[] getOutputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     /**

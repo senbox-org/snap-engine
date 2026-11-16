@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.envi;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
@@ -13,10 +14,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(LongTestRunner.class)
 public class EnviProductReaderTest_WithFileIO {
@@ -36,16 +46,16 @@ public class EnviProductReaderTest_WithFileIO {
     private static final int BYTE_ORDER = 1;
     private static final String WAVELENGTH_UNITS = "unknown";
 
-    private File tempDir;
+    private Path tempDir;
 
     @Before
     public void setUp() throws Exception {
-        final String ioTempDir = System.getProperty("java.io.tmpdir");
-        tempDir = new File(ioTempDir, "tempEnviProductReaderTest");
-        if (tempDir.exists()) {
+        tempDir = IOHelper.createATempDir().resolve("tempEnviProductReaderTest");
+        if (Files.exists(tempDir)) {
             assertTrue(FileUtils.deleteTree(tempDir));
         }
-        assertTrue(tempDir.mkdir());
+        Files.createDirectory(tempDir);
+        assertTrue(Files.exists(tempDir));
     }
 
     @After
@@ -81,8 +91,8 @@ public class EnviProductReaderTest_WithFileIO {
 
     @Test
     public void testCreateEnviImageFile_missingImageFile() throws IOException {
-        final File hdrFile = new File(tempDir, "envi.hdr");
-        assertTrue(hdrFile.createNewFile());
+        final Path hdrFile = tempDir.resolve("envi.hdr");
+        assertTrue(IOHelper.createFile(hdrFile));
 
         try {
             EnviProductReader.getEnviImageFile(hdrFile);
@@ -94,18 +104,18 @@ public class EnviProductReaderTest_WithFileIO {
     }
 
     private void doTest(String hdrFilename, String imgFilename) throws IOException {
-        final File hdrFile = new File(tempDir, hdrFilename);
-        assertTrue(hdrFile.createNewFile());
+        final Path hdrFile = tempDir.resolve(hdrFilename);
+        assertTrue(IOHelper.createFile(hdrFile));
 
-        final File imgFile = new File(tempDir, imgFilename);
-        assertTrue(imgFile.createNewFile());
+        final Path imgFile = tempDir.resolve(imgFilename);
+        assertTrue(IOHelper.createFile(imgFile));
 
         try {
-            assertEquals(imgFile.getCanonicalFile(), EnviProductReader.getEnviImageFile(hdrFile).getCanonicalFile());
+            assertEquals(imgFile.toRealPath(), EnviProductReader.getEnviImageFile(hdrFile).toRealPath());
         } finally {
             // cleanup
-            imgFile.delete();
-            hdrFile.delete();
+            Files.delete(imgFile);
+            Files.delete(hdrFile);
         }
     }
 
@@ -113,7 +123,7 @@ public class EnviProductReaderTest_WithFileIO {
     public void testReadProductNodes_WithoutSensingStartStop() throws IOException, ParseException {
         final String sensingStartStop = "";
         final String headerContent = createHeaderFileContent(sensingStartStop);
-        final File headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
+        final Path headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
 
         final ProductReaderPlugIn plugIn = new EnviProductReaderPlugIn();
         final ProductReader reader = plugIn.createReaderInstance();
@@ -159,7 +169,7 @@ public class EnviProductReaderTest_WithFileIO {
         final String stop = Header.SENSING_STOP;
         final String sensingStartStop = start + " = 238746, " + stop + " = 17-feb-1999 6:7:8";
         final String headerContent = createHeaderFileContent(sensingStartStop);
-        final File headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
+        final Path headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
 
         final EnviProductReaderPlugIn plugIn = new EnviProductReaderPlugIn();
         final ProductReader reader = plugIn.createReaderInstance();
@@ -177,7 +187,7 @@ public class EnviProductReaderTest_WithFileIO {
         final String stop = Header.SENSING_STOP;
         final String sensingStartStop = start + " = 16-jan-1998 5:6:7, " + stop + " = jkhadsf";
         final String headerContent = createHeaderFileContent(sensingStartStop);
-        final File headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
+        final Path headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
 
         final EnviProductReaderPlugIn plugIn = new EnviProductReaderPlugIn();
         final ProductReader reader = plugIn.createReaderInstance();
@@ -195,7 +205,7 @@ public class EnviProductReaderTest_WithFileIO {
         final String stop = Header.SENSING_STOP;
         final String sensingStartStop = start + " = 16-jan-1998 5:6:7, " + stop + " = 17-feb-1999 6:7:8";
         final String headerContent = createHeaderFileContent(sensingStartStop);
-        final File headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
+        final Path headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
 
         final EnviProductReaderPlugIn plugIn = new EnviProductReaderPlugIn();
         final ProductReader reader = plugIn.createReaderInstance();
@@ -254,7 +264,7 @@ public class EnviProductReaderTest_WithFileIO {
         // valid DATE_FORMAT_PATTERN = "dd-MMM-yyyy HH:mm:ss";
         final String sensingStartStop = Header.SENSING_START + " = 16-jan-1998 5:6:7";
         final String headerContent = createHeaderFileContent(sensingStartStop);
-        final File headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
+        final Path headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
 
         final EnviProductReaderPlugIn plugIn = new EnviProductReaderPlugIn();
         final ProductReader reader = plugIn.createReaderInstance();
@@ -271,34 +281,34 @@ public class EnviProductReaderTest_WithFileIO {
 
     @Test
     public void testImageDataFileConsideredInRightOrder() throws IOException {
-        File enviImageFile;
-        final File headerFile = new File(tempDir, PRODUCT_NAME + ".hdr");
+        Path enviImageFile;
+        final Path headerFile = tempDir.resolve(PRODUCT_NAME + ".hdr");
 
-        new File(tempDir, PRODUCT_NAME + ".bsq").createNewFile();
+        IOHelper.createFile(tempDir.resolve(PRODUCT_NAME + ".bsq"));
         enviImageFile = EnviProductReader.getEnviImageFile(headerFile);
         assertEquals(".bsq", FileUtils.getExtension(enviImageFile));
 
-        new File(tempDir, PRODUCT_NAME + ".bil").createNewFile();
+        IOHelper.createFile(tempDir.resolve(PRODUCT_NAME + ".bil"));
         enviImageFile = EnviProductReader.getEnviImageFile(headerFile);
         assertEquals(".bil", FileUtils.getExtension(enviImageFile));
 
-        new File(tempDir, PRODUCT_NAME + ".bip").createNewFile();
+        IOHelper.createFile(tempDir.resolve(PRODUCT_NAME + ".bip"));
         enviImageFile = EnviProductReader.getEnviImageFile(headerFile);
         assertEquals(".bip", FileUtils.getExtension(enviImageFile));
 
-        new File(tempDir, PRODUCT_NAME + ".bin").createNewFile();
+        IOHelper.createFile(tempDir.resolve(PRODUCT_NAME + ".bin"));
         enviImageFile = EnviProductReader.getEnviImageFile(headerFile);
         assertEquals(".bin", FileUtils.getExtension(enviImageFile));
 
-        new File(tempDir, PRODUCT_NAME + ".img").createNewFile();
+        IOHelper.createFile(tempDir.resolve(PRODUCT_NAME + ".img"));
         enviImageFile = EnviProductReader.getEnviImageFile(headerFile);
         assertEquals(".img", FileUtils.getExtension(enviImageFile));
 
-        new File(tempDir, PRODUCT_NAME).createNewFile();
+        IOHelper.createFile(tempDir.resolve(PRODUCT_NAME));
         enviImageFile = EnviProductReader.getEnviImageFile(headerFile);
         assertEquals(null, FileUtils.getExtension(enviImageFile));
 
-        new File(tempDir, PRODUCT_NAME + ".dat").createNewFile();
+        IOHelper.createFile(tempDir.resolve(PRODUCT_NAME + ".dat"));
         enviImageFile = EnviProductReader.getEnviImageFile(headerFile);
         assertEquals(".dat", FileUtils.getExtension(enviImageFile));
     }
@@ -306,7 +316,7 @@ public class EnviProductReaderTest_WithFileIO {
     @Test
     public void testMetadata() throws IOException {
         final String headerContent = createHeaderFileContent("");
-        final File headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
+        final Path headerFile = createHeaderAndImageFile(headerContent, PRODUCT_NAME);
 
         final EnviProductReaderPlugIn plugIn = new EnviProductReaderPlugIn();
         final ProductReader reader = plugIn.createReaderInstance();
@@ -372,13 +382,13 @@ public class EnviProductReaderTest_WithFileIO {
         return writer.toString();
     }
 
-    private File createHeaderAndImageFile(final String headerContent, String headerFileName) throws IOException {
-        final File headerFile = new File(tempDir, headerFileName + ".hdr");
-        final File imageFile = new File(tempDir, headerFileName + ".img");
-        assertTrue(headerFile.createNewFile());
-        assertTrue(imageFile.createNewFile());
+    private Path createHeaderAndImageFile(final String headerContent, String headerFileName) throws IOException {
+        final Path headerFile = tempDir.resolve(headerFileName + ".hdr");
+        final Path imageFile = tempDir.resolve(headerFileName + ".img");
+        assertTrue(IOHelper.createFile(headerFile));
+        assertTrue(IOHelper.createFile(imageFile));
 
-        final FileOutputStream outputStream = new FileOutputStream(headerFile);
+        final OutputStream outputStream = Files.newOutputStream(headerFile);
         outputStream.write(headerContent.getBytes());
         outputStream.close();
         return headerFile;

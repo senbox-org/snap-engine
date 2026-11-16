@@ -5,7 +5,10 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Locale;
 
 /**
@@ -16,8 +19,8 @@ public class HicoProductReaderPlugin implements ProductReaderPlugIn {
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
-        File[] hdrFiles = findHdrFiles(input);
-        if (hdrFiles.length > 0) {
+        final Collection<Path> hdrFiles = findHdrFiles(input);
+        if (!hdrFiles.isEmpty()) {
             return DecodeQualification.INTENDED;
         }
         return DecodeQualification.UNABLE;
@@ -40,7 +43,7 @@ public class HicoProductReaderPlugin implements ProductReaderPlugIn {
 
     @Override
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     @Override
@@ -52,30 +55,30 @@ public class HicoProductReaderPlugin implements ProductReaderPlugIn {
     public SnapFileFilter getProductFileFilter() {
         return new SnapFileFilter(getFormatNames()[0], getDefaultFileExtensions(), getDescription(null)) {
             @Override
-            public boolean accept(File file) {
+            public boolean accept(Path file) {
                 // directories are accepted right away
-                if (file.isDirectory()) {
+                if (Files.isDirectory(file)) {
                     return true;
                 }
-                String fileName = file.getName();
+                String fileName = file.getFileName().toString();
                 return fileName.startsWith("iss.") && fileName.endsWith(".hico.hdr");
             }
         };
     }
 
-    static File[] findHdrFiles(Object input) {
+    static Collection<Path> findHdrFiles(Object input) {
         if (input != null) {
-            File file = new File(input.toString());
-            String fileName = file.getName();
+            Path file = Path.of(input.toString());
+            String fileName = file.getFileName().toString();
             HicoFilename hicoFilename = HicoFilename.create(fileName);
             if (hicoFilename != null) {
-                File parentFile = file.getParentFile();
+                Path parentFile = file.getParent();
                 if (parentFile == null) {
-                    parentFile = new File(".");
+                    parentFile = Path.of(".");
                 }
                 return hicoFilename.findAllHdrs(parentFile);
             }
         }
-        return new File[0];
+        return new ArrayList<>();
     }
 }

@@ -1,12 +1,14 @@
 package org.esa.snap.dataio.hico;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.Debug;
 
-import java.io.File;
-import java.io.FilenameFilter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -129,25 +131,19 @@ class HicoFilename {
         return null;
     }
 
-    public File[] findAllHdrs(File parentFile) {
-        File[] hdrFiles = parentFile.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                boolean hdrExist = name.startsWith(getProductBase()) && name.endsWith(".hdr");
-                boolean dataExist = false;
-                if (hdrExist) {
-                    int hdrIndex = name.lastIndexOf("hdr");
-                    String bandBaseName = name.substring(0, hdrIndex);
-                    File bsqFile = new File(dir, bandBaseName + "bsq");
-                    File bilFile = new File(dir, bandBaseName + "bil");
-                    dataExist = bsqFile.exists() || bilFile.exists();
-                }
-                return hdrExist && dataExist;
+    public Collection<Path> findAllHdrs(Path parentFile) {
+        return IOHelper.listFiles(parentFile, dir -> {
+            final String name = dir.getFileName().toString();
+            boolean hdrExist = name.startsWith(getProductBase()) && name.endsWith(".hdr");
+            boolean dataExist = false;
+            if (hdrExist) {
+                int hdrIndex = name.lastIndexOf("hdr");
+                String bandBaseName = name.substring(0, hdrIndex);
+                Path bsqFile = dir.resolve(bandBaseName + "bsq");
+                Path bilFile = dir.resolve(bandBaseName + "bil");
+                dataExist = Files.exists(bsqFile) || Files.exists(bilFile);
             }
+            return hdrExist && dataExist;
         });
-        if (hdrFiles == null) {
-            hdrFiles = new File[0];
-        }
-        return hdrFiles;
     }
 }

@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.envi;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.util.io.SnapFileFilter;
@@ -10,16 +11,25 @@ import org.junit.Test;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 public class EnviProductReaderPluginTest {
+
+    private final Path tempDir = IOHelper.createATempDir();
 
     @Test
     public void testGetDefaultFileExtensions() {
@@ -35,12 +45,12 @@ public class EnviProductReaderPluginTest {
         assertNotNull(inputTypes);
         assertEquals(2, inputTypes.length);
         assertEquals(String.class, inputTypes[0]);
-        assertEquals(File.class, inputTypes[1]);
+        assertEquals(Path.class, inputTypes[1]);
     }
 
     @Test
     public void testDecodeQualfication_wrongObject() {
-        assertEquals(DecodeQualification.UNABLE, readerPlugIn.getDecodeQualification(new Double(23.8)));
+        assertThrows(IllegalArgumentException.class, () -> readerPlugIn.getDecodeQualification(23.8));
     }
 
     @Test
@@ -79,14 +89,14 @@ public class EnviProductReaderPluginTest {
         final String line = EnviConstants.FIRST_LINE + "dklfj\n234j\nsdf\tsdf\tsdaf\n";
         writeToTestFile(line);
 
-        assertEquals(DecodeQualification.SUITABLE, readerPlugIn.getDecodeQualification(headerFile.getName()));
+        assertEquals(DecodeQualification.SUITABLE, readerPlugIn.getDecodeQualification(headerFile.toString()));
     }
 
     @Test
     public void testDecodeQualification_String_failure() throws IOException {
         writeToTestFile("blaberrhabarber");
 
-        assertEquals(DecodeQualification.UNABLE, readerPlugIn.getDecodeQualification(headerFile.getName()));
+        assertEquals(DecodeQualification.UNABLE, readerPlugIn.getDecodeQualification(headerFile.toString()));
     }
 
     @Test
@@ -123,20 +133,20 @@ public class EnviProductReaderPluginTest {
     public void testGetInputFile() {
         final String inputFileName = "test.file";
 
-        File file = EnviProductReaderPlugIn.getInputFile(inputFileName);
-        assertEquals(inputFileName, file.getName());
+        Path file = EnviProductReaderPlugIn.getInputFile(inputFileName);
+        assertEquals(inputFileName, file.getFileName().toString());
 
-        final File inputFile = new File(inputFileName);
+        final Path inputFile = tempDir.resolve(inputFileName);
         file = EnviProductReaderPlugIn.getInputFile(inputFile);
-        assertEquals(inputFileName, file.getName());
+        assertEquals(inputFileName, file.getFileName().toString());
     }
 
     @Test
     public void testIsCompressedFile() {
-        File file = new File("envi.file");
+        Path file = tempDir.resolve("envi.file");
         assertFalse(EnviProductReaderPlugIn.isCompressedFile(file));
 
-        file = new File("envi.zip");
+        file = tempDir.resolve("envi.zip");
         assertTrue(EnviProductReaderPlugIn.isCompressedFile(file));
     }
 
@@ -164,12 +174,12 @@ public class EnviProductReaderPluginTest {
         assertEquals("ENVI", snapFileFilter.getFormatName());
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    /////// END OF PUBLIC
-    ///////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////
+    /// //// END OF PUBLIC
+    /// ////////////////////////////////////////////////////////////////////////
 
     private EnviProductReaderPlugIn readerPlugIn;
-    private File headerFile;
+    private Path headerFile;
 
     @Before
     public void setUp() throws Exception {
@@ -179,26 +189,25 @@ public class EnviProductReaderPluginTest {
     @After
     public void tearDown() throws Exception {
         if (headerFile != null) {
-            if (!headerFile.delete()) {
-                fail("unable to delete testdata: " + headerFile.getName());
+            if (!Files.deleteIfExists(headerFile)) {
+                fail("unable to delete testdata: " + headerFile.getFileName());
             }
             headerFile = null;
         }
     }
 
     private void writeToTestFile(String line) throws IOException {
-        headerFile = new File("test.hdr");
+        headerFile = tempDir.resolve("test.hdr");
 
-        headerFile.createNewFile();
-        FileOutputStream outStream = new FileOutputStream(headerFile);
+        OutputStream outStream = Files.newOutputStream(headerFile);
         outStream.write(line.getBytes());
         outStream.flush();
         outStream.close();
     }
 
     private void writeToZipTestFile(String line, boolean writeImgEntry) throws IOException {
-        headerFile = new File("test.zip");
-        final ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(headerFile.getName()));
+        headerFile = tempDir.resolve("test.zip");
+        final ZipOutputStream zipOut = new ZipOutputStream(Files.newOutputStream(headerFile));
         zipOut.putNextEntry(new ZipEntry("test.hdr"));
         zipOut.write(line.getBytes());
         zipOut.closeEntry();
