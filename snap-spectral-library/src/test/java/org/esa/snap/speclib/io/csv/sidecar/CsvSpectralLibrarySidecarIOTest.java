@@ -1,27 +1,42 @@
 package org.esa.snap.speclib.io.csv.sidecar;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.speclib.io.csv.util.CsvTable;
 import org.esa.snap.speclib.io.csv.util.CsvUtils;
-import org.esa.snap.speclib.model.*;
-import org.junit.Rule;
+import org.esa.snap.speclib.model.AttributeDef;
+import org.esa.snap.speclib.model.AttributeSchema;
+import org.esa.snap.speclib.model.AttributeType;
+import org.esa.snap.speclib.model.AttributeValue;
+import org.esa.snap.speclib.model.SpectralAxis;
+import org.esa.snap.speclib.model.SpectralLibrary;
+import org.esa.snap.speclib.model.SpectralProfile;
+import org.esa.snap.speclib.model.SpectralSignature;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 
 public class CsvSpectralLibrarySidecarIOTest {
 
 
-    @Rule
-    public TemporaryFolder tmp = new TemporaryFolder();
+    public Path tmp = IOHelper.createATempDir();
 
 
     @Test(expected = NullPointerException.class)
@@ -33,7 +48,7 @@ public class CsvSpectralLibrarySidecarIOTest {
     @Test(expected = IOException.class)
     @STTM("SNAP-4129")
     public void test_read_emptyHeader_throwsIOException() throws Exception {
-        Path p = tmp.newFile("empty.csv").toPath();
+        Path p = tmp.resolve("empty.csv");
         Files.writeString(p, "", StandardCharsets.UTF_8);
         new CsvSpectralLibrarySidecarIO().read(p);
     }
@@ -41,7 +56,7 @@ public class CsvSpectralLibrarySidecarIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_nameColMissing_fallsBackToFirstColumn_andSkipsEmptyNameRow() throws Exception {
-        Path p = tmp.newFile("no_spectra_names.csv").toPath();
+        Path p = tmp.resolve("no_spectra_names.csv");
 
         String csv = "name,attr\n,123\nA, 7\n";
         Files.writeString(p, csv, StandardCharsets.UTF_8);
@@ -60,7 +75,7 @@ public class CsvSpectralLibrarySidecarIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_findNameColumn_skipsNullHeaderEntry_andUsesSpectraNames() throws Exception {
-        Path p = tmp.newFile("with_spectra_names.csv").toPath();
+        Path p = tmp.resolve("with_spectra_names.csv");
 
         String csv = "spectra names, ,a\nS1,ignored,42\nS2,ignored,\n";
         Files.writeString(p, csv, StandardCharsets.UTF_8);
@@ -81,7 +96,7 @@ public class CsvSpectralLibrarySidecarIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_infersArraysAndMapsAndFallsBackToStringWhenParseFails() throws Exception {
-        Path p = tmp.newFile("types.csv").toPath();
+        Path p = tmp.resolve("types.csv");
         String csv = "spectra names,ia,da,sl,mp,badInt\n"
                 + "P1,\"[1,2,3]\",\"[1.0,2.5]\",\"[a,b]\",\"k=v,k2=v2\",abc\n";
         Files.writeString(p, csv, StandardCharsets.UTF_8);
@@ -111,7 +126,7 @@ public class CsvSpectralLibrarySidecarIOTest {
     @Test(expected = NullPointerException.class)
     @STTM("SNAP-4129")
     public void test_write_nullLibrary_throwsNpe() throws Exception {
-        Path p = tmp.newFile("x.csv").toPath();
+        Path p = tmp.resolve("x.csv");
         new CsvSpectralLibrarySidecarIO().write(null, p);
     }
 
@@ -126,7 +141,7 @@ public class CsvSpectralLibrarySidecarIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_write_buildsHeaderWithSchemaKeysAndExtras_sorted_andWritesRows() throws Exception {
-        Path p = tmp.newFile("out.csv").toPath();
+        Path p = tmp.resolve("out.csv");
 
         SpectralAxis axis = new SpectralAxis(new double[]{1.0}, "nm");
         SpectralSignature sig = SpectralSignature.of(new double[]{0.5});
@@ -164,7 +179,7 @@ public class CsvSpectralLibrarySidecarIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_write_infersTypeFromProfiles_whenSchemaMissingKey_andFormatsArrayBracketed() throws Exception {
-        Path p = tmp.newFile("infer.csv").toPath();
+        Path p = tmp.resolve("infer.csv");
 
         SpectralAxis axis = new SpectralAxis(new double[]{1.0}, "nm");
         SpectralSignature sig = SpectralSignature.of(new double[]{0.5});
@@ -186,7 +201,7 @@ public class CsvSpectralLibrarySidecarIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_rowShorterThanHeader_safeCellOutOfRange_returnsEmpty_andAttributeSkipped() throws Exception {
-        Path p = tmp.newFile("shortrow.csv").toPath();
+        Path p = tmp.resolve("shortrow.csv");
 
         String csv = "spectra names,a,b\nP1\n";
         Files.writeString(p, csv, StandardCharsets.UTF_8);

@@ -5,7 +5,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.esa.snap.speclib.io.csv.util.CsvTable;
 import org.esa.snap.speclib.io.csv.util.CsvUtils;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,8 +50,8 @@ public class SpectralResponseFunction {
      * @param csvFile - File
      * @return - CsvTable
      */
-    public static CsvTable readFwhmFromCsv(File csvFile) throws IOException {
-        return CsvUtils.read(csvFile.toPath());
+    public static CsvTable readFwhmFromCsv(Path csvFile) throws IOException {
+        return CsvUtils.read(csvFile);
     }
 
     /**
@@ -137,7 +137,7 @@ public class SpectralResponseFunction {
      *
      * @param geoJsonFile -
      */
-    public void readSpectralResponsesFromGeoJson(File geoJsonFile) {
+    public void readSpectralResponsesFromGeoJson(Path geoJsonFile) {
         // TODO later if needed
     }
 

@@ -1,6 +1,7 @@
 package org.esa.snap.speclib.io.csv;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.speclib.model.AttributeType;
 import org.esa.snap.speclib.model.AttributeValue;
 import org.esa.snap.speclib.model.SpectralAxis;
@@ -10,21 +11,24 @@ import org.esa.snap.speclib.model.SpectralSignature;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class CsvSpectralLibraryIOTest {
 
 
-    @Rule
-    public TemporaryFolder tmp = new TemporaryFolder();
+    public Path tmp = IOHelper.createATempDir();
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -52,8 +56,8 @@ public class CsvSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4177")
     public void test_canWrite() {
-        assertTrue(io.canWrite(tmp.getRoot().toPath().resolve("out.csv")));
-        assertFalse(io.canWrite(tmp.getRoot().toPath().resolve("out.geojson")));
+        assertTrue(io.canWrite(tmp.resolve("out.csv")));
+        assertFalse(io.canWrite(tmp.resolve("out.geojson")));
     }
 
 
@@ -304,7 +308,7 @@ public class CsvSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4177")
     public void test_write_createsParentDirectories() throws Exception {
-        Path deep = tmp.getRoot().toPath().resolve("a/b/c/out.csv");
+        Path deep = tmp.resolve("a/b/c/out.csv");
         io.write(libraryWith("P", 1.0), deep);
 
         assertTrue(Files.exists(deep));
@@ -468,12 +472,12 @@ public class CsvSpectralLibraryIOTest {
     }
 
     private Path write(String filename, String content) throws Exception {
-        Path path = tmp.newFile(filename).toPath();
+        Path path = tmp.resolve(filename);
         Files.writeString(path, content);
         return path;
     }
 
     private Path outPath(String filename) {
-        return tmp.getRoot().toPath().resolve(filename);
+        return tmp.resolve(filename);
     }
 }

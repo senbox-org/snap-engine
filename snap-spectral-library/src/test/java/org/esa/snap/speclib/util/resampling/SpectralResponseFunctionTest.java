@@ -1,12 +1,12 @@
 package org.esa.snap.speclib.util.resampling;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.speclib.io.csv.util.CsvTable;
-import org.esa.snap.speclib.io.csv.util.CsvUtils;
 import org.junit.Test;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -26,7 +26,7 @@ public class SpectralResponseFunctionTest {
 
         final URL resource = getClass().getResource("fwhm_" + srf.getID() + ".csv");
         assertNotNull(resource);
-        final File csvFile = new File(resource.toURI());
+        final Path csvFile = UrlHelper.urlToFile(resource);
         final CsvTable fwhmTableFromCsv = SpectralResponseFunction.readFwhmFromCsv(csvFile);
 
         assertEquals(List.of("wavelength", "fwhm"), fwhmTableFromCsv.header());
@@ -62,7 +62,7 @@ public class SpectralResponseFunctionTest {
 
         final URL resource = getClass().getResource("fwhm_" + srf.getID() + ".csv");
         assertNotNull(resource);
-        final File csvFile = new File(resource.toURI());
+        final Path csvFile = UrlHelper.urlToFile(resource);
         final CsvTable fwhmTableFromCsv = SpectralResponseFunction.readFwhmFromCsv(csvFile);
 
         assertEquals(List.of("wavelength", "fwhm"), fwhmTableFromCsv.header());
@@ -98,7 +98,7 @@ public class SpectralResponseFunctionTest {
 
         final URL resource = getClass().getResource("fwhm_" + srf.getID() + ".csv");
         assertNotNull(resource);
-        final File csvFile = new File(resource.toURI());
+        final Path csvFile = UrlHelper.urlToFile(resource);
         final CsvTable fwhmTableFromCsv = SpectralResponseFunction.readFwhmFromCsv(csvFile);
 
         assertEquals(List.of("wavelength", "fwhm"), fwhmTableFromCsv.header());
@@ -130,7 +130,7 @@ public class SpectralResponseFunctionTest {
 
         final URL fwhmResource = getClass().getResource("fwhm_" + srf.getID() + ".csv");
         assertNotNull(fwhmResource);
-        final File fwhmCsvFile = new File(fwhmResource.toURI());
+        final Path fwhmCsvFile = UrlHelper.urlToFile(fwhmResource);
         final CsvTable fwhmTable = SpectralResponseFunction.readFwhmFromCsv(fwhmCsvFile);
 
         srf.setFWHMList(fwhmTable);
@@ -176,7 +176,7 @@ public class SpectralResponseFunctionTest {
 
         final URL fwhmResource = getClass().getResource("fwhm_" + srf.getID() + ".csv");
         assertNotNull(fwhmResource);
-        final File fwhmCsvFile = new File(fwhmResource.toURI());
+        final Path fwhmCsvFile = UrlHelper.urlToFile(fwhmResource);
         final CsvTable fwhmTable = SpectralResponseFunction.readFwhmFromCsv(fwhmCsvFile);
 
         srf.setFWHMList(fwhmTable);
@@ -195,7 +195,7 @@ public class SpectralResponseFunctionTest {
 
         final URL fwhmResource = getClass().getResource("fwhm_" + srf.getID() + ".csv");
         assertNotNull(fwhmResource);
-        final File fwhmCsvFile = new File(fwhmResource.toURI());
+        final Path fwhmCsvFile = UrlHelper.urlToFile(fwhmResource);
         final CsvTable fwhmTable = SpectralResponseFunction.readFwhmFromCsv(fwhmCsvFile);
 
         srf.setFWHMList(fwhmTable);
@@ -214,7 +214,7 @@ public class SpectralResponseFunctionTest {
 
         final URL fwhmResource = getClass().getResource("fwhm_" + srf.getID() + ".csv");
         assertNotNull(fwhmResource);
-        final File fwhmCsvFile = new File(fwhmResource.toURI());
+        final Path fwhmCsvFile = UrlHelper.urlToFile(fwhmResource);
         final CsvTable fwhmTable = SpectralResponseFunction.readFwhmFromCsv(fwhmCsvFile);
 
         final double[][] fwhmTableColumnsAsArrays = SpectralResponseFunction.getFwhmTableColumnsAsArrays(fwhmTable);

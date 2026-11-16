@@ -1,25 +1,34 @@
 package org.esa.snap.speclib.io.envi;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.dataio.envi.EnviConstants;
-import org.esa.snap.speclib.model.*;
-import org.junit.Rule;
+import org.esa.snap.speclib.model.AttributeSchema;
+import org.esa.snap.speclib.model.AttributeType;
+import org.esa.snap.speclib.model.AttributeValue;
+import org.esa.snap.speclib.model.SpectralAxis;
+import org.esa.snap.speclib.model.SpectralLibrary;
+import org.esa.snap.speclib.model.SpectralProfile;
+import org.esa.snap.speclib.model.SpectralSignature;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 
 public class EnviCsvSidecarSupportTest {
 
 
-    @Rule
-    public TemporaryFolder tmp = new TemporaryFolder();
+    public Path tmp = IOHelper.createATempDir();
 
 
     @Test(expected = NullPointerException.class)
@@ -31,7 +40,7 @@ public class EnviCsvSidecarSupportTest {
     @Test
     @STTM("SNAP-4129")
     public void test_resolveCsvPath_hdrInput_returnsSiblingCsvSameBase() throws Exception {
-        Path hdr = tmp.newFile("lib" + EnviConstants.HDR_EXTENSION).toPath();
+        Path hdr = tmp.resolve("lib" + EnviConstants.HDR_EXTENSION);
         Path csv = EnviCsvSidecarSupport.resolveCsvPath(hdr);
 
         assertEquals(hdr.getParent(), csv.getParent());
@@ -41,7 +50,7 @@ public class EnviCsvSidecarSupportTest {
     @Test
     @STTM("SNAP-4129")
     public void test_resolveCsvPath_nonHdrInput_resolvesViaHdrExtension() throws Exception {
-        Path sli = tmp.newFile("lib.sli").toPath();
+        Path sli = tmp.resolve("lib.sli");
         Path csv = EnviCsvSidecarSupport.resolveCsvPath(sli);
 
         assertEquals(sli.getParent(), csv.getParent());
@@ -51,7 +60,7 @@ public class EnviCsvSidecarSupportTest {
     @Test
     @STTM("SNAP-4129")
     public void test_resolveCsvPath_noExtension_addsHdrThenCsv() throws Exception {
-        Path base = tmp.newFile("lib").toPath();
+        Path base = tmp.resolve("lib");
         Path csv = EnviCsvSidecarSupport.resolveCsvPath(base);
         assertEquals("lib.csv", csv.getFileName().toString());
     }
@@ -93,7 +102,7 @@ public class EnviCsvSidecarSupportTest {
     @Test(expected = NullPointerException.class)
     @STTM("SNAP-4129")
     public void test_writeIfNeeded_nullLib_throwsNpe() throws Exception {
-        Path p = tmp.newFile("lib" + EnviConstants.HDR_EXTENSION).toPath();
+        Path p = tmp.resolve("lib" + EnviConstants.HDR_EXTENSION);
         EnviCsvSidecarSupport.writeIfNeeded(null, p);
     }
 
@@ -107,7 +116,7 @@ public class EnviCsvSidecarSupportTest {
     @Test
     @STTM("SNAP-4129")
     public void test_writeIfNeeded_noAttributes_doesNotCreateCsv() throws Exception {
-        Path hdr = tmp.newFile("lib" + EnviConstants.HDR_EXTENSION).toPath();
+        Path hdr = tmp.resolve("lib" + EnviConstants.HDR_EXTENSION);
 
         SpectralAxis axis = new SpectralAxis(new double[]{1.0}, "nm");
         SpectralSignature sig = SpectralSignature.of(new double[]{0.1});
@@ -124,7 +133,7 @@ public class EnviCsvSidecarSupportTest {
     @Test
     @STTM("SNAP-4129")
     public void test_writeIfNeeded_withAttributes_createsCsv() throws Exception {
-        Path hdr = tmp.newFile("lib" + EnviConstants.HDR_EXTENSION).toPath();
+        Path hdr = tmp.resolve("lib" + EnviConstants.HDR_EXTENSION);
 
         SpectralAxis axis = new SpectralAxis(new double[]{1.0}, "nm");
         SpectralSignature sig = SpectralSignature.of(new double[]{0.1});
@@ -153,7 +162,7 @@ public class EnviCsvSidecarSupportTest {
     @Test(expected = NullPointerException.class)
     @STTM("SNAP-4129")
     public void test_mergeIfPresent_nullLib_throwsNpe() throws Exception {
-        Path hdr = tmp.newFile("lib" + EnviConstants.HDR_EXTENSION).toPath();
+        Path hdr = tmp.resolve("lib" + EnviConstants.HDR_EXTENSION);
         EnviCsvSidecarSupport.mergeIfPresent(null, hdr);
     }
 
@@ -167,7 +176,7 @@ public class EnviCsvSidecarSupportTest {
     @Test
     @STTM("SNAP-4129")
     public void test_mergeIfPresent_csvMissing_returnsSameInstance() throws Exception {
-        Path hdr = tmp.newFile("lib" + EnviConstants.HDR_EXTENSION).toPath();
+        Path hdr = tmp.resolve("lib" + EnviConstants.HDR_EXTENSION);
         Path csv = EnviCsvSidecarSupport.resolveCsvPath(hdr);
         Files.deleteIfExists(csv);
 
@@ -183,7 +192,7 @@ public class EnviCsvSidecarSupportTest {
     @Test
     @STTM("SNAP-4129")
     public void test_mergeIfPresent_mergesAttributesByIndex_andKeepsMeta() throws Exception {
-        Path hdr = tmp.newFile("lib" + EnviConstants.HDR_EXTENSION).toPath();
+        Path hdr = tmp.resolve("lib" + EnviConstants.HDR_EXTENSION);
         Path csv = EnviCsvSidecarSupport.resolveCsvPath(hdr);
 
         SpectralAxis axis = new SpectralAxis(new double[]{1.0}, "nm");
@@ -226,7 +235,7 @@ public class EnviCsvSidecarSupportTest {
     @Test
     @STTM("SNAP-4129")
     public void test_mergeIfPresent_ignoresNullProfileAndNullNameInCsvLibRows() throws Exception {
-        Path hdr = tmp.newFile("lib" + EnviConstants.HDR_EXTENSION).toPath();
+        Path hdr = tmp.resolve("lib" + EnviConstants.HDR_EXTENSION);
         Path csv = EnviCsvSidecarSupport.resolveCsvPath(hdr);
 
         Files.writeString(csv, "spectra names,a\n\"\",1\nP1,2\n", StandardCharsets.UTF_8);

@@ -1,5 +1,7 @@
 package org.esa.snap.speclib.io.envi;
 
+import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.envi.DataTypeUtils;
 import org.esa.snap.dataio.envi.EnviConstants;
 import org.esa.snap.dataio.envi.EnviProductReader;
@@ -13,13 +15,10 @@ import org.esa.snap.speclib.model.SpectralLibrary;
 import org.esa.snap.speclib.model.SpectralProfile;
 import org.esa.snap.speclib.model.SpectralSignature;
 
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -60,7 +59,6 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIODelegate {
         Objects.requireNonNull(path, "path must not be null");
 
         Path hdrPath = resolveHdrPath(path);
-        File hdrFile = hdrPath.toFile();
         if (!Files.exists(hdrPath)) {
             throw new IOException("ENVI header not found: " + hdrPath);
         }
@@ -122,13 +120,13 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIODelegate {
         ByteOrder order = header.getJavaByteOrder();
         int offset = header.getHeaderOffset();
 
-        File dataFile = resolveDataFile(hdrFile);
-        if (!dataFile.exists()) {
-            throw new IOException("ENVI data file not found for header: " + hdrFile.getPath());
+        Path dataFile = resolveDataFile(hdrPath);
+        if (!Files.exists(dataFile)) {
+            throw new IOException("ENVI data file not found for header: " + hdrPath);
         }
 
         List<SpectralProfile> profiles = new ArrayList<>(lines);
-        try (ImageInputStream in = new FileImageInputStream(dataFile)) {
+        try (ImageInputStream in = ImageUtils.getImageInputStream(dataFile)) {
             in.setByteOrder(order);
             if (offset > 0) {
                 in.seek(offset);
@@ -195,7 +193,7 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIODelegate {
             writeBraceList(w, KEY_SPECTRA_NAMES, library.getProfiles().stream().map(SpectralProfile::getName).toArray(String[]::new));
         }
 
-        try (ImageOutputStream out = new FileImageOutputStream(dataPath.toFile())) {
+        try (ImageOutputStream out = ImageUtils.getImageOutputStream(dataPath)) {
             out.setByteOrder(ByteOrder.LITTLE_ENDIAN);
             for (SpectralProfile p : library.getProfiles()) {
                 double[] v = p.getSignature().getValues();
@@ -251,10 +249,9 @@ public class EnviSpectralLibraryIO implements SpectralLibraryIODelegate {
         return path.resolveSibling(base + ".sli");
     }
 
-    private static File resolveDataFile(File hdrFile) throws IOException {
-        String base = IOUtils.stripExtension(hdrFile.getName());
-        File siblingSli = new File(hdrFile.getParentFile(), base + ".sli");
-        if (siblingSli.exists()) {
+    private static Path resolveDataFile(Path hdrFile) throws IOException {
+        Path siblingSli = FileUtils.exchangeExtension(hdrFile,".sli");
+        if (Files.exists(siblingSli)) {
             return siblingSli;
         }
 

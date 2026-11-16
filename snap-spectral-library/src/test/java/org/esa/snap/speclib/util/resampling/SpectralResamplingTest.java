@@ -1,16 +1,20 @@
 package org.esa.snap.speclib.util.resampling;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.speclib.io.csv.util.CsvTable;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class SpectralResamplingTest {
 
@@ -181,7 +185,7 @@ public class SpectralResamplingTest {
 
         final URL resource = getClass().getResource("fwhm_" + srf.getID() + ".csv");
         assertNotNull(resource);
-        final File csvFile = new File(resource.toURI());
+        final Path csvFile = UrlHelper.urlToFile(resource);
         final CsvTable fwhmTable = SpectralResponseFunction.readFwhmFromCsv(csvFile);
 
         srf.setFWHMList(fwhmTable);

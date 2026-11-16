@@ -1,6 +1,8 @@
 package org.esa.snap.speclib.io.envi;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.dataio.envi.EnviConstants;
 import org.esa.snap.speclib.model.SpectralAxis;
 import org.esa.snap.speclib.model.SpectralLibrary;
@@ -8,8 +10,6 @@ import org.esa.snap.speclib.model.SpectralProfile;
 import org.esa.snap.speclib.model.SpectralSignature;
 import org.junit.Test;
 
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
@@ -19,7 +19,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 
 public class EnviSpectralLibraryIOTest {
@@ -33,7 +36,7 @@ public class EnviSpectralLibraryIOTest {
         EnviSpectralLibraryIO io = new EnviSpectralLibraryIO();
 
         assertThrows(NullPointerException.class, () -> io.read(null));
-        assertThrows(NullPointerException.class, () -> io.write(null, Path.of("x.hdr")));
+        assertThrows(NullPointerException.class, () -> io.write(null, IOHelper.createATempDir().resolve("x.hdr")));
 
         SpectralAxis axis = new SpectralAxis(new double[]{1, 2}, "nm");
         SpectralLibrary lib = SpectralLibrary.create("L", axis, null);
@@ -49,7 +52,7 @@ public class EnviSpectralLibraryIOTest {
         SpectralLibrary lib = SpectralLibrary.create("L", axis, null)
                 .withProfileAdded(SpectralProfile.create("P", SpectralSignature.of(new double[]{1, 2})));
 
-        Path dir = Files.createTempDirectory("sli-path");
+        Path dir = IOHelper.createATempDir("sli-path");
         Path base = dir.resolve("mylib");
 
         io.write(lib, base);
@@ -63,7 +66,7 @@ public class EnviSpectralLibraryIOTest {
     public void test_read_pathWithoutHdrExtension_resolvesHdr() throws Exception {
         EnviSpectralLibraryIO io = new EnviSpectralLibraryIO();
 
-        Path dir = Files.createTempDirectory("sli-readpath");
+        Path dir = IOHelper.createATempDir("sli-readpath");
         Path hdr = dir.resolve("x.hdr");
         Path sli = dir.resolve("x.sli");
 
@@ -79,7 +82,7 @@ public class EnviSpectralLibraryIOTest {
                 "spectra names", "{A}",
                 "data ignore value", "-9999"
         );
-        try (ImageOutputStream out = new FileImageOutputStream(sli.toFile())) {
+        try (ImageOutputStream out = ImageUtils.getImageOutputStream(sli)) {
             out.setByteOrder(ByteOrder.LITTLE_ENDIAN);
             out.writeDouble(1.0);
             out.writeDouble(2.0);
@@ -92,7 +95,7 @@ public class EnviSpectralLibraryIOTest {
     @STTM("SNAP-4129")
     public void test_read_missingHeader_throws() throws Exception {
         EnviSpectralLibraryIO io = new EnviSpectralLibraryIO();
-        Path dir = Files.createTempDirectory("sli-nohdr");
+        Path dir = IOHelper.createATempDir("sli-nohdr");
         Path missing = dir.resolve("missing.hdr");
         assertThrows(IOException.class, () -> io.read(missing));
     }
@@ -100,7 +103,7 @@ public class EnviSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_rejectsBandsNotOne() throws Exception {
-        Path dir = Files.createTempDirectory("sli-bands");
+        Path dir = IOHelper.createATempDir("sli-bands");
         Path hdr = dir.resolve("x.hdr");
         writeHdr(hdr,
                 "samples", "1",
@@ -119,7 +122,7 @@ public class EnviSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_wavelengthCountMismatch_throws() throws Exception {
-        Path dir = Files.createTempDirectory("sli-wlm");
+        Path dir = IOHelper.createATempDir("sli-wlm");
         Path hdr = dir.resolve("x.hdr");
         writeHdr(hdr,
                 "samples", "2",
@@ -138,7 +141,7 @@ public class EnviSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_defaultSpectraNamesWhenMissing() throws Exception {
-        Path dir = Files.createTempDirectory("sli-defnames");
+        Path dir = IOHelper.createATempDir("sli-defnames");
         Path hdr = dir.resolve("x.hdr");
         Path sli = dir.resolve("x.sli");
 
@@ -154,7 +157,7 @@ public class EnviSpectralLibraryIOTest {
                 "wavelength units", "nm",
                 "data ignore value", "-9999"
         );
-        try (ImageOutputStream out = new FileImageOutputStream(sli.toFile())) {
+        try (ImageOutputStream out = ImageUtils.getImageOutputStream(sli)) {
             out.setByteOrder(ByteOrder.LITTLE_ENDIAN);
             out.writeDouble(1); out.writeDouble(2);
             out.writeDouble(3); out.writeDouble(4);
@@ -169,7 +172,7 @@ public class EnviSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_spectraNamesCountMismatch_throws() throws Exception {
-        Path dir = Files.createTempDirectory("sli-nmismatch");
+        Path dir = IOHelper.createATempDir("sli-nmismatch");
         Path hdr = dir.resolve("x.hdr");
         writeHdr(hdr,
                 "samples", "1",
@@ -188,7 +191,7 @@ public class EnviSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_missingWavelengthUnits_isToleratedAsEmptyString() throws Exception {
-        Path dir = Files.createTempDirectory("sli-wlunit");
+        Path dir = IOHelper.createATempDir("sli-wlunit");
         Path hdr = dir.resolve("x.hdr");
         Path sli = dir.resolve("x.sli");
 
@@ -203,7 +206,7 @@ public class EnviSpectralLibraryIOTest {
                 "wavelength", "{1}",
                 "spectra names", "{A}"
         );
-        try (ImageOutputStream out = new FileImageOutputStream(sli.toFile())) {
+        try (ImageOutputStream out = ImageUtils.getImageOutputStream(sli)) {
             out.setByteOrder(ByteOrder.LITTLE_ENDIAN);
             out.writeDouble(7);
         }
@@ -216,7 +219,7 @@ public class EnviSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_missingDataFile_throws() throws Exception {
-        Path dir = Files.createTempDirectory("sli-nodata");
+        Path dir = IOHelper.createATempDir("sli-nodata");
         Path hdr = dir.resolve("x.hdr");
         writeHdr(hdr,
                 "samples", "1",
@@ -237,7 +240,7 @@ public class EnviSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_unsupportedDataType_throws() throws Exception {
-        Path dir = Files.createTempDirectory("sli-udt");
+        Path dir = IOHelper.createATempDir("sli-udt");
         Path hdr = dir.resolve("x.hdr");
         writeHdr(hdr,
                 "samples", "1",
@@ -256,7 +259,7 @@ public class EnviSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_headerOffsetIsRespected() throws Exception {
-        Path dir = Files.createTempDirectory("sli-offset");
+        Path dir = IOHelper.createATempDir("sli-offset");
         Path hdr = dir.resolve("x.hdr");
         Path sli = dir.resolve("x.sli");
 
@@ -273,7 +276,7 @@ public class EnviSpectralLibraryIOTest {
                 "spectra names", "{A}"
         );
 
-        try (ImageOutputStream out = new FileImageOutputStream(sli.toFile())) {
+        try (ImageOutputStream out = ImageUtils.getImageOutputStream(sli)) {
             out.setByteOrder(ByteOrder.LITTLE_ENDIAN);
             out.writeLong(123456L);
             out.writeDouble(9.0);
@@ -299,7 +302,7 @@ public class EnviSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_mapsDefaultNoDataWhenHeaderMissingDataIgnoreValue() throws Exception {
-        Path dir = Files.createTempDirectory("sli-nodata-default");
+        Path dir = IOHelper.createATempDir("sli-nodata-default");
         Path hdr = dir.resolve("x.hdr");
         Path sli = dir.resolve("x.sli");
 
@@ -316,7 +319,7 @@ public class EnviSpectralLibraryIOTest {
                 "spectra names", "{A}"
         );
 
-        try (ImageOutputStream out = new FileImageOutputStream(sli.toFile())) {
+        try (ImageOutputStream out = ImageUtils.getImageOutputStream(sli)) {
             out.setByteOrder(ByteOrder.LITTLE_ENDIAN);
             out.writeDouble(-9999.0);
         }
@@ -330,7 +333,7 @@ public class EnviSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_rejectsNullFileType() throws Exception {
-        Path dir = Files.createTempDirectory("sli-nullfiletype");
+        Path dir = IOHelper.createATempDir("sli-nullfiletype");
         Path hdr = dir.resolve("x.hdr");
         writeHdr(hdr,
                 "samples", "1",
@@ -349,7 +352,7 @@ public class EnviSpectralLibraryIOTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_rejectsWrongFileType() throws Exception {
-        Path dir = Files.createTempDirectory("sli-wrongfiletype");
+        Path dir = IOHelper.createATempDir("sli-wrongfiletype");
         Path hdr = dir.resolve("x.hdr");
         Files.writeString(hdr,
                 "ENVI\n" +
@@ -374,13 +377,13 @@ public class EnviSpectralLibraryIOTest {
         SpectralLibrary lib = SpectralLibrary.create("L", axis, null)
                 .withProfileAdded(SpectralProfile.create("P", SpectralSignature.of(new double[]{Double.NaN, Double.POSITIVE_INFINITY})));
 
-        Path dir = Files.createTempDirectory("sli-naninf");
+        Path dir = IOHelper.createATempDir("sli-naninf");
         Path hdr = dir.resolve("x.hdr");
         Path sli = dir.resolve("x.sli");
 
         io.write(lib, hdr);
 
-        try (var in = new FileImageInputStream(sli.toFile())) {
+        try (var in = ImageUtils.getImageInputStream(sli)) {
             in.setByteOrder(ByteOrder.LITTLE_ENDIAN);
             double a = in.readDouble();
             double b = in.readDouble();
@@ -398,7 +401,7 @@ public class EnviSpectralLibraryIOTest {
         SpectralLibrary lib = SpectralLibrary.create("L", axis, null)
                 .withProfileAdded(SpectralProfile.create("P", SpectralSignature.of(new double[]{1})));
 
-        Path dir = Files.createTempDirectory("sli-pathsli");
+        Path dir = IOHelper.createATempDir("sli-pathsli");
         Path sliPath = dir.resolve("x.sli");
 
         io.write(lib, sliPath);
@@ -450,7 +453,7 @@ public class EnviSpectralLibraryIOTest {
 
     private void typeRoundTrip(int enviType, ByteOrder order, WriterFn writer, double expected) throws Exception {
         EnviSpectralLibraryIO io = new EnviSpectralLibraryIO();
-        Path dir = Files.createTempDirectory("sli-type-" + enviType);
+        Path dir = IOHelper.createATempDir("sli-type-" + enviType);
         Path hdr = dir.resolve("x.hdr");
         Path sli = dir.resolve("x.sli");
 
@@ -470,7 +473,7 @@ public class EnviSpectralLibraryIOTest {
                 "data ignore value", "-9999"
         );
 
-        try (ImageOutputStream out = new FileImageOutputStream(sli.toFile())) {
+        try (ImageOutputStream out = ImageUtils.getImageOutputStream(sli)) {
             out.setByteOrder(order);
             writer.write(out);
         }

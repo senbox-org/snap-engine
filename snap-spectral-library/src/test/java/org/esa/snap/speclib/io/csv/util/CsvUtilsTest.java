@@ -1,29 +1,29 @@
 package org.esa.snap.speclib.io.csv.util;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.speclib.model.AttributeType;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class CsvUtilsTest {
 
 
-    @Rule
-    public TemporaryFolder tmp = new TemporaryFolder();
+    public Path tmp = IOHelper.createATempDir();
 
 
     @Test(expected = NullPointerException.class)
@@ -41,21 +41,21 @@ public class CsvUtilsTest {
     @Test(expected = NullPointerException.class)
     @STTM("SNAP-4129")
     public void test_write_nullHeader_throwsNpe() throws Exception {
-        Path p = tmp.newFile("x.csv").toPath();
+        Path p = tmp.resolve("x.csv");
         CsvUtils.write(p, null, List.of(List.of("v")));
     }
 
     @Test(expected = NullPointerException.class)
     @STTM("SNAP-4129")
     public void test_write_nullRows_throwsNpe() throws Exception {
-        Path p = tmp.newFile("x.csv").toPath();
+        Path p = tmp.resolve("x.csv");
         CsvUtils.write(p, List.of("h"), null);
     }
 
     @Test
     @STTM("SNAP-4129")
     public void test_read_emptyFile_returnsEmptyTable() throws Exception {
-        Path p = tmp.newFile("empty.csv").toPath();
+        Path p = tmp.resolve("empty.csv");
         Files.writeString(p, "", StandardCharsets.UTF_8);
 
         CsvTable t = CsvUtils.read(p);
@@ -67,7 +67,7 @@ public class CsvUtilsTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_bomIsRemovedFromFirstHeaderCell() throws Exception {
-        Path p = tmp.newFile("bom.csv").toPath();
+        Path p = tmp.resolve("bom.csv");
         Files.writeString(p, "\uFEFFa,b\n1,2\n", StandardCharsets.UTF_8);
 
         CsvTable t = CsvUtils.read(p);
@@ -79,7 +79,7 @@ public class CsvUtilsTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_eofWithoutNewline_flushesLastRow() throws Exception {
-        Path p = tmp.newFile("eof.csv").toPath();
+        Path p = tmp.resolve("eof.csv");
         Files.writeString(p, "h1,h2\nv1,v2", StandardCharsets.UTF_8);
 
         CsvTable t = CsvUtils.read(p);
@@ -91,7 +91,7 @@ public class CsvUtilsTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_trailingCommaAtEof_addsEmptyLastCell() throws Exception {
-        Path p = tmp.newFile("trail.csv").toPath();
+        Path p = tmp.resolve("trail.csv");
         Files.writeString(p, "h1,h2,\n1,2,", StandardCharsets.UTF_8);
 
         CsvTable t = CsvUtils.read(p);
@@ -103,7 +103,7 @@ public class CsvUtilsTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_handlesCRLF_andStandaloneCR() throws Exception {
-        Path p = tmp.newFile("cr.csv").toPath();
+        Path p = tmp.resolve("cr.csv");
         Files.writeString(p, "h1,h2\r\nv1,v2\ra,b\n", StandardCharsets.UTF_8);
 
         CsvTable t = CsvUtils.read(p);
@@ -116,7 +116,7 @@ public class CsvUtilsTest {
     @Test(expected = IOException.class)
     @STTM("SNAP-4129")
     public void test_read_unclosedQuote_throwsIOException() throws Exception {
-        Path p = tmp.newFile("bad.csv").toPath();
+        Path p = tmp.resolve("bad.csv");
         Files.writeString(p, "h1\n\"x", StandardCharsets.UTF_8);
         CsvUtils.read(p);
     }
@@ -124,7 +124,7 @@ public class CsvUtilsTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_quotesEscapesCommasAndNewlinesInsideQuotes() throws Exception {
-        Path p = tmp.newFile("quotes.csv").toPath();
+        Path p = tmp.resolve("quotes.csv");
 
         String csv = ""
                 + "c1,c2\n"
@@ -147,7 +147,7 @@ public class CsvUtilsTest {
     @Test
     @STTM("SNAP-4129")
     public void test_read_quoteCloseAtEof_noResetNeeded() throws Exception {
-        Path p = tmp.newFile("quote_eof.csv").toPath();
+        Path p = tmp.resolve("quote_eof.csv");
 
         Files.writeString(p, "h1\n\"x\"", StandardCharsets.UTF_8);
 
@@ -161,8 +161,7 @@ public class CsvUtilsTest {
     @Test
     @STTM("SNAP-4129")
     public void test_write_then_read_roundtrip_escapesSpecialCharsAndNulls() throws Exception {
-        File f = tmp.newFile("roundtrip.csv");
-        Path p = f.toPath();
+        Path p = tmp.resolve("roundtrip.csv");
 
         List<String> header = new ArrayList<>(Arrays.asList("plain", "a,b", "c\"d", "e\nf", "g\rg", null));
 
