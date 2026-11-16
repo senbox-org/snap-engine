@@ -16,10 +16,12 @@
 
 package de.gkss.hs.datev2004;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
@@ -28,8 +30,12 @@ import static org.junit.Assert.assertNotNull;
 public class ClucovTest {
 
     @Test
-    public void testClucov() throws IOException, URISyntaxException {
-        DataSet ds = new DataSet(ClucovTest.class.getResource("iris.mdda").toURI().getPath());
+    public void testClucov() throws IOException {
+        final URL fileURL = ClucovTest.class.getResource("iris.mdda");
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
+        assertNotNull(file);
+        DataSet ds = new DataSet(file.toString());
         Random rgen = new Random(12345);
 
         Clucov clucov = new Clucov(ds, rgen);

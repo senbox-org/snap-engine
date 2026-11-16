@@ -20,8 +20,9 @@ import Jama.Matrix;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
@@ -83,7 +84,8 @@ public class DataSet {
             int weighted;
             int dimension;
             double[][] df;
-            try (BufferedReader in = new BufferedReader(new FileReader(filename))) {
+            final Path filepath = Path.of(filename);
+            try (BufferedReader in = Files.newBufferedReader(filepath)) {
                 String eing = "";
                 while (!eing.equals("$")) {
                     eing = in.readLine();
