@@ -17,6 +17,7 @@
 
 package org.esa.snap.lib.openjpeg.dataio;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.lib.openjpeg.utils.CommandOutput;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegUtils;
@@ -25,12 +26,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -45,10 +45,12 @@ public class OpjDumpTest {
     }
 
     @Test
-    public void testGetTileLayoutFromOpjDump() throws URISyntaxException, IOException {
+    public void testGetTileLayoutFromOpjDump() throws IOException {
         String jp2Path = "/org/esa/snap/lib/openjpeg/dataio/s2/l2a/S2A_USER_MSI_L2A_TL_MPS__20150210T180608_A000069_T14RMQ_B03_20m.jp2";
 
-        final Path pathToJP2File = Paths.get(OpjDumpTest.class.getResource(jp2Path).toURI());
+        final URL fileURL = OpjDumpTest.class.getResource(jp2Path);
+        assertNotNull(fileURL);
+        final Path pathToJP2File = UrlHelper.urlToFile(fileURL);
         try {
             OpenJpegUtils.getTileLayoutWithOpenJPEG(opjDumpPath.toAbsolutePath().toString(), pathToJP2File);
         } catch (InterruptedException e) {
@@ -58,14 +60,14 @@ public class OpjDumpTest {
     }
 
     @Test
-    public void testLaunchOpjDump() throws URISyntaxException, IOException {
+    public void testLaunchOpjDump() throws IOException {
         String jp2Path = "/org/esa/snap/lib/openjpeg/dataio/s2/l2a/S2A_USER_MSI_L2A_TL_MPS__20150210T180608_A000069_T14RMQ_B03_20m.jp2";
 
-        String pathToJp2File = OpjDumpTest.class.getResource(jp2Path).toURI().getPath();
-
-        if(IS_OS_WINDOWS) {
-            pathToJp2File = pathToJp2File.substring(1);
-        }
+        final URL fileURL = OpjDumpTest.class.getResource(jp2Path);
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
+        assertNotNull(file);
+        String pathToJp2File = file.toAbsolutePath().toString();
 
         ProcessBuilder builder = new ProcessBuilder(opjDumpPath.toAbsolutePath().toString(), "-i", pathToJp2File);
 

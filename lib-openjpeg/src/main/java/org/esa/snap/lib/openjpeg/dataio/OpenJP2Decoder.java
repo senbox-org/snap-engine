@@ -1,5 +1,6 @@
 package org.esa.snap.lib.openjpeg.dataio;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 import org.esa.snap.core.util.SystemUtils;
@@ -24,7 +25,6 @@ import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -91,7 +91,7 @@ public class OpenJP2Decoder implements AutoCloseable {
         String tileFileName="";
         try {
             if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
-                tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator
+                tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + IOHelper.SEPARATOR
                         + tileFile.getName(tileFile.getNameCount() - 1);
                 this.tileFile = cacheDir.resolve(tileFileName);
             }

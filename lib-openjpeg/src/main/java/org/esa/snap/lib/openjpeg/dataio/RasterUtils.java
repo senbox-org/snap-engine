@@ -1,5 +1,6 @@
 package org.esa.snap.lib.openjpeg.dataio;
 
+import com.bc.ceres.core.io.EnhancedNIORandomAccessFile;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import org.esa.snap.core.util.SystemUtils;
@@ -7,13 +8,13 @@ import org.esa.snap.core.util.SystemUtils;
 import java.awt.*;
 import java.awt.image.*;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -64,44 +65,41 @@ public class RasterUtils {
         int width, height;
         byte[] values;
         TileImageDescriptor<byte[]> descriptor;
-        try (RandomAccessFile in = new RandomAccessFile(path.toFile(), "r")) {
-            try (FileChannel file = in.getChannel()) {
-                buf = file.map(FileChannel.MapMode.READ_ONLY, 0, size);
-                width = buf.getInt();
-                height = buf.getInt();
-                int offset = 8;
-                int byteLen = size - offset;
-                if (roi == null) {
-                    values = new byte[byteLen];
-                    for (int i = 0; i < values.length; i++) {
-                        values[i] = buf.get();
-                    }
-                } else {
-                    values = new byte[roi.width * roi.height];
-                    int srcPos;
-                    int dstPos;
-                    int maxVal = Math.min(roi.y + roi.height, height);
-                    int fileOffset;
-                    for (int col = roi.y; col < maxVal; col++) {
-                        try {
-                            srcPos = roi.x + col * width;
-                            dstPos = (col - roi.y) * roi.width;
-                            if (srcPos < byteLen && dstPos < values.length) {
-                                fileOffset = offset + srcPos;
-                                for (int i = 0; i < Math.min(roi.width, byteLen - srcPos); i++) {
-                                    values[dstPos + i] = buf.get(fileOffset + i);
-                                }
-                            }
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    width = roi.width;
-                    height = roi.height;
+        try (EnhancedNIORandomAccessFile in = new EnhancedNIORandomAccessFile(path, StandardOpenOption.READ)) {
+            buf = in.withChannel(file -> file.map(FileChannel.MapMode.READ_ONLY, 0, size));
+            width = buf.getInt();
+            height = buf.getInt();
+            int offset = 8;
+            int byteLen = size - offset;
+            if (roi == null) {
+                values = new byte[byteLen];
+                for (int i = 0; i < values.length; i++) {
+                    values[i] = buf.get();
                 }
-                descriptor = new TileImageDescriptor<>(width, height, values);
+            } else {
+                values = new byte[roi.width * roi.height];
+                int srcPos;
+                int dstPos;
+                int maxVal = Math.min(roi.y + roi.height, height);
+                int fileOffset;
+                for (int col = roi.y; col < maxVal; col++) {
+                    try {
+                        srcPos = roi.x + col * width;
+                        dstPos = (col - roi.y) * roi.width;
+                        if (srcPos < byteLen && dstPos < values.length) {
+                            fileOffset = offset + srcPos;
+                            for (int i = 0; i < Math.min(roi.width, byteLen - srcPos); i++) {
+                                values[dstPos + i] = buf.get(fileOffset + i);
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                width = roi.width;
+                height = roi.height;
             }
-            in.close();
+            descriptor = new TileImageDescriptor<>(width, height, values);
         }
         return descriptor;
     }
@@ -118,44 +116,41 @@ public class RasterUtils {
         int width, height;
         short[] values;
         TileImageDescriptor<short[]> descriptor;
-        try (RandomAccessFile in = new RandomAccessFile(path.toFile(), "r")) {
-            try (FileChannel file = in.getChannel()) {
-                buf = file.map(FileChannel.MapMode.READ_ONLY, 0, size);
-                width = buf.getInt();
-                height = buf.getInt();
-                int offset = 2 * SIZE_OF_INT;
-                int shortLen = (size - offset) / SIZE_OF_SHORT;
-                if (roi == null) {
-                    values = new short[shortLen];
-                    for (int i = 0; i < values.length; i++) {
-                        values[i] = buf.getShort();
-                    }
-                } else {
-                    values = new short[roi.width * roi.height];
-                    int srcPos;
-                    int dstPos;
-                    int maxVal = Math.min(roi.y + roi.height, height);
-                    int fileOffset;
-                    for (int col = roi.y; col < maxVal; col++) {
-                        try {
-                            srcPos = roi.x + col * width;
-                            dstPos = (col - roi.y) * roi.width;
-                            if (srcPos < shortLen && dstPos < values.length) {
-                                fileOffset = offset + srcPos * SIZE_OF_SHORT;
-                                for (int i = 0; i < Math.min(roi.width, shortLen - srcPos); i++) {
-                                    values[dstPos + i] = buf.getShort(fileOffset + i * SIZE_OF_SHORT);
-                                }
-                            }
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    width = roi.width;
-                    height = roi.height;
+        try (EnhancedNIORandomAccessFile in = new EnhancedNIORandomAccessFile(path, StandardOpenOption.READ)) {
+            buf = in.withChannel(file -> file.map(FileChannel.MapMode.READ_ONLY, 0, size));
+            width = buf.getInt();
+            height = buf.getInt();
+            int offset = 2 * SIZE_OF_INT;
+            int shortLen = (size - offset) / SIZE_OF_SHORT;
+            if (roi == null) {
+                values = new short[shortLen];
+                for (int i = 0; i < values.length; i++) {
+                    values[i] = buf.getShort();
                 }
-                descriptor = new TileImageDescriptor<>(width, height, values);
+            } else {
+                values = new short[roi.width * roi.height];
+                int srcPos;
+                int dstPos;
+                int maxVal = Math.min(roi.y + roi.height, height);
+                int fileOffset;
+                for (int col = roi.y; col < maxVal; col++) {
+                    try {
+                        srcPos = roi.x + col * width;
+                        dstPos = (col - roi.y) * roi.width;
+                        if (srcPos < shortLen && dstPos < values.length) {
+                            fileOffset = offset + srcPos * SIZE_OF_SHORT;
+                            for (int i = 0; i < Math.min(roi.width, shortLen - srcPos); i++) {
+                                values[dstPos + i] = buf.getShort(fileOffset + i * SIZE_OF_SHORT);
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                width = roi.width;
+                height = roi.height;
             }
-            in.close();
+            descriptor = new TileImageDescriptor<>(width, height, values);
         }
         return descriptor;
     }
@@ -172,44 +167,41 @@ public class RasterUtils {
         int width, height;
         int[] values;
         TileImageDescriptor<int[]> descriptor;
-        try (RandomAccessFile in = new RandomAccessFile(path.toFile(), "r")) {
-            try (FileChannel file = in.getChannel()) {
-                buf = file.map(FileChannel.MapMode.READ_ONLY, 0, size);
-                width = buf.getInt();
-                height = buf.getInt();
-                int offset = 2 * SIZE_OF_INT;
-                int intLen = (size - offset) / SIZE_OF_INT;
-                if (roi == null) {
-                    values = new int[intLen];
-                    for (int i = 0; i < values.length; i++) {
-                        values[i] = buf.getInt();
-                    }
-                } else {
-                    values = new int[roi.width * roi.height];
-                    int srcPos;
-                    int dstPos;
-                    int maxVal = Math.min(roi.y + roi.height, height);
-                    int fileOffset;
-                    for (int col = roi.y; col < maxVal; col++) {
-                        try {
-                            srcPos = roi.x + col * width;
-                            dstPos = (col - roi.y) * roi.width;
-                            if (srcPos < intLen && dstPos < values.length) {
-                                fileOffset = offset + srcPos * SIZE_OF_INT;
-                                for (int i = 0; i < Math.min(roi.width, intLen - srcPos); i++) {
-                                    values[dstPos + i] = buf.getShort(fileOffset + i * SIZE_OF_INT);
-                                }
-                            }
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    width = roi.width;
-                    height = roi.height;
+        try (EnhancedNIORandomAccessFile in = new EnhancedNIORandomAccessFile(path, StandardOpenOption.READ)) {
+            buf = in.withChannel(file -> file.map(FileChannel.MapMode.READ_ONLY, 0, size));
+            width = buf.getInt();
+            height = buf.getInt();
+            int offset = 2 * SIZE_OF_INT;
+            int intLen = (size - offset) / SIZE_OF_INT;
+            if (roi == null) {
+                values = new int[intLen];
+                for (int i = 0; i < values.length; i++) {
+                    values[i] = buf.getInt();
                 }
-                descriptor = new TileImageDescriptor<>(width, height, values);
+            } else {
+                values = new int[roi.width * roi.height];
+                int srcPos;
+                int dstPos;
+                int maxVal = Math.min(roi.y + roi.height, height);
+                int fileOffset;
+                for (int col = roi.y; col < maxVal; col++) {
+                    try {
+                        srcPos = roi.x + col * width;
+                        dstPos = (col - roi.y) * roi.width;
+                        if (srcPos < intLen && dstPos < values.length) {
+                            fileOffset = offset + srcPos * SIZE_OF_INT;
+                            for (int i = 0; i < Math.min(roi.width, intLen - srcPos); i++) {
+                                values[dstPos + i] = buf.getShort(fileOffset + i * SIZE_OF_INT);
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                width = roi.width;
+                height = roi.height;
             }
-            in.close();
+            descriptor = new TileImageDescriptor<>(width, height, values);
         }
         return descriptor;
     }
@@ -393,9 +385,8 @@ public class RasterUtils {
                 pixSize = 4;
                 break;
         }
-        try (RandomAccessFile raf = new RandomAccessFile(toFile.toFile(), "rw");
-             FileChannel file = raf.getChannel()) {
-            ByteBuffer buffer = file.map(FileChannel.MapMode.READ_WRITE, 0, (long) pixSize * values.length + 8);
+        try (EnhancedNIORandomAccessFile raf = new EnhancedNIORandomAccessFile(toFile, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+            ByteBuffer buffer = raf.withChannel(channel -> channel.map(FileChannel.MapMode.READ_WRITE, 0, (long) pixSize * values.length + 8));
             buffer.putInt(width);
             buffer.putInt(height);
             if (pixSize == 4) {

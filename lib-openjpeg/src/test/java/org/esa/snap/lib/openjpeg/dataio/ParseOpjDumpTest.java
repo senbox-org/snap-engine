@@ -17,27 +17,32 @@
 
 package org.esa.snap.lib.openjpeg.dataio;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.lib.openjpeg.jp2.TileLayout;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegUtils;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ParseOpjDumpTest {
 
     @Test
-    public void testRun4() throws URISyntaxException, IOException
+    public void testRun4() throws IOException
     {
         String jp2Path = "/org/esa/snap/lib/openjpeg/dataio/s2/l2a/out.txt";
-        final File file = new File(ParseOpjDumpTest.class.getResource(jp2Path).toURI());
+        final URL fileURL = ParseOpjDumpTest.class.getResource(jp2Path);
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
+        assertNotNull(file);
 
-        List<String> content = Files.readAllLines(file.toPath());
+        List<String> content = Files.readAllLines(file);
 
         TileLayout result = OpenJpegUtils.parseOpjDump(content);
         
@@ -51,12 +56,15 @@ public class ParseOpjDumpTest {
     }
 
     @Test
-    public void testRun5() throws URISyntaxException, IOException
+    public void testRun5() throws IOException
     {
         String jp2Path = "/org/esa/snap/lib/openjpeg/dataio/s2/l1c/out.txt";
-        final File file = new File(ParseOpjDumpTest.class.getResource(jp2Path).toURI());
+        final URL fileURL = ParseOpjDumpTest.class.getResource(jp2Path);
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
+        assertNotNull(file);
 
-        List<String> content = Files.readAllLines(file.toPath());
+        List<String> content = Files.readAllLines(file);
 
         TileLayout result = OpenJpegUtils.parseOpjDump(content);
 

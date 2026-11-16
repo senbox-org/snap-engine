@@ -17,18 +17,23 @@
 
 package org.esa.snap.lib.openjpeg.jp2;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.lib.openjpeg.jp2.boxes.FileTypeBox;
 import org.esa.snap.lib.openjpeg.jp2.boxes.ImageHeaderBox;
 import org.esa.snap.lib.openjpeg.jp2.boxes.Jpeg2000SignatureBox;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.imageio.stream.FileImageInputStream;
-import java.io.File;
+import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class BoxReaderS2Test {
 
@@ -65,10 +70,13 @@ public class BoxReaderS2Test {
 
     }
 
-     static BoxReader openBoxReader(String jp2Path) throws URISyntaxException, IOException {
-        final File file = new File(BoxReaderS2Test.class.getResource(jp2Path).toURI());
-        final FileImageInputStream stream = new FileImageInputStream(file);
-        return new BoxReader(stream, file.length(), new MyListener());
+     static BoxReader openBoxReader(String jp2Path) throws IOException {
+        final URL fileURL = BoxReaderS2Test.class.getResource(jp2Path);
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
+        assertNotNull(file);
+        final ImageInputStream stream = ImageUtils.getImageInputStream(file);
+        return new BoxReader(stream, Files.size(file), new MyListener());
     }
 
 

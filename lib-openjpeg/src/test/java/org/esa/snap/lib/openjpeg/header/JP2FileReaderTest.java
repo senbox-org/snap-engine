@@ -1,18 +1,11 @@
 package org.esa.snap.lib.openjpeg.header;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import org.junit.Assert;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Created by jcoravu on 7/6/2019.
@@ -21,16 +14,15 @@ public class JP2FileReaderTest {
 
     @Test
     public void testReadFileHeader() throws Exception {
-        File testJP2File = JP2FileReaderTest.getTestDataDir("space.jp2");
+        Path testJP2File = JP2FileReaderTest.getTestDataDir("space.jp2");
         Assert.assertNotNull(testJP2File);
 
-        Path filePath = testJP2File.toPath();
-        Assert.assertNotNull(filePath);
+        Assert.assertNotNull(testJP2File);
 
-        Assert.assertTrue("The input test file '"+filePath.toString()+"' does not exist.", Files.exists(filePath));
+        Assert.assertTrue("The input test file '"+ testJP2File +"' does not exist.", Files.exists(testJP2File));
 
         JP2FileReader jp2FileReader = new JP2FileReader();
-        jp2FileReader.readFileFormat(filePath, 1024, true);
+        jp2FileReader.readFileFormat(testJP2File, 1024, true);
 
         List<String> xmlMetadata = jp2FileReader.getXmlMetadata();
 
@@ -95,18 +87,18 @@ public class JP2FileReaderTest {
         Assert.assertNull(rgn);
     }
 
-    private static File getTestDataDir() {
-        File dir = new File("./src/test/data/");
-        if (!dir.exists()) {
-            dir = new File("./lib-openjpeg/src/test/data/");
-            if (!dir.exists()) {
+    private static Path getTestDataDir() {
+        Path dir = Path.of("./src/test/data/");
+        if (!Files.exists(dir)) {
+            dir = Path.of("./lib-openjpeg/src/test/data/");
+            if (!Files.exists(dir)) {
                 Assert.fail("Can't find my test data. Where is '" + dir + "'?");
             }
         }
         return dir;
     }
 
-    public static File getTestDataDir(String path) {
-        return new File(getTestDataDir(), path);
+    public static Path getTestDataDir(String path) {
+        return getTestDataDir().resolve(path);
     }
 }

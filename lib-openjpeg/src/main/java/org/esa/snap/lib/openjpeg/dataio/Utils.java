@@ -17,14 +17,16 @@
 
 package org.esa.snap.lib.openjpeg.dataio;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.win32.W32APIOptions;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
@@ -44,7 +46,7 @@ public class Utils {
             return path;
         }
 
-        if (!(new File(path).exists())) {
+        if (!Files.exists((Path.of(path)))) {
             return "";
         }
 
@@ -63,7 +65,7 @@ public class Utils {
             return path;
         }
 
-        if (!(new File(path).exists())) {
+        if (!Files.exists((Path.of(path)))) {
             return "";
         }
 
@@ -77,12 +79,12 @@ public class Utils {
     }
 
 
-    public static String GetIterativeShortPathNameW(String path) throws IOException{
+    public static String GetIterativeShortPathNameW(String path) throws IOException {
         if (!org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
             return path;
         }
 
-        if (!(new File(path).exists())) {
+        if (!Files.exists((Path.of(path)))) {
             return "";
         }
 
@@ -94,12 +96,12 @@ public class Utils {
         int lenght = 0;
         String workingPath = path;
         while (lenght == 0) {
-            workingPath = new File(workingPath).getParent();
+            workingPath = Path.of(workingPath).getParent().toString();
             lenght = GetShortPathNameW(workingPath).length();
         }
 
-        String[] shortenedFragments = GetShortPathNameW(workingPath).split(Pattern.quote(File.separator));
-        String[] fragments = path.split(Pattern.quote(File.separator));
+        String[] shortenedFragments = GetShortPathNameW(workingPath).split(Pattern.quote(IOHelper.SEPARATOR));
+        String[] fragments = path.split(Pattern.quote(IOHelper.SEPARATOR));
         // if the path did not split, we didn't have the system separator but '/'
         if (fragments.length == 1) {
             fragments = path.split(Pattern.quote("/"));
@@ -107,7 +109,7 @@ public class Utils {
 
         System.arraycopy(shortenedFragments, 0, fragments, 0, shortenedFragments.length);
 
-        String complete = String.join(File.separator, (CharSequence[]) fragments);
+        String complete = String.join(IOHelper.SEPARATOR, fragments);
         String shortComplete = GetShortPathNameW(complete);
 
         if (shortComplete.length() != 0) {
@@ -140,11 +142,11 @@ public class Utils {
      * @param file2
      * @return OL if it is not possible to compute, in other case time1-time2
      */
-    public static long diffLastModifiedTimes(File file1, File file2) {
+    public static long diffLastModifiedTimes(Path file1, Path file2) {
 
         try {
-            long time1 = file1.lastModified();
-            long time2 = file2.lastModified();
+            long time1 = IOHelper.getLastModifiedTime(file1);
+            long time2 = IOHelper.getLastModifiedTime(file2);
 
             if ((time1 != 0L) && (time2 != 0L)) {
                 return (time1 - time2);

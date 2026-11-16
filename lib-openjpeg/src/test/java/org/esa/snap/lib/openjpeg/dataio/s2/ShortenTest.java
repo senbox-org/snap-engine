@@ -17,27 +17,29 @@
 
 package org.esa.snap.lib.openjpeg.dataio.s2;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.apache.commons.lang3.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.lib.openjpeg.dataio.Utils;
-import org.junit.*;
-import org.junit.rules.TemporaryFolder;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * @author opicas-p
  */
 public class ShortenTest {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    public Path tempFolder = IOHelper.createATempDir();
     private String tempFolderPath ;
 
     @Before
     public void beforeMethod() {
         Assume.assumeTrue(SystemUtils.IS_OS_WINDOWS);
-        tempFolderPath = tempFolder.getRoot().getPath();
+        tempFolderPath = tempFolder.toString();
     }
 
     /**
@@ -47,12 +49,12 @@ public class ShortenTest {
     @Test
     public void testLongDirectoryName() {
         String mediumPath = tempFolderPath + "\\5A3AA7c3-475c-42a5-9a25-94d6a93c67b7\\S2A_OPER_PRD_MSIL1C_PDMC_20130621T120000_R065_V20091211T165928_20091211T170025";
-        File directory = new File(mediumPath);
+        Path directory = Path.of(mediumPath);
 
-        if (directory.mkdirs()) {
+        if (IOHelper.createDirectories(directory)) {
             String shortPath = Utils.GetShortPathNameW(mediumPath);
             Assert.assertTrue( shortPath.endsWith("\\5A3AA7~1\\S2A_OP~1"));
-            FileUtils.deleteTree(directory.getParentFile());
+            FileUtils.deleteTree(directory.getParent());
         }
     }
 
@@ -64,11 +66,11 @@ public class ShortenTest {
     public void testLongFileName() throws Exception {
 
         String mediumPath = tempFolderPath + "\\5a3aa7c3-475c-42a5-9a25-94d6a93c67b7\\S2A_OPER_PRD_MSIL1C_PDMC_20130621T120000_R065_V20091211T165928_20091211T170025.JP2";
-        File mediumFile = new File(mediumPath);
-        if (mediumFile.getParentFile().mkdir() && mediumFile.createNewFile()) {
+        Path mediumFile = Path.of(mediumPath);
+        if (IOHelper.createDirectory(mediumFile.getParent()) && IOHelper.createFile(mediumFile)) {
             String shortPath = Utils.GetShortPathNameW(mediumPath);
             Assert.assertTrue( shortPath.endsWith("\\5A3AA7~1\\S2A_OP~1.JP2"));
-            FileUtils.deleteTree(mediumFile.getParentFile());
+            FileUtils.deleteTree(mediumFile.getParent());
         }
     }
 

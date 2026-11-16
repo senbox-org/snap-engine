@@ -1,16 +1,10 @@
 package org.esa.snap.lib.openjpeg.header;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.junit.Assert;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Created by jcoravu on 7/6/2019.
@@ -19,15 +13,14 @@ public class BufferedRandomAccessFileTest {
 
     @Test
     public void testReadFileContent() throws Exception {
-        File testJP2File = JP2FileReaderTest.getTestDataDir("sample.jp2");
+        Path testJP2File = JP2FileReaderTest.getTestDataDir("sample.jp2");
         Assert.assertNotNull(testJP2File);
 
-        Path filePath = testJP2File.toPath();
-        Assert.assertNotNull(filePath);
+        Assert.assertNotNull(testJP2File);
 
-        Assert.assertTrue("The input test file '"+filePath.toString()+"' does not exist.", Files.exists(filePath));
+        Assert.assertTrue("The input test file '"+ testJP2File +"' does not exist.", Files.exists(testJP2File));
 
-        BufferedRandomAccessFile bufferedRandomAccessFile = new BufferedRandomAccessFile(filePath, 1024, true);
+        BufferedRandomAccessFile bufferedRandomAccessFile = new BufferedRandomAccessFile(testJP2File, 1024, true);
 
         Assert.assertEquals(16298, bufferedRandomAccessFile.getLength());
 
