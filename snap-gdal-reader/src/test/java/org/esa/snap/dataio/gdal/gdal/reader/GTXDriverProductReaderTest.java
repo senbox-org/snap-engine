@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -34,7 +34,7 @@ public class GTXDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testGTXReadProductNodes() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("GTX-driver.gtx").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("GTX-driver.gtx");
 
             GTXDriverProductReaderPlugIn readerPlugin = new GTXDriverProductReaderPlugIn();
             GDALProductReader reader = (GDALProductReader)readerPlugin.createReaderInstance();
@@ -69,7 +69,7 @@ public class GTXDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testGTXReadProductPixelSubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("GTX-driver.gtx").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("GTX-driver.gtx");
 
             Rectangle subsetRegion = new Rectangle(5, 10, 10, 20);
             ProductSubsetDef subsetDef = new ProductSubsetDef();
@@ -118,7 +118,7 @@ public class GTXDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testGTXReadProductGeometrySubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("GTX-driver.gtx").toFile();
+            Path file = this.gdalTestsFolderPath.resolve("GTX-driver.gtx");
             try{
                 JtsGeometryConverter converter = new JtsGeometryConverter();
                 Geometry geometry = converter.parse("POLYGON ((0.0399999991059303 0.2000000029802322, 0.0500000007450581 0.2000000029802322," +

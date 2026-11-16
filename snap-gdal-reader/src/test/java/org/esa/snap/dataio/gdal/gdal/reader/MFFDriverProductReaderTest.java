@@ -10,7 +10,7 @@ import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Test;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -28,7 +28,7 @@ public class MFFDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testMFFReadProductNodes() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("MFF-driver.hdr").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("MFF-driver.hdr");
 
             MFFDriverProductReaderPlugIn readerPlugin = new MFFDriverProductReaderPlugIn();
             GDALProductReader reader = (GDALProductReader)readerPlugin.createReaderInstance();
@@ -63,7 +63,7 @@ public class MFFDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testMFFReadProductSubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("MFF-driver.hdr").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("MFF-driver.hdr");
 
             Rectangle subsetRegion = new Rectangle(10, 20, 50, 40);
             ProductSubsetDef subsetDef = new ProductSubsetDef();

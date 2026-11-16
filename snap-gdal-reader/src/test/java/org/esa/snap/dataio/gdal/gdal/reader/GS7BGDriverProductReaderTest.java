@@ -11,7 +11,7 @@ import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Test;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -29,7 +29,7 @@ public class GS7BGDriverProductReaderTest extends AbstractTestDriverProductReade
     @Test
     public void testGS7BGReadProductNodes() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("GS7BG-driver.grd").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("GS7BG-driver.grd");
 
             GS7BGDriverProductReaderPlugIn readerPlugin = new GS7BGDriverProductReaderPlugIn();
             GDALProductReader reader = (GDALProductReader)readerPlugin.createReaderInstance();
@@ -64,7 +64,7 @@ public class GS7BGDriverProductReaderTest extends AbstractTestDriverProductReade
     @Test
     public void testGS7BGReadProductSubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("GS7BG-driver.grd").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("GS7BG-driver.grd");
 
             Rectangle subsetRegion = new Rectangle(240, 110, 500, 300);
             ProductSubsetDef subsetDef = new ProductSubsetDef();

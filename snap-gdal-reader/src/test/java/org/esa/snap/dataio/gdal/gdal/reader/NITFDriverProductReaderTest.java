@@ -11,7 +11,7 @@ import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Test;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -29,7 +29,7 @@ public class NITFDriverProductReaderTest extends AbstractTestDriverProductReader
     @Test
     public void testNITFReadProductNodes() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("NITF-driver.ntf").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("NITF-driver.ntf");
 
             NITFDriverProductReaderPlugIn readerPlugin = new NITFDriverProductReaderPlugIn();
             GDALProductReader reader = (GDALProductReader)readerPlugin.createReaderInstance();
@@ -64,7 +64,7 @@ public class NITFDriverProductReaderTest extends AbstractTestDriverProductReader
     @Test
     public void testNITFReadProductSubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("NITF-driver.ntf").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("NITF-driver.ntf");
 
             Rectangle subsetRegion = new Rectangle(20, 10, 40, 50);
             ProductSubsetDef subsetDef = new ProductSubsetDef();

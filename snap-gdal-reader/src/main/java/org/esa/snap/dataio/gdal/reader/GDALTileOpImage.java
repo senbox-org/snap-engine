@@ -1,5 +1,16 @@
 package org.esa.snap.dataio.gdal.reader;
 
+import org.esa.snap.core.image.AbstractSubsetTileOpImage;
+import org.esa.snap.core.image.ImageReadBoundsSupport;
+import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.dataio.gdal.drivers.Band;
+import org.esa.snap.dataio.gdal.drivers.BuildVRTOptions;
+import org.esa.snap.dataio.gdal.drivers.Dataset;
+import org.esa.snap.dataio.gdal.drivers.GDAL;
+import org.esa.snap.dataio.gdal.drivers.GDALConst;
+import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
+
+import javax.media.jai.PlanarImage;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.ComponentSampleModel;
@@ -21,16 +32,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Vector;
 import java.util.stream.Collectors;
-import javax.media.jai.PlanarImage;
-import org.esa.snap.core.image.AbstractSubsetTileOpImage;
-import org.esa.snap.core.image.ImageReadBoundsSupport;
-import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.dataio.gdal.drivers.Band;
-import org.esa.snap.dataio.gdal.drivers.BuildVRTOptions;
-import org.esa.snap.dataio.gdal.drivers.Dataset;
-import org.esa.snap.dataio.gdal.drivers.GDAL;
-import org.esa.snap.dataio.gdal.drivers.GDALConst;
-import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
 
 /**
  * A JAI operator for handling the tiles of the products imported with the GDAL library.

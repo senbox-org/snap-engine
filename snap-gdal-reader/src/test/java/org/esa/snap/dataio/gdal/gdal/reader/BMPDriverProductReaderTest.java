@@ -10,7 +10,7 @@ import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Test;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -28,7 +28,7 @@ public class BMPDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testBMPReadProductNodes() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("BMP-driver.bmp").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("BMP-driver.bmp");
 
             BMPDriverProductReaderPlugIn readerPlugin = new BMPDriverProductReaderPlugIn();
             GDALProductReader reader = (GDALProductReader)readerPlugin.createReaderInstance();
@@ -63,7 +63,7 @@ public class BMPDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testBMPReadProductSubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("BMP-driver.bmp").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("BMP-driver.bmp");
 
             Rectangle subsetRegion = new Rectangle(15, 5, 5, 16);
             ProductSubsetDef subsetDef = new ProductSubsetDef();

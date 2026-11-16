@@ -9,7 +9,7 @@ import org.esa.snap.dataio.gdal.reader.plugins.AbstractDriverProductReaderPlugIn
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -83,7 +83,7 @@ public abstract class AbstractTestDriverProductReaderPlugIn {
             assertEquals(2, classes.length);
 
             List<Class> list = Arrays.asList(classes);
-            assertTrue(list.contains(File.class));
+            assertTrue(list.contains(Path.class));
             assertTrue(list.contains(String.class));
         }
     }

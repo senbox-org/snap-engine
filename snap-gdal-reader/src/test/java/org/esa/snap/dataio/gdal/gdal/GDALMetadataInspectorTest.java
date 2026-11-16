@@ -1,17 +1,21 @@
 package org.esa.snap.dataio.gdal.gdal;
 
-import org.esa.snap.dataio.gdal.reader.GDALMetadataInspector;
-import org.esa.snap.engine_utilities.utils.TestUtil;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.lib.gdal.activator.GDALInstallInfo;
 import org.esa.snap.core.metadata.MetadataInspector;
+import org.esa.snap.dataio.gdal.reader.GDALMetadataInspector;
+import org.esa.snap.engine_utilities.utils.TestUtil;
 import org.esa.snap.runtime.LogUtils4Tests;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -33,11 +37,11 @@ public class GDALMetadataInspectorTest {
         assumeTrue(TestUtil.testdataAvailable());
 
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = TestUtil.getTestFile("_gdal"+ File.separator + "BMP-driver.bmp");
+            final Path file = TestUtil.getTestFile("_gdal"+ IOHelper.SEPARATOR + "BMP-driver.bmp");
             assertNotNull(file);
 
             GDALMetadataInspector metadataInspector = new GDALMetadataInspector();
-            MetadataInspector.Metadata metadata = metadataInspector.getMetadata(file.toPath());
+            MetadataInspector.Metadata metadata = metadataInspector.getMetadata(file);
             assertNotNull(metadata);
             assertEquals(20, metadata.getProductWidth());
             assertEquals(30, metadata.getProductHeight());

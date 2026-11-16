@@ -9,7 +9,6 @@ import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.core.util.StringUtils;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -69,7 +68,7 @@ public abstract class AbstractDriverProductReaderPlugIn implements ProductReader
 
     @Override
     public final Class[] getInputTypes() {
-        return new Class[] { String.class, File.class };
+        return new Class[] { String.class, Path.class };
     }
 
     @Override
@@ -96,8 +95,6 @@ public abstract class AbstractDriverProductReaderPlugIn implements ProductReader
     protected Path getInput(Object input) {
         if (input instanceof String) {
             return Paths.get((String)input);
-        } else if (input instanceof File) {
-            return ((File)input).toPath().toAbsolutePath();
         } else if (input instanceof Path) {
             return ((Path)input).toAbsolutePath();
         } else {

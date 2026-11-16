@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -35,7 +35,7 @@ public class RSTDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testRSTReadProductNodes() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("RST-driver.rst").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("RST-driver.rst");
 
             RSTDriverProductReaderPlugIn readerPlugin = new RSTDriverProductReaderPlugIn();
             GDALProductReader reader = (GDALProductReader)readerPlugin.createReaderInstance();
@@ -70,7 +70,7 @@ public class RSTDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testRSTReadProductPixelSubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("RST-driver.rst").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("RST-driver.rst");
 
             Rectangle subsetRegion = new Rectangle(5, 10, 15, 10);
             ProductSubsetDef subsetDef = new ProductSubsetDef();
@@ -124,7 +124,7 @@ public class RSTDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testRSTReadProductGeometrySubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("RST-driver.rst").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("RST-driver.rst");
 
            try {
                JtsGeometryConverter converter = new JtsGeometryConverter();

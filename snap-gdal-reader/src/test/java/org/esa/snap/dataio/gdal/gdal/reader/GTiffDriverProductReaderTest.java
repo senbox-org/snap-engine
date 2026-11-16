@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -31,7 +31,7 @@ public class GTiffDriverProductReaderTest extends AbstractTestDriverProductReade
     @STTM("SNAP-3567")
     public void testReadProduct() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            final File productFile = this.gdalTestsFolderPath.resolve("s1a-1-cog.tiff").toFile();
+            final Path productFile = this.gdalTestsFolderPath.resolve("s1a-1-cog.tiff");
 
             final GDALProductReader reader = buildProductReader();
             final Product product = reader.readProductNodes(productFile, null);
@@ -79,7 +79,7 @@ public class GTiffDriverProductReaderTest extends AbstractTestDriverProductReade
     @STTM("SNAP-3567")
     public void testReadProductPixelSubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            final File productFile = this.gdalTestsFolderPath.resolve("s1a-1-cog.tiff").toFile();
+            final Path productFile = this.gdalTestsFolderPath.resolve("s1a-1-cog.tiff");
 
             final ProductSubsetDef subsetDef = new ProductSubsetDef();
             subsetDef.setNodeNames(new String[]{"band_1"});

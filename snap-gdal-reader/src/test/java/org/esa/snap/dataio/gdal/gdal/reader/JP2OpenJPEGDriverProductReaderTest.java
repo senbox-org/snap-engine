@@ -18,7 +18,7 @@ public class JP2OpenJPEGDriverProductReaderTest extends AbstractTestDriverProduc
 //    @Test
 //    public void testReadProduct() throws IOException {
 //        if (GDALInstallInfo.INSTANCE.isPresent()) {
-//            File productFile = this.gdalTestsFolderPath.resolve("JP2OpenJPEG-driver.jp2").toFile();
+//            Path productFile = this.gdalTestsFolderPath.resolve("JP2OpenJPEG-driver.jp2");
 //
 //            GDALProductReader reader = buildProductReader();
 //            Product product = reader.readProductNodes(productFile, null);
@@ -66,7 +66,7 @@ public class JP2OpenJPEGDriverProductReaderTest extends AbstractTestDriverProduc
 //    @Test
 //    public void testReadProductPixelSubset() throws IOException {
 //        if (GDALInstallInfo.INSTANCE.isPresent()) {
-//            File productFile = this.gdalTestsFolderPath.resolve("JP2OpenJPEG-driver.jp2").toFile();
+//            Path productFile = this.gdalTestsFolderPath.resolve("JP2OpenJPEG-driver.jp2");
 //
 //            ProductSubsetDef subsetDef = new ProductSubsetDef();
 //            subsetDef.setNodeNames(new String[] { "band_1", "band_2" } );
@@ -119,7 +119,7 @@ public class JP2OpenJPEGDriverProductReaderTest extends AbstractTestDriverProduc
 //    @Test
 //    public void testReadProductGeometrySubset() throws IOException {
 //        if (GDALInstallInfo.INSTANCE.isPresent()) {
-//            File productFile = this.gdalTestsFolderPath.resolve("JP2OpenJPEG-driver.jp2").toFile();
+//            Path productFile = this.gdalTestsFolderPath.resolve("JP2OpenJPEG-driver.jp2");
 //
 //            try {
 //                JtsGeometryConverter converter = new JtsGeometryConverter();

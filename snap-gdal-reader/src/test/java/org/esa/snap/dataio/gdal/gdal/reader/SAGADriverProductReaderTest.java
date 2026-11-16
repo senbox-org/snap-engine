@@ -10,7 +10,7 @@ import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Test;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -28,7 +28,7 @@ public class SAGADriverProductReaderTest extends AbstractTestDriverProductReader
     @Test
     public void testSAGAReadProductNodes() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("SAGA-driver.sdat").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("SAGA-driver.sdat");
 
             SAGADriverProductReaderPlugIn readerPlugin = new SAGADriverProductReaderPlugIn();
             GDALProductReader reader = (GDALProductReader)readerPlugin.createReaderInstance();
@@ -63,7 +63,7 @@ public class SAGADriverProductReaderTest extends AbstractTestDriverProductReader
     @Test
     public void testSAGAReadProductSubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("SAGA-driver.sdat").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("SAGA-driver.sdat");
 
             Rectangle subsetRegion = new Rectangle(200, 100, 700, 500);
             ProductSubsetDef subsetDef = new ProductSubsetDef();

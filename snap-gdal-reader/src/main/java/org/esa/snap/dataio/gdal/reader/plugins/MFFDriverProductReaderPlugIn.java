@@ -1,13 +1,13 @@
 package org.esa.snap.dataio.gdal.reader.plugins;
 
 import org.esa.snap.core.dataio.DecodeQualification;
-import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.core.util.io.FileUtils;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -26,17 +26,8 @@ public class MFFDriverProductReaderPlugIn extends AbstractDriverProductReaderPlu
         DecodeQualification result = super.getDecodeQualification(input);
 
         if (DecodeQualification.UNABLE != result) {
-            File inputFile = null;
-            if (input instanceof String) {
-                inputFile = new File((String)input);
-            } else if (input instanceof File) {
-                inputFile = (File)input;
-            } else if (input instanceof Path) {
-                inputFile = ((Path)input).toFile();
-            } else {
-                throw new IllegalArgumentException("Unknown type '"+input.getClass()+"' for input '"+ input.toString()+"'.");
-            }
-            String filePath = inputFile.getAbsolutePath();
+            Path inputFile = getInput(input);
+            String filePath = inputFile.toAbsolutePath().toString();
             // '.rat.hdr' file extension for RATProductReaderPlugIn
             // 'bin.hdr' file extension for PolsarProProductReaderPlugIn
             // '.snaphu.hdr' file extension for SNAPHUProductReaderPlugIn
@@ -48,16 +39,16 @@ public class MFFDriverProductReaderPlugIn extends AbstractDriverProductReaderPlu
                 // '.hdr, .dbl' file extensions for SmosProductReaderPlugIn
                 boolean canContinue = true;
                 if (StringUtils.endsWithIgnoreCase(filePath, ".hdr")) {
-                    File hdrFile = FileUtils.exchangeExtension(inputFile, ".hdr");
-                    File dblFile = FileUtils.exchangeExtension(inputFile, ".dbl");
-                    if (hdrFile.exists() && dblFile.exists()) {
+                    Path hdrFile = FileUtils.exchangeExtension(inputFile, ".hdr");
+                    Path dblFile = FileUtils.exchangeExtension(inputFile, ".dbl");
+                    if (Files.exists(hdrFile) && Files.exists(dblFile)) {
                         canContinue = false;
                     }
                 }
                 if (canContinue) {
                     // open the input file as an image stream to check the header for EnviProductReaderPlugIn
                     try {
-                        ImageInputStream headerStream = new FileImageInputStream(inputFile);
+                        ImageInputStream headerStream = ImageUtils.getImageInputStream(inputFile);
                         result = checkDecodeQualificationOnStream(headerStream);
                     } catch (IOException e) {
                         result = DecodeQualification.UNABLE;

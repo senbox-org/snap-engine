@@ -10,7 +10,7 @@ import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Test;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -28,7 +28,7 @@ public class PNMDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testPNMReadProductNodes() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("PNM-driver.pnm").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("PNM-driver.pnm");
 
             PNMDriverProductReaderPlugIn readerPlugin = new PNMDriverProductReaderPlugIn();
             GDALProductReader reader = (GDALProductReader)readerPlugin.createReaderInstance();
@@ -63,7 +63,7 @@ public class PNMDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testPNMReadProductSubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("PNM-driver.pnm").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("PNM-driver.pnm");
 
             Rectangle subsetRegion = new Rectangle(200, 100, 500, 400);
             ProductSubsetDef subsetDef = new ProductSubsetDef();

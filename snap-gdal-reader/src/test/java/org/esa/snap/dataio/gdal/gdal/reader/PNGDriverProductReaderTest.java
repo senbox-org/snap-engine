@@ -10,7 +10,7 @@ import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Test;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -28,7 +28,7 @@ public class PNGDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testPNGReadProductNodes() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("PNG-driver.png").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("PNG-driver.png");
 
             PNGDriverProductReaderPlugIn readerPlugin = new PNGDriverProductReaderPlugIn();
             GDALProductReader reader = (GDALProductReader)readerPlugin.createReaderInstance();
@@ -63,7 +63,7 @@ public class PNGDriverProductReaderTest extends AbstractTestDriverProductReader 
     @Test
     public void testPNGReadProductSubset() throws IOException {
         if (GDALInstallInfo.INSTANCE.isPresent()) {
-            File file = this.gdalTestsFolderPath.resolve("PNG-driver.png").toFile();
+            final Path file = this.gdalTestsFolderPath.resolve("PNG-driver.png");
 
             Rectangle subsetRegion = new Rectangle(480, 108, 1165, 1056);
             ProductSubsetDef subsetDef = new ProductSubsetDef();
