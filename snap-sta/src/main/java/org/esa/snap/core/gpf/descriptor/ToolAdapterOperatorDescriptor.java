@@ -36,12 +36,12 @@ import org.esa.snap.core.gpf.operators.tooladapter.ToolAdapterIO;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -490,11 +490,11 @@ public class ToolAdapterOperatorDescriptor implements OperatorDescriptor {
         this.mainToolFileLocation = mainToolFileLocation;
     }
 
-    public File resolveVariables(String location) {
+    public Path resolveVariables(String location) {
         return VariableResolver.newInstance(this).resolve(location);
     }
 
-    public File resolveVariables(File file) {
+    public Path resolveVariables(Path file) {
         return file != null ?
                 VariableResolver.newInstance(this).resolve(file.toString()) : null;
     }
@@ -738,21 +738,21 @@ public class ToolAdapterOperatorDescriptor implements OperatorDescriptor {
      *                    class defined by the {@code operatorClass} tag.
      * @return A new operator descriptor.
      */
-    public static ToolAdapterOperatorDescriptor fromXml(File file, ClassLoader classLoader) throws OperatorException {
-        String resourceName = file.getPath();
+    public static ToolAdapterOperatorDescriptor fromXml(Path file, ClassLoader classLoader) throws OperatorException {
+        String resourceName = file.toString();
         try {
-            try (FileReader reader = new FileReader(file)) {
+            try (Reader reader = Files.newBufferedReader(file)) {
                 return ToolAdapterOperatorDescriptor.fromXml(reader, resourceName, classLoader);
             }
         } catch (Exception e) {
             try {
-                ToolAdapterIO.convertAdapter(file.toPath());
-                String name = FileUtils.getFilenameWithoutExtension(file.getParentFile() != null ? file.getParentFile() : file);
+                ToolAdapterIO.convertAdapter(file);
+                String name = FileUtils.getFilenameWithoutExtension(file.getParent() != null ? file.getParent() : file);
                 logger.fine(String.format("Adapter %s has been automatically converted to the new format", name));
             } catch (IOException e1) {
                 throw new OperatorException(formatReadExceptionText(resourceName, e), e);
             }
-            try (FileReader reader = new FileReader(file)) {
+            try (Reader reader = Files.newBufferedReader(file)) {
                 return ToolAdapterOperatorDescriptor.fromXml(reader, resourceName, classLoader);
             } catch (IOException e1) {
                 throw new OperatorException(formatReadExceptionText(resourceName, e1), e1);

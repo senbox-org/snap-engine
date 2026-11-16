@@ -21,7 +21,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 /**
@@ -124,8 +124,8 @@ public class MemoryTemplate implements Template {
     }
 
     @Override
-    public File getPath() {
-        return new File(getName());
+    public Path getPath() {
+        return Path.of(getName());
     }
 
     public Template copy() throws IOException {

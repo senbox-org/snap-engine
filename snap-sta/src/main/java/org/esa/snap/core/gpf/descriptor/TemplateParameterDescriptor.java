@@ -25,7 +25,7 @@ import org.esa.snap.core.gpf.descriptor.template.TemplateException;
 import org.esa.snap.core.gpf.descriptor.template.TemplateType;
 import org.esa.snap.core.gpf.operators.tooladapter.ToolAdapterConstants;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +45,7 @@ public class TemplateParameterDescriptor extends ToolParameterDescriptor {
     private List<ToolParameterDescriptor> parameterDescriptors = new ArrayList<>();
     private Template template;
     @XStreamAlias("outputFile")
-    private File outputFile;
+    private Path outputFile;
     @XStreamOmitField
     private TemplateEngine engine;
     @XStreamOmitField
@@ -210,7 +210,7 @@ public class TemplateParameterDescriptor extends ToolParameterDescriptor {
      *
      * @return the output file of this template parameter, after the template is parsed
      */
-    public File getOutputFile() {
+    public Path getOutputFile() {
         return outputFile;
     }
 
@@ -219,7 +219,7 @@ public class TemplateParameterDescriptor extends ToolParameterDescriptor {
      * The output file path may be a relative one or an absolute one
      * @param outputFile output file of this template parameter
      */
-    public void setOutputFile(File outputFile) {
+    public void setOutputFile(Path outputFile) {
         this.outputFile = outputFile;
     }
 

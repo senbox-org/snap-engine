@@ -22,9 +22,8 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,7 +54,7 @@ public class FileTemplate implements Template {
     static Template fromFile(String path) throws TemplateException, IOException {
         FileTemplate template = null;
         if (path != null) {
-            File file = new File(path);
+            Path file = Path.of(path);
             String extension = FileUtils.getExtension(file);
             TemplateType templateType = FileTemplate.getTypeByExtension(extension);
             if (templateType != null) {
@@ -63,7 +62,7 @@ public class FileTemplate implements Template {
             } else {
                 throw new TemplateException("Unsupported template extension");
             }
-            template.setName(file.getName());
+            template.setName(file.getFileName().toString());
             template.read();
         }
         return template;
@@ -147,7 +146,7 @@ public class FileTemplate implements Template {
     }
 
     @Override
-    public File getPath() {
+    public Path getPath() {
         Path thisPath;
         if (this.engine != null) {
             Path adapterPath = engine.getTemplateBasePath();
@@ -155,7 +154,7 @@ public class FileTemplate implements Template {
         } else {
             thisPath = Paths.get(getName());
         }
-        return thisPath.toFile();
+        return thisPath;
     }
 
     @Override
@@ -180,12 +179,11 @@ public class FileTemplate implements Template {
 
     @Override
     public void save() throws IOException {
-        File path = getPath();
+        Path path = getPath();
         if (path != null) {
-            try (FileWriter writer = new FileWriter(path)) {
+            try (Writer writer = Files.newBufferedWriter(path)) {
                 writer.write(getContents());
                 writer.flush();
-                writer.close();
             }
         }
     }
@@ -240,7 +238,7 @@ public class FileTemplate implements Template {
 
     private String read() throws IOException {
         if (this.contents == null) {
-            Path templatePath = getPath().toPath();
+            Path templatePath = getPath();
             byte[] encoded = Files.readAllBytes(templatePath);
             this.contents = new String(encoded, Charset.defaultCharset());
         }

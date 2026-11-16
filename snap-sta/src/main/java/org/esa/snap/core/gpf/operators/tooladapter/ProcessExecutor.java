@@ -18,7 +18,11 @@
 
 package org.esa.snap.core.gpf.operators.tooladapter;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -32,7 +36,7 @@ import java.util.logging.Logger;
 public class ProcessExecutor {
     private volatile boolean isStopped;
     private List<String>[] arguments;
-    private File workingDirectory;
+    private Path workingDirectory;
     private ProcessOutputConsumer consumer;
     private final Logger logger = Logger.getLogger(ProcessExecutor.class.getName());
     private Process process;
@@ -44,7 +48,7 @@ public class ProcessExecutor {
         }
     }
 
-    public void setWorkingDirectory(File directory) {
+    public void setWorkingDirectory(Path directory) {
         this.workingDirectory = directory;
     }
 
@@ -56,7 +60,7 @@ public class ProcessExecutor {
         return execute(arguments, envVars, null);
     }
 
-    public int execute(List<String> arguments, Map<String, String> envVars, File workingDirectory) throws IOException {
+    public int execute(List<String> arguments, Map<String, String> envVars, Path workingDirectory) throws IOException {
         BufferedReader outReader = null;
         int ret = -1;
         try {
@@ -65,7 +69,7 @@ public class ProcessExecutor {
             pb.redirectErrorStream(true);
             //set the working directory
             if (workingDirectory != null) {
-                pb.directory(workingDirectory);
+                pb.directory(workingDirectory.toFile());
             }
             if (envVars != null) {
                 pb.environment().putAll(envVars);

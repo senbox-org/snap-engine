@@ -43,7 +43,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedReader;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -210,7 +210,7 @@ public abstract class TemplateEngine<C> {
         public void parse(Template template) throws TemplateException {
             VelocityEngine veloEngine = new VelocityEngine();
             if (!template.isInMemory()) {
-                File templateFile = template.getPath();
+                Path templateFile = template.getPath();
                 veloEngine.setProperty("file.resource.loader.path", templateFile.getParent());
             }
             List<SystemVariable> variables = operatorDescriptor.getVariables();
@@ -240,7 +240,7 @@ public abstract class TemplateEngine<C> {
                 VelocityEngine veloEngine = new VelocityEngine();
                 VelocityContext veloContext = context != null ? context.getContext() : new VelocityContext();
                 if (!template.isInMemory()) {
-                    File templateFile = template.getPath();
+                    Path templateFile = template.getPath();
                     if (templateFile.getParent() != null) {
                         veloEngine.setProperty("file.resource.loader.path", templateFile.getParent());
                     }
@@ -256,9 +256,9 @@ public abstract class TemplateEngine<C> {
                     veloContext.put(variable.getKey(), variableValue);
                 }
                 veloEngine.init();
-                //Template veloTemplate = veloEngine.getTemplate(templateFile.getName());
+                //Template veloTemplate = veloEngine.getTemplate(templateFile.getFileName());
                 org.apache.velocity.Template veloTemplate = createTemplate(veloEngine, template);
-                        //veloEngine.getTemplate(templateFile.getName());
+                        //veloEngine.getTemplate(templateFile.getFileName());
                 for (String key : parameters.keySet()) {
                     veloContext.put(key, parameters.get(key));
                 }
@@ -283,7 +283,7 @@ public abstract class TemplateEngine<C> {
                 String veloTemplate = this.macroTemplateContents + "\n" +
                         (internalTemplate.isInMemory() ?
                                 internalTemplate.getContents() :
-                                new String(Files.readAllBytes(internalTemplate.getPath().toPath())));
+                                new String(Files.readAllBytes(internalTemplate.getPath())));
                 StringReader reader = new StringReader(veloTemplate);
                 template = new org.apache.velocity.Template();
                 template.setName(internalTemplate.getName());

@@ -17,6 +17,7 @@ package org.esa.snap.core.gpf.operators.tooladapter;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.apache.velocity.app.Velocity;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
@@ -28,7 +29,12 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
-import org.esa.snap.core.gpf.descriptor.*;
+import org.esa.snap.core.gpf.descriptor.ParameterDescriptor;
+import org.esa.snap.core.gpf.descriptor.SystemVariable;
+import org.esa.snap.core.gpf.descriptor.TemplateParameterDescriptor;
+import org.esa.snap.core.gpf.descriptor.ToolAdapterOperatorDescriptor;
+import org.esa.snap.core.gpf.descriptor.ToolParameterDescriptor;
+import org.esa.snap.core.gpf.descriptor.VariableResolver;
 import org.esa.snap.core.gpf.descriptor.template.FileTemplate;
 import org.esa.snap.core.gpf.descriptor.template.Template;
 import org.esa.snap.core.gpf.descriptor.template.TemplateContext;
@@ -38,13 +44,13 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -92,7 +98,7 @@ public class ToolAdapterOp extends Operator {
 
     private ProgressMonitor progressMonitor;
 
-    private List<File> intermediateProductFiles;
+    private List<Path> intermediateProductFiles;
 
     private List<String> errorMessages;
 
@@ -159,11 +165,11 @@ public class ToolAdapterOp extends Operator {
         }
     }
 
-    public void setAdapterFolder(File folder) {
+    public void setAdapterFolder(Path folder) {
         /*
       The folder where the tool descriptors reside.
      */
-        File adapterFolder = folder;
+        Path adapterFolder = folder;
     }
 
     /**
@@ -250,13 +256,13 @@ public class ToolAdapterOp extends Operator {
     private void validateDescriptor() throws OperatorException {
 
         //Get the tool file
-        File toolFile = descriptor.resolveVariables(descriptor.getMainToolFileLocation());
+        Path toolFile = descriptor.resolveVariables(descriptor.getMainToolFileLocation());
         if (toolFile == null) {
             throw new OperatorException("Tool file not defined!");
         }
         // check if the tool file exists
-        if (!toolFile.exists() || !toolFile.isFile()) {
-            throw new OperatorException(String.format("Invalid tool file: '%s'!", toolFile.getAbsolutePath()));
+        if (!Files.exists(toolFile) || !Files.isRegularFile(toolFile)) {
+            throw new OperatorException(String.format("Invalid tool file: '%s'!", toolFile.toAbsolutePath()));
         }
     }
 
@@ -286,16 +292,16 @@ public class ToolAdapterOp extends Operator {
                 String sourceDefaultExtension = writerPlugIn.getDefaultFileExtensions()[0];
                 for (Product selectedProduct : selectedProducts) {
                     if (!sourceDefaultExtension.equalsIgnoreCase(selectedProduct.getProductReader().getReaderPlugIn().getDefaultFileExtensions()[0])) {
-                        File outFile = new File(descriptor.resolveVariables(descriptor.getWorkingDir()), INTERMEDIATE_PRODUCT_NAME + sourceDefaultExtension);
+                        Path outFile = descriptor.resolveVariables(descriptor.getWorkingDir()).resolve(INTERMEDIATE_PRODUCT_NAME + sourceDefaultExtension);
                         boolean hasDeleted = false;
-                        while (outFile.exists() && !hasDeleted) {
-                            hasDeleted = outFile.canWrite() && outFile.delete();
+                        while (Files.exists(outFile) && !hasDeleted) {
+                            hasDeleted = Files.isWritable(outFile) && IOHelper.delete(outFile);
                             if (!hasDeleted) {
-                                getLogger().warning(String.format("Could not delete previous temporary image %s", outFile.getName()));
-                                outFile = new File(descriptor.resolveVariables(descriptor.getWorkingDir()), INTERMEDIATE_PRODUCT_NAME + "_" + new Date().getTime() + sourceDefaultExtension);
+                                getLogger().warning(String.format("Could not delete previous temporary image %s", outFile.getFileName()));
+                                outFile = descriptor.resolveVariables(descriptor.getWorkingDir()).resolve(INTERMEDIATE_PRODUCT_NAME + "_" + new Date().getTime() + sourceDefaultExtension);
                             }
                         }
-                        Product interimProduct = new Product(outFile.getName(), selectedProduct.getProductType(),
+                        Product interimProduct = new Product(outFile.getFileName().toString(), selectedProduct.getProductType(),
                                 selectedProduct.getSceneRasterWidth(), selectedProduct.getSceneRasterHeight());
                         try {
                             ProductUtils.copyProductNodes(selectedProduct, interimProduct);
@@ -314,7 +320,7 @@ public class ToolAdapterOp extends Operator {
                             }
                             reportProgress("Product conversion finished");
                         }
-                        if (outFile.exists()) {
+                        if (Files.exists(outFile)) {
                             intermediateProductFiles.add(outFile);
                         } else {
                             stop();
@@ -345,7 +351,7 @@ public class ToolAdapterOp extends Operator {
             Map<String, String> envVars = this.descriptor.getVariables().stream()
                     .collect(Collectors.toMap(SystemVariable::getKey,
                             variable -> resolver.resolveString(variable.getValue())));
-            File workingDir = this.descriptor.resolveVariables(this.descriptor.getWorkingDir());
+            Path workingDir = this.descriptor.resolveVariables(this.descriptor.getWorkingDir());
             ret = this.executor.execute(cmdLine, envVars, workingDir);
         } catch (IOException e) {
             this.wasCancelled = true;
@@ -371,30 +377,30 @@ public class ToolAdapterOp extends Operator {
         }
         reportProgress("Trying to open the new product");
         Object targetFileObj = getParameter(ToolAdapterConstants.TOOL_TARGET_PRODUCT_FILE);
-        File input = null;
-        if(targetFileObj instanceof File){
-            input = (File) targetFileObj;
+        Path input = null;
+        if(targetFileObj instanceof Path){
+            input = (Path) targetFileObj;
         } else if (targetFileObj != null){
             input = descriptor.resolveVariables(targetFileObj.toString());
         }
         if (input == null) {
-            input = descriptor.resolveVariables((File) this.lastPostContext.getValue(ToolAdapterConstants.TOOL_TARGET_PRODUCT_FILE));
+            input = descriptor.resolveVariables((Path) this.lastPostContext.getValue(ToolAdapterConstants.TOOL_TARGET_PRODUCT_FILE));
         }
         this.lastPostContext = null;
         if (input != null) {
-            getLogger().fine(String.format("Target product: %s", input.getAbsolutePath()));
+            getLogger().fine(String.format("Target product: %s", input.toAbsolutePath()));
             try {
-                intermediateProductFiles.stream().filter(intermediateProductFile -> intermediateProductFile != null && intermediateProductFile.exists())
-                                                 .filter(intermediateProductFile -> !(intermediateProductFile.canWrite() && intermediateProductFile.delete()))
-                                                 .forEach(intermediateProductFile -> getLogger().warning(String.format("Temporary image %s could not be deleted", intermediateProductFile.getName())));
-                if (input.isDirectory()) {
+                intermediateProductFiles.stream().filter(intermediateProductFile -> intermediateProductFile != null && Files.exists(intermediateProductFile))
+                                                 .filter(intermediateProductFile -> !(Files.isWritable(intermediateProductFile) && IOHelper.delete(intermediateProductFile)))
+                                                 .forEach(intermediateProductFile -> getLogger().warning(String.format("Temporary image %s could not be deleted", intermediateProductFile.getFileName())));
+                if (Files.isDirectory(input)) {
                     input = selectCandidateRasterFile(input);
                 }
-                if (!input.exists()) {
+                if (!Files.exists(input)) {
                     getLogger().warning("Tool may not have produced an output");
                     return -1;
                 }
-                getLogger().fine(String.format("Trying to open %s", input.getAbsolutePath()));
+                getLogger().fine(String.format("Trying to open %s", input.toAbsolutePath()));
                 Product target;
                 try {
                     target = ProductIO.readProduct(input);
@@ -413,7 +419,7 @@ public class ToolAdapterOp extends Operator {
                     }
                 }
             } catch (IOException e) {
-                throw new OperatorException("Error reading product '" + input.getPath() + "'");
+                throw new OperatorException("Error reading product '" + input + "'");
             }
         }
         if (this.consumer != null && this.consumer instanceof DefaultOutputConsumer) {
@@ -452,7 +458,7 @@ public class ToolAdapterOp extends Operator {
         final List<String> tokens = new ArrayList<>();
         FileTemplate template = ((ToolAdapterOperatorDescriptor) (getSpi().getOperatorDescriptor())).getTemplate();
         if (template != null) {
-            tokens.add(descriptor.resolveVariables(descriptor.getMainToolFileLocation()).getAbsolutePath());
+            tokens.add(descriptor.resolveVariables(descriptor.getMainToolFileLocation()).toAbsolutePath().toString());
             try {
                 tokens.addAll(descriptor.getTemplateEngine().getLines(template, extractParameters()));
             } catch (TemplateException e) {
@@ -486,7 +492,7 @@ public class ToolAdapterOp extends Operator {
             } else {
                 Object paramValue = getParameter(paramName);
                 if (ToolAdapterConstants.TOOL_TARGET_PRODUCT_FILE.equals(paramName)) {
-                    paramValue = getNextFileName(this.descriptor.resolveVariables((File) paramValue));
+                    paramValue = getNextFileName(this.descriptor.resolveVariables((Path) paramValue));
                 }
                 if (param.getDataType().isArray()) {
                     paramValue = StringUtils.arrayToString(paramValue, "\n");
@@ -500,12 +506,12 @@ public class ToolAdapterOp extends Operator {
         Product[] sourceProducts = getSourceProducts();
         parameters.put(ToolAdapterConstants.TOOL_SOURCE_PRODUCT_ID,
                 sourceProducts.length == 1 ? sourceProducts[0] : sourceProducts);
-        File[] rasterFiles = new File[sourceProducts.length];
+        Path[] rasterFiles = new Path[sourceProducts.length];
         for (int i = 0; i < sourceProducts.length; i++) {
-            File productFile = intermediateProductFiles.size() == sourceProducts.length ?
+            Path productFile = intermediateProductFiles.size() == sourceProducts.length ?
                                     intermediateProductFiles.get(i) :
                                     sourceProducts[i].getFileLocation();
-            rasterFiles[i] = productFile.isFile() ? productFile : selectCandidateRasterFile(productFile);
+            rasterFiles[i] = Files.isRegularFile(productFile) ? productFile : selectCandidateRasterFile(productFile);
         }
         parameters.put(ToolAdapterConstants.TOOL_SOURCE_PRODUCT_FILE,
                 rasterFiles.length == 1 ? rasterFiles[0] : rasterFiles);
@@ -519,7 +525,7 @@ public class ToolAdapterOp extends Operator {
             String paramName = param.getName();
             Object paramValue = getParameter(paramName);
             if (ToolAdapterConstants.TOOL_TARGET_PRODUCT_FILE.equals(paramName)) {
-                paramValue = getNextFileName(this.descriptor.resolveVariables((File) paramValue));
+                paramValue = getNextFileName(this.descriptor.resolveVariables((Path) paramValue));
             }
             if (param.getDataType().isArray()) {
                 paramValue = StringUtils.arrayToString(paramValue, "\n");
@@ -530,12 +536,12 @@ public class ToolAdapterOp extends Operator {
         Product[] sourceProducts = getSourceProducts();
         parameters.put(ToolAdapterConstants.TOOL_SOURCE_PRODUCT_ID,
                 sourceProducts.length == 1 ? sourceProducts[0] : sourceProducts);
-        File[] rasterFiles = new File[sourceProducts.length];
+        Path[] rasterFiles = new Path[sourceProducts.length];
         for (int i = 0; i < sourceProducts.length; i++) {
-            File productFile = intermediateProductFiles.size() == sourceProducts.length ?
+            Path productFile = intermediateProductFiles.size() == sourceProducts.length ?
                     intermediateProductFiles.get(i) :
                     sourceProducts[i].getFileLocation();
-            rasterFiles[i] = productFile.isFile() ? productFile : selectCandidateRasterFile(productFile);
+            rasterFiles[i] = Files.isRegularFile(productFile) ? productFile : selectCandidateRasterFile(productFile);
         }
         parameters.put(ToolAdapterConstants.TOOL_SOURCE_PRODUCT_FILE,
                 rasterFiles.length == 1 ? rasterFiles[0] : rasterFiles);
@@ -551,42 +557,42 @@ public class ToolAdapterOp extends Operator {
         dateFormatted = dateFormatted.replace("/", separatorChar).replace(" ", separatorChar);
         Template template = parameter.getTemplate();
         String newFileName;
-        File parameterOutputFile = parameter.getOutputFile();
+        Path parameterOutputFile = parameter.getOutputFile();
         if (parameterOutputFile != null) {
-            newFileName = parameterOutputFile.getName();
+            newFileName = parameterOutputFile.getFileName().toString();
         } else {
             newFileName = template.getName() + "_result_" + dateFormatted;
         }
-        File writeLocation = new File(descriptor.resolveVariables(descriptor.getWorkingDir()), newFileName);
+        Path writeLocation = descriptor.resolveVariables(descriptor.getWorkingDir()).resolve(newFileName);
         ToolAdapterIO.saveFileContent(writeLocation, result);
         this.lastPostContext = parameter.getLastContext();
         return parameterOutputFile == null ? newFileName : writeLocation.toString();
     }
 
-    private File selectCandidateRasterFile(File folder) {
-        File rasterFile = null;
-        List<File> candidates = getRasterFiles(folder);
+    private Path selectCandidateRasterFile(Path folder) {
+        Path rasterFile = null;
+        List<Path> candidates = getRasterFiles(folder);
         int numFiles = candidates.size() - 1;
         if (numFiles >= 0) {
-            candidates.sort(Comparator.comparingLong(File::length));
+            candidates.sort(Comparator.comparingLong(IOHelper::size));
             rasterFile = candidates.get(numFiles);
-            getLogger().fine(rasterFile.getName() + " was selected as raster file");
+            getLogger().fine(rasterFile.getFileName() + " was selected as raster file");
         }
         return rasterFile;
     }
 
-    private List<File> getRasterFiles(File folder) {
-        List<File> rasters = new ArrayList<>();
+    private List<Path> getRasterFiles(Path folder) {
+        List<Path> rasters = new ArrayList<>();
         for (String extension : DEFAULT_EXTENSIONS) {
-            File[] files = folder.listFiles((File dir, String name) -> name.endsWith(extension));
+            final Collection<Path> files = IOHelper.listFiles(folder, path -> Files.isRegularFile(path) && path.endsWith(extension));
             if (files != null) {
-                rasters.addAll(Arrays.asList(files));
+                rasters.addAll(files);
             }
         }
-        File[] subFolders = folder.listFiles(File::isDirectory);
+        final Collection<Path> subFolders = IOHelper.listFiles(folder, Files::isDirectory);
         if (subFolders != null) {
-            for (File subFolder : subFolders) {
-                List<File> subCandidates = getRasterFiles(subFolder);
+            for (Path subFolder : subFolders) {
+                List<Path> subCandidates = getRasterFiles(subFolder);
                 if (subCandidates != null) {
                     rasters.addAll(subCandidates);
                 }
@@ -601,13 +607,12 @@ public class ToolAdapterOp extends Operator {
         }
     }
 
-    private File getNextFileName(File file) {
+    private Path getNextFileName(Path file) {
         if (file != null) {
             int counter = 1;
-            File initial = file;
-            while (file.exists()) {
-                file = new File(initial.getParent(),
-                        FileUtils.getFilenameWithoutExtension(initial) + "_" + String.valueOf(counter++) +
+            Path initial = file;
+            while (Files.exists(file)) {
+                file = initial.getParent().resolve(FileUtils.getFilenameWithoutExtension(initial) + "_" + String.valueOf(counter++) +
                                 FileUtils.getExtension(initial));
             }
         }

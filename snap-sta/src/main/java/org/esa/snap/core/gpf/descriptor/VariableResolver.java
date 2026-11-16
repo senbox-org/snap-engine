@@ -1,7 +1,10 @@
 package org.esa.snap.core.gpf.descriptor;
 
-import java.io.File;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,15 +36,15 @@ public abstract class VariableResolver {
     }
 
     public abstract String resolveString(String input);
-    public abstract File resolve(String input);
+    public abstract Path resolve(String input);
     private void setNextResolver(VariableResolver resolver) {
         this.nextResolver = resolver;
     }
     boolean isValidFileName(String fileName) {
-        File f = new File(fileName);
+        Path f = Path.of(fileName);
         try {
             //noinspection ResultOfMethodCallIgnored
-            f.getCanonicalPath();
+            f.toRealPath().toString();
             return true;
         } catch (IOException e) {
             return false;
@@ -86,15 +89,15 @@ public abstract class VariableResolver {
         }
 
         @Override
-        public File resolve(String input) {
+        public Path resolve(String input) {
             if (input == null) {
                 return null;
             }
-            File resolved = new File(input);
-            if (!resolved.exists()) {
-                String expandedValue = recursiveResolve(resolved.getPath());
-                resolved = new File(expandedValue);
-                if (nextResolver != null && !resolved.exists()) {
+            Path resolved = Path.of(input);
+            if (!Files.exists(resolved)) {
+                String expandedValue = recursiveResolve(resolved.toString());
+                resolved = Path.of(expandedValue);
+                if (nextResolver != null && !Files.exists(resolved)) {
                     resolved = nextResolver.resolve(resolved.toString());
                 }
             }
@@ -112,31 +115,31 @@ public abstract class VariableResolver {
         SystemPathVariableResolver(ToolAdapterOperatorDescriptor operatorDescriptor) {
             super(operatorDescriptor);
             String sysPath = System.getenv("PATH");
-            systemPath = sysPath.split(File.pathSeparator);
+            systemPath = sysPath.split(IOHelper.PATH_SEPARATOR);
         }
 
         @Override
         public String resolveString(String input) {
             String resolved = input;
             if (resolved != null) {
-                File resolvedFile = resolve(input);
+                Path resolvedFile = resolve(input);
                 if (resolvedFile != null) {
-                    resolved = resolvedFile.getAbsolutePath();
+                    resolved = resolvedFile.toAbsolutePath().toString();
                 }
             }
             return resolved;
         }
 
         @Override
-        public File resolve(String input) {
+        public Path resolve(String input) {
             if (input == null) {
                 return null;
             }
-            File resolved = new File(input);
-            if (!resolved.exists()) {
+            Path resolved = Path.of(input);
+            if (!Files.exists(resolved)) {
                 for (String sysPath : systemPath) {
-                    File current = new File(sysPath, resolved.getPath());
-                    if (current.exists()) {
+                    Path current = Path.of(sysPath).resolve(resolved.toString());
+                    if (Files.exists(current)) {
                         resolved = current;
                         break;
                     }

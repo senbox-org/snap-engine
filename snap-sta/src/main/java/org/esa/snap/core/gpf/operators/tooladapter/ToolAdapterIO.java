@@ -16,6 +16,7 @@
 package org.esa.snap.core.gpf.operators.tooladapter;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.gpf.Operator;
@@ -33,14 +34,13 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.file.CopyOption;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitOption;
@@ -120,7 +120,7 @@ public class ToolAdapterIO {
 
     public static void setAdaptersPath(Path path) {
         Preferences preferences = getPreferences();
-        preferences.put(ToolAdapterConstants.USER_MODULE_PATH, path.toFile().getAbsolutePath());
+        preferences.put(ToolAdapterConstants.USER_MODULE_PATH, path.toAbsolutePath().toString());
         try {
             preferences.sync();
         } catch (BackingStoreException e) {
@@ -170,7 +170,7 @@ public class ToolAdapterIO {
      */
     public static Collection<ToolAdapterOpSpi> searchAndRegisterAdapters() {
         Logger logger = Logger.getLogger(ToolAdapterOpSpi.class.getName());
-        List<File> moduleFolders = null;
+        List<Path> moduleFolders = null;
         try {
             ToolAdapterRegistry.INSTANCE.clear();
             moduleFolders = ToolAdapterIO.scanForAdapters();
@@ -178,11 +178,11 @@ public class ToolAdapterIO {
             logger.severe("Failed scan for Tools descriptors: I/O problem: " + e.getMessage());
         }
         if (moduleFolders != null) {
-            for (File moduleFolder : moduleFolders) {
+            for (Path moduleFolder : moduleFolders) {
                 try {
-                    ToolAdapterIO.registerAdapter(moduleFolder.toPath());
+                    ToolAdapterIO.registerAdapter(moduleFolder);
                 } catch (Exception ex) {
-                    logger.severe(String.format("Failed to register module %s. Problem: %s", moduleFolder.getName(), ex.getMessage()));
+                    logger.severe(String.format("Failed to register module %s. Problem: %s", moduleFolder.getFileName(), ex.getMessage()));
                 }
             }
         }
@@ -201,12 +201,12 @@ public class ToolAdapterIO {
         ToolAdapterOperatorDescriptor operatorDescriptor;
         Path descriptorFile = operatorFolder.resolve(ToolAdapterConstants.DESCRIPTOR_FILE);
         if (Files.exists(descriptorFile)) {
-            operatorDescriptor = ToolAdapterOperatorDescriptor.fromXml(descriptorFile.toFile(), ToolAdapterIO.class.getClassLoader());
+            operatorDescriptor = ToolAdapterOperatorDescriptor.fromXml(descriptorFile, ToolAdapterIO.class.getClassLoader());
             return new ToolAdapterOpSpi(operatorDescriptor) {
                 @Override
                 public Operator createOperator() throws OperatorException {
                     ToolAdapterOp toolOperator = (ToolAdapterOp) super.createOperator();
-                    toolOperator.setAdapterFolder(operatorFolder.toFile());
+                    toolOperator.setAdapterFolder(operatorFolder);
                     toolOperator.setParameterDefaultValues();
                     return toolOperator;
                 }
@@ -274,7 +274,7 @@ public class ToolAdapterIO {
             @Override
             public Operator createOperator() throws OperatorException {
                 ToolAdapterOp toolOperator = (ToolAdapterOp) super.createOperator();
-                toolOperator.setAdapterFolder(moduleFolder.toFile());
+                toolOperator.setAdapterFolder(moduleFolder);
                 toolOperator.setParameterDefaultValues();
                 return toolOperator;
             }
@@ -309,19 +309,15 @@ public class ToolAdapterIO {
         return operatorSpi;
     }
 
-    public static ToolAdapterOpSpi registerAdapter(File adapterFolder) throws OperatorException {
-        return registerAdapter(adapterFolder.toPath());
-    }
-
     /**
      * Scans for adapter folders in the system and user paths.
      *
      * @return A list of adapter folders.
      * @throws IOException in case of an IO error
      */
-    public static List<File> scanForAdapters() throws IOException {
+    public static List<Path> scanForAdapters() throws IOException {
         logger.info("Initializing external tool adapters");
-        List<File> modules = new ArrayList<>();
+        List<Path> modules = new ArrayList<>();
         Set<Path> modulesPath = getClusterModulesPaths();
         for (Path clusterPath : modulesPath) {
             final Preferences preferences = Config.instance(clusterPath.getFileName().toString()).preferences();
@@ -368,8 +364,8 @@ public class ToolAdapterIO {
         return userModulePath;
     }
 
-    public static File getUserAdapterPath() {
-        return getAdaptersPath().toFile();
+    public static Path getUserAdapterPath() {
+        return getAdaptersPath();
     }
 
     /**
@@ -379,8 +375,8 @@ public class ToolAdapterIO {
      * @param content       The content to be written
      * @throws IOException in case of an IO error
      */
-    public static void saveFileContent(File file, String content) throws IOException{
-        try (FileWriter writer = new FileWriter(file)) {
+    public static void saveFileContent(Path file, String content) throws IOException{
+        try (Writer writer = Files.newBufferedWriter(file)) {
             writer.write(content);
             writer.flush();
         }
@@ -505,13 +501,13 @@ public class ToolAdapterIO {
         }
     }
 
-    private static List<File> scanForAdapters(Path path) throws IOException {
+    private static List<Path> scanForAdapters(Path path) throws IOException {
         if (!Files.exists(path) || !Files.isDirectory(path)) {
             throw new FileNotFoundException(path.toAbsolutePath().toString());
         }
-        File[] jarFiles = path.toFile().listFiles(f -> f.getName().endsWith(".jar"));
+        Collection<Path> jarFiles = IOHelper.listFiles(path,f -> f.getFileName().toString().endsWith(".jar"));
         if (jarFiles != null) {
-            for (File jarFile : jarFiles) {
+            for (Path jarFile : jarFiles) {
                 try {
                     unpackAdapterJar(jarFile, null);
                 } catch (IOException ioEx) {
@@ -519,12 +515,12 @@ public class ToolAdapterIO {
                 }
             }
         }
-        File[] moduleFolders = path.toFile().listFiles();
-        List<File> modules = new ArrayList<>();
+        Collection<Path> moduleFolders = IOHelper.listFiles(path);
+        List<Path> modules = new ArrayList<>();
         if (moduleFolders != null) {
-            for (File moduleFolder : moduleFolders) {
-                File descriptorFile = new File(moduleFolder, ToolAdapterConstants.DESCRIPTOR_FILE);
-                if (descriptorFile.exists()) {
+            for (Path moduleFolder : moduleFolders) {
+                Path descriptorFile = moduleFolder.resolve(ToolAdapterConstants.DESCRIPTOR_FILE);
+                if (Files.exists(descriptorFile)) {
                     modules.add(moduleFolder);
                 }
             }
@@ -532,34 +528,34 @@ public class ToolAdapterIO {
         return modules;
     }
 
-    private static void unpackAdapterJar(File jarFile, File unpackFolder) throws IOException {
-        try (JarFile jar = new JarFile(jarFile)) {
+    private static void unpackAdapterJar(Path jarFile, Path unpackFolder) throws IOException {
+        try (JarFile jar = new JarFile(jarFile.toFile())) {
             Manifest manifest = jar.getManifest();
             Attributes manifestEntries = manifest.getMainAttributes();
             if (manifestEntries.containsKey(typeKey) && "STA".equals(manifestEntries.getValue(typeKey.toString()))) {
                 Enumeration<JarEntry> enumEntries = jar.entries();
                 if (unpackFolder == null) {
-                    unpackFolder = getAdaptersPath().resolve(jarFile.getName().replace(".jar", "")).toFile();
+                    unpackFolder = getAdaptersPath().resolve(jarFile.getFileName().toString().replace(".jar", ""));
                 }
-                if (!unpackFolder.exists())
-                    if (!unpackFolder.mkdir()) {
-                        logger.warning(String.format("Cannot create folder %s", unpackFolder.getAbsolutePath()));
+                if (!Files.exists(unpackFolder))
+                    if (!Files.exists(Files.createDirectory(unpackFolder))) {
+                        logger.warning(String.format("Cannot create folder %s", unpackFolder.toAbsolutePath()));
                     }
                 while (enumEntries.hasMoreElements()) {
                     JarEntry file = enumEntries.nextElement();
-                    File f = new File(unpackFolder, file.getName());
+                    Path f = unpackFolder.resolve(file.getName());
                     if (file.isDirectory()) {
-                        if (!f.mkdir()) {
-                            logger.warning(String.format("Cannot create folder %s", f.getAbsolutePath()));
+                        if (!Files.exists(Files.createDirectory(f))) {
+                            logger.warning(String.format("Cannot create folder %s", f.toAbsolutePath()));
                         }
                         continue;
                     } else {
-                        if (!f.getParentFile().mkdirs()) {
-                            logger.warning(String.format("Cannot create folder %s", f.getParentFile().getAbsolutePath()));
+                        if (!IOHelper.createDirectories(f.getParent())) {
+                            logger.warning(String.format("Cannot create folder %s", f.getParent().toAbsolutePath()));
                         }
                     }
                     try (InputStream is = jar.getInputStream(file)) {
-                        try (FileOutputStream fos = new FileOutputStream(f)) {
+                        try (OutputStream fos = Files.newOutputStream(f)) {
                             while (is.available() > 0) {
                                 fos.write(is.read());
                             }
@@ -572,11 +568,10 @@ public class ToolAdapterIO {
 
     private static Preferences getPreferences() {
         Config instance = Config.instance();
-        Path storagePath = instance.storagePath();
-        File file = storagePath.toFile();
-        if (!file.exists()) {
+        Path file = instance.storagePath();
+        if (!Files.exists(file)) {
             try {
-                if (!(file.getParentFile().mkdirs() && file.createNewFile())) {
+                if (!(IOHelper.createDirectories(file.getParent()) && IOHelper.createFile(file))) {
                     logger.warning("Cannot create module preferences");
                 }
             } catch (IOException e) {
@@ -694,11 +689,11 @@ public class ToolAdapterIO {
                 Path filePath = destination.resolve(fileNames.get(entry.getName()));
                 if (!Files.exists(filePath)) {
                     if (entry.isDirectory()) {
-                        Files.createDirectories(filePath);
+                        IOHelper.createDirectories(filePath);
                     } else {
                         try (InputStream inputStream = zipFile.getInputStream(entry)) {
                             try (BufferedOutputStream bos = new BufferedOutputStream(
-                                    new FileOutputStream(filePath.toFile()))) {
+                                    Files.newOutputStream(filePath))) {
                                 buffer = new byte[4096];
                                 int read;
                                 while ((read = inputStream.read(buffer)) > 0) {

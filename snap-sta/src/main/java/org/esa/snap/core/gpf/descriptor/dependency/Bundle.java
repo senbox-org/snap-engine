@@ -35,7 +35,6 @@ import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -65,7 +64,7 @@ public class Bundle {
     private BundleLocation bundleLocation;
     private String downloadURL;
     //@XStreamOmitField
-    private File source;
+    private Path source;
     private TemplateParameterDescriptor templateparameter;
     private String targetLocation;
     private String entryPoint;
@@ -162,16 +161,16 @@ public class Bundle {
     /**
      * Returns the local source of the bundle
      */
-    public File getSource() { return this.source; }
+    public Path getSource() { return this.source; }
 
     /**
      * Sets the local source of the bundle
      * @param value     The file representing an archive or an installer
      */
-    public void setSource(File value) {
+    public void setSource(Path value) {
         this.source = value;
         if (value != null) {
-            setEntryPoint(value.getName());
+            setEntryPoint(value.getFileName().toString());
         }
     }
     /**
@@ -220,7 +219,7 @@ public class Bundle {
         if (this.bundleType != BundleType.NONE) {
             try {
                 if (this.targetLocation != null && this.entryPoint != null && this.parent != null) {
-                    Path path = this.parent.resolveVariables(this.targetLocation).toPath()
+                    Path path = this.parent.resolveVariables(this.targetLocation)
                                     .resolve(FileUtils.getFilenameWithoutExtension(this.entryPoint));
                     installed = Files.exists(path) && Files.list(path).count() > 0;
                 }
@@ -302,11 +301,11 @@ public class Bundle {
 
     private void initArgumentsParameter() {
         if (this.templateparameter == null || this.templateparameter.getName() == null) {
-            this.templateparameter = new TemplateParameterDescriptor("arguments", File.class);
+            this.templateparameter = new TemplateParameterDescriptor("arguments", Path.class);
             this.templateparameter.setParameterType(ToolAdapterConstants.TEMPLATE_PARAM_MASK);
             Template template = new MemoryTemplate(TemplateType.VELOCITY);
-            this.templateparameter.setOutputFile(new File(template.getName()));
-            ToolParameterDescriptor parameterDescriptor = new ToolParameterDescriptor("targetLocation", File.class);
+            this.templateparameter.setOutputFile(Path.of(template.getName()));
+            ToolParameterDescriptor parameterDescriptor = new ToolParameterDescriptor("targetLocation", Path.class);
             parameterDescriptor.setDefaultValue(String.valueOf(this.targetLocation));
             this.templateparameter.addParameterDescriptor(parameterDescriptor);
             if (this.parent != null) {

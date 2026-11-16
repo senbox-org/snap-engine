@@ -18,7 +18,7 @@
 
 package org.esa.snap.core.gpf.descriptor.template;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 /**
@@ -36,6 +36,6 @@ public interface Template {
     boolean isInMemory();
     Template copy() throws IOException;
     void save() throws IOException;
-    File getPath();
+    Path getPath();
 
 }

@@ -1,9 +1,10 @@
 package org.esa.snap.core.gpf.operators.tooladapter;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import junit.framework.TestCase;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
@@ -13,8 +14,9 @@ public class ToolAdapterIOTest extends TestCase {
         // Test with root_dir.zip (has a common root directory)
         URL rootDirUrl = getClass().getResource("root_dir.zip");
         assertNotNull("Test file root_dir.zip not found", rootDirUrl);
-        File rootDirFile = new File(rootDirUrl.toURI());
-        try (ZipFile rootDirZip = new ZipFile(rootDirFile)) {
+        Path rootDirFile = UrlHelper.urlToFile(rootDirUrl);
+        assertNotNull(rootDirFile);
+        try (ZipFile rootDirZip = new ZipFile(rootDirFile.toFile())) {
             // Get the mapping
             Map<String, String> rootDirMapping = ToolAdapterIO.getFileNameMapping(rootDirZip);
 
@@ -32,9 +34,10 @@ public class ToolAdapterIOTest extends TestCase {
         // Test with single_dirs.zip (no common root directory)
         URL singleDirsUrl = getClass().getResource("single_dirs.zip");
         assertNotNull("Test file single_dirs.zip not found", singleDirsUrl);
-        File singleDirsFile = new File(singleDirsUrl.toURI());
+        Path singleDirsFile = UrlHelper.urlToFile(singleDirsUrl);
+        assertNotNull(singleDirsFile);
 
-        try (ZipFile singleDirsZip = new ZipFile(singleDirsFile)) {
+        try (ZipFile singleDirsZip = new ZipFile(singleDirsFile.toFile())) {
             // Get the mapping
             Map<String, String> singleDirsMapping = ToolAdapterIO.getFileNameMapping(singleDirsZip);
 

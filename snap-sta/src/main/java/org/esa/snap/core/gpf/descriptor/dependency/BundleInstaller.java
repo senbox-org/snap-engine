@@ -19,6 +19,7 @@
 package org.esa.snap.core.gpf.descriptor.dependency;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.gpf.descriptor.OSFamily;
 import org.esa.snap.core.gpf.descriptor.ToolAdapterOperatorDescriptor;
 import org.esa.snap.core.gpf.operators.tooladapter.DefaultOutputConsumer;
@@ -26,8 +27,12 @@ import org.esa.snap.core.gpf.operators.tooladapter.ProcessExecutor;
 import org.esa.snap.core.gpf.operators.tooladapter.ToolAdapterIO;
 import org.esa.snap.core.util.SystemUtils;
 
-import javax.net.ssl.*;
-import java.io.File;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -68,7 +73,7 @@ public class BundleInstaller implements AutoCloseable {
 
     static {
         currentOS = Bundle.getCurrentOS();
-        baseModulePath = SystemUtils.getApplicationDataDir().toPath().resolve("modules").resolve("lib");
+        baseModulePath = SystemUtils.getApplicationDataDir().resolve("modules").resolve("lib");
         try {
             fixUnsignedCertificates();
         } catch (KeyManagementException | NoSuchAlgorithmException e) {
@@ -123,9 +128,9 @@ public class BundleInstaller implements AutoCloseable {
         if (descriptorBundle != null) {
             Path sourcePath = baseModulePath.resolve(descriptorBundle.getEntryPoint());
             if (!Files.exists(sourcePath)) {
-                File source = descriptorBundle.getSource();
+                Path source = descriptorBundle.getSource();
                 if (source != null) {
-                    sourcePath = descriptorBundle.getSource().toPath();
+                    sourcePath = descriptorBundle.getSource();
                 }
             }
             Callable<Void> action;
@@ -198,9 +203,9 @@ public class BundleInstaller implements AutoCloseable {
     private static Path getLocalSourcePath(Bundle bundle) {
         Path bundlePath = null;
         if (bundle != null) {
-            File source = bundle.getSource();
-            if (source != null && source.exists()) {
-                bundlePath = source.toPath();
+            Path source = bundle.getSource();
+            if (source != null && Files.exists(source)) {
+                bundlePath = source;
             } else {
                 String entryPoint = bundle.getEntryPoint();
                 if (entryPoint != null && Files.exists(baseModulePath.resolve(entryPoint))) {
@@ -216,9 +221,9 @@ public class BundleInstaller implements AutoCloseable {
         if (targetLocation == null) {
             throw new IOException("No target defined");
         }
-        Path targetPath = descriptor.resolveVariables(targetLocation).toPath();
+        Path targetPath = descriptor.resolveVariables(targetLocation);
         if (!Files.exists(targetPath)) {
-            Files.createDirectories(targetPath);
+            IOHelper.createDirectories(targetPath);
         }
         Path targetFile = targetPath.resolve(source.getFileName());
         if (!Files.exists(targetFile)) {
@@ -244,7 +249,7 @@ public class BundleInstaller implements AutoCloseable {
             throw new IOException("No target defined");
         }
         ToolAdapterIO.unzip(source,
-                descriptor.resolveVariables(targetLocation).toPath(),
+                descriptor.resolveVariables(targetLocation),
                 this.progressMonitor, taskCount);
         if (!bundle.isLocal()) {
             Files.deleteIfExists(source);
@@ -265,7 +270,7 @@ public class BundleInstaller implements AutoCloseable {
             if (this.progressMonitor != null) {
                 this.progressMonitor.worked(50 + 50 / taskCount);
             }
-            final Path exePath = descriptor.resolveVariables(targetLocation).toPath()
+            final Path exePath = descriptor.resolveVariables(targetLocation)
                     .resolve(bundle.getEntryPoint());
             ToolAdapterIO.fixPermissions(exePath);
             List<String> arguments = new ArrayList<>();
@@ -276,7 +281,7 @@ public class BundleInstaller implements AutoCloseable {
             }
             ProcessExecutor executor = new ProcessExecutor();
             executor.setConsumer(new DefaultOutputConsumer());
-            executor.setWorkingDirectory(exePath.getParent().toFile());
+            executor.setWorkingDirectory(exePath.getParent());
             switch (Bundle.getCurrentOS()) {
                 case linux:
                 case macosx:
@@ -373,7 +378,7 @@ public class BundleInstaller implements AutoCloseable {
         if (!Files.exists(targetFile) || length != Files.size(targetFile)) {
             Files.deleteIfExists(targetFile);
             Files.createDirectories(targetFile.getParent());
-            tmpFile = Files.createTempFile(targetFile.getParent(), "tmp", null);
+            tmpFile = IOHelper.createTempFile("tmp", null);
             if (this.progressMonitor != null) {
                 this.progressMonitor.setSubTaskName("Downloading...");
             }

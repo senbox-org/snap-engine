@@ -15,7 +15,7 @@
  */
 package org.esa.snap.core.gpf.operators.tooladapter;
 
-import java.io.File;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 
 /**
  * Holder interface for tool adapter constants.
@@ -25,7 +25,7 @@ import java.io.File;
 public interface ToolAdapterConstants {
 
     String OPERATOR_NAMESPACE = "org.esa.snap.core.gpf.operators.tooladapter.";
-    String DESCRIPTOR_FILE = "META-INF" + File.separator + "descriptor.xml";
+    String DESCRIPTOR_FILE = "META-INF" + IOHelper.SEPARATOR + "descriptor.xml";
     /**
      * The id of the tool's source product.
      */
