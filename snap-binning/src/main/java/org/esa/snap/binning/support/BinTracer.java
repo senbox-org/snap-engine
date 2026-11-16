@@ -27,9 +27,10 @@ import org.esa.snap.binning.Vector;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Traces all activities that happen to a given bin.
@@ -115,8 +116,8 @@ public class BinTracer {
     private void ensureOutputOpen() {
         if (out == null) {
             try {
-                out = new PrintStream(new FileOutputStream(outputFile), true);
-            } catch (FileNotFoundException e) {
+                out = new PrintStream(Files.newOutputStream(Path.of(outputFile)), true);
+            } catch (IOException e) {
                 e.printStackTrace();
                 out = System.out;
             }

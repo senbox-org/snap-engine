@@ -5,7 +5,7 @@ import com.bc.ceres.core.ServiceRegistryManager;
 import org.esa.snap.core.util.ServiceLoader;
 import org.esa.snap.core.util.StringUtils;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Set;
 
 public class FormatterFactory {
@@ -30,8 +30,8 @@ public class FormatterFactory {
         throw new RuntimeException("Unknown formatter key: " + key);
     }
 
-    public static String getOutputFormat(FormatterConfig formatterConfig, File outputFile) {
-        final String fileName = outputFile.getName();
+    public static String getOutputFormat(FormatterConfig formatterConfig, Path outputFile) {
+        final String fileName = outputFile.getFileName().toString();
         final int extPos = fileName.lastIndexOf(".");
         String outputFileNameExt = fileName.substring(extPos + 1);
         String outputFormat = formatterConfig.getOutputFormat();

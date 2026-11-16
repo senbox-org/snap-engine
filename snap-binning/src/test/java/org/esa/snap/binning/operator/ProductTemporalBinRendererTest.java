@@ -17,6 +17,7 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.binding.ConversionException;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.binning.BinManager;
 import org.esa.snap.binning.CompositingType;
@@ -39,8 +40,8 @@ import org.junit.runner.RunWith;
 
 import javax.media.jai.operator.ConstantDescriptor;
 import java.awt.Rectangle;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.Arrays;
 
@@ -68,8 +69,8 @@ public class ProductTemporalBinRendererTest {
 
     @Test
     public void testRenderBin() throws Exception {
-        File tempFile = File.createTempFile("BEAM", ".nc");
-        tempFile.deleteOnExit();
+        Path tempFile = IOHelper.createTempFile("BEAM", ".nc");
+        IOHelper.deleteOnExit(tempFile);
         BinningContextImpl binningContext = new BinningContextImpl(new SEAGrid(10), new BinManager(),
                                                                    CompositingType.BINNING, 1, -1, null, null);
         ProductTemporalBinRenderer binRenderer = createBinRenderer(tempFile, binningContext, null);
@@ -105,8 +106,8 @@ public class ProductTemporalBinRendererTest {
 
     @Test
     public void testRenderBinWithCustomizer() throws Exception {
-        File tempFile = File.createTempFile("BEAM", ".nc");
-        tempFile.deleteOnExit();
+        Path tempFile = IOHelper.createTempFile("BEAM", ".nc");
+        IOHelper.deleteOnExit(tempFile);
         BinningContextImpl binningContext = new BinningContextImpl(new SEAGrid(10), new BinManager(),
                                                                    CompositingType.BINNING, 1, -1, null, null);
         ProductTemporalBinRenderer binRenderer = createBinRenderer(tempFile, binningContext, new MyProductCustomizer());
@@ -141,7 +142,7 @@ public class ProductTemporalBinRendererTest {
         }
     }
 
-    private Product renderBins(File tempFile, ProductTemporalBinRenderer binRenderer, Rectangle region) throws IOException {
+    private Product renderBins(Path tempFile, ProductTemporalBinRenderer binRenderer, Rectangle region) throws IOException {
         binRenderer.begin();
         TemporalBin temporalBin = new TemporalBin(0, 11);
         for (int y = 0; y < region.height; y++) {
@@ -160,7 +161,7 @@ public class ProductTemporalBinRendererTest {
     }
 
 
-    private ProductTemporalBinRenderer createBinRenderer(File tempFile,
+    private ProductTemporalBinRenderer createBinRenderer(Path tempFile,
                                                          BinningContextImpl binningContext,
                                                          ProductCustomizer productCustomizer) throws IOException, ConversionException, ParseException {
         String worldWKT = "POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))";

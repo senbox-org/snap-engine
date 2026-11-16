@@ -1,8 +1,8 @@
 package org.esa.snap.binning.reader;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.esa.snap.core.util.io.SnapFileFilter;
-
-import java.io.File;
 
 public class BinnedFileFilter extends SnapFileFilter {
 
@@ -13,13 +13,13 @@ public class BinnedFileFilter extends SnapFileFilter {
     }
 
     @Override
-    public boolean accept(File file) {
-        if (file.isDirectory()) {
+    public boolean accept(Path file) {
+        if (Files.isDirectory(file)) {
             return true;    // needed to be able to browse through directories when used from VISAT tb 2013-07-29
         }
 
         if (super.accept(file)) {
-            return isBinnedName(file.getName());
+            return isBinnedName(file.getFileName().toString());
         }
 
         return false;

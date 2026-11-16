@@ -28,7 +28,7 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.List;
@@ -48,7 +48,7 @@ public abstract class AbstractBinWriter implements BinWriter {
     private final Geometry region;
     private final ProductData.UTC startTime;
     private final ProductData.UTC stopTime;
-    private File targetFilePath;
+    private Path targetFilePath;
     private Logger logger;
 
     public AbstractBinWriter(Geometry region, ProductData.UTC startTime, ProductData.UTC stopTime) {
@@ -69,12 +69,12 @@ public abstract class AbstractBinWriter implements BinWriter {
 
     @Override
     public void setTargetFileTemplatePath(String targetFileTemplatePath) {
-        targetFilePath = FileUtils.exchangeExtension(new File(targetFileTemplatePath), "-bins.nc");
+        targetFilePath = FileUtils.exchangeExtension(Path.of(targetFileTemplatePath), "-bins.nc");
     }
 
     @Override
     public String getTargetFilePath() {
-        return targetFilePath.getAbsolutePath();
+        return targetFilePath.toAbsolutePath().toString();
     }
 
     Geometry getRegion() {
@@ -95,7 +95,7 @@ public abstract class AbstractBinWriter implements BinWriter {
             try {
                 netcdfFile.addGlobalAttribute(name, value);
             } catch (Exception e) {
-                logger.warning(String.format("Failed to write metadata property to '%s': %s = %s", targetFilePath.getAbsolutePath(), name, value));
+                logger.warning(String.format("Failed to write metadata property to '%s': %s = %s", targetFilePath.toAbsolutePath(), name, value));
             }
         }
     }

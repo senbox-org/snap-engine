@@ -2,6 +2,7 @@ package org.esa.snap.binning.operator.metadata;
 
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertySet;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -19,19 +20,20 @@ import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.locationtech.jts.geom.Geometry;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,10 +74,10 @@ public class GlobalMetadata {
         return globalMetadata;
     }
 
-    public void processMetadataTemplates(File metadataTemplateDir, BinningOp operator, Product targetProduct, Logger logger) {
-        final File absTemplateDir = metadataTemplateDir.getAbsoluteFile();
-        final File[] files = absTemplateDir.listFiles(new VelocityTemplateFilter());
-        if (files == null || files.length == 0) {
+    public void processMetadataTemplates(Path metadataTemplateDir, BinningOp operator, Product targetProduct, Logger logger) {
+        final Path absTemplateDir = metadataTemplateDir.toAbsolutePath();
+        final Collection<Path> files = IOHelper.listFiles(absTemplateDir, new VelocityTemplateFilter());
+        if (files == null || files.isEmpty()) {
             return;
         }
 
@@ -92,7 +94,7 @@ public class GlobalMetadata {
         vc.put("targetProduct", targetProduct);
         vc.put("metadataProperties", metaProperties);
 
-        for (File file : files) {
+        for (Path file : files) {
             processMetadataTemplate(file, ve, vc, logger);
         }
     }
@@ -116,17 +118,17 @@ public class GlobalMetadata {
         return processingGraph;
     }
 
-    public void load(File propertiesFile, Logger logger) {
+    public void load(Path propertiesFile, Logger logger) {
         if (propertiesFile == null) {
             return;
         }
-        if (!propertiesFile.isFile()) {
+        if (!Files.isRegularFile(propertiesFile)) {
             logger.warning(String.format("Metadata properties file '%s' not found", propertiesFile));
             return;
         }
 
         logger.info(String.format("Reading metadata properties file '%s'...", propertiesFile));
-        try (FileReader reader = new FileReader(propertiesFile)) {
+        try (Reader reader = Files.newBufferedReader(propertiesFile)) {
             final Properties properties = new Properties();
             properties.load(reader);
             for (String name : properties.stringPropertyNames()) {
@@ -138,10 +140,10 @@ public class GlobalMetadata {
         }
     }
 
-    private static VelocityEngine createVelocityEngine(File absTemplateDir, Logger logger) {
+    private static VelocityEngine createVelocityEngine(Path absTemplateDir, Logger logger) {
         final Properties veConfig = new Properties();
-        if (absTemplateDir.equals(new File(".").getAbsoluteFile())) {
-            veConfig.setProperty("file.resource.loader.path", absTemplateDir.getPath());
+        if (absTemplateDir.equals(Path.of(".").toAbsolutePath())) {
+            veConfig.setProperty("file.resource.loader.path", absTemplateDir.toString());
         }
 
         final VelocityEngine ve = new VelocityEngine();
@@ -155,12 +157,12 @@ public class GlobalMetadata {
         return ve;
     }
 
-    private static void processMetadataTemplate(File templateFile, VelocityEngine ve, VelocityContext vc, Logger logger) {
-        final String templateName = templateFile.getName();
+    private static void processMetadataTemplate(Path templateFile, VelocityEngine ve, VelocityContext vc, Logger logger) {
+        final String templateName = templateFile.getFileName().toString();
         final String outputName = templateName.substring(0, templateName.lastIndexOf('.'));
         logger.info(String.format("Writing metadata file '%s'...", outputName));
 
-        try (Writer writer = new FileWriter(outputName)) {
+        try (Writer writer = Files.newBufferedWriter(Path.of(outputName))) {
             ve.mergeTemplate(templateName, RuntimeConstants.ENCODING_DEFAULT, vc, writer);
         } catch (Exception e) {
             final String msgPattern = "Failed to generate metadata file from template '%s': %s";
@@ -171,8 +173,8 @@ public class GlobalMetadata {
     private void extractConfigMetadata(BinningConfig config) {
         final String outputPath = config.getOutputFile();
         if (StringUtils.isNotNullAndNotEmpty(outputPath)) {
-            final File outputFile = new File(outputPath);
-            metaProperties.put("product_name", FileUtils.getFilenameWithoutExtension(outputFile.getName()));
+            final Path outputFile = Path.of(outputPath);
+            metaProperties.put("product_name", FileUtils.getFilenameWithoutExtension(outputFile.getFileName()));
         }
 
         // provisionally moved to node attributes as it is not a binning parameter, boe, 2014-11-04
@@ -280,10 +282,10 @@ public class GlobalMetadata {
         metaProperties = new TreeMap<>();
     }
 
-    private static class VelocityTemplateFilter implements FilenameFilter {
+    private static class VelocityTemplateFilter implements Predicate<Path> {
         @Override
-        public boolean accept(File dir, String name) {
-            return name.endsWith(".vm");
+        public boolean test(Path dir) {
+            return dir.getFileName().toString().endsWith(".vm");
         }
     }
 }

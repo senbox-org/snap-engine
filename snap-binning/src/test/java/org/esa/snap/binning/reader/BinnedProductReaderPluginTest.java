@@ -6,7 +6,7 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
@@ -24,7 +24,7 @@ public class BinnedProductReaderPluginTest {
         final Class[] inputTypes = plugin.getInputTypes();
         assertEquals(2, inputTypes.length);
         assertEquals(String.class, inputTypes[0]);
-        assertEquals(File.class, inputTypes[1]);
+        assertEquals(Path.class, inputTypes[1]);
     }
 
     @Test

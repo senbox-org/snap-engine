@@ -27,10 +27,11 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.AbstractList;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,7 +54,7 @@ class TemporalBinList extends AbstractList<TemporalBin> {
     private final long numberOfBins;
     private final int binsPerFile;
     private final List<TemporalBin> currentBinList;
-    private final File tempDir;
+    private final Path tempDir;
     private int size;
     private int lastFileIndex;
     private boolean firstGet;
@@ -152,45 +153,39 @@ class TemporalBinList extends AbstractList<TemporalBin> {
         return index / binsPerFile;
     }
 
-    private File getFile(int fileIndex) throws IOException {
-        return new File(tempDir, String.format(FILE_NAME_PATTERN, fileIndex));
+    private Path getFile(int fileIndex) {
+        return tempDir.resolve(String.format(FILE_NAME_PATTERN, fileIndex));
     }
 
     private void writeBinList(int currentFileIndex, List<TemporalBin> binList) throws IOException {
-        File file = getFile(currentFileIndex);
+        Path file = getFile(currentFileIndex);
         writeToFile(binList, file);
     }
 
     private void readBinList(int currentFileIndex, List<TemporalBin> binList) throws IOException {
-        File file = getFile(currentFileIndex);
-        if (file.exists()) {
+        Path file = getFile(currentFileIndex);
+        if (Files.exists(file)) {
             readFromFile(file, binList);
         }
     }
 
-    private static void writeToFile(List<TemporalBin> temporalBins, File file) throws IOException {
-        FileOutputStream fos = new FileOutputStream(file);
-        DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(fos, 5 * 1024 * 1024));
-        try {
+    private static void writeToFile(List<TemporalBin> temporalBins, Path file) throws IOException {
+        try (OutputStream fos = Files.newOutputStream(file);
+             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(fos, 5 * 1024 * 1024));){
             for (TemporalBin bin : temporalBins) {
                 dos.writeLong(bin.getIndex());
                 bin.write(dos);
             }
-        } finally {
-            dos.close();
         }
     }
 
-    private static void readFromFile(File file, List<TemporalBin> temporalBins) throws IOException {
-        FileInputStream fis = new FileInputStream(file);
-        DataInputStream dis = new DataInputStream(new BufferedInputStream(fis, 5 * 1024 * 1024));
-        try {
+    private static void readFromFile(Path file, List<TemporalBin> temporalBins) throws IOException {
+        try (InputStream fis = Files.newInputStream(file);
+             DataInputStream dis = new DataInputStream(new BufferedInputStream(fis, 5 * 1024 * 1024))){
             while (dis.available() != 0) {
                 long binIndex = dis.readLong();
                 temporalBins.add(TemporalBin.read(binIndex, dis));
             }
-        } finally {
-            dis.close();
         }
 
     }

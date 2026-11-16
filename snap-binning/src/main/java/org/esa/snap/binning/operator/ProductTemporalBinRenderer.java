@@ -17,6 +17,7 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.binning.ProductCustomizer;
 import org.esa.snap.binning.TemporalBin;
 import org.esa.snap.binning.TemporalBinRenderer;
@@ -34,8 +35,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.awt.Rectangle;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,13 +58,13 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
     private final Band numObsBand;
     private final Band numPassesBand;
     private final float[] fillValues;
-    private final File outputFile;
+    private final Path outputFile;
     private int yLast;
     private final ProductWriter productWriter;
     private final Rectangle outputRegion;
 
     public ProductTemporalBinRenderer(String[] featureNames,
-                                      File outputFile,
+                                      Path outputFile,
                                       String outputFormat,
                                       Rectangle outputRegion,
                                       GeoCoding geoCoding,
@@ -82,7 +83,7 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
 
 //        CrsGeoCoding geoCoding = createMapGeoCoding(outputRegion, pixelSize);
 
-        product = new Product(outputFile.getName(), "BINNED-L3", outputRegion.width, outputRegion.height);
+        product = new Product(outputFile.getFileName().toString(), "BINNED-L3", outputRegion.width, outputRegion.height);
         product.setProductWriter(productWriter);
         product.setPreferredTileSize(64, 64);
         product.setSceneGeoCoding(geoCoding);
@@ -169,9 +170,9 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
 
     @Override
     public void begin() throws IOException {
-        final File parentFile = outputFile.getParentFile();
+        final Path parentFile = outputFile.getParent();
         if (parentFile != null) {
-            parentFile.mkdirs();
+            IOHelper.createDirectories(parentFile);
         }
         productWriter.writeProductNodes(product, outputFile);
         initLine();

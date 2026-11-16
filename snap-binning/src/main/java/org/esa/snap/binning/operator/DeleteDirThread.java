@@ -2,7 +2,7 @@ package org.esa.snap.binning.operator;
 
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Used for registering a shutdown hook to the runtime and deleting files when
@@ -14,9 +14,9 @@ import java.io.File;
 class DeleteDirThread extends Thread {
 
 
-    private final File tempDir;
+    private final Path tempDir;
 
-    DeleteDirThread(File tempDir) {
+    DeleteDirThread(Path tempDir) {
         this.tempDir = tempDir;
     }
 

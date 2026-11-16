@@ -16,8 +16,7 @@
 
 package org.esa.snap.binning.operator;
 
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.binning.BinManager;
 import org.esa.snap.binning.CompositingType;
 import org.esa.snap.binning.TemporalBin;
@@ -31,18 +30,21 @@ import org.geotools.geometry.jts.JTS;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 
 import java.awt.geom.Rectangle2D;
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Marco Peters
@@ -51,26 +53,26 @@ public class SeaDASLevel3BinWriterTest {
 
     private int numRows;
     private BinWriter binWriter;
-    private File tempFile;
+    private Path tempFile;
 
     @Before
     public void setUp() throws Exception {
         numRows = 216;
-        tempFile = File.createTempFile("SeaDASLevel3BinWriterTest-temp", ".nc");
+        tempFile = IOHelper.createTempFile("SeaDASLevel3BinWriterTest-temp", ".nc");
         binWriter = createBinWriter(tempFile, numRows);
     }
 
     @After
     public void tearDown() throws Exception {
         if (tempFile != null) {
-            if (!tempFile.delete()) {
-                tempFile.deleteOnExit();
+            if (!IOHelper.delete(tempFile)) {
+                IOHelper.deleteOnExit(tempFile);
             }
         }
         if (binWriter != null) {
-            File binTempFile = new File(binWriter.getTargetFilePath());
-            if (!binTempFile.delete()) {
-                binTempFile.deleteOnExit();
+            Path binTempFile = Path.of(binWriter.getTargetFilePath());
+            if (!IOHelper.delete(binTempFile)) {
+                IOHelper.deleteOnExit(binTempFile);
             }
         }
     }
@@ -231,14 +233,14 @@ public class SeaDASLevel3BinWriterTest {
         return metadataProperties;
     }
 
-    private BinWriter createBinWriter(File tempFile, int numRows) {
+    private BinWriter createBinWriter(Path tempFile, int numRows) {
         final ProductData.UTC startTime = null;
         final ProductData.UTC stopTime = null;
 
         return createBinWriter(tempFile, numRows, startTime, stopTime);
     }
 
-    private BinWriter createBinWriter(File tempFile, int numRows, ProductData.UTC startTime, ProductData.UTC stopTime) {
+    private BinWriter createBinWriter(Path tempFile, int numRows, ProductData.UTC startTime, ProductData.UTC stopTime) {
         final SEAGrid seaGrid = new SEAGrid(numRows);
         final VariableContextImpl variableContext = new VariableContextImpl();
         variableContext.defineVariable("test", "blah");
@@ -249,7 +251,7 @@ public class SeaDASLevel3BinWriterTest {
 
         final SeaDASLevel3BinWriter binWriter = new SeaDASLevel3BinWriter(region, startTime, stopTime);
         binWriter.setBinningContext(binningContext);
-        binWriter.setTargetFileTemplatePath(tempFile.getAbsolutePath());
+        binWriter.setTargetFileTemplatePath(tempFile.toAbsolutePath().toString());
         binWriter.setLogger(Logger.getLogger("SeaDASLevel3BinWriterTest"));
         return binWriter;
     }

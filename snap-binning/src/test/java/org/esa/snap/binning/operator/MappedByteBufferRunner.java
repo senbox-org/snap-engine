@@ -17,16 +17,18 @@
 package org.esa.snap.binning.operator;
 
 
+import com.bc.ceres.core.io.EnhancedNIORandomAccessFile;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import static org.junit.Assert.assertEquals;
 
@@ -39,9 +41,9 @@ import static org.junit.Assert.assertEquals;
 public class MappedByteBufferRunner {
 
     interface FileIO {
-        void write(File file, int n, Producer producer) throws IOException;
+        void write(Path file, int n, Producer producer) throws IOException;
 
-        int read(File file, Consumer consumer) throws IOException;
+        int read(Path file, Consumer consumer) throws IOException;
     }
 
     interface Producer {
@@ -65,18 +67,18 @@ public class MappedByteBufferRunner {
     }
 
     private static void testStreamedFileIOPerformance() throws Exception {
-        File file = genTestFile();
+        Path file = genTestFile();
         testFileIOPerformance(file, new StreamedFileIO());
         deleteFile(file);
     }
 
     private static void testMemoryMappedFileIOPerformance() throws Exception {
-        File file = genTestFile();
+        Path file = genTestFile();
         testFileIOPerformance(file, new MemoryMappedFileIO());
         deleteFile(file);
     }
 
-    private static void testFileIOPerformance(File file, FileIO fileIO) throws IOException {
+    private static void testFileIOPerformance(Path file, FileIO fileIO) throws IOException {
 
         System.out.println("Testing " + fileIO.getClass().getSimpleName() + " for " + N + " samples");
 
@@ -95,36 +97,33 @@ public class MappedByteBufferRunner {
         System.out.println("buf write time: " + (t2 - t1) + " ms");
         System.out.println("buf read time:  " + (t3 - t2) + " ms");
         System.out.println("buf total time: " + (t3 - t1) + " ms");
-        System.out.println("file size:      " + file.length() + " bytes");
+        System.out.println("file size:      " + Files.size(file) + " bytes");
     }
 
     static class MemoryMappedFileIO implements FileIO {
         @Override
-        public void write(File file, int n, Producer producer) throws IOException {
-            RandomAccessFile raf = new RandomAccessFile(file, "rw");
-            FileChannel channel = raf.getChannel();
-            ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, 100L * MiB);
-            try {
-                for (int i = 0; i < n; i++) {
-                    long key = producer.createKey();
-                    float[] samples = producer.createSamples();
-                    writeKey(buffer, key);
-                    writeSamples(buffer, samples);
+        public void write(Path file, int n, Producer producer) throws IOException {
+            try (EnhancedNIORandomAccessFile raf = new EnhancedNIORandomAccessFile(file, StandardOpenOption.READ, StandardOpenOption.WRITE)) {
+                final ByteBuffer buffer = raf.withChannel(channel -> channel.map(FileChannel.MapMode.READ_WRITE, 0, 100L * MiB));
+                try {
+                    for (int i = 0; i < n; i++) {
+                        long key = producer.createKey();
+                        float[] samples = producer.createSamples();
+                        writeKey(buffer, key);
+                        writeSamples(buffer, samples);
+                    }
+                } finally {
+                    writeKey(buffer, -1L);
                 }
-            } finally {
-                writeKey(buffer, -1L);
-                raf.close();
             }
         }
 
         @Override
-        public int read(File file, Consumer consumer) throws IOException {
-            RandomAccessFile raf = new RandomAccessFile(file, "r");
-            FileChannel channel = raf.getChannel();
-            long length = file.length();
-            ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, length);
+        public int read(Path file, Consumer consumer) throws IOException {
             int n = 0;
-            try {
+            try (EnhancedNIORandomAccessFile raf = new EnhancedNIORandomAccessFile(file, StandardOpenOption.READ)) {
+                final long length = Files.size(file);
+                final ByteBuffer buffer = raf.withChannel(channel -> channel.map(FileChannel.MapMode.READ_ONLY, 0, length));
                 while (true) {
                     long key = readKey(buffer);
                     if (key == -1L) {
@@ -134,8 +133,6 @@ public class MappedByteBufferRunner {
                     consumer.process(key, samples);
                     n++;
                 }
-            } finally {
-                raf.close();
             }
             return n;
         }
@@ -169,8 +166,8 @@ public class MappedByteBufferRunner {
 
     static class StreamedFileIO implements FileIO {
         @Override
-        public void write(File file, int n, Producer producer) throws IOException {
-            try (DataOutputStream stream = new DataOutputStream(new FileOutputStream(file))) {
+        public void write(Path file, int n, Producer producer) throws IOException {
+            try (DataOutputStream stream = new DataOutputStream(Files.newOutputStream(file))) {
                 for (int i = 0; i < n; i++) {
                     long key = producer.createKey();
                     float[] samples = producer.createSamples();
@@ -181,9 +178,9 @@ public class MappedByteBufferRunner {
         }
 
         @Override
-        public int read(File file, Consumer consumer) throws IOException {
+        public int read(Path file, Consumer consumer) throws IOException {
             int n = 0;
-            try (DataInputStream stream = new DataInputStream(new FileInputStream(file))) {
+            try (DataInputStream stream = new DataInputStream(Files.newInputStream(file))) {
                 while (true) {
                     long key;
                     try {
@@ -261,14 +258,14 @@ public class MappedByteBufferRunner {
         return Runtime.getRuntime().freeMemory() / MiB;
     }
 
-    static File genTestFile() throws IOException {
-        return File.createTempFile(MappedByteBufferRunner.class.getSimpleName() + "-", ".dat");
+    static Path genTestFile() {
+        return IOHelper.createTempFile(MappedByteBufferRunner.class.getSimpleName() + "-", ".dat");
     }
 
-    static void deleteFile(File file) {
-        if (file.exists()) {
-            if (!file.delete()) {
-                file.deleteOnExit();
+    static void deleteFile(Path file) {
+        if (Files.exists(file)) {
+            if (!IOHelper.delete(file)) {
+                IOHelper.deleteOnExit(file);
             }
         }
     }

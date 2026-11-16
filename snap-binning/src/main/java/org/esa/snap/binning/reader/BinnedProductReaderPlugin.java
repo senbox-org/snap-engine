@@ -26,7 +26,7 @@ import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -81,7 +81,7 @@ public class BinnedProductReaderPlugin implements ProductReaderPlugIn {
     }
 
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     public ProductReader createReaderInstance() {

@@ -1,15 +1,19 @@
 package org.esa.snap.binning.reader;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class BinnedFileFilterTest {
 
-//    private static final File TESTDATA_DIR = new File("target/binning-test-io");
+//    private static final Path TESTDATA_DIR = Path.of("target/binning-test-io");
     private static final String endsWith = ".nc";
     private BinnedFileFilter filter;
 
@@ -31,14 +35,14 @@ public class BinnedFileFilterTest {
 
     @Test
     public void testAccept() {
-        final File tempDir = new File(System.getProperty("java.io.tmpdir"));
-        assertTrue(tempDir.isDirectory());
+        final Path tempDir = IOHelper.createATempDir();
+        assertTrue(Files.isDirectory(tempDir));
         assertTrue(filter.accept(tempDir));
-        assertTrue(filter.accept(new File("ESACCI-OC-L3S-OC_PRODUCTS-MERGED-1M_MONTHLY_4km_PML_TEST_COMPOSITE_200306.nc")));
+        assertTrue(filter.accept(Path.of("ESACCI-OC-L3S-OC_PRODUCTS-MERGED-1M_MONTHLY_4km_PML_TEST_COMPOSITE_200306.nc")));
 
-        assertFalse(filter.accept(new File("ESACCI-OC-L3S-OC_PRODUCTS-MERGED-1M_MONTHLY_4km_PML_TEST_COMPOSITE_200306")));
-        assertFalse(filter.accept(new File("MER_FR__1PNUPA20070708_164713_000000982059_00384_27993_4986.N1")));
-        assertFalse(filter.accept(new File("MER_FR__1PNUPA20070708_164713_000000982059_00384_27993_4986.nc")));
+        assertFalse(filter.accept(Path.of("ESACCI-OC-L3S-OC_PRODUCTS-MERGED-1M_MONTHLY_4km_PML_TEST_COMPOSITE_200306")));
+        assertFalse(filter.accept(Path.of("MER_FR__1PNUPA20070708_164713_000000982059_00384_27993_4986.N1")));
+        assertFalse(filter.accept(Path.of("MER_FR__1PNUPA20070708_164713_000000982059_00384_27993_4986.nc")));
     }
 
     @Test

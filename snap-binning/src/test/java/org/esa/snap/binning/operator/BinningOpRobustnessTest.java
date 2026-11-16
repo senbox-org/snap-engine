@@ -16,6 +16,7 @@
 
 package org.esa.snap.binning.operator;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
@@ -24,7 +25,8 @@ import org.junit.Test;
 
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Norman Fomferra
@@ -33,7 +35,7 @@ public class BinningOpRobustnessTest {
 
     @Before
     public void setUp() throws Exception {
-        BinningOpTest.TESTDATA_DIR.mkdir();
+        IOHelper.createDirectory(BinningOpTest.TESTDATA_DIR);
     }
 
     @After

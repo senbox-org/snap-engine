@@ -29,7 +29,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Utility class used to format the results of a binning given by a {@link TemporalBinSource}.
@@ -51,7 +51,7 @@ class DefaultFormatter implements Formatter {
             throw new IllegalArgumentException("Illegal binning context: featureNames.length == 0");
         }
 
-        final File outputFile = new File(formatterConfig.getOutputFile());
+        final Path outputFile = Path.of(formatterConfig.getOutputFile());
         final String outputType = formatterConfig.getOutputType();
         final String outputFormat = FormatterFactory.getOutputFormat(formatterConfig, outputFile);
 

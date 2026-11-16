@@ -16,17 +16,18 @@
 
 package org.esa.snap.binning.operator;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.binning.TemporalBin;
 import org.esa.snap.binning.TemporalBinRenderer;
 import org.esa.snap.binning.Vector;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.FileUtils;
 
-import javax.imageio.ImageIO;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 /**
@@ -45,11 +46,11 @@ public final class ImageTemporalBinRenderer implements TemporalBinRenderer {
     private final float[][] bandData;
     private final Rectangle outputRegion;
     private final boolean writeRgb;
-    private final File outputFile;
+    private final Path outputFile;
     private final String outputFormat;
 
     public ImageTemporalBinRenderer(String[] featureNames,
-                                    File outputFile, String outputFormat,
+                                    Path outputFile, String outputFormat,
                                     Rectangle outputRegion,
                                     BinningOp.BandConfiguration[] bandConfigurations,
                                     boolean writeRgb) {
@@ -95,9 +96,9 @@ public final class ImageTemporalBinRenderer implements TemporalBinRenderer {
 
     @Override
     public void begin() {
-        final File parentFile = outputFile.getParentFile();
+        final Path parentFile = outputFile.getParent();
         if (parentFile != null) {
-            parentFile.mkdirs();
+            IOHelper.createDirectories(parentFile);
         }
     }
 
@@ -114,7 +115,7 @@ public final class ImageTemporalBinRenderer implements TemporalBinRenderer {
                                                 FileUtils.getFilenameWithoutExtension(outputFile),
                                                 bandNames[i],
                                                 FileUtils.getExtension(outputFile));
-                File imageFile = new File(outputFile.getParentFile(), fileName);
+                Path imageFile = outputFile.getParent().resolve(fileName);
                 writeGrayScaleImage(outputRegion.width, outputRegion.height,
                                     bandData[i],
                                     bandMinValues[i], bandMaxValues[i],
@@ -140,7 +141,7 @@ public final class ImageTemporalBinRenderer implements TemporalBinRenderer {
     private static void writeGrayScaleImage(int width, int height,
                                             float[] rawData,
                                             float rawValue1, float rawValue2,
-                                            String outputFormat, File outputImageFile) throws IOException {
+                                            String outputFormat, Path outputImageFile) throws IOException {
 
         final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
         final DataBufferByte dataBuffer = (DataBufferByte) image.getRaster().getDataBuffer();
@@ -151,13 +152,13 @@ public final class ImageTemporalBinRenderer implements TemporalBinRenderer {
         for (int i = 0; i < rawData.length; i++) {
             data[i] = toByte(rawData[i], a, b);
         }
-        ImageIO.write(image, outputFormat, outputImageFile);
+        ImageUtils.writeImage(image, outputFormat, outputImageFile);
     }
 
     private static void writeRgbImage(int width, int height,
                                       float[][] rawData,
                                       float[] rawValue1, float[] rawValue2,
-                                      String outputFormat, File outputImageFile) throws IOException {
+                                      String outputFormat, Path outputImageFile) throws IOException {
         final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
         final DataBufferByte dataBuffer = (DataBufferByte) image.getRaster().getDataBuffer();
         @SuppressWarnings("MismatchedReadAndWriteOfArray")
@@ -177,7 +178,7 @@ public final class ImageTemporalBinRenderer implements TemporalBinRenderer {
             data[j + 1] = toByte(rawDataG[i], aG, bG);
             data[j] = toByte(rawDataB[i], aB, bB);
         }
-        ImageIO.write(image, outputFormat, outputImageFile);
+        ImageUtils.writeImage(image, outputFormat, outputImageFile);
     }
 
     private static byte toByte(float s, float a, float b) {

@@ -1,11 +1,11 @@
 package org.esa.snap.binning.operator;
 
+import java.nio.MappedByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.nio.MappedByteBuffer;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,7 +16,7 @@ public class MappedFileTest {
 
     private int MiB = 1024 * 1024;
 
-    private File file;
+    private Path file;
 
     @Before
     public void setUp() throws Exception {
@@ -39,7 +39,7 @@ public class MappedFileTest {
             buffer1.putDouble(0, 0.111);
             buffer1.putDouble(chunkSize - 8, 1.222);
         } finally {
-            assertEquals(chunkSize, file.length());
+            assertEquals(chunkSize, Files.size(file));
         }
 
         try {
@@ -48,7 +48,7 @@ public class MappedFileTest {
             assertEquals(1.222, buffer2.getDouble(chunkSize - 8), 1e-10);
             buffer2.putDouble(2 * chunkSize - 8, 2.333);
         } finally {
-            assertEquals(2 * chunkSize, file.length());
+            assertEquals(2 * chunkSize, Files.size(file));
         }
 
         try {
@@ -58,7 +58,7 @@ public class MappedFileTest {
             assertEquals(2.333, buffer3.getDouble(2 * chunkSize - 8), 1e-10);
             buffer3.putDouble(3 * chunkSize - 8, 3.444);
         } finally {
-            assertEquals(3 * chunkSize, file.length());
+            assertEquals(3 * chunkSize, Files.size(file));
         }
 
         mappedFile.close();
@@ -71,7 +71,7 @@ public class MappedFileTest {
             assertEquals(2.333, buffer4.getDouble(2 * chunkSize - 8), 1e-10);
             assertEquals(3.444, buffer4.getDouble(3 * chunkSize - 8), 1e-10);
         } finally {
-            assertEquals(3 * chunkSize, file.length());
+            assertEquals(3 * chunkSize, Files.size(file));
             mappedFile.close();
         }
     }

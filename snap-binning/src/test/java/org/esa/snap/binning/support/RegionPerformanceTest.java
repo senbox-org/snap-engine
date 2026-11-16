@@ -16,6 +16,14 @@
 
 package org.esa.snap.binning.support;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -25,14 +33,6 @@ import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
-import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
-
-import java.io.FileReader;
-import java.io.IOException;
 
 /**
  * This program test how big the effort is to do a point-in-polygon test.
@@ -55,7 +55,7 @@ public class RegionPerformanceTest {
 
         GeometryFactory geometryFactory = new GeometryFactory();
         WKTReader wktReader = new WKTReader(geometryFactory);
-        Geometry geometry = wktReader.read(new FileReader(wktFile));
+        Geometry geometry = wktReader.read(Files.newBufferedReader(Path.of(wktFile)));
 
         if (geometry instanceof Polygon) {
             Polygon polygon = (Polygon) geometry;

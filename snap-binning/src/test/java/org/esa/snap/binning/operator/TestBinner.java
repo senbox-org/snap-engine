@@ -17,7 +17,19 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.locationtech.jts.io.WKTReader;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import org.esa.snap.binning.BinningContext;
 import org.esa.snap.binning.PlanetaryGrid;
 import org.esa.snap.binning.SpatialBin;
@@ -37,17 +49,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.io.FileUtils;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import org.locationtech.jts.io.WKTReader;
 
 /**
  * <p>
@@ -80,14 +82,9 @@ public class TestBinner {
         String[] outputterConfigFiles = new String[args.length - 3];
         System.arraycopy(args, 3, outputterConfigFiles, 0, outputterConfigFiles.length);
 
-        File[] sourceFiles = new File(sourceDirFile).listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".N1");
-            }
-        });
-        String regionWkt = FileUtils.readText(new File(regionWktFile));
-        BinningConfig binningConfig = BinningConfig.fromXml(FileUtils.readText(new File(binnerConfigFile)));
+        Collection<Path> sourceFiles = IOHelper.listFiles(Path.of(sourceDirFile), path -> path.getFileName().toString().endsWith(".N1"));
+        String regionWkt = FileUtils.readText(Path.of(regionWktFile));
+        BinningConfig binningConfig = BinningConfig.fromXml(FileUtils.readText(Path.of(binnerConfigFile)));
 
         Debug.setEnabled(true);
 
@@ -102,17 +99,17 @@ public class TestBinner {
         List<TemporalBin> temporalBins = doTemporalBinning(binningContext, spatialBinMap);
         // Step 3: Formatting
         for (String outputterConfigFile : outputterConfigFiles) {
-            FormatterConfig formatterConfig = FormatterConfig.fromXml(FileUtils.readText(new File(outputterConfigFile)));
+            FormatterConfig formatterConfig = FormatterConfig.fromXml(FileUtils.readText(Path.of(outputterConfigFile)));
             doOutputting(regionWkt, formatterConfig, binningContext, temporalBins);
         }
 
-        stopWatch.stopAndTrace(String.format("Total time for binning %d product(s)", sourceFiles.length));
+        stopWatch.stopAndTrace(String.format("Total time for binning %d product(s)", sourceFiles.size()));
     }
 
-    private static SortedMap<Long, List<SpatialBin>> doSpatialBinning(BinningContext binningContext, File[] sourceFiles) throws IOException {
+    private static SortedMap<Long, List<SpatialBin>> doSpatialBinning(BinningContext binningContext, Collection<Path> sourceFiles) throws IOException {
         final SpatialBinStore spatialBinStore = new SpatialBinStore();
         final SpatialBinner spatialBinner = new SpatialBinner(binningContext, spatialBinStore);
-        for (File sourceFile : sourceFiles) {
+        for (Path sourceFile : sourceFiles) {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
 

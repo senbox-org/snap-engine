@@ -67,9 +67,9 @@ import org.locationtech.jts.geom.GeometryFactory;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -230,11 +230,11 @@ public class BinningOp extends Operator {
 
     @Parameter(description = "The name of the file containing metadata key-value pairs (google \"Java Properties file format\").",
             defaultValue = "./metadata.properties")
-    File metadataPropertiesFile;
+    Path metadataPropertiesFile;
 
     @Parameter(description = "The name of the directory containing metadata templates (google \"Apache Velocity VTL format\").",
             defaultValue = ".")
-    File metadataTemplateDir;
+    Path metadataTemplateDir;
 
     @Parameter(description = "The type of metadata aggregation to be used. Possible values are:\n" +
                              "'NAME': aggregate the name of each input product\n" +
@@ -548,10 +548,10 @@ public class BinningOp extends Operator {
         if (formatterConfig.getOutputFile() == null) {
             throw new OperatorException("Missing operator parameter 'formatterConfig.outputFile'");
         }
-        if (metadataTemplateDir == null || "".equals(metadataTemplateDir.getPath())) {
-            metadataTemplateDir = new File(".");
+        if (metadataTemplateDir == null || "".equals(metadataTemplateDir.toString())) {
+            metadataTemplateDir = Path.of(".");
         }
-        if (!metadataTemplateDir.exists()) {
+        if (!Files.exists(metadataTemplateDir)) {
             String msgPattern = "Directory given by 'metadataTemplateDir' does not exist: %s";
             throw new OperatorException(String.format(msgPattern, metadataTemplateDir));
         }
@@ -627,7 +627,7 @@ public class BinningOp extends Operator {
         }
         if (sourceProductPaths != null && sourceProductPaths.length > 0)  {
             getLogger().info("expanding sourceProductPaths wildcards.");
-            SortedSet<File> fileSet = new TreeSet<>();
+            SortedSet<Path> fileSet = new TreeSet<>();
             for (String filePattern : sourceProductPaths) {
                 WildcardMatcher.glob(filePattern, fileSet);
             }
@@ -635,11 +635,11 @@ public class BinningOp extends Operator {
                 getLogger().warning("The given source file patterns did not match any files");
             } else {
                 getLogger().info("found " + fileSet.size() + " product files.");
-                for (File file : fileSet) {
-                    getLogger().info(file.getCanonicalPath());
+                for (Path file : fileSet) {
+                    getLogger().info(file.toRealPath().toString());
                 }
             }
-            for (File file : fileSet) {
+            for (Path file : fileSet) {
                 Product sourceProduct = null;
                 try {
                     if (sourceProductFormat != null) {
@@ -670,7 +670,7 @@ public class BinningOp extends Operator {
         }
         if (sourceGraphPaths != null && sourceGraphPaths.length > 0) {
             getLogger().info("expanding sourceGraphPaths wildcards.");
-            SortedSet<File> fileSet = new TreeSet<>();
+            SortedSet<Path> fileSet = new TreeSet<>();
             for (String filePattern : sourceGraphPaths) {
                 WildcardMatcher.glob(filePattern, fileSet);
             }
@@ -678,15 +678,15 @@ public class BinningOp extends Operator {
                 getLogger().warning("The given graph file patterns did not match any files");
             } else {
                 getLogger().info("found " + fileSet.size() + " graph files.");
-                for (File file : fileSet) {
-                    getLogger().info(file.getCanonicalPath());
+                for (Path file : fileSet) {
+                    getLogger().info(file.toRealPath().toString());
                 }
             }
-            for (File file : fileSet) {
+            for (Path file : fileSet) {
                 Product sourceProduct = null;
                 GraphContext graphContext = null;
                 try {
-                    Graph graph = GraphIO.read(new FileReader(file));
+                    Graph graph = GraphIO.read(Files.newBufferedReader(file));
                     graphContext = new GraphContext(graph);
                     Product[] outputProducts = graphContext.getOutputProducts();
                     if (outputProducts.length != 1) {
@@ -858,7 +858,7 @@ public class BinningOp extends Operator {
             getLogger().info(String.format(msgPattern, formatterConfig.getOutputFile(), stopWatch));
 
             if (outputType.equalsIgnoreCase("Product")) {
-                final File writtenProductFile = new File(outputFile);
+                final Path writtenProductFile = Path.of(outputFile);
                 String format = FormatterFactory.getOutputFormat(formatterConfig, writtenProductFile);
                 writtenProduct = ProductIO.readProduct(writtenProductFile, format);
                 this.targetProduct = copyProduct(writtenProduct);

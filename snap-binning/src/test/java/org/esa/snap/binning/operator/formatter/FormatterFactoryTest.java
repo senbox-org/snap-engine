@@ -2,7 +2,7 @@ package org.esa.snap.binning.operator.formatter;
 
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
@@ -36,19 +36,19 @@ public class FormatterFactoryTest {
     public void testGetOutputFormat_notInConfig() {
         final FormatterConfig config = new FormatterConfig();
 
-        String outputFormat = FormatterFactory.getOutputFormat(config, new File("schlappi.nc"));
+        String outputFormat = FormatterFactory.getOutputFormat(config, Path.of("schlappi.nc"));
         assertEquals("NetCDF-BEAM", outputFormat);
 
-        outputFormat = FormatterFactory.getOutputFormat(config, new File("schmappi.dim"));
+        outputFormat = FormatterFactory.getOutputFormat(config, Path.of("schmappi.dim"));
         assertEquals("BEAM-DIMAP", outputFormat);
 
-        outputFormat = FormatterFactory.getOutputFormat(config, new File("schnappi.tiff"));
+        outputFormat = FormatterFactory.getOutputFormat(config, Path.of("schnappi.tiff"));
         assertEquals("GeoTIFF", outputFormat);
 
-        outputFormat = FormatterFactory.getOutputFormat(config, new File("schoappi.png"));
+        outputFormat = FormatterFactory.getOutputFormat(config, Path.of("schoappi.png"));
         assertEquals("PNG", outputFormat);
 
-        outputFormat = FormatterFactory.getOutputFormat(config, new File("schpappi.jpg"));
+        outputFormat = FormatterFactory.getOutputFormat(config, Path.of("schpappi.jpg"));
         assertEquals("JPEG", outputFormat);
     }
 
@@ -57,7 +57,7 @@ public class FormatterFactoryTest {
         final FormatterConfig config = new FormatterConfig();
 
         try {
-            FormatterFactory.getOutputFormat(config, new File("schlappi.txt"));
+            FormatterFactory.getOutputFormat(config, Path.of("schlappi.txt"));
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException expected) {
         }
@@ -68,23 +68,23 @@ public class FormatterFactoryTest {
         final FormatterConfig config = new FormatterConfig();
         config.setOutputFormat("NetCDF-BEAM");
 
-        String outputFormat = FormatterFactory.getOutputFormat(config, new File("schlappi.whatever"));
+        String outputFormat = FormatterFactory.getOutputFormat(config, Path.of("schlappi.whatever"));
         assertEquals("NetCDF-BEAM", outputFormat);
 
         config.setOutputFormat("BEAM-DIMAP");
-        outputFormat = FormatterFactory.getOutputFormat(config, new File("schlappi.whatever"));
+        outputFormat = FormatterFactory.getOutputFormat(config, Path.of("schlappi.whatever"));
         assertEquals("BEAM-DIMAP", outputFormat);
 
         config.setOutputFormat("GeoTIFF");
-        outputFormat = FormatterFactory.getOutputFormat(config, new File("schlappi.whatever"));
+        outputFormat = FormatterFactory.getOutputFormat(config, Path.of("schlappi.whatever"));
         assertEquals("GeoTIFF", outputFormat);
 
         config.setOutputFormat("PNG");
-        outputFormat = FormatterFactory.getOutputFormat(config, new File("schlappi.whatever"));
+        outputFormat = FormatterFactory.getOutputFormat(config, Path.of("schlappi.whatever"));
         assertEquals("PNG", outputFormat);
 
         config.setOutputFormat("JPEG");
-        outputFormat = FormatterFactory.getOutputFormat(config, new File("schlappi.whatever"));
+        outputFormat = FormatterFactory.getOutputFormat(config, Path.of("schlappi.whatever"));
         assertEquals("JPEG", outputFormat);
     }
 
@@ -94,7 +94,7 @@ public class FormatterFactoryTest {
         config.setOutputFormat("wurstnasen_files");
 
         try {
-            FormatterFactory.getOutputFormat(config, new File("schlappi.png"));
+            FormatterFactory.getOutputFormat(config, Path.of("schlappi.png"));
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException expected) {
         }

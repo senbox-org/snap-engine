@@ -37,7 +37,7 @@ import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -76,8 +76,8 @@ public class BinnedProductReader extends AbstractProductReader {
      */
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        final File productFile = getProductFile();
-        final String path = productFile.getPath();
+        final Path productFile = getProductPath();
+        final String path = productFile.toString();
         netcdfFile = NetcdfFileOpener.open(productFile);
         if (netcdfFile == null) {
             throw new IOException("Could not open NetCDF file " +  path);
@@ -178,7 +178,7 @@ public class BinnedProductReader extends AbstractProductReader {
     }
 
     private void initProduct() {
-        final File productFile = new File(getInput().toString());
+        final Path productFile = getProductPath();
         final String productName = FileUtils.getFilenameWithoutExtension(productFile);
 
         String productType = "BINNED";

@@ -16,10 +16,9 @@
 
 package org.esa.snap.binning.operator;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.CellProcessorConfig;
 import org.esa.snap.binning.DataPeriod;
@@ -38,14 +37,19 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.main.GPT;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.io.FileUtils;
-import com.bc.ceres.test.LongTestRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.SortedMap;
@@ -70,17 +74,17 @@ import static org.junit.Assert.fail;
 @RunWith(LongTestRunner.class)
 public class BinningOpTest {
 
-    static final File TESTDATA_DIR = new File("target/binning-test-io");
+    static final Path TESTDATA_DIR = IOHelper.createATempDir("binning-test-io");
 
     @Before
     public void setUp() throws Exception {
-        TESTDATA_DIR.mkdirs();
+        IOHelper.createDirectories(TESTDATA_DIR);
 
         // @todo 1 tb/tb should read like the lines commented below .... see todo in tearDown()
-//        if (!TESTDATA_DIR.mkdirs()) {
+//        if (!Files.createDirectories(TESTDATA_DIR)) {
 //            fail("Can't create test I/O directory: " + TESTDATA_DIR);
 //        }
-        if (!TESTDATA_DIR.isDirectory()) {
+        if (!Files.isDirectory(TESTDATA_DIR)) {
             fail("Can't create test I/O directory: " + TESTDATA_DIR);
         }
     }
@@ -108,7 +112,7 @@ public class BinningOpTest {
         binningOp.setAggregatorConfigs(chlAgg(), p70Agg());
         binningOp.setNumRows(180);
         binningOp.setMaskExpr("true");
-        binningOp.setOutputFile(getTestFile("target-1.dim").getPath());
+        binningOp.setOutputFile(getTestFile("target-1.dim").toString());
         binningOp.setOutputType("Product");
         binningOp.setOutputFormat("BEAM-DIMAP");
         binningOp.setMetadataAggregatorName("NAME");
@@ -200,8 +204,8 @@ public class BinningOpTest {
         binningOp.setStartDateTime("2002-01-01");
         binningOp.setPeriodDuration(10.0);
         binningOp.setMaskExpr("");
-        final File targetFile = getTestFile("target-1.dim");
-        binningOp.setOutputFile(targetFile.getPath());
+        final Path targetFile = getTestFile("target-1.dim");
+        binningOp.setOutputFile(targetFile.toString());
         binningOp.setOutputType("Product");
         binningOp.setOutputFormat("BEAM-DIMAP");
         binningOp.setRegion(geometryConverter.parse("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))"));
@@ -214,7 +218,7 @@ public class BinningOpTest {
     @Test
     public void testBinningWhenMaskExpressionIsNull() throws Exception {
 
-        final File targetFile = getTestFile("target-1.dim");
+        final Path targetFile = getTestFile("target-1.dim");
         float obs1 = 0.2F;
 
         final BinningOp binningOp = createBinningOp();
@@ -226,7 +230,7 @@ public class BinningOpTest {
         binningOp.setStartDateTime("2002-01-01");
         binningOp.setPeriodDuration(10.0);
         binningOp.setMaskExpr(null);
-        binningOp.setOutputFile(targetFile.getPath());
+        binningOp.setOutputFile(targetFile.toString());
         binningOp.setOutputType("Product");
         binningOp.setOutputFormat("BEAM-DIMAP");
         binningOp.setRegion(geometryConverter.parse("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))"));
@@ -245,7 +249,7 @@ public class BinningOpTest {
      */
     @Test
     public void testGlobalBinning() throws Exception {
-        final File targetFile = getTestFile("target-1.dim");
+        final Path targetFile = getTestFile("target-1.dim");
 
         float obs1 = 0.2F;
         float obs2 = 0.4F;
@@ -264,7 +268,7 @@ public class BinningOpTest {
                 createSourceProduct(5, obs5));
 
         JtsGeometryConverter geometryConverter = new JtsGeometryConverter();
-        binningOp.setOutputFile(targetFile.getPath());
+        binningOp.setOutputFile(targetFile.toString());
         binningOp.setOutputType("Product");
         binningOp.setOutputFormat("BEAM-DIMAP");
         binningOp.setStartDateTime("2002-01-01");
@@ -291,7 +295,7 @@ public class BinningOpTest {
     @Test
     public void testLocalBinning() throws Exception {
 
-        final File targetFile = getTestFile("target-1.dim");
+        final Path targetFile = getTestFile("target-1.dim");
 
         float obs1 = 0.2F;
         float obs2 = 0.4F;
@@ -303,7 +307,7 @@ public class BinningOpTest {
         binningOp.setAggregatorConfigs(chlAgg(), p70Agg());
         binningOp.setNumRows(180);
         binningOp.setMaskExpr("true");
-        binningOp.setOutputFile(targetFile.getPath());
+        binningOp.setOutputFile(targetFile.toString());
         binningOp.setOutputType("Product");
         binningOp.setOutputFormat("BEAM-DIMAP");
         binningOp.setSourceProducts(createSourceProduct(1, obs1),
@@ -342,7 +346,7 @@ public class BinningOpTest {
     @Test
     public void testGlobalBinningViaGPF() throws Exception {
 
-        final File targetFile = getTestFile("target-1.dim");
+        final Path targetFile = getTestFile("target-1.dim");
 
         float obs1 = 0.2F;
         float obs2 = 0.4F;
@@ -356,7 +360,7 @@ public class BinningOpTest {
         parameters.put("numRows", 180);
         parameters.put("maskExpr", "true");
         parameters.put("aggregatorConfigs", new AggregatorConfig[]{chlAgg(), p70Agg()});
-        parameters.put("outputFile", targetFile.getPath());
+        parameters.put("outputFile", targetFile.toString());
         parameters.put("outputType", "Product");
         parameters.put("outputFormat", "BEAM-DIMAP");
         parameters.put("region", "POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))");
@@ -385,7 +389,7 @@ public class BinningOpTest {
     @Test
     public void testLocalBinningViaGPF() throws Exception {
 
-        final File targetFile = getTestFile("target-1.dim");
+        final Path targetFile = getTestFile("target-1.dim");
 
         float obs1 = 0.2F;
         float obs2 = 0.4F;
@@ -400,7 +404,7 @@ public class BinningOpTest {
         parameters.put("numRows", 180);
         parameters.put("maskExpr", "true");
         parameters.put("aggregatorConfigs", new AggregatorConfig[]{chlAgg(), p70Agg()});
-        parameters.put("outputFile", targetFile.getPath());
+        parameters.put("outputFile", targetFile.toString());
         parameters.put("outputType", "Product");
         parameters.put("outputFormat", "BEAM-DIMAP");
 
@@ -434,13 +438,16 @@ public class BinningOpTest {
         float obs4 = 0.8F;
         float obs5 = 1.0F;
 
-        final File parameterFile = new File(getClass().getResource("BinningParamsGlobal.xml").toURI());
-        final File targetFile = getTestFile("output.dim");
-        final File sourceFile1 = getTestFile("obs1.dim");
-        final File sourceFile2 = getTestFile("obs2.dim");
-        final File sourceFile3 = getTestFile("obs3.dim");
-        final File sourceFile4 = getTestFile("obs4.dim");
-        final File sourceFile5 = getTestFile("obs5.dim");
+        final URL fileURL = getClass().getResource("BinningParamsGlobal.xml");
+        assertNotNull(fileURL);
+        final Path parameterFile = UrlHelper.urlToFile(fileURL);
+        assertNotNull(parameterFile);
+        final Path targetFile = getTestFile("output.dim");
+        final Path sourceFile1 = getTestFile("obs1.dim");
+        final Path sourceFile2 = getTestFile("obs2.dim");
+        final Path sourceFile3 = getTestFile("obs3.dim");
+        final Path sourceFile4 = getTestFile("obs4.dim");
+        final Path sourceFile5 = getTestFile("obs5.dim");
 
         ProductIO.writeProduct(createSourceProduct(1, obs1), sourceFile1, "BEAM-DIMAP", false);
         ProductIO.writeProduct(createSourceProduct(2, obs2), sourceFile2, "BEAM-DIMAP", false);
@@ -450,16 +457,16 @@ public class BinningOpTest {
 
         GPT.run(new String[]{
                 "Binning",
-                "-p", parameterFile.getPath(),
-                "-t", targetFile.getPath(),
-                sourceFile1.getPath(),
-                sourceFile2.getPath(),
-                sourceFile3.getPath(),
-                sourceFile4.getPath(),
-                sourceFile5.getPath(),
+                "-p", parameterFile.toString(),
+                "-t", targetFile.toString(),
+                sourceFile1.toString(),
+                sourceFile2.toString(),
+                sourceFile3.toString(),
+                sourceFile4.toString(),
+                sourceFile5.toString(),
         });
 
-        assertTrue(targetFile.exists());
+        assertTrue(Files.exists(targetFile));
 
         final Product targetProduct = ProductIO.readProduct(targetFile);
         assertNotNull(targetProduct);
@@ -485,14 +492,17 @@ public class BinningOpTest {
         float obs4 = 0.8F;
         float obs5 = 1.0F;
 
-        final File parameterFile = new File(getClass().getResource("BinningParamsLocal.xml").toURI());
+        final URL fileURL = getClass().getResource("BinningParamsLocal.xml");
+        assertNotNull(fileURL);
+        final Path parameterFile = UrlHelper.urlToFile(fileURL);
+        assertNotNull(parameterFile);
         final String fileName = "output.dim";
-        final File targetFile = getTestFile(fileName);
-        final File sourceFile1 = getTestFile("obs1.dim");
-        final File sourceFile2 = getTestFile("obs2.dim");
-        final File sourceFile3 = getTestFile("obs3.dim");
-        final File sourceFile4 = getTestFile("obs4.dim");
-        final File sourceFile5 = getTestFile("obs5.dim");
+        final Path targetFile = getTestFile(fileName);
+        final Path sourceFile1 = getTestFile("obs1.dim");
+        final Path sourceFile2 = getTestFile("obs2.dim");
+        final Path sourceFile3 = getTestFile("obs3.dim");
+        final Path sourceFile4 = getTestFile("obs4.dim");
+        final Path sourceFile5 = getTestFile("obs5.dim");
 
         ProductIO.writeProduct(createSourceProduct(1, obs1), sourceFile1, "BEAM-DIMAP", false);
         ProductIO.writeProduct(createSourceProduct(2, obs2), sourceFile2, "BEAM-DIMAP", false);
@@ -502,16 +512,16 @@ public class BinningOpTest {
 
         GPT.run(new String[]{
                 "Binning",
-                "-p", parameterFile.getPath(),
-                "-t", targetFile.getPath(),
-                sourceFile1.getPath(),
-                sourceFile2.getPath(),
-                sourceFile3.getPath(),
-                sourceFile4.getPath(),
-                sourceFile5.getPath(),
+                "-p", parameterFile.toString(),
+                "-t", targetFile.toString(),
+                sourceFile1.toString(),
+                sourceFile2.toString(),
+                sourceFile3.toString(),
+                sourceFile4.toString(),
+                sourceFile5.toString(),
         });
 
-        assertTrue(targetFile.exists());
+        assertTrue(Files.exists(targetFile));
 
         final Product targetProduct = ProductIO.readProduct(targetFile);
         assertNotNull(targetProduct);
@@ -537,13 +547,16 @@ public class BinningOpTest {
         float obs4 = 0.8F;
         float obs5 = 1.0F;
 
-        final File parameterFile = new File(getClass().getResource("BinningParamsGlobal_FilePattern.xml").toURI());
-        final File targetFile = getTestFile("output.dim");
-        final File sourceFile1 = getTestFile("obs1.dim");
-        final File sourceFile2 = getTestFile("obs2.dim");
-        final File sourceFile3 = getTestFile("obs3.dim");
-        final File sourceFile4 = getTestFile("obs4.dim");
-        final File sourceFile5 = getTestFile("obs5.dim");
+        final URL fileURL = getClass().getResource("BinningParamsGlobal_FilePattern.xml");
+        assertNotNull(fileURL);
+        final Path parameterFile = UrlHelper.urlToFile(fileURL);
+        assertNotNull(parameterFile);
+        final Path targetFile = getTestFile("output.dim");
+        final Path sourceFile1 = getTestFile("obs1.dim");
+        final Path sourceFile2 = getTestFile("obs2.dim");
+        final Path sourceFile3 = getTestFile("obs3.dim");
+        final Path sourceFile4 = getTestFile("obs4.dim");
+        final Path sourceFile5 = getTestFile("obs5.dim");
 
         ProductIO.writeProduct(createSourceProduct(1, obs1), sourceFile1, "BEAM-DIMAP", false);
         ProductIO.writeProduct(createSourceProduct(2, obs2), sourceFile2, "BEAM-DIMAP", false);
@@ -553,11 +566,11 @@ public class BinningOpTest {
 
         GPT.run(new String[]{
                 "Binning",
-                "-p", parameterFile.getPath(),
-                "-t", targetFile.getPath(),
+                "-p", parameterFile.toString(),
+                "-t", targetFile.toString(),
         });
 
-        assertTrue(targetFile.exists());
+        assertTrue(Files.exists(targetFile));
 
         final Product targetProduct = ProductIO.readProduct(targetFile);
         assertNotNull(targetProduct);
@@ -584,14 +597,17 @@ public class BinningOpTest {
         float obs4 = 0.8F;
         float obs5 = 1.0F;
 
-        final File parameterFile = new File(getClass().getResource("BinningParamsLocal_FilePattern.xml").toURI());
+        final URL fileURL = getClass().getResource("BinningParamsLocal_FilePattern.xml");
+        assertNotNull(fileURL);
+        final Path parameterFile = UrlHelper.urlToFile(fileURL);
+        assertNotNull(parameterFile);
         final String fileName = "output.dim";
-        final File targetFile = getTestFile(fileName);
-        final File sourceFile1 = getTestFile("obs1.dim");
-        final File sourceFile2 = getTestFile("obs2.dim");
-        final File sourceFile3 = getTestFile("obs3.dim");
-        final File sourceFile4 = getTestFile("obs4.dim");
-        final File sourceFile5 = getTestFile("obs5.dim");
+        final Path targetFile = getTestFile(fileName);
+        final Path sourceFile1 = getTestFile("obs1.dim");
+        final Path sourceFile2 = getTestFile("obs2.dim");
+        final Path sourceFile3 = getTestFile("obs3.dim");
+        final Path sourceFile4 = getTestFile("obs4.dim");
+        final Path sourceFile5 = getTestFile("obs5.dim");
 
         ProductIO.writeProduct(createSourceProduct(1, obs1), sourceFile1, "BEAM-DIMAP", false);
         ProductIO.writeProduct(createSourceProduct(2, obs2), sourceFile2, "BEAM-DIMAP", false);
@@ -601,11 +617,11 @@ public class BinningOpTest {
 
         GPT.run(new String[]{
                 "Binning",
-                "-p", parameterFile.getPath(),
-                "-t", targetFile.getPath(),
+                "-p", parameterFile.toString(),
+                "-t", targetFile.toString(),
         });
 
-        assertTrue(targetFile.exists());
+        assertTrue(Files.exists(targetFile));
 
         final Product targetProduct = ProductIO.readProduct(targetFile);
         assertNotNull(targetProduct);
@@ -672,7 +688,7 @@ public class BinningOpTest {
 
     @Test
     public void testBinningSetsCorrectStartAndStopTimesFromProductTimes() throws Exception {
-        final File targetFile = getTestFile("target-1.dim");
+        final Path targetFile = getTestFile("target-1.dim");
         float obs1 = 0.2F;
 
         final BinningOp binningOp = createBinningOp();
@@ -687,7 +703,7 @@ public class BinningOpTest {
         binningOp.setAggregatorConfigs(chlAgg(), p70Agg());
         binningOp.setNumRows(180);
         binningOp.setMaskExpr("true");
-        binningOp.setOutputFile(targetFile.getPath());
+        binningOp.setOutputFile(targetFile.toString());
         binningOp.setOutputType("Product");
         binningOp.setOutputFormat("BEAM-DIMAP");
         binningOp.setRegion(geometryConverter.parse("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))"));
@@ -746,17 +762,17 @@ public class BinningOpTest {
         return binningOp;
     }
 
-    private void assertGlobalBinningProductIsOk(Product targetProduct, File location, float obs1, float obs2,
+    private void assertGlobalBinningProductIsOk(Product targetProduct, Path location, float obs1, float obs2,
                                                 float obs3, float obs4, float obs5) throws IOException {
         assertTargetProductIsOk(targetProduct, location, obs1, obs2, obs3, obs4, obs5, 360, 180, 179, 87);
     }
 
-    private void assertLocalBinningProductIsOk(Product targetProduct, File location, float obs1, float obs2, float obs3,
+    private void assertLocalBinningProductIsOk(Product targetProduct, Path location, float obs1, float obs2, float obs3,
                                                float obs4, float obs5) throws IOException {
         assertTargetProductIsOk(targetProduct, location, obs1, obs2, obs3, obs4, obs5, 4, 4, 0, 0);
     }
 
-    private void assertTargetProductIsOk(Product targetProduct, File location, float obs1, float obs2, float obs3,
+    private void assertTargetProductIsOk(Product targetProduct, Path location, float obs1, float obs2, float obs3,
                                          float obs4, float obs5, int sceneRasterWidth, int sceneRasterHeight, int x0,
                                          int y0) throws IOException {
         final int w = 4;
@@ -876,8 +892,8 @@ public class BinningOpTest {
         return p;
     }
 
-    static File getTestFile(String fileName) {
-        return new File(TESTDATA_DIR, fileName);
+    static Path getTestFile(String fileName) {
+        return TESTDATA_DIR.resolve(fileName);
     }
 
     private static class TestCellProcessorConfig extends CellProcessorConfig {

@@ -16,6 +16,15 @@
 
 package org.esa.snap.binning.support;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import org.esa.snap.binning.DataPeriod;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.GeoCoding;
@@ -24,16 +33,6 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.ProductUtils;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * A tool for analysing the coverage of product related to spatial-data-day
@@ -46,20 +45,15 @@ public class SpatialDataDayComputer {
     public static void main(String[] args) throws IOException, ParseException {
         String startDate = args[0];
         Double minDataHour = Double.valueOf(args[1]);
-        File directory = new File(args[2]);
+        Path directory = Path.of(args[2]);
         String extension = args[3];
 
-        File[] subdirs = getDirectories(directory);
-        List<File> filesList = new ArrayList<>();
-        for (File dir : subdirs) {
-            Collections.addAll(filesList, getProductFiles(dir, extension));
+        Collection<Path> subdirs = getDirectories(directory);
+        List<Path> filesList = new ArrayList<>();
+        for (Path dir : subdirs) {
+            filesList.addAll(getProductFiles(dir, extension));
         }
-        Collections.sort(filesList, new Comparator<File>() {
-            @Override
-            public int compare(File f1, File f2) {
-                return f1.getName().compareTo(f2.getName());
-            }
-        });
+        filesList.sort(Comparator.comparing(Path::getFileName));
         int mode = 3; // 1 precise, 2, basic, 3 both
         Double periodDuration = 1.0;
         ProductData.UTC startUtc = ProductData.UTC.parse(startDate, DATE_INPUT_PATTERN);
@@ -82,23 +76,23 @@ public class SpatialDataDayComputer {
                               "Product_Name", "num_pixels", memberships[0], memberships[1], memberships[2],
                               "top_left", "top_right", "bottom_left", "bottom_right");
         }
-        for (File file : filesList) {
+        for (Path file : filesList) {
             Product product = ProductIO.readProduct(file);
             if (mode == 1) {
                 int width = product.getSceneRasterWidth();
                 int height = product.getSceneRasterHeight();
                 int[] distribution = analysePrecise(dataPeriod, product);
-                printPrecise(file.getName(), width, height, distribution);
+                printPrecise(file.getFileName().toString(), width, height, distribution);
             } else if (mode == 2) {
                 DataPeriod.Membership[] basic = analyseBasic(dataPeriod, product);
-                printBasic(file.getName(), basic);
+                printBasic(file.getFileName().toString(), basic);
             } else if (mode == 3) {
                 int width = product.getSceneRasterWidth();
                 int height = product.getSceneRasterHeight();
                 DataPeriod.Membership[] basic = analyseBasic(dataPeriod, product);
                 int[] distribution = analysePrecise(dataPeriod, product);
 
-                printBooth(file.getName(), width, height, distribution, basic);
+                printBooth(file.getFileName().toString(), width, height, distribution, basic);
             }
             product.dispose();
         }
@@ -156,21 +150,11 @@ public class SpatialDataDayComputer {
         return distribution;
     }
 
-    private static File[] getProductFiles(File directory, final String extension) {
-        return directory.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(extension);
-            }
-        });
+    private static Collection<Path> getProductFiles(Path directory, final String extension) {
+        return IOHelper.listFiles(directory, path -> path.getFileName().toString().endsWith(extension));
     }
 
-    private static File[] getDirectories(File directory) {
-        return directory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isDirectory();
-            }
-        });
+    private static Collection<Path> getDirectories(Path directory) {
+        return IOHelper.listFiles(directory, Files::isDirectory);
     }
 }

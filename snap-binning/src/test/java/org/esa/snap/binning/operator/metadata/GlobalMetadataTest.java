@@ -1,7 +1,6 @@
 package org.esa.snap.binning.operator.metadata;
 
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.aggregators.AggregatorAverage;
 import org.esa.snap.binning.aggregators.AggregatorOnMaxSet;
@@ -12,19 +11,31 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.Test;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.SortedMap;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.contains;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class GlobalMetadataTest {
 
-    private static final String TEST_DIR = "test_dir";
+    private static final Path TEST_DIR = IOHelper.createATempDir().resolve("test_dir");
     private static final String TEST_PROPERTIES = "param_a = aaaaa\n" +
             "param_b = bbbb\n" +
             "param_c = CCCC";
@@ -219,7 +230,7 @@ public class GlobalMetadataTest {
         final Logger logger = mock(Logger.class);
         final GlobalMetadata globalMetadata = new GlobalMetadata();
 
-        globalMetadata.load(new File("over_the_rain.bow"), logger);
+        globalMetadata.load(Path.of("over_the_rain.bow"), logger);
 
         final SortedMap<String, String> metaProperties = globalMetadata.asSortedMap();
         assertNotNull(metaProperties);
@@ -235,7 +246,7 @@ public class GlobalMetadataTest {
 
         final GlobalMetadata globalMetadata = new GlobalMetadata();
         try {
-            final File propertiesFile = writePropertiesFile();
+            final Path propertiesFile = writePropertiesFile();
             globalMetadata.load(propertiesFile, logger);
 
             final SortedMap<String, String> metaProperties = globalMetadata.asSortedMap();
@@ -298,26 +309,24 @@ public class GlobalMetadataTest {
     }
 
     private void deletePropertiesFile() {
-        final File testDir = new File(TEST_DIR);
-        if (testDir.isDirectory()) {
-            if (!FileUtils.deleteTree(testDir)) {
+        if (Files.isDirectory(TEST_DIR)) {
+            if (!FileUtils.deleteTree(TEST_DIR)) {
                 fail("unable to delete test directory");
             }
         }
     }
 
-    private File writePropertiesFile() throws IOException {
-        final File testDir = new File(TEST_DIR);
-        if (!testDir.mkdirs()) {
+    private Path writePropertiesFile() throws IOException {
+        if (!IOHelper.createDirectories(TEST_DIR)) {
             fail("unable to create test directory");
         }
 
-        final File testPropertiesFile = new File(testDir, "test.properties");
-        if (!testPropertiesFile.createNewFile()) {
+        final Path testPropertiesFile = TEST_DIR.resolve("test.properties");
+        if (!IOHelper.createFile(testPropertiesFile)) {
             fail("unable to create test file");
         }
 
-        final FileOutputStream fileOutputStream = new FileOutputStream(testPropertiesFile);
+        final OutputStream fileOutputStream = Files.newOutputStream(testPropertiesFile);
         fileOutputStream.write(TEST_PROPERTIES.getBytes());
         fileOutputStream.close();
 
