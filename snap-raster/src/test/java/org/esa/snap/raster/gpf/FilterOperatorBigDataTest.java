@@ -22,11 +22,12 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.engine_utilities.util.ResourceUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.imageio.ImageIO;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.image.BandedSampleModel;
@@ -42,16 +43,15 @@ import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Marco Peters
@@ -66,7 +66,9 @@ public class FilterOperatorBigDataTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        image = ImageIO.read(Objects.requireNonNull(FilterOperatorBigDataTest.class.getResourceAsStream("SNAP_visual.png")));
+        final Path imageFile = ResourceUtils.getTestResourceAsPath("SNAP_visual.png", FilterOperatorBigDataTest.class);
+        assertNotNull(imageFile);
+        image = ImageUtils.readImage(imageFile);
         width = image.getWidth();
         height = image.getHeight();
     }
@@ -80,7 +82,7 @@ public class FilterOperatorBigDataTest {
     }
 
     @Test
-    public void test_Smoothing_ArithMean() throws IOException, URISyntaxException {
+    public void test_Smoothing_ArithMean() throws IOException {
         final HashMap<String, Object> parameters = new HashMap<>();
         parameters.put("sourceBands", "B1");
         parameters.put("selectedFilterName", "Arithmetic 3x3 Mean");
@@ -88,12 +90,14 @@ public class FilterOperatorBigDataTest {
         final Band band = target.getBand("B1");
         final int[] samples = band.readPixels(0, 0, width, height, new int[width * height]);
 //        writeExpectedDataToFile(samples, file));
-        int[] expectedSamples = readExpectedDataFromFile(new File(getClass().getResource("SNAP_visual_Ari3x3Mean_exp.bin").toURI()));
+        final Path samplesFile = ResourceUtils.getTestResourceAsPath("SNAP_visual_Ari3x3Mean_exp.bin", FilterOperatorBigDataTest.class);
+        assertNotNull(samplesFile);
+        int[] expectedSamples = readExpectedDataFromFile(samplesFile);
         assertArrayEquals(expectedSamples, samples);
     }
 
-    private void writeExpectedDataToFile(int[] data, File file) throws IOException {
-        try (DataOutputStream os = new DataOutputStream(new DeflaterOutputStream(Files.newOutputStream(file.toPath())))) {
+    private void writeExpectedDataToFile(int[] data, Path file) throws IOException {
+        try (DataOutputStream os = new DataOutputStream(new DeflaterOutputStream(Files.newOutputStream(file)))) {
             os.writeInt(data.length);
             for (int v : data) {
                 os.writeInt(v);
@@ -101,8 +105,8 @@ public class FilterOperatorBigDataTest {
         }
     }
 
-    private int[] readExpectedDataFromFile(File file) throws IOException {
-        try (DataInputStream is = new DataInputStream(new InflaterInputStream(Files.newInputStream(file.toPath())))) {
+    private int[] readExpectedDataFromFile(Path file) throws IOException {
+        try (DataInputStream is = new DataInputStream(new InflaterInputStream(Files.newInputStream(file)))) {
             final int length = is.readInt();
             int[] data = new int[length];
             for (int i = 0; i < data.length; i++) {

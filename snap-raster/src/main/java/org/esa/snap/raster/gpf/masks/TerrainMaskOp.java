@@ -43,7 +43,7 @@ import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 import org.esa.snap.engine_utilities.gpf.TileIndex;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * This operator detects mountain area using DEM and gnerates a terrain mask for given SAR image.
@@ -77,7 +77,7 @@ public final class TerrainMaskOp extends Operator {
     private String demResamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
 
     @Parameter(label = "External DEM")
-    private File externalDEMFile = null;
+    private Path externalDEMFile = null;
 
     @Parameter(label = "DEM No Data Value", defaultValue = "0")
     private double externalDEMNoDataValue = 0;
@@ -148,7 +148,7 @@ public final class TerrainMaskOp extends Operator {
         if (externalDEMFile != null) { // if external DEM file is specified by user
             dem = new FileElevationModel(externalDEMFile, demResamplingMethod, externalDEMNoDataValue);
             demNoDataValue = externalDEMNoDataValue;
-            demName = externalDEMFile.getPath();
+            demName = externalDEMFile.toString();
 
         } else {
             dem = DEMFactory.createElevationModel(demName, demResamplingMethod);
@@ -175,7 +175,7 @@ public final class TerrainMaskOp extends Operator {
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
 
         if (externalDEMFile != null) { // if external DEM file is specified by user
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, externalDEMFile.getPath());
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, externalDEMFile.toString());
         } else {
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
         }

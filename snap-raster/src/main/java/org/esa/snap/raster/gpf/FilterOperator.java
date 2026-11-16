@@ -34,11 +34,11 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +69,7 @@ public class FilterOperator extends Operator {
     private String selectedFilterName = null;
 
     @Parameter(description = "The kernel file", label = "Kernel File")
-    private File userDefinedKernelFile = null;
+    private Path userDefinedKernelFile = null;
 
     private final static Map<String, Filter> filterMap = new HashMap<>();
 
@@ -187,9 +187,9 @@ public class FilterOperator extends Operator {
                           kernelData);
     }
 
-    private static KernelFilter getUserDefinedFilter(File userDefinedKernelFile) throws IOException {
-        FileInputStream fis = new FileInputStream(userDefinedKernelFile);
-        final float[][] kernelData = readFile(fis, userDefinedKernelFile.getName());
+    private static KernelFilter getUserDefinedFilter(Path userDefinedKernelFile) throws IOException {
+        final InputStream fis = Files.newInputStream(userDefinedKernelFile);
+        final float[][] kernelData = readFile(fis, userDefinedKernelFile.getFileName().toString());
         final int filterWidth = kernelData.length;
         final int filterHeight = kernelData[0].length;
         final double[] data = new double[filterWidth * filterHeight];
