@@ -29,7 +29,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -49,13 +49,13 @@ public class ScatterPlotDecoratingStrategy implements FormatStrategy {
     private final RasterNamesFactory rasterNamesFactory;
     private final ProductRegistry productRegistry;
     private final Map<Long, String> productNames = new HashMap<Long, String>();
-    private final File parent;
+    private final Path parent;
     private final String filePrefix;
 
     public ScatterPlotDecoratingStrategy(Measurement[] originalMeasurements, FormatStrategy decoratedStrategy,
                                          PixExOp.VariableCombination[] scatterPlotVariableCombinations,
                                          RasterNamesFactory rasterNamesFactory,
-                                         ProductRegistry productRegistry, File parentDirectory, String filePrefix) {
+                                         ProductRegistry productRegistry, Path parentDirectory, String filePrefix) {
         this.originalMeasurements = originalMeasurements;
         this.decoratedStrategy = decoratedStrategy;
         this.scatterPlotVariableCombinations = scatterPlotVariableCombinations;
@@ -113,14 +113,14 @@ public class ScatterPlotDecoratingStrategy implements FormatStrategy {
             for (Map.Entry<PixExOp.VariableCombination, JFreeChart> entry : plots.entrySet()) {
                 final PixExOp.VariableCombination variableCombination = entry.getKey();
                 try {
-                    File targetFile = new File(parent,
+                    Path targetFile = parent.resolve(
                             String.format("%s_scatter_plot_%s_%s_%s.png",
                                     filePrefix,
                                     variableCombination.originalVariableName,
                                     variableCombination.productVariableName,
                                     productNames.get(productId))
                     );
-                    ChartUtils.saveChartAsPNG(targetFile, entry.getValue(), 600, 400);
+                    ChartUtils.saveChartAsPNG(targetFile.toFile(), entry.getValue(), 600, 400);
                 } catch (IOException e) {
                     SystemUtils.LOG.warning(e.getMessage());
                 }

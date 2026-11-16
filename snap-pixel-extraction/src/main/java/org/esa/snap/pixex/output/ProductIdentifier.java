@@ -18,7 +18,7 @@ package org.esa.snap.pixex.output;
 
 import org.esa.snap.core.datamodel.Product;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Used to identify a product within the {@link org.esa.snap.measurement.writer.MeasurementWriter}.
@@ -35,9 +35,9 @@ class ProductIdentifier {
     }
 
     private static String getProductLocation(Product product) {
-        final File fileLocation = product.getFileLocation();
+        final Path fileLocation = product.getFileLocation();
         if (fileLocation != null) {
-            return fileLocation.getAbsolutePath();
+            return fileLocation.toAbsolutePath().toString();
         } else {
             return String.format("Not saved to disk [%s]", product.getName());
         }

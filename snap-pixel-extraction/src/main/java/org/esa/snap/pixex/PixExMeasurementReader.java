@@ -16,6 +16,7 @@
 
 package org.esa.snap.pixex;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.measurement.Measurement;
@@ -23,18 +24,19 @@ import org.esa.snap.runtime.EngineConfig;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 /**
  * Reads all measurements from a specified directory. All measurement files are combined.
@@ -45,10 +47,10 @@ public class PixExMeasurementReader implements Iterator<Measurement>, Closeable 
     private boolean withExpression;
     private BufferedReader[] bufferedReaders;
     private String measurementLine;
-    private File inputDir;
+    private Path inputDir;
     private AtomicBoolean isInitialized;
 
-    public PixExMeasurementReader(File inputDir) {
+    public PixExMeasurementReader(Path inputDir) {
         this.inputDir = inputDir;
         readerIndex = 0;
         isInitialized = new AtomicBoolean(false);
@@ -67,9 +69,9 @@ public class PixExMeasurementReader implements Iterator<Measurement>, Closeable 
         }
     }
 
-    private void initialize(File inputDir) {
+    private void initialize(Path inputDir) {
         try {
-            bufferedReaders = initReader(inputDir.listFiles(new MeasurementFilenameFilter()));
+            bufferedReaders = initReader(IOHelper.listFiles(inputDir, new MeasurementFilenameFilter()));
             measurementLine = getNextMeasurementLine();
         } catch (IOException e) {
             EngineConfig.instance().logger().warning("Could not initialize readers. No measurements available.");
@@ -77,16 +79,20 @@ public class PixExMeasurementReader implements Iterator<Measurement>, Closeable 
     }
 
     @SuppressWarnings({"IOResourceOpenedButNotSafelyClosed"})
-    private BufferedReader[] initReader(File[] measurementFiles) throws IOException {
-        BufferedReader[] readers = new BufferedReader[measurementFiles.length];
-        for (int i = 0; i < measurementFiles.length; i++) {
-            File measurementFile = measurementFiles[i];
-            readers[i] = new BufferedReader(new FileReader(measurementFile));
+    private BufferedReader[] initReader(Collection<Path> measurementFiles) throws IOException {
+        if (measurementFiles == null) {
+            return new BufferedReader[0];
+        }
+        BufferedReader[] readers = new BufferedReader[measurementFiles.size()];
+        int i=0;
+        for (Path measurementFile : measurementFiles) {
+            readers[i] = Files.newBufferedReader(measurementFile);
             String line = readers[i].readLine();
             while (line.startsWith("#") || line.isEmpty()) {
                 line = readers[i].readLine();
             }
             withExpression = line.toLowerCase().startsWith("expression");
+            i++;
         }
 
         return readers;
@@ -196,11 +202,11 @@ public class PixExMeasurementReader implements Iterator<Measurement>, Closeable 
     }
 
 
-    private static class MeasurementFilenameFilter implements FilenameFilter {
+    private static class MeasurementFilenameFilter implements Predicate<Path> {
 
         @Override
-        public boolean accept(File dir, String name) {
-            return name.toLowerCase().endsWith("measurements.txt");
+        public boolean test(Path dir) {
+            return dir.getFileName().toString().toLowerCase().endsWith("measurements.txt");
         }
     }
 }

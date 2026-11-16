@@ -1,6 +1,24 @@
 package org.esa.snap.pixex;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+import javax.media.jai.operator.ConstantDescriptor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -20,24 +38,13 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.List;
-import java.util.*;
-import java.util.logging.Logger;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class PixExOpTest {
 
-    private File testDir;
+    private Path testDir;
 
     private static void computeData(Map<String, Object> parameterMap, Product[] sourceProducts) {
         GPF.createProduct("PixEx", parameterMap, sourceProducts);
@@ -66,9 +73,9 @@ public class PixExOpTest {
 
     @Before
     public void setUp() {
-        final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-        testDir = new File(tmpDir, this.getClass().getSimpleName());
-        if (!testDir.mkdirs()) {
+        final Path tmpDir = IOHelper.createATempDir();
+        testDir = tmpDir.resolve(this.getClass().getSimpleName());
+        if (!IOHelper.createDirectories(testDir)) {
             fail("unable to create test directory");
         }
     }
@@ -82,7 +89,7 @@ public class PixExOpTest {
     public void testUsingGraph() throws GraphException, URISyntaxException {
         final URL resource = getClass().getResource("dummyProduct1.dim");
         final URI uri = new URI(resource.toString());
-        String parentDir = new File(uri.getPath()).getParent();
+        String parentDir = Path.of(uri).getParent().toString();
         int windowSize = 11;
         Coordinate[] coordinates = new Coordinate[]{
                 new Coordinate("carlCoordinate", 60.1, 3.0, null),
@@ -95,7 +102,7 @@ public class PixExOpTest {
                         "      <operator>PixEx</operator>\n" +
                         "      <parameters>\n" +
                         "        <sourceProductPaths>\n" +
-                        "           " + parentDir + File.separator + "*.dim" +
+                        "           " + parentDir + IOHelper.SEPARATOR + "*.dim" +
                         "        </sourceProductPaths>\n" +
                         "        <exportTiePoints>false</exportTiePoints>\n" +
                         "        <exportBands>true</exportBands>\n" +
@@ -113,7 +120,7 @@ public class PixExOpTest {
                         "          </coordinate>\n" +
                         "        </coordinates>\n" +
                         "        <windowSize>" + windowSize + "</windowSize>\n" +
-                        "        <outputDir>" + testDir.getAbsolutePath() + "</outputDir>\n" +
+                        "        <outputDir>" + testDir.toAbsolutePath() + "</outputDir>\n" +
                         "        <outputFilePrefix>" + "testUsingGraph" + "</outputFilePrefix>\n" +
 
                         "      </parameters>\n" +
@@ -131,33 +138,33 @@ public class PixExOpTest {
 
     @Test
     public void testGetParsedInputPaths() throws Exception {
-        final File subDir1 = new File(testDir, "subDir1");
-        final File subDir2 = new File(testDir, "subDir2");
-        final File subDir2_1 = new File(subDir2, "subDir2_1");
-        final File subDir2_2 = new File(subDir2, "subDir2_2");
-        testDir.mkdir();
-        subDir1.mkdir();
-        subDir2.mkdir();
-        subDir2_1.mkdir();
-        subDir2_2.mkdir();
+        final Path subDir1 = testDir.resolve("subDir1");
+        final Path subDir2 = testDir.resolve("subDir2");
+        final Path subDir2_1 = subDir2.resolve("subDir2_1");
+        final Path subDir2_2 = subDir2.resolve("subDir2_2");
+        IOHelper.createDirectory(testDir);
+        Files.createDirectory(subDir1);
+        Files.createDirectory(subDir2);
+        Files.createDirectory(subDir2_1);
+        Files.createDirectory(subDir2_2);
 
-        final String pattern = testDir.getCanonicalPath() + File.separator + PixExOp.RECURSIVE_INDICATOR;
-        Set<File> dirList = PixExOp.getSourceProductFileSet(new String[]{pattern}, Logger.getAnonymousLogger());
+        final String pattern = testDir.toRealPath() + IOHelper.SEPARATOR + PixExOp.RECURSIVE_INDICATOR;
+        Set<Path> dirList = PixExOp.getSourceProductFileSet(new String[]{pattern}, Logger.getAnonymousLogger());
 
         //assertEquals(5, dirList.size());
-        //assertTrue("Missing dir '" + testDir.getAbsolutePath() + "'.", dirList.contains(testDir));
+        //assertTrue("Missing dir '" + testDir.toAbsolutePath() + "'.", dirList.contains(testDir));
         assertEquals(4, dirList.size());
-        assertTrue("Missing dir '" + subDir1.getCanonicalPath() + "'.", dirList.contains(subDir1.getCanonicalFile()));
-        assertTrue("Missing dir '" + subDir2.getCanonicalPath() + "'.", dirList.contains(subDir2.getCanonicalFile()));
-        assertTrue("Missing dir '" + subDir2_1.getCanonicalPath() + "'.",
-                dirList.contains(subDir2_1.getCanonicalFile()));
-        assertTrue("Missing dir '" + subDir2_2.getCanonicalPath() + "'.",
-                dirList.contains(subDir2_2.getCanonicalFile()));
+        assertTrue("Missing dir '" + subDir1.toRealPath() + "'.", dirList.contains(subDir1.toRealPath()));
+        assertTrue("Missing dir '" + subDir2.toRealPath() + "'.", dirList.contains(subDir2.toRealPath()));
+        assertTrue("Missing dir '" + subDir2_1.toRealPath() + "'.",
+                dirList.contains(subDir2_1.toRealPath()));
+        assertTrue("Missing dir '" + subDir2_2.toRealPath() + "'.",
+                dirList.contains(subDir2_2.toRealPath()));
 
-        dirList = PixExOp.getSourceProductFileSet(new String[]{testDir.getPath(), subDir2_1.getPath()}, Logger.getAnonymousLogger());
+        dirList = PixExOp.getSourceProductFileSet(new String[]{testDir.toString(), subDir2_1.toString()}, Logger.getAnonymousLogger());
         assertEquals(2, dirList.size());
-        assertTrue("Missing dir '" + testDir.getCanonicalPath() + "'.", dirList.contains(testDir.getCanonicalFile()));
-        assertTrue("Missing dir '" + subDir2_1.getCanonicalPath() + "'.", dirList.contains(subDir2_1.getCanonicalFile()));
+        assertTrue("Missing dir '" + testDir.toRealPath() + "'.", dirList.contains(testDir.toRealPath()));
+        assertTrue("Missing dir '" + subDir2_1.toRealPath() + "'.", dirList.contains(subDir2_1.toRealPath()));
     }
 
     @Test
@@ -183,7 +190,7 @@ public class PixExOpTest {
 
         computeData(parameterMap, sourceProducts);
 
-        assertTrue("Kmz file does not exists", new File(testDir, "pixels_coordinates.kmz").exists());
+        assertTrue("Kmz file does not exists", Files.exists(testDir.resolve("pixels_coordinates.kmz")));
 
         try (PixExMeasurementReader reader = new PixExMeasurementReader(testDir)) {
             final List<Measurement> measurementList = convertToList(reader);
@@ -214,11 +221,11 @@ public class PixExOpTest {
         p1.setStartTime(ProductData.UTC.parse("22/08/1999", "dd/MM/yyyy"));
 
         Product p2 = createTestProduct("bob", "type1", bandNames);
-        p2.setFileLocation(new File("bob_20010320.nc"));
+        p2.setFileLocation(Path.of("bob_20010320.nc"));
         p2.setStartTime(ProductData.UTC.parse("30/03/1920", "dd/MM/yyyy"));
 
         Product p3 = createTestProduct("jane", "type1", bandNames);
-        p3.setFileLocation(new File("bob_20101114.nc"));
+        p3.setFileLocation(Path.of("bob_20101114.nc"));
         Product[] sourceProducts = {p1, p2, p3};
 
         computeData(parameterMap, sourceProducts);
@@ -434,7 +441,7 @@ public class PixExOpTest {
     public void testExtractMatchupCoordinates() throws Exception {
         final URL resource = getClass().getResource("test.csv");
         final URI uri = new URI(resource.toString());
-        final File testFile = new File(uri.getPath());
+        final Path testFile = Path.of(uri);
         final List<Coordinate> coordinates = PixExOp.extractMatchupCoordinates(testFile);
 
         assertEquals(2, coordinates.size());

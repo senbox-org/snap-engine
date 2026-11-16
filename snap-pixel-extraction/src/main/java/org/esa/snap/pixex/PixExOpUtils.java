@@ -1,8 +1,6 @@
 package org.esa.snap.pixex;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeReader;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Placemark;
@@ -15,14 +13,17 @@ import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,13 +56,11 @@ public class PixExOpUtils {
         return extendedFeatureType;
     }
 
-    public static List<SimpleFeature> extractFeatures(File matchupFile) throws IOException {
+    public static List<SimpleFeature> extractFeatures(Path matchupFile) throws IOException {
         final List<SimpleFeature> result = new ArrayList<>();
         final Product dummyProduct = new Product("dummy", "dummy", 10, 10);
         FeatureIterator<SimpleFeature> featureIterator = null;
-        FileReader reader = null;
-        try {
-            reader = new FileReader(matchupFile);
+        try (Reader reader = Files.newBufferedReader(matchupFile)){
             final FeatureUtils.FeatureCrsProvider featureCrsProvider = new FeatureUtils.FeatureCrsProvider() {
                 @Override
                 public CoordinateReferenceSystem getFeatureCrs(Product product) {
@@ -74,7 +73,7 @@ public class PixExOpUtils {
                 }
             };
             final VectorDataNode vdn = VectorDataNodeReader.read(
-                    matchupFile.getName(),
+                    matchupFile.getFileName().toString(),
                     reader,
                     dummyProduct,
                     featureCrsProvider,
@@ -104,9 +103,6 @@ public class PixExOpUtils {
         } finally {
             if (featureIterator != null) {
                 featureIterator.close();
-            }
-            if (reader != null) {
-                reader.close();
             }
         }
         return result;

@@ -2,10 +2,10 @@ package org.esa.snap.pixex.output;
 
 import org.esa.snap.core.datamodel.Product;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +16,9 @@ public class TargetWriterFactoryAndMap {
 
     private final Map<String, PrintWriter> writerMap;
     private final String filenamePrefix;
-    private final File outputDir;
+    private final Path outputDir;
 
-    public TargetWriterFactoryAndMap(final String filenamePrefix, final File outputDir) {
+    public TargetWriterFactoryAndMap(final String filenamePrefix, final Path outputDir) {
         writerMap = new HashMap<String, PrintWriter>();
         this.filenamePrefix = filenamePrefix;
         this.outputDir = outputDir;
@@ -35,8 +35,8 @@ public class TargetWriterFactoryAndMap {
     public PrintWriter createWriterFor(Product product) throws IOException {
         String productType = product.getProductType();
         final String fileName = String.format(MEASUREMENTS_FILE_NAME_PATTERN, filenamePrefix, productType);
-        File coordinateFile = new File(outputDir, fileName);
-        PrintWriter writer = new PrintWriter(new FileOutputStream(coordinateFile));
+        Path coordinateFile = outputDir.resolve(fileName);
+        PrintWriter writer = new PrintWriter(Files.newOutputStream(coordinateFile));
         writerMap.put(productType, writer);
         return writer;
     }

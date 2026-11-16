@@ -2,11 +2,10 @@ package org.esa.snap.pixex.output;
 
 import org.esa.snap.core.datamodel.Product;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,11 +15,11 @@ public class PixExProductRegistry implements ProductRegistry {
 
     private final List<ProductIdentifier> productList;
     private final String filenamePrefix;
-    private final File outputDir;
+    private final Path outputDir;
 
     private PrintWriter productMapWriter;
 
-    public PixExProductRegistry(final String filenamePrefix, final File outputDir) {
+    public PixExProductRegistry(final String filenamePrefix, final Path outputDir) {
         productList = new ArrayList<ProductIdentifier>();
         this.filenamePrefix = filenamePrefix;
         this.outputDir = outputDir;
@@ -56,11 +55,11 @@ public class PixExProductRegistry implements ProductRegistry {
         }
     }
 
-    private PrintWriter createProductMapWriter() throws FileNotFoundException {
+    private PrintWriter createProductMapWriter() throws IOException {
 
         final String fileName = String.format(PRODUCT_MAP_FILE_NAME_PATTERN, filenamePrefix);
-        final File file = new File(outputDir, fileName);
-        PrintWriter printWriter = new PrintWriter(new FileOutputStream(file), true);
+        final Path file = outputDir.resolve(fileName);
+        PrintWriter printWriter = new PrintWriter(Files.newOutputStream(file), true);
         writeProductMapHeader(printWriter);
 
         return printWriter;

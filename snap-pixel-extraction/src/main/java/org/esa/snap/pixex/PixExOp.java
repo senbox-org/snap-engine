@@ -21,6 +21,7 @@ import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.Validator;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -77,10 +78,10 @@ import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -156,18 +157,18 @@ public class PixExOp extends Operator {
     private String timeDifference = "";
 
     @Parameter(description = "Path to a file containing geo-coordinates. BEAM's placemark files can be used.")
-    private File coordinatesFile;
+    private Path coordinatesFile;
 
     @Parameter(description = "Path to a CSV-file containing geo-coordinates associated with measurements according" +
                              "to BEAM CSV format specification")
-    private File matchupFile;
+    private Path matchupFile;
 
     @Parameter(description = "Side length of surrounding window (uneven)", defaultValue = "1",
             validator = WindowSizeValidator.class)
     private Integer windowSize;
 
     @Parameter(description = "The output directory.", notNull = true)
-    private File outputDir;
+    private Path outputDir;
 
     @Parameter(description = "The prefix is used to name the output files.", defaultValue = "pixEx")
     private String outputFilePrefix;
@@ -234,7 +235,7 @@ public class PixExOp extends Operator {
     private int timeDelta;
     private int calendarField = -1;
     private MeasurementWriter measurementWriter;
-    private File subScenesDir;
+    private Path subScenesDir;
     private KmlDocument kmlDocument;
     private ArrayList<String> knownKmzPlacemarks;
     private TimeStampExtractor timeStampExtractor;
@@ -268,12 +269,12 @@ public class PixExOp extends Operator {
         if (coordinatesFile == null && (coordinates == null || coordinates.length == 0) && matchupFile == null) {
             throw new OperatorException("No coordinates specified.");
         }
-        if (outputDir != null && !outputDir.exists() && !outputDir.mkdirs()) {
+        if (outputDir == null || !Files.exists(outputDir) || !IOHelper.createDirectories(outputDir)) {
             throw new OperatorException("Output directory does not exist and could not be created.");
         }
         if (exportSubScenes) {
-            subScenesDir = new File(outputDir, SUB_SCENES_DIR_NAME);
-            if (!subScenesDir.exists() && !subScenesDir.mkdirs()) {
+            subScenesDir = outputDir.resolve(SUB_SCENES_DIR_NAME);
+            if (!Files.exists(subScenesDir) && !IOHelper.createDirectories(subScenesDir)) {
                 throw new OperatorException("Directory for sub-scenes does not exist and could not be created.");
             }
         }
@@ -287,7 +288,7 @@ public class PixExOp extends Operator {
         if (sourceProducts != null) {
             numTicks += sourceProducts.length;
         }
-        Set<File> sourceProductFileSet = getSourceProductFileSet(this.sourceProductPaths, getLogger());
+        Set<Path> sourceProductFileSet = getSourceProductFileSet(this.sourceProductPaths, getLogger());
         if (!sourceProductFileSet.isEmpty()) {
             numTicks += sourceProductFileSet.size();
         }
@@ -341,8 +342,8 @@ public class PixExOp extends Operator {
 
             if (exportKmz && measurementsFound) {
                 KmzExporter kmzExporter = new KmzExporter();
-                File outFile = new File(outputDir, outputFilePrefix + "_coordinates.kmz");
-                try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(outFile))) {
+                Path outFile = outputDir.resolve(outputFilePrefix + "_coordinates.kmz");
+                try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(outFile))) {
                     kmzExporter.export(kmlDocument, zos, new SubProgressMonitor(pm, 5));
                 } catch (IOException e) {
                     getLogger().log(Level.SEVERE, "Problem writing KMZ file.", e);
@@ -443,8 +444,8 @@ public class PixExOp extends Operator {
         }
     }
 
-    public static Set<File> getSourceProductFileSet(String[] sourceProductPaths, Logger logger) {
-        Set<File> sourceProductFileSet = new TreeSet<>();
+    public static Set<Path> getSourceProductFileSet(String[] sourceProductPaths, Logger logger) {
+        Set<Path> sourceProductFileSet = new TreeSet<>();
         String[] paths = trimSourceProductPaths(sourceProductPaths);
         if (paths != null && paths.length != 0) {
             for (String path : paths) {
@@ -603,7 +604,7 @@ public class PixExOp extends Operator {
         return list;
     }
 
-    static List<Coordinate> extractMatchupCoordinates(File matchupFile) {
+    static List<Coordinate> extractMatchupCoordinates(Path matchupFile) {
         final List<Coordinate> result = new ArrayList<>();
         List<SimpleFeature> simpleFeatures;
         try {
@@ -611,7 +612,7 @@ public class PixExOp extends Operator {
         } catch (IOException e) {
             SystemUtils.LOG.warning(
                     String.format("Unable to read matchups from file '%s'. Reason: %s",
-                                  matchupFile.getAbsolutePath(), e.getMessage()));
+                                  matchupFile.toAbsolutePath(), e.getMessage()));
             return result;
         }
         for (SimpleFeature extendedFeature : simpleFeatures) {
@@ -628,14 +629,12 @@ public class PixExOp extends Operator {
         return result;
     }
 
-    private List<Coordinate> extractCoordinates(File coordinatesFile) {
+    private List<Coordinate> extractCoordinates(Path coordinatesFile) {
         final List<Coordinate> extractedCoordinates = new ArrayList<>();
-        FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(coordinatesFile);
+        try (Reader fileReader = Files.newBufferedReader(coordinatesFile)) {
             final List<Placemark> pins = PlacemarkIO.readPlacemarks(fileReader,
-                                                                    null, // no GeoCoding needed
-                                                                    PinDescriptor.getInstance());
+                    null, // no GeoCoding needed
+                    PinDescriptor.getInstance());
             for (Placemark pin : pins) {
                 final GeoPos geoPos = pin.getGeoPos();
                 if (geoPos != null) {
@@ -646,31 +645,24 @@ public class PixExOp extends Operator {
             }
         } catch (IOException cause) {
             throw new OperatorException(cause);
-        } finally {
-            if (fileReader != null) {
-                try {
-                    fileReader.close();
-                } catch (IOException ignored) {
-                }
-            }
         }
         return extractedCoordinates;
     }
 
-    private boolean extractMeasurements(Set<File> fileSet, ProgressMonitor pm) {
+    private boolean extractMeasurements(Set<Path> fileSet, ProgressMonitor pm) {
         boolean measurementsFound = false;
-        for (File file : fileSet) {
+        for (Path file : fileSet) {
             measurementsFound |= extractMeasurements(file);
             pm.worked(1);
         }
         return measurementsFound;
     }
 
-    private boolean extractMeasurements(File file) {
+    private boolean extractMeasurements(Path file) {
         try {
             final Product product = ProductIO.readProduct(file);
             if (product == null) {
-                getLogger().warning("Unable to read product from file '" + file.getAbsolutePath() + "'.");
+                getLogger().warning("Unable to read product from file '" + file.toAbsolutePath() + "'.");
                 return false;
             }
             try {
@@ -680,7 +672,7 @@ public class PixExOp extends Operator {
             }
         } catch (Exception e) {
             final Logger logger = getLogger();
-            logger.warning("Unable to extract measurements from product file '" + file.getAbsolutePath() + "'.");
+            logger.warning("Unable to extract measurements from product file '" + file.toAbsolutePath() + "'.");
             logger.log(Level.WARNING, e.getMessage());
             logger.log(Level.FINER, e.getMessage(), e);
         }
@@ -697,9 +689,9 @@ public class PixExOp extends Operator {
         oldTimeStamps[0] = product.getStartTime();
         oldTimeStamps[1] = product.getEndTime();
         try {
-            File file = product.getFileLocation();
+            Path file = product.getFileLocation();
             if (extractTimeFromFilename && file != null) {
-                String fileName = file.getName();
+                String fileName = file.getFileName().toString();
                 final ProductData.UTC[] timeStamps = timeStampExtractor.extractTimeStamps(fileName);
                 product.setStartTime(timeStamps[0]);
                 product.setEndTime(timeStamps[1]);
@@ -779,8 +771,8 @@ public class PixExOp extends Operator {
         subsetDef.setSubsetRegion(new PixelSubsetRegion(finalRegion, 0));
         final Product subset = ProductSubsetBuilder.createProductSubset(product, subsetDef, null, null);
         final String[] extension = ProductIO.getProductWriterExtensions(ProductIO.DEFAULT_FORMAT_NAME);
-        final File productFile = new File(subScenesDir, product.getName() + extension[0]);
-        ProductIO.writeProduct(subset, productFile.getAbsolutePath(), ProductIO.DEFAULT_FORMAT_NAME);
+        final Path productFile = subScenesDir.resolve(product.getName() + (extension != null ? extension[0] : ".dim"));
+        ProductIO.writeProduct(subset, productFile.toAbsolutePath(), ProductIO.DEFAULT_FORMAT_NAME);
     }
 
     private void setDummyTargetProduct() {

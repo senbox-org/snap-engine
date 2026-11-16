@@ -16,6 +16,15 @@
 
 package org.esa.snap.pixex;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import java.awt.Rectangle;
+import java.awt.image.Raster;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Date;
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.ConstantDescriptor;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.io.FileUtils;
@@ -31,28 +40,20 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.Rectangle;
-import java.awt.image.Raster;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
 
 public class PixExMeasurementReaderTest {
 
-    private File inputDir;
+    private Path inputDir;
     private int windowSize;
 
     @Before
     public void setup() throws Exception {
-        final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-        inputDir = new File(tmpDir, getClass().getSimpleName());
+        final Path tmpDir = IOHelper.createATempDir();
+        inputDir = tmpDir.resolve(getClass().getSimpleName());
         String msg = String.format("Could not create temporary test directory (%s); skipping test", inputDir.toString());
-        Assume.assumeTrue(msg, inputDir.mkdir());
+        Assume.assumeTrue(msg, Files.exists(Files.createDirectory(inputDir)));
 
         windowSize = 3;
         final int upperLeftX = 20;
@@ -96,7 +97,7 @@ public class PixExMeasurementReaderTest {
 
     @After
     public void tearDown() {
-        if (inputDir != null && inputDir.isDirectory()) {
+        if (inputDir != null && Files.isDirectory(inputDir)) {
             FileUtils.deleteTree(inputDir);
         }
     }
