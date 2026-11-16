@@ -19,6 +19,7 @@ package org.esa.snap.statistics.percentile.interpolated;
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.multilevel.MultiLevelImage;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductWriter;
@@ -56,7 +57,8 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.RenderedImage;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.ParseException;
@@ -158,7 +160,7 @@ public class TemporalPercentileOp extends Operator {
 
     @Parameter(description = "The output directory for the intermediate time series product. If not given, the time\n" +
                              "series product will be written to the working directory.")
-    File timeSeriesOutputDir;
+    Path timeSeriesOutputDir;
 
     @Parameter(description = "A text specifying the target Coordinate Reference System, either in WKT or as an\n" +
                              "authority code. For appropriate EPSG authority codes see (www.epsg-registry.org).\n" +
@@ -325,7 +327,7 @@ public class TemporalPercentileOp extends Operator {
     }
 
     private void reloadIntermediateTimeSeriesProduct() {
-        final File timeSeriesDataProductLocation = getTimeSeriesDataProductLocation();
+        final Path timeSeriesDataProductLocation = getTimeSeriesDataProductLocation();
         try {
             timeSeriesDataProduct.getProductWriter().close();
             timeSeriesDataProduct.dispose();
@@ -405,7 +407,7 @@ public class TemporalPercentileOp extends Operator {
             if (stringWriter.getBuffer().length() > 0) {
                 stringWriter.append(", ");
             }
-            stringWriter.append(dailyGroupedProduct.getFileLocation().getName());
+            stringWriter.append(dailyGroupedProduct.getFileLocation().getFileName().toString());
         }
         return stringWriter.toString();
     }
@@ -518,7 +520,7 @@ public class TemporalPercentileOp extends Operator {
             band.setNoDataValueUsed(true);
         }
         final ProductWriter productWriter = ProductIO.getProductWriter(DimapProductConstants.DIMAP_FORMAT_NAME);
-        final File timeSeriesDataProductLocation = getTimeSeriesDataProductLocation();
+        final Path timeSeriesDataProductLocation = getTimeSeriesDataProductLocation();
         try {
             productWriter.writeProductNodes(timeSeriesDataProduct, timeSeriesDataProductLocation);
         } catch (IOException e) {
@@ -526,13 +528,13 @@ public class TemporalPercentileOp extends Operator {
         }
     }
 
-    private File getTimeSeriesDataProductLocation() {
+    private Path getTimeSeriesDataProductLocation() {
         final String filename = timeSeriesDataProduct.getName() + DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION;
-        final File location;
+        final Path location;
         if (timeSeriesOutputDir != null) {
-            location = new File(timeSeriesOutputDir, filename);
+            location = timeSeriesOutputDir.resolve(filename);
         } else {
-            location = new File(filename);
+            location = Path.of(filename);
         }
         return location;
     }
@@ -582,15 +584,15 @@ public class TemporalPercentileOp extends Operator {
     public void dispose() {
         super.dispose();
 
-        final File timeSeriesDataProductLocation = getTimeSeriesDataProductLocation();
+        final Path timeSeriesDataProductLocation = getTimeSeriesDataProductLocation();
         timeSeriesDataProduct.dispose();
         if (!keepIntermediateTimeSeriesProduct) {
             final String filenameWithoutExtension = FileUtils.getFilenameWithoutExtension(timeSeriesDataProductLocation);
-            final File parentFile = timeSeriesDataProductLocation.getParentFile();
-            final File dataDir = new File(parentFile, filenameWithoutExtension + ".data");
-            Utils.safelyDeleteTree(dataDir);
-            timeSeriesDataProductLocation.delete();
-            timeSeriesDataProductLocation.deleteOnExit();
+            final Path parentFile = timeSeriesDataProductLocation.getParent();
+            final Path dataDir = parentFile.resolve(filenameWithoutExtension + ".data");
+            IOHelper.deleteOnExit(dataDir);
+            IOHelper.delete(timeSeriesDataProductLocation);
+            IOHelper.deleteOnExit(timeSeriesDataProductLocation);
         }
 
         dailyGroupedSourceProducts.clear();
@@ -729,7 +731,7 @@ public class TemporalPercentileOp extends Operator {
         final ArrayList<String> absolutePaths = new ArrayList<>();
         for (List<Product> products : dailyGroupedSourceProducts.values()) {
             for (Product product : products) {
-                absolutePaths.add(product.getFileLocation().getAbsolutePath());
+                absolutePaths.add(product.getFileLocation().toAbsolutePath().toString());
             }
         }
         return absolutePaths.toArray(new String[0]);
@@ -806,8 +808,8 @@ public class TemporalPercentileOp extends Operator {
         if (sourceBandName == null && bandMathsExpression == null || sourceBandName != null && bandMathsExpression != null) {
             throw new OperatorException("Either parameter 'sourceBandName' or 'bandMathExpression' must be specified.");
         }
-        if (timeSeriesOutputDir != null && !timeSeriesOutputDir.isDirectory()) {
-            throw new OperatorException("The output dir '" + timeSeriesOutputDir.getAbsolutePath() + "' does not exist.");
+        if (timeSeriesOutputDir != null && !Files.isDirectory(timeSeriesOutputDir)) {
+            throw new OperatorException("The output dir '" + timeSeriesOutputDir.toAbsolutePath() + "' does not exist.");
         }
         if (westBound == eastBound) {
             throw new OperatorException("Most western longitude must be different from most eastern longitude.");

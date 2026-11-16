@@ -4,7 +4,7 @@ import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.io.WildcardMatcher;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -25,7 +25,7 @@ public class ProductLoader {
     public Product[] loadProducts() {
         final ArrayList<Product> products = new ArrayList<Product>();
         for (String sourceProductPath : sourceProductPaths) {
-            final File[] files;
+            final Path[] files;
             try {
                 files = WildcardMatcher.glob(sourceProductPath);
             } catch (IOException e) {
@@ -33,13 +33,13 @@ public class ProductLoader {
                 logger.log(Level.SEVERE, e.getMessage(), e);
                 continue;
             }
-            for (File productFile : files) {
+            for (Path productFile : files) {
                 final Product product;
                 try {
-                    logger.info("Trying to open product file '" + productFile.getAbsolutePath() + "'.");
+                    logger.info("Trying to open product file '" + productFile.toAbsolutePath() + "'.");
                     product = loadProduct(productFile);
                 } catch (IOException e) {
-                    logger.severe("Unable to read product '" + productFile.getAbsolutePath() + "'.");
+                    logger.severe("Unable to read product '" + productFile.toAbsolutePath() + "'.");
                     logger.log(Level.SEVERE, e.getMessage(), e);
                     continue;
                 }
@@ -55,7 +55,7 @@ public class ProductLoader {
         return products.toArray(new Product[products.size()]);
     }
 
-    private Product loadProduct(File path) throws IOException {
+    private Product loadProduct(Path path) throws IOException {
         try {
             return ProductIO.readProduct(path);
         } catch (IllegalArgumentException e) {

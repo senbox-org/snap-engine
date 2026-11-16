@@ -4,12 +4,9 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.DateTimeUtils;
 import org.esa.snap.core.util.GeoUtils;
-import org.esa.snap.core.util.Guardian;
-import org.esa.snap.core.util.ProductUtils;
 
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -52,25 +49,6 @@ class Utils {
 
         final Date centerUTCDate = new Date(centerMillies);
         return utcToModifiedJulianDay(centerUTCDate);
-    }
-
-    static void safelyDeleteTree(File tree) {
-        Guardian.assertNotNull("tree", tree);
-
-        File[] files = tree.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    safelyDeleteTree(file);
-                } else {
-                    file.delete();
-                    file.deleteOnExit();
-                }
-            }
-        }
-
-        tree.delete();
-        tree.deleteOnExit();
     }
 
 }
