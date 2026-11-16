@@ -19,14 +19,14 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.util.PropertyMap;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ConfigFileLandCoverModelDescriptor extends AbstractLandCoverModelDescriptor {
 
-    private final File[] fileList;
+    private final Path[] fileList;
     private final boolean isUTM;
     private final boolean isFloat;
 
@@ -43,18 +43,18 @@ public class ConfigFileLandCoverModelDescriptor extends AbstractLandCoverModelDe
         isFloat = configProp.getPropertyBool(prefix + ".floatData");
         final int numFiles = configProp.getPropertyInt(prefix + ".file.num");
 
-        final List<File> fileArray = new ArrayList<>(numFiles);
+        final List<Path> fileArray = new ArrayList<>(numFiles);
         for (int i = 1; i <= numFiles; ++i) {
             final String filePath = configProp.getPropertyString(prefix + ".file." + i);
             if (filePath != null && !filePath.isEmpty()) {
-                fileArray.add(new File(filePath));
+                fileArray.add(Path.of(filePath));
             }
         }
-        fileList = fileArray.toArray(new File[0]);
+        fileList = fileArray.toArray(new Path[0]);
 
         final String colourIndex = configProp.getPropertyString(prefix + ".colourIndex");
         if (colourIndex != null && !colourIndex.isEmpty()) {
-            //     colourIndexFile = new File(ResourceUtils.getResFolder(), "ColourIndex" + File.separator + colourIndex);
+            //     colourIndexFile = ResourceUtils.getResFolder().resolve("ColourIndex").resolve(colourIndex);
         }
     }
 

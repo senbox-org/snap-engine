@@ -22,15 +22,14 @@ import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.LandCoverModel;
 import org.esa.snap.landcover.dataio.StacLandCoverModel;
 
-import java.io.File;
 import java.nio.file.Path;
 
 public class WorldCoverModelDescriptor extends AbstractLandCoverModelDescriptor {
 
     public static final String NAME = "ESA_WorldCover";
 
-    private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + NAME);
+    private static final Path INSTALL_DIR = Settings.instance().getAuxDataFolder().toAbsolutePath().resolve(
+            "LandCover").resolve(NAME);
 
     public WorldCoverModelDescriptor() {
         name = NAME;

@@ -22,7 +22,6 @@ import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.FileLandCoverUTMModel;
 import org.esa.snap.landcover.dataio.LandCoverModel;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -30,23 +29,23 @@ public class AESBEOS2000CropModelDescriptor extends AbstractLandCoverModelDescri
 
     public static final String NAME = "AAFC Canada 2000 Crop";
 
-    private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + "AAFC" + File.separator + "AESB_EOS_Crop_2000");
-    private static final File[] fileList = new File[]{
-            new File(INSTALL_DIR, "LCV_UTM9_AAFC_30M_2000_v12.zip"),
-            new File(INSTALL_DIR, "LCV_UTM10_AAFC_30M_2000_v12.zip"),
-            new File(INSTALL_DIR, "LCV_UTM11_AAFC_30M_2000_v12.zip"),
-            new File(INSTALL_DIR, "LCV_UTM12_AAFC_30M_2000_v11.zip"),
-            new File(INSTALL_DIR, "LCV_UTM13_AAFC_30M_2000_v11.zip"),
-            new File(INSTALL_DIR, "LCV_UTM14_AAFC_30M_2000_v11.zip"),
-            new File(INSTALL_DIR, "LCV_UTM15_AAFC_30M_2000_v12.zip"),
-            new File(INSTALL_DIR, "LCV_UTM16_AAFC_30M_2000_v12.zip"),
-            new File(INSTALL_DIR, "LCV_UTM17_AAFC_30M_2000_v12.zip"),
-            new File(INSTALL_DIR, "LCV_UTM18_AAFC_30M_2000_v12.zip"),
-            new File(INSTALL_DIR, "LCV_UTM19_AAFC_30M_2000_v11.zip"),
-            new File(INSTALL_DIR, "LCV_UTM20_AAFC_30M_2000_v11.zip"),
-            new File(INSTALL_DIR, "LCV_UTM21_AAFC_30M_2000_v11.zip"),
-            new File(INSTALL_DIR, "LCV_UTM22_AAFC_30M_2000_v11.zip"),
+    private static final Path INSTALL_DIR = Settings.instance().getAuxDataFolder().toAbsolutePath().resolve(
+            "LandCover").resolve("AAFC").resolve("AESB_EOS_Crop_2000");
+    private static final Path[] fileList = new Path[]{
+            INSTALL_DIR.resolve("LCV_UTM9_AAFC_30M_2000_v12.zip"),
+            INSTALL_DIR.resolve("LCV_UTM10_AAFC_30M_2000_v12.zip"),
+            INSTALL_DIR.resolve("LCV_UTM11_AAFC_30M_2000_v12.zip"),
+            INSTALL_DIR.resolve("LCV_UTM12_AAFC_30M_2000_v11.zip"),
+            INSTALL_DIR.resolve("LCV_UTM13_AAFC_30M_2000_v11.zip"),
+            INSTALL_DIR.resolve("LCV_UTM14_AAFC_30M_2000_v11.zip"),
+            INSTALL_DIR.resolve("LCV_UTM15_AAFC_30M_2000_v12.zip"),
+            INSTALL_DIR.resolve("LCV_UTM16_AAFC_30M_2000_v12.zip"),
+            INSTALL_DIR.resolve("LCV_UTM17_AAFC_30M_2000_v12.zip"),
+            INSTALL_DIR.resolve("LCV_UTM18_AAFC_30M_2000_v12.zip"),
+            INSTALL_DIR.resolve("LCV_UTM19_AAFC_30M_2000_v11.zip"),
+            INSTALL_DIR.resolve("LCV_UTM20_AAFC_30M_2000_v11.zip"),
+            INSTALL_DIR.resolve("LCV_UTM21_AAFC_30M_2000_v11.zip"),
+            INSTALL_DIR.resolve("LCV_UTM22_AAFC_30M_2000_v11.zip"),
     };
 
     public AESBEOS2000CropModelDescriptor() {

@@ -22,7 +22,7 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.engine_utilities.download.DownloadableContent;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -148,7 +148,7 @@ public abstract class AbstractLandCoverModel implements LandCoverModel, Resampli
 
     private DownloadableContent[][] createLandCoverFiles() {
         final DownloadableContent[][] elevationFiles = new DownloadableContent[NUM_X_TILES][NUM_Y_TILES];
-        final File demInstallDir = descriptor.getInstallDir();
+        final Path demInstallDir = descriptor.getInstallDir();
         for (int x = 0; x < elevationFiles.length; x++) {
             for (int y = 0; y < elevationFiles[x].length; y++) {
 
@@ -159,7 +159,7 @@ public abstract class AbstractLandCoverModel implements LandCoverModel, Resampli
     }
 
     protected abstract void createLandCoverFile(final DownloadableContent[][] elevationFiles,
-                                                final int x, final int y, final File demInstallDir);
+                                                final int x, final int y, final Path demInstallDir);
 
     public void updateCache(final LandCoverTile tile) {
         elevationTileCache.remove(tile);

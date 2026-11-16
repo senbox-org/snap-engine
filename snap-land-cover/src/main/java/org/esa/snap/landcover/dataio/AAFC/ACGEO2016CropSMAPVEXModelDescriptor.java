@@ -22,7 +22,6 @@ import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.FileLandCoverModel;
 import org.esa.snap.landcover.dataio.LandCoverModel;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -30,9 +29,9 @@ public class ACGEO2016CropSMAPVEXModelDescriptor extends AbstractLandCoverModelD
 
     public static final String NAME = "AAFC Canada 2016 Crop SMAPVEX";
 
-    private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + "AAFC");
-    private static final File file = new File(INSTALL_DIR, "ACGEO_2016_CI_SMAPVEX_30m_v3.zip");
+    private static final Path INSTALL_DIR = Settings.instance().getAuxDataFolder().toAbsolutePath().resolve(
+            "LandCover").resolve("AAFC");
+    private static final Path file = INSTALL_DIR.resolve("ACGEO_2016_CI_SMAPVEX_30m_v3.zip");
 
     public ACGEO2016CropSMAPVEXModelDescriptor() {
         remotePath = "http://step.esa.int/auxdata/landcover/AAFC/AESB_EOS_Crop_2016/";
@@ -45,7 +44,7 @@ public class ACGEO2016CropSMAPVEXModelDescriptor extends AbstractLandCoverModelD
 
     @Override
     public LandCoverModel createLandCoverModel(final Resampling resampling) throws IOException {
-        return new FileLandCoverModel(this, new File[]{file}, resampling);
+        return new FileLandCoverModel(this, new Path[]{file}, resampling);
     }
 
     @Override

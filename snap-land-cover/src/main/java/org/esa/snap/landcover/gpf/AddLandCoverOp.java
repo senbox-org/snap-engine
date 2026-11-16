@@ -46,8 +46,9 @@ import org.esa.snap.landcover.dataio.LandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.LandCoverModelRegistry;
 
 import java.awt.image.RenderedImage;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,7 +74,7 @@ public final class AddLandCoverOp extends Operator {
     private String[] landCoverNames = {"AAFC Canada Sand Pct"};
 
     @Parameter(description = "The external landcover files.", defaultValue = "", label = "External Files")
-    private File[] externalFiles = null;
+    private Path[] externalFiles = null;
 
     @Parameter(defaultValue = ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
             label = "Resampling Method")
@@ -133,11 +134,11 @@ public final class AddLandCoverOp extends Operator {
             }
         }
         if (externalFiles != null) {
-            for(File externalFile : externalFiles) {
-                if (externalFile.exists()) {
+            for(Path externalFile : externalFiles) {
+                if (Files.exists(externalFile)) {
 
                     final LandCoverParameters param = new LandCoverParameters(
-                            externalFile.getName(), externalFile, resamplingMethod);
+                            externalFile.getFileName().toString(), externalFile, resamplingMethod);
 
                     addLandCover(targetProduct, param, paramsToDescriptor, paramsToBand);
                 }
@@ -304,7 +305,7 @@ public final class AddLandCoverOp extends Operator {
         public String name;
         public String resamplingMethod;
         public String bandName;
-        public File externalFile = null;
+        public Path externalFile = null;
 
         public LandCoverParameters(final String name, final String resamplingMethod) {
             this.name = name;
@@ -312,9 +313,9 @@ public final class AddLandCoverOp extends Operator {
             this.bandName = name;
         }
 
-        public LandCoverParameters(final String name, final File externalFile, final String resamplingMethod) {
+        public LandCoverParameters(final String name, final Path externalFile, final String resamplingMethod) {
             this(name, resamplingMethod);
-            this.name = externalFile.getName();
+            this.name = externalFile.getFileName().toString();
             this.externalFile = externalFile;
         }
     }

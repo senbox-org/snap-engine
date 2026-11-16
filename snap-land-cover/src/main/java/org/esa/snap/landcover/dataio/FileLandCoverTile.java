@@ -25,7 +25,7 @@ import org.esa.snap.engine_utilities.download.DownloadableContentImpl;
 import org.esa.snap.engine_utilities.download.DownloadableFile;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,17 +46,17 @@ public class FileLandCoverTile extends DownloadableContentImpl implements Resamp
     private final LandCoverModel model;
     private final ProductReader reader;
 
-    public FileLandCoverTile(final LandCoverModel model, final File localFile, final ProductReader reader)
+    public FileLandCoverTile(final LandCoverModel model, final Path localFile, final ProductReader reader)
             throws IOException {
         this(model, localFile, reader, ".zip");
     }
 
-    public FileLandCoverTile(final LandCoverModel model, final File localFile, final ProductReader reader,
+    public FileLandCoverTile(final LandCoverModel model, final Path localFile, final ProductReader reader,
                              final String archiveExt) throws IOException {
         this(model, localFile, model.getDescriptor().getArchiveUrl(), reader, archiveExt);
     }
 
-    public FileLandCoverTile(final LandCoverModel model, final File localFile, final URL remoteURL,
+    public FileLandCoverTile(final LandCoverModel model, final Path localFile, final URL remoteURL,
                              final ProductReader reader, final String archiveExt) throws IOException {
         super(localFile, remoteURL, archiveExt);
         this.model = model;
@@ -81,7 +81,7 @@ public class FileLandCoverTile extends DownloadableContentImpl implements Resamp
         }
     }
 
-    protected DownloadableFile createContentFile(final File file) {
+    protected DownloadableFile createContentFile(final Path file) {
         try {
             product = reader.readProductNodes(file, null);
 

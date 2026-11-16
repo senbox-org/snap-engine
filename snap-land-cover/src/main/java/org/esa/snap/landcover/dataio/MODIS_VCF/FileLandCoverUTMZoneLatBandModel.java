@@ -23,7 +23,7 @@ import org.esa.snap.landcover.dataio.FileLandCoverTile;
 import org.esa.snap.landcover.dataio.LandCoverModelDescriptor;
 import uk.me.jstott.jcoord.LatLng;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class FileLandCoverUTMZoneLatBandModel extends FileLandCoverModel {
     // Map "FE1718" to the tile
     private Map<String, FileLandCoverTile> tileMap = new HashMap<>();
 
-    public FileLandCoverUTMZoneLatBandModel(final LandCoverModelDescriptor descriptor, final File[] files,
+    public FileLandCoverUTMZoneLatBandModel(final LandCoverModelDescriptor descriptor, final Path[] files,
                                             final Resampling resamplingMethod) throws IOException {
         super(descriptor, files, resamplingMethod);
         buildLatBandAndLonZoneIDMaps();
@@ -75,9 +75,9 @@ public class FileLandCoverUTMZoneLatBandModel extends FileLandCoverModel {
     }
 
     private FileLandCoverTile loadProduct(final String tileID) throws Exception {
-        // If doing a linear search through fileList is slow, may be we can map "E" and "17" directly to the File.
-        for (File file : fileList) {
-            if (file.getName().contains(tileID)) {
+        // If doing a linear search through fileList is slow, may be we can map "E" and "17" directly to the Path.
+        for (Path file : fileList) {
+            if (file.getFileName().toString().contains(tileID)) {
                 final FileLandCoverTile tile = new FileLandCoverTile(this, file, productReaderPlugIn.createReaderInstance());
                 tileMap.put(tileID, tile);
                 tileList = tileMap.values().toArray(new FileLandCoverTile[0]);
@@ -93,8 +93,8 @@ public class FileLandCoverUTMZoneLatBandModel extends FileLandCoverModel {
     }
 
     private void buildLatBandAndLonZoneIDMaps() {
-        for (File f : fileList) {
-            final String tileID = f.getName().substring(19, 25);
+        for (Path f : fileList) {
+            final String tileID = f.getFileName().toString().substring(19, 25);
             for (int i = 0; i < 2; i++) {
                 for (int j = 0; j < 4; j += 2) {
                     final Character latBandID = tileID.charAt(i);

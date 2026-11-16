@@ -21,7 +21,6 @@ import org.esa.snap.engine_utilities.util.Settings;
 import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.LandCoverModel;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -29,19 +28,19 @@ public class AESBEOS2016CropModelDescriptor extends AbstractLandCoverModelDescri
 
     public static final String NAME = "AAFC Canada 2016 Crop";
 
-    private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + "AAFC" + File.separator + "AESB_EOS_Crop_2016");
-    private static final File[] fileList = new File[]{
-            new File(INSTALL_DIR, "ci_2016_ab_30m_v1.zip"),
-            new File(INSTALL_DIR, "ci_2016_bc_30m_v1.zip"),
-            new File(INSTALL_DIR, "ci_2016_mb_30m_v1.zip"),
-            new File(INSTALL_DIR, "ci_2016_nb_30m_v1.zip"),
-            new File(INSTALL_DIR, "ci_2016_nfl_30m_v1.zip"),
-            new File(INSTALL_DIR, "ci_2016_ns_30m_v1.zip"),
-            new File(INSTALL_DIR, "ci_2016_on_30m_v1.zip"),
-            new File(INSTALL_DIR, "ci_2016_pei_30m_v1.zip"),
-            new File(INSTALL_DIR, "ci_2016_qc_30m_v1.zip"),
-            new File(INSTALL_DIR, "ci_2016_sk_30m_v1.zip")
+    private static final Path INSTALL_DIR = Settings.instance().getAuxDataFolder().toAbsolutePath().resolve(
+            "LandCover").resolve("AAFC").resolve("AESB_EOS_Crop_2016");
+    private static final Path[] fileList = new Path[]{
+            INSTALL_DIR.resolve("ci_2016_ab_30m_v1.zip"),
+            INSTALL_DIR.resolve("ci_2016_bc_30m_v1.zip"),
+            INSTALL_DIR.resolve("ci_2016_mb_30m_v1.zip"),
+            INSTALL_DIR.resolve("ci_2016_nb_30m_v1.zip"),
+            INSTALL_DIR.resolve("ci_2016_nfl_30m_v1.zip"),
+            INSTALL_DIR.resolve("ci_2016_ns_30m_v1.zip"),
+            INSTALL_DIR.resolve("ci_2016_on_30m_v1.zip"),
+            INSTALL_DIR.resolve("ci_2016_pei_30m_v1.zip"),
+            INSTALL_DIR.resolve("ci_2016_qc_30m_v1.zip"),
+            INSTALL_DIR.resolve("ci_2016_sk_30m_v1.zip")
     };
 
     public AESBEOS2016CropModelDescriptor() {

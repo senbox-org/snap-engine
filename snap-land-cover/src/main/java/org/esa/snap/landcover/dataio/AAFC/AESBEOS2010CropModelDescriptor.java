@@ -22,7 +22,6 @@ import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.FileLandCoverModel;
 import org.esa.snap.landcover.dataio.LandCoverModel;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -30,10 +29,10 @@ public class AESBEOS2010CropModelDescriptor extends AbstractLandCoverModelDescri
 
     public static final String NAME = "AAFC Canada 2010 Prairies Crop";
 
-    private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + "AAFC" + File.separator + "AESB_EOS_Crop_2010");
-    private static final File[] fileList = new File[]{
-            new File(INSTALL_DIR, "AAFC_Prairie_Crop_Mapping_2010_v3.zip")
+    private static final Path INSTALL_DIR = Settings.instance().getAuxDataFolder().toAbsolutePath().resolve(
+            "LandCover").resolve("AAFC").resolve("AESB_EOS_Crop_2010");
+    private static final Path[] fileList = new Path[]{
+            INSTALL_DIR.resolve("AAFC_Prairie_Crop_Mapping_2010_v3.zip")
     };
 
     public AESBEOS2010CropModelDescriptor() {

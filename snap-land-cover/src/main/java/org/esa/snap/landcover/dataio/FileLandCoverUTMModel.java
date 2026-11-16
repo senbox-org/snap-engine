@@ -20,7 +20,7 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import uk.me.jstott.jcoord.LatLng;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ public class FileLandCoverUTMModel extends FileLandCoverModel {
 
     private final Map<Integer, FileLandCoverTile> zoneTileMap = new HashMap<>();
 
-    public FileLandCoverUTMModel(final LandCoverModelDescriptor descriptor, final File[] files,
+    public FileLandCoverUTMModel(final LandCoverModelDescriptor descriptor, final Path[] files,
                                  final Resampling resamplingMethod) throws IOException {
         super(descriptor, files, resamplingMethod);
     }
@@ -63,8 +63,8 @@ public class FileLandCoverUTMModel extends FileLandCoverModel {
     }
 
     private FileLandCoverTile loadProduct(final int zone) throws Exception {
-        for (File file : fileList) {
-            if (file.getName().contains("UTM" + zone)) {
+        for (Path file : fileList) {
+            if (file.getFileName().toString().contains("UTM" + zone)) {
                 final FileLandCoverTile tile = new FileLandCoverTile(this, file, productReaderPlugIn.createReaderInstance());
                 zoneTileMap.put(zone, tile);
                 tileList = zoneTileMap.values().toArray(new FileLandCoverTile[0]);

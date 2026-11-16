@@ -23,7 +23,6 @@ import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.FileLandCoverModel;
 import org.esa.snap.landcover.dataio.LandCoverModel;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -31,9 +30,8 @@ public class AAFCClayHRModelDescriptor extends AbstractLandCoverModelDescriptor 
 
     public static final String NAME = "AAFC Canada Clay Pct";
 
-    private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + "AAFC");
-    private static final File file = new File(INSTALL_DIR, "AAFC_Canada_CLAY_HR_pct.zip");
+    private static final Path INSTALL_DIR = Settings.instance().getAuxDataFolder().toAbsolutePath().resolve("LandCover").resolve("AAFC");
+    private static final Path file = INSTALL_DIR.resolve("AAFC_Canada_CLAY_HR_pct.zip");
 
     public AAFCClayHRModelDescriptor() {
         remotePath = "http://step.esa.int/auxdata/landcover/AAFC/";
@@ -47,7 +45,7 @@ public class AAFCClayHRModelDescriptor extends AbstractLandCoverModelDescriptor 
 
     @Override
     public LandCoverModel createLandCoverModel(final Resampling resampling) throws IOException {
-        return new FileLandCoverModel(this, new File[]{file}, resampling);
+        return new FileLandCoverModel(this, new Path[]{file}, resampling);
     }
 
     @Override

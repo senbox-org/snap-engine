@@ -21,7 +21,6 @@ import org.esa.snap.engine_utilities.util.Settings;
 import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.LandCoverModel;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -29,19 +28,19 @@ public class AESBEOS2015CropModelDescriptor extends AbstractLandCoverModelDescri
 
     public static final String NAME = "AAFC Canada 2015 Crop";
 
-    private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + "AAFC" + File.separator + "AESB_EOS_Crop_2015");
-    private static final File[] fileList = new File[]{
-            new File(INSTALL_DIR, "ACGEO_2015_CI_AB_30m_v1_TIF.zip"),
-            new File(INSTALL_DIR, "ACGEO_2015_CI_BC_30m_v1_TIF.zip"),
-            new File(INSTALL_DIR, "ACGEO_2015_CI_MB_30m_v1_TIF.zip"),
-            new File(INSTALL_DIR, "ACGEO_2015_CI_NB_30m_v2_TIF.zip"),
-            new File(INSTALL_DIR, "ACGEO_2015_CI_NFL_30m_v2_TIF.zip"),
-            new File(INSTALL_DIR, "ACGEO_2015_CI_NS_30m_v2_TIF.zip"),
-            new File(INSTALL_DIR, "ACGEO_2015_CI_ON_30m_v2_TIF.zip"),
-            new File(INSTALL_DIR, "ACGEO_2015_CI_PEI_30m_v2_TIF.zip"),
-            new File(INSTALL_DIR, "ACGEO_2015_CI_QC_30m_v2_TIF.zip"),
-            new File(INSTALL_DIR, "ACGEO_2015_CI_SK_30m_v1_TIF.zip")
+    private static final Path INSTALL_DIR = Settings.instance().getAuxDataFolder().toAbsolutePath().resolve(
+            "LandCover").resolve("AAFC").resolve("AESB_EOS_Crop_2015");
+    private static final Path[] fileList = new Path[]{
+            INSTALL_DIR.resolve("ACGEO_2015_CI_AB_30m_v1_TIF.zip"),
+            INSTALL_DIR.resolve("ACGEO_2015_CI_BC_30m_v1_TIF.zip"),
+            INSTALL_DIR.resolve("ACGEO_2015_CI_MB_30m_v1_TIF.zip"),
+            INSTALL_DIR.resolve("ACGEO_2015_CI_NB_30m_v2_TIF.zip"),
+            INSTALL_DIR.resolve("ACGEO_2015_CI_NFL_30m_v2_TIF.zip"),
+            INSTALL_DIR.resolve("ACGEO_2015_CI_NS_30m_v2_TIF.zip"),
+            INSTALL_DIR.resolve("ACGEO_2015_CI_ON_30m_v2_TIF.zip"),
+            INSTALL_DIR.resolve("ACGEO_2015_CI_PEI_30m_v2_TIF.zip"),
+            INSTALL_DIR.resolve("ACGEO_2015_CI_QC_30m_v2_TIF.zip"),
+            INSTALL_DIR.resolve("ACGEO_2015_CI_SK_30m_v1_TIF.zip")
     };
 
     public AESBEOS2015CropModelDescriptor() {

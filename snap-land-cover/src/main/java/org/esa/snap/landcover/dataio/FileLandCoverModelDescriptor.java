@@ -18,23 +18,23 @@ package org.esa.snap.landcover.dataio;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.resamp.Resampling;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 public class FileLandCoverModelDescriptor extends AbstractLandCoverModelDescriptor {
 
-    private final File file;
+    private final Path file;
 
-    public FileLandCoverModelDescriptor(final File file) {
+    public FileLandCoverModelDescriptor(final Path file) {
         remotePath = null;
-        name = file.getName();
+        name = file.getFileName().toString();
         this.file = file;
         NO_DATA_VALUE = -9999d;
     }
 
     @Override
     public LandCoverModel createLandCoverModel(Resampling resampling) throws IOException {
-        return new FileLandCoverModel(this, new File[]{file}, resampling);
+        return new FileLandCoverModel(this, new Path[]{file}, resampling);
     }
 
     @Override

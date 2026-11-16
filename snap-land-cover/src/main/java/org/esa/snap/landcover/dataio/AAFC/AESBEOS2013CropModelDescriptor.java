@@ -22,7 +22,6 @@ import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.FileLandCoverUTMModel;
 import org.esa.snap.landcover.dataio.LandCoverModel;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -30,23 +29,23 @@ public class AESBEOS2013CropModelDescriptor extends AbstractLandCoverModelDescri
 
     public static final String NAME = "AAFC Canada 2013 Crop";
 
-    private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + "AAFC" + File.separator + "AESB_EOS_Crop_2013");
-    private static final File[] fileList = new File[]{
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM9_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM10_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM11_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM12_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM13_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM14_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM15_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM16_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM17_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM18_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM19_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM20_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM21_30m_v1.zip"),
-            new File(INSTALL_DIR, "STB-EOS_2013_CI_UTM22_30m_v1.zip")
+    private static final Path INSTALL_DIR = Settings.instance().getAuxDataFolder().toAbsolutePath().resolve(
+            "LandCover").resolve("AAFC").resolve("AESB_EOS_Crop_2013");
+    private static final Path[] fileList = new Path[]{
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM9_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM10_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM11_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM12_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM13_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM14_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM15_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM16_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM17_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM18_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM19_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM20_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM21_30m_v1.zip"),
+            INSTALL_DIR.resolve("STB-EOS_2013_CI_UTM22_30m_v1.zip")
     };
 
     public AESBEOS2013CropModelDescriptor() {

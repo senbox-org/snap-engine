@@ -28,9 +28,10 @@ import org.esa.snap.stac.extensions.Assets;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.awt.*;
-import java.io.File;
+import java.awt.Dimension;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -192,11 +193,11 @@ public class StacLandCoverModel implements LandCoverModel {
                 String fileName = asset.getFileName();
                 URL remoteURL = new URL(client.signURL(asset));
 
-                File localFile = new File(descriptor.getInstallDir(), fileName);
-                if(!localFile.exists()) {
+                Path localFile = descriptor.getInstallDir().resolve(fileName);
+                if(!Files.exists(localFile)) {
 
                     System.out.println("Downloading " + fileName + " from " + remoteURL);
-                    File folder = client.downloadAsset(asset, descriptor.getInstallDir());
+                    client.downloadAsset(asset, descriptor.getInstallDir());
                 }
 
                 ProductReader reader = productReaderPlugIn.createReaderInstance();

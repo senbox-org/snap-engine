@@ -22,7 +22,7 @@ import org.esa.snap.landcover.dataio.FileLandCoverModel;
 import org.esa.snap.landcover.dataio.FileLandCoverTile;
 import org.esa.snap.landcover.dataio.LandCoverModelDescriptor;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ public class FileLandCoverProvincialModel extends FileLandCoverModel {
 
     private final List<TileData> tileDataList = new ArrayList<>();
 
-    public FileLandCoverProvincialModel(final LandCoverModelDescriptor descriptor, final File[] files,
+    public FileLandCoverProvincialModel(final LandCoverModelDescriptor descriptor, final Path[] files,
                                         final Resampling resamplingMethod) throws IOException {
         super(descriptor, files, resamplingMethod);
 
@@ -107,10 +107,10 @@ public class FileLandCoverProvincialModel extends FileLandCoverModel {
     private static class TileData {
         final double lat;
         final double lon;
-        final File file;
+        final Path file;
         FileLandCoverTile tile;
 
-        TileData(double lat, double lon, File file) {
+        TileData(double lat, double lon, Path file) {
             this.lat = lat + 90;
             this.lon = lon + 180;
             this.file = file;

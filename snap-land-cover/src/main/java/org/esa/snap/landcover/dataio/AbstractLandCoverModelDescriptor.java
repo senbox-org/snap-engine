@@ -16,6 +16,7 @@
 package org.esa.snap.landcover.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
 import org.esa.snap.core.datamodel.ImageInfo;
 import org.esa.snap.core.datamodel.IndexCoding;
@@ -27,17 +28,19 @@ import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.datamodel.Unit;
 
-import java.awt.*;
-import java.io.File;
+import java.awt.Color;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * The <code>AbstractLandCoverModelDescriptor</code> offers a default implementation for the installFiles
@@ -49,7 +52,7 @@ public abstract class AbstractLandCoverModelDescriptor implements LandCoverModel
     protected String name;
     protected double NO_DATA_VALUE = -9999d;
     protected String unit = Unit.CLASS;
-    protected File installDir = null;
+    protected Path installDir = null;
     protected String remotePath = null;
     protected Path colourIndexFile = null;
     protected String metadataFileName = null;
@@ -104,7 +107,7 @@ public abstract class AbstractLandCoverModelDescriptor implements LandCoverModel
         }
     }
 
-    public File getInstallDir() {
+    public Path getInstallDir() {
         return installDir;
     }
 
@@ -116,8 +119,8 @@ public abstract class AbstractLandCoverModelDescriptor implements LandCoverModel
         installMetadata();
 
         if (installDir != null) {
-            final File[] files = installDir.listFiles();
-            isInstalled = files != null && files.length > 0;
+            final Collection<Path> files = IOHelper.listFiles(installDir, Files::isRegularFile);
+            isInstalled = files != null && !files.isEmpty();
         }
         return isInstalled;
     }
@@ -192,11 +195,11 @@ public abstract class AbstractLandCoverModelDescriptor implements LandCoverModel
     protected void installMetadata() {
         try {
             if (metadataFileName != null) {
-                final File file = new File(installDir, metadataFileName);
-                if (file.exists())
+                final Path file = installDir.resolve(metadataFileName);
+                if (Files.exists(file))
                     return;
 
-                final ResourceInstaller resourceInstaller = new ResourceInstaller(metadataSrcPath, installDir.toPath());
+                final ResourceInstaller resourceInstaller = new ResourceInstaller(metadataSrcPath, installDir);
                 resourceInstaller.install(".*", ProgressMonitor.NULL);
             }
         } catch (Exception e) {

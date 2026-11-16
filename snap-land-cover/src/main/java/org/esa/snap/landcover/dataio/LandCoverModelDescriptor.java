@@ -19,7 +19,7 @@ import org.esa.snap.core.datamodel.ImageInfo;
 import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.dataop.resamp.Resampling;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.URL;
 
@@ -93,7 +93,7 @@ public interface LandCoverModelDescriptor {
      *
      * @return the file directory
      */
-    File getInstallDir();
+    Path getInstallDir();
 
     /**
      * Gets the URL of the (ZIP) archive to be used for on-line installation.

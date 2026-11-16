@@ -24,14 +24,14 @@ import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 public class FileLandCoverModel implements LandCoverModel {
 
     protected final Resampling resampling;
     protected final Resampling.Index resamplingIndex;
-    protected final File[] fileList;
+    protected final Path[] fileList;
     private final String archiveExt;
 
     protected final LandCoverModelDescriptor descriptor;
@@ -39,12 +39,12 @@ public class FileLandCoverModel implements LandCoverModel {
 
     protected static final ProductReaderPlugIn productReaderPlugIn = new GeoTiffProductReaderPlugIn();
 
-    public FileLandCoverModel(final LandCoverModelDescriptor descriptor, final File[] files,
+    public FileLandCoverModel(final LandCoverModelDescriptor descriptor, final Path[] files,
                               final Resampling resamplingMethod) {
         this(descriptor, files, resamplingMethod, ".zip");
     }
 
-    public FileLandCoverModel(final LandCoverModelDescriptor descriptor, final File[] files,
+    public FileLandCoverModel(final LandCoverModelDescriptor descriptor, final Path[] files,
                               final Resampling resamplingMethod, final String archiveExt) {
 
         this.descriptor = descriptor;

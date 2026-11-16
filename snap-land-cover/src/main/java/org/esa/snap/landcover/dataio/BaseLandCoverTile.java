@@ -19,7 +19,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 public class BaseLandCoverTile implements LandCoverTile {
@@ -44,7 +44,7 @@ public class BaseLandCoverTile implements LandCoverTile {
         }
     }
 
-    public File getFile() {
+    public Path getFile() {
         return product.getFileLocation();
     }
 

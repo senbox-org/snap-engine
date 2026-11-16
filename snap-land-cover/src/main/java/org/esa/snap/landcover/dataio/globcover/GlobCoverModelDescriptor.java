@@ -22,7 +22,6 @@ import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.FileLandCoverModel;
 import org.esa.snap.landcover.dataio.LandCoverModel;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -30,45 +29,45 @@ public class GlobCoverModelDescriptor extends AbstractLandCoverModelDescriptor {
 
     public static final String NAME = "GlobCover";
 
-    private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + NAME);
-    private static final File[] fileList = new File[]{
-            new File(INSTALL_DIR, "globecover_1.tif.zip"),          //todo replace with coordinates
-            new File(INSTALL_DIR, "globecover_2.tif.zip"),
-            new File(INSTALL_DIR, "globecover_3.tif.zip"),
-            new File(INSTALL_DIR, "globecover_4.tif.zip"),
-            new File(INSTALL_DIR, "globecover_5.tif.zip"),
-            new File(INSTALL_DIR, "globecover_6.tif.zip"),
-            new File(INSTALL_DIR, "globecover_7.tif.zip"),
-            new File(INSTALL_DIR, "globecover_8.tif.zip"),
-            new File(INSTALL_DIR, "globecover_9.tif.zip"),
-            new File(INSTALL_DIR, "globecover_10.tif.zip"),
-            new File(INSTALL_DIR, "globecover_11.tif.zip"),
-            new File(INSTALL_DIR, "globecover_12.tif.zip"),
-            new File(INSTALL_DIR, "globecover_13.tif.zip"),
-            new File(INSTALL_DIR, "globecover_14.tif.zip"),
-            new File(INSTALL_DIR, "globecover_15.tif.zip"),
-            new File(INSTALL_DIR, "globecover_16.tif.zip"),
-            new File(INSTALL_DIR, "globecover_17.tif.zip"),
-            new File(INSTALL_DIR, "globecover_18.tif.zip"),
-            new File(INSTALL_DIR, "globecover_19.tif.zip"),
-            new File(INSTALL_DIR, "globecover_20.tif.zip"),
-            new File(INSTALL_DIR, "globecover_21.tif.zip"),
-            new File(INSTALL_DIR, "globecover_22.tif.zip"),
-            new File(INSTALL_DIR, "globecover_23.tif.zip"),
-            new File(INSTALL_DIR, "globecover_24.tif.zip"),
-            new File(INSTALL_DIR, "globecover_25.tif.zip"),
-            new File(INSTALL_DIR, "globecover_26.tif.zip"),
-            new File(INSTALL_DIR, "globecover_27.tif.zip"),
-            new File(INSTALL_DIR, "globecover_28.tif.zip"),
-            new File(INSTALL_DIR, "globecover_29.tif.zip"),
-            new File(INSTALL_DIR, "globecover_30.tif.zip"),
-            new File(INSTALL_DIR, "globecover_31.tif.zip"),
-            new File(INSTALL_DIR, "globecover_32.tif.zip"),
-            new File(INSTALL_DIR, "globecover_33.tif.zip"),
-            new File(INSTALL_DIR, "globecover_34.tif.zip"),
-            new File(INSTALL_DIR, "globecover_35.tif.zip"),
-            new File(INSTALL_DIR, "globecover_36.tif.zip")
+    private static final Path INSTALL_DIR = Settings.instance().getAuxDataFolder().toAbsolutePath().resolve(
+            "LandCover").resolve(NAME);
+    private static final Path[] fileList = new Path[]{
+            INSTALL_DIR.resolve("globecover_1.tif.zip"),          //todo replace with coordinates
+            INSTALL_DIR.resolve("globecover_2.tif.zip"),
+            INSTALL_DIR.resolve("globecover_3.tif.zip"),
+            INSTALL_DIR.resolve("globecover_4.tif.zip"),
+            INSTALL_DIR.resolve("globecover_5.tif.zip"),
+            INSTALL_DIR.resolve("globecover_6.tif.zip"),
+            INSTALL_DIR.resolve("globecover_7.tif.zip"),
+            INSTALL_DIR.resolve("globecover_8.tif.zip"),
+            INSTALL_DIR.resolve("globecover_9.tif.zip"),
+            INSTALL_DIR.resolve("globecover_10.tif.zip"),
+            INSTALL_DIR.resolve("globecover_11.tif.zip"),
+            INSTALL_DIR.resolve("globecover_12.tif.zip"),
+            INSTALL_DIR.resolve("globecover_13.tif.zip"),
+            INSTALL_DIR.resolve("globecover_14.tif.zip"),
+            INSTALL_DIR.resolve("globecover_15.tif.zip"),
+            INSTALL_DIR.resolve("globecover_16.tif.zip"),
+            INSTALL_DIR.resolve("globecover_17.tif.zip"),
+            INSTALL_DIR.resolve("globecover_18.tif.zip"),
+            INSTALL_DIR.resolve("globecover_19.tif.zip"),
+            INSTALL_DIR.resolve("globecover_20.tif.zip"),
+            INSTALL_DIR.resolve("globecover_21.tif.zip"),
+            INSTALL_DIR.resolve("globecover_22.tif.zip"),
+            INSTALL_DIR.resolve("globecover_23.tif.zip"),
+            INSTALL_DIR.resolve("globecover_24.tif.zip"),
+            INSTALL_DIR.resolve("globecover_25.tif.zip"),
+            INSTALL_DIR.resolve("globecover_26.tif.zip"),
+            INSTALL_DIR.resolve("globecover_27.tif.zip"),
+            INSTALL_DIR.resolve("globecover_28.tif.zip"),
+            INSTALL_DIR.resolve("globecover_29.tif.zip"),
+            INSTALL_DIR.resolve("globecover_30.tif.zip"),
+            INSTALL_DIR.resolve("globecover_31.tif.zip"),
+            INSTALL_DIR.resolve("globecover_32.tif.zip"),
+            INSTALL_DIR.resolve("globecover_33.tif.zip"),
+            INSTALL_DIR.resolve("globecover_34.tif.zip"),
+            INSTALL_DIR.resolve("globecover_35.tif.zip"),
+            INSTALL_DIR.resolve("globecover_36.tif.zip")
     };
 
     public GlobCoverModelDescriptor() {

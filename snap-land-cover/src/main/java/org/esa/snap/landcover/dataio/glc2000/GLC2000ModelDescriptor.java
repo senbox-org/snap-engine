@@ -22,7 +22,6 @@ import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.FileLandCoverModel;
 import org.esa.snap.landcover.dataio.LandCoverModel;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -30,9 +29,9 @@ public class GLC2000ModelDescriptor extends AbstractLandCoverModelDescriptor {
 
     public static final String NAME = "GLC2000";
 
-    private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + NAME);
-    private static final File file = new File(INSTALL_DIR, "glc2000_v1_1.zip");
+    private static final Path INSTALL_DIR = Settings.instance().getAuxDataFolder().toAbsolutePath().resolve(
+            "LandCover").resolve(NAME);
+    private static final Path file = INSTALL_DIR.resolve("glc2000_v1_1.zip");
 
     public GLC2000ModelDescriptor() {
         remotePath = "http://step.esa.int/auxdata/landcover/glc2000/";
@@ -46,7 +45,7 @@ public class GLC2000ModelDescriptor extends AbstractLandCoverModelDescriptor {
 
     @Override
     public LandCoverModel createLandCoverModel(final Resampling resampling) throws IOException {
-        return new FileLandCoverModel(this, new File[]{file}, resampling);
+        return new FileLandCoverModel(this, new Path[]{file}, resampling);
     }
 
     @Override

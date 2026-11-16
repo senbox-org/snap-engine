@@ -21,7 +21,6 @@ import org.esa.snap.engine_utilities.util.Settings;
 import org.esa.snap.landcover.dataio.AbstractLandCoverModelDescriptor;
 import org.esa.snap.landcover.dataio.LandCoverModel;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -29,19 +28,19 @@ public class AESBEOS2017CropModelDescriptor extends AbstractLandCoverModelDescri
 
     public static final String NAME = "AAFC Canada 2017 Crop";
 
-    private static final File INSTALL_DIR = new File(Settings.instance().getAuxDataFolder().getAbsolutePath(),
-            "LandCover" + File.separator + "AAFC" + File.separator + "AESB_EOS_Crop_2017");
-    private static final File[] fileList = new File[]{
-            new File(INSTALL_DIR, "aci_2017_ab.zip"),
-            new File(INSTALL_DIR, "aci_2017_bc.zip"),
-            new File(INSTALL_DIR, "aci_2017_mb.zip"),
-            new File(INSTALL_DIR, "aci_2017_nb.zip"),
-            new File(INSTALL_DIR, "aci_2017_nl.zip"),
-            new File(INSTALL_DIR, "aci_2017_ns.zip"),
-            new File(INSTALL_DIR, "aci_2017_on.zip"),
-            new File(INSTALL_DIR, "aci_2017_pe.zip"),
-            new File(INSTALL_DIR, "aci_2017_qc.zip"),
-            new File(INSTALL_DIR, "aci_2017_sk.zip")
+    private static final Path INSTALL_DIR = Settings.instance().getAuxDataFolder().toAbsolutePath().resolve(
+            "LandCover").resolve("AAFC").resolve("AESB_EOS_Crop_2017");
+    private static final Path[] fileList = new Path[]{
+            INSTALL_DIR.resolve("aci_2017_ab.zip"),
+            INSTALL_DIR.resolve("aci_2017_bc.zip"),
+            INSTALL_DIR.resolve("aci_2017_mb.zip"),
+            INSTALL_DIR.resolve("aci_2017_nb.zip"),
+            INSTALL_DIR.resolve("aci_2017_nl.zip"),
+            INSTALL_DIR.resolve("aci_2017_ns.zip"),
+            INSTALL_DIR.resolve("aci_2017_on.zip"),
+            INSTALL_DIR.resolve("aci_2017_pe.zip"),
+            INSTALL_DIR.resolve("aci_2017_qc.zip"),
+            INSTALL_DIR.resolve("aci_2017_sk.zip")
     };
 
     public AESBEOS2017CropModelDescriptor() {
