@@ -1,6 +1,5 @@
 package org.esa.snap.runtime;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +21,7 @@ import java.util.stream.Collectors;
  */
 class InstallationScanner {
 
+    private static final String PATH_SEPARATOR = System.getProperty("path.separator");
     private static final String JAR_EXT = ".jar";
 
     private final EngineConfig config;
@@ -93,7 +93,7 @@ class InstallationScanner {
         } catch (IOException e) {
             fail(e);
         }
-        for (String pathName : config.preferences().get("snap.extraClusters", "").split(File.pathSeparator)) {
+        for (String pathName : config.preferences().get("snap.extraClusters", "").split(PATH_SEPARATOR)) {
             if (!pathName.isEmpty()) {
                 Path clusterPath = Paths.get(pathName);
                 if (Files.isDirectory(clusterPath)) {

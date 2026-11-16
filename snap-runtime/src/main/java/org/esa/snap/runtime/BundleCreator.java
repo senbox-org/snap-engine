@@ -1,6 +1,5 @@
 package org.esa.snap.runtime;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,6 +28,8 @@ import static java.nio.file.FileVisitResult.CONTINUE;
  * @since SNAP 2.0
  */
 public class BundleCreator {
+
+    public static final String SEPARATOR = FileSystems.getDefault().getSeparator();
 
     public static void main(String[] args) throws IOException {
 
@@ -93,15 +94,15 @@ public class BundleCreator {
                     logger.warning("Invalid classpath entry: '" + classPathEntry.toString());
                     continue;
                 }
-                targetFilename = targetFilename.replace(File.separator, "_");
-                Files.copy(classPathEntry, zipfs.getPath(File.separator + targetFilename), StandardCopyOption.REPLACE_EXISTING);
+                targetFilename = targetFilename.replace(SEPARATOR, "_");
+                Files.copy(classPathEntry, zipfs.getPath(SEPARATOR + targetFilename), StandardCopyOption.REPLACE_EXISTING);
                 logger.fine("Added '" + classPathEntry.toString() + "'");
             }
             logger.fine("done. Adding shared objects entries to zip...");
             for (Path libraryPathEntry : libraryPathEntries) {
                 Files.newDirectoryStream(libraryPathEntry).forEach(path -> {
                     if (Files.isRegularFile(path)) {
-                        String targetFilename = path.toString().substring(path.toString().lastIndexOf(File.separator) + 1);
+                        String targetFilename = path.getFileName().toString();
                         try {
                             Files.copy(path, zipfs.getPath("/" + targetFilename), StandardCopyOption.REPLACE_EXISTING);
                         } catch (IOException e) {
@@ -164,8 +165,8 @@ public class BundleCreator {
         for (Path libraryPathEntry : libraryPathEntries) {
             String targetFilename;
             targetFilename = getTargetFilename(libraryPathEntry.getParent().toString(), libraryPathEntry);
-            targetFilename = targetFilename.replace(File.separator, "_");
-            Files.copy(libraryPathEntry, zipfs.getPath(File.separator + targetFilename), StandardCopyOption.REPLACE_EXISTING);
+            targetFilename = targetFilename.replace(SEPARATOR, "_");
+            Files.copy(libraryPathEntry, zipfs.getPath(SEPARATOR + targetFilename), StandardCopyOption.REPLACE_EXISTING);
             logger.fine("Added '" + libraryPathEntry.toString() + "'");
         }
     }
@@ -195,7 +196,7 @@ public class BundleCreator {
 
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-            if (file.toString().contains(File.separator + "target" + File.separator + "nbm" + File.separator) &&
+            if (file.toString().contains(SEPARATOR + "target" + SEPARATOR + "nbm" + SEPARATOR) &&
                     file.toString().endsWith(".jar")) {
                 resultFiles.add(file);
             }

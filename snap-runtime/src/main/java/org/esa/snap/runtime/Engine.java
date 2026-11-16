@@ -1,7 +1,5 @@
 package org.esa.snap.runtime;
 
-import java.io.File;
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -11,7 +9,6 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * This {@link #getInstance() singleton} class is used to run client code that uses the various SNAP Engine APIs.
