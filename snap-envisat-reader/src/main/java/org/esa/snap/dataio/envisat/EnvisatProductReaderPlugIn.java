@@ -28,9 +28,9 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.zip.GZIPInputStream;
@@ -93,7 +93,7 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
      * Checks whether the given object is an acceptable input for this product reader and if so, the method checks if
      * it's content has the ENVISAT format by checking if the first bytes in the file equals the ENVISAT magic file
      * string <code>PRODUCT=&quot;</code>.
-     * <p> ENVISAT product readers accept <code>java.lang.String</code> - a file path, <code>java.io.File</code> - an
+     * <p> ENVISAT product readers accept <code>java.lang.String</code> - a file path, <code>java.nio.file.Path</code> - an
      * abstract file path or a <code>javax.imageio.stream.ImageInputStream</code> - an already opened image input
      * stream.
      *
@@ -103,12 +103,11 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
     public DecodeQualification getDecodeQualification(Object input) {
         if (input instanceof String) {
             // @todo 1 tb/tb check for zip extension and handle accordingly
-            if (ProductFile.getProductType(new File((String) input)) != null) {
+            if (ProductFile.getProductType(Path.of((String) input)) != null) {
                 return DecodeQualification.INTENDED;
             }
-        } else if (input instanceof File) {
-            final File inputFile = (File) input;
-            final String fileName = inputFile.getName().toUpperCase();
+        } else if (input instanceof Path inputFile) {
+            final String fileName = inputFile.getFileName().toString().toUpperCase();
             for (String ext : EnvisatConstants.EXTENSIONS) {
                 if (fileName.endsWith(ext) || fileName.endsWith(ext + ".ZIP") || fileName.endsWith(ext + ".GZ")) {
                     return DecodeQualification.INTENDED;
@@ -158,7 +157,7 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
      * @see AbstractProductReader#readProductNodes
      */
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class, ImageInputStream.class, ProductFile.class};
+        return new Class[]{String.class, Path.class, ImageInputStream.class, ProductFile.class};
     }
 
     /**
@@ -181,8 +180,8 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
      * @return the input stream
      * @throws java.io.IOException if an I/O error occurred
      */
-    static InputStream getInflaterInputStream(File file) throws IOException {
-        if (file.getName().endsWith(".gz") && !file.getName().endsWith(".tar.gz")) {
+    static InputStream getInflaterInputStream(Path file) throws IOException {
+        if (file.getFileName().toString().endsWith(".gz") && !file.getFileName().toString().endsWith(".tar.gz")) {
             try {
                 return createGZIPInputStream(file);
             } catch (IOException e) {
@@ -192,9 +191,9 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
         return createZIPInputStream(file);
     }
 
-    private static InputStream createZIPInputStream(File file) throws IOException {
-        final File cachedFile = FileUtils.getCachedFile(file);
-        final ZipFile productZip = new ZipFile(cachedFile, ZipFile.OPEN_READ);
+    private static InputStream createZIPInputStream(Path file) throws IOException {
+        final Path cachedFile = FileUtils.getCachedFile(file);
+        final ZipFile productZip = new ZipFile(cachedFile.toFile(), ZipFile.OPEN_READ);
         if (productZip.size() != 1) {
             throw new IllegalFileFormatException("Illegal ZIP format, single file entry expected.");
         }
@@ -206,7 +205,7 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
         return productZip.getInputStream(zipEntry);
     }
 
-    private static InputStream createGZIPInputStream(File file) throws IOException {
+    private static InputStream createGZIPInputStream(Path file) throws IOException {
         final InputStream inputStream = ProductUtils.getProductInputStream(file);
         return new GZIPInputStream(inputStream);
     }

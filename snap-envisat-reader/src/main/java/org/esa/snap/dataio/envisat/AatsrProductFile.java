@@ -25,7 +25,7 @@ import org.esa.snap.core.util.StringUtils;
 
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Color;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -103,7 +103,7 @@ public class AatsrProductFile extends ProductFile {
      * @param dataInputStream the seekable data input stream which will be used to read data from the product file.
      * @throws java.io.IOException if an I/O error occurs
      */
-    protected AatsrProductFile(File file, ImageInputStream dataInputStream) throws IOException {
+    protected AatsrProductFile(Path file, ImageInputStream dataInputStream) throws IOException {
         super(file, dataInputStream);
     }
 

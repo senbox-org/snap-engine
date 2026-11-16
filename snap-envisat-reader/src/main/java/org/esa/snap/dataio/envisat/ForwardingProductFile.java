@@ -19,11 +19,11 @@ package org.esa.snap.dataio.envisat;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.ImageUtils;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * To be reused by specializations of {@link ProductFile}.
@@ -32,11 +32,11 @@ import java.io.IOException;
  */
 class ForwardingProductFile extends ProductFile {
 
-    protected ForwardingProductFile(File file) throws IOException {
-        super(file, new FileImageInputStream(file));
+    protected ForwardingProductFile(Path file) throws IOException {
+        super(file, ImageUtils.getImageInputStream(file));
     }
 
-    protected ForwardingProductFile(File file, ImageInputStream iis) throws IOException {
+    protected ForwardingProductFile(Path file, ImageInputStream iis) throws IOException {
         super(file, iis);
     }
 

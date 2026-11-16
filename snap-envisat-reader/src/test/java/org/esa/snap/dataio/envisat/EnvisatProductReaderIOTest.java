@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.envisat;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -9,14 +10,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Scanner;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(LongTestRunner.class)
 public class EnvisatProductReaderIOTest {
@@ -29,13 +31,15 @@ public class EnvisatProductReaderIOTest {
     }
 
     @Test
-    public void testAatsrGeoLocation_UpperRightCorner() throws IOException, URISyntaxException {
+    public void testAatsrGeoLocation_UpperRightCorner() throws IOException {
         final EnvisatProductReader reader = (EnvisatProductReader) readerPlugIn.createReaderInstance();
 
         try {
-            final Product product = reader.readProductNodes(
-                    new File(getClass().getResource(
-                            "ATS_TOA_1PRMAP20050504_080932_000000482037_00020_16607_0001.N1").toURI()), null);
+            final URL fileURL = getClass().getResource("ATS_TOA_1PRMAP20050504_080932_000000482037_00020_16607_0001.N1");
+            assertNotNull(fileURL);
+            final Path file = UrlHelper.urlToFile(fileURL);
+            assertNotNull(file);
+            final Product product = reader.readProductNodes(file, null);
             assertEquals(512, product.getSceneRasterWidth());
             assertEquals(320, product.getSceneRasterHeight());
 
@@ -77,13 +81,15 @@ public class EnvisatProductReaderIOTest {
     }
 
     @Test
-    public void testAatsrGeoLocation_Center() throws IOException, URISyntaxException {
+    public void testAatsrGeoLocation_Center() throws IOException {
         final EnvisatProductReader reader = (EnvisatProductReader) readerPlugIn.createReaderInstance();
 
         try {
-            final Product product = reader.readProductNodes(
-                    new File(getClass().getResource(
-                            "ATS_TOA_1PRMAP20050504_080932_000000482037_00020_16607_0001.N1").toURI()), null);
+            final URL fileURL = getClass().getResource("ATS_TOA_1PRMAP20050504_080932_000000482037_00020_16607_0001.N1");
+            assertNotNull(fileURL);
+            final Path file = UrlHelper.urlToFile(fileURL);
+            assertNotNull(file);
+            final Product product = reader.readProductNodes(file, null);
             assertEquals(512, product.getSceneRasterWidth());
             assertEquals(320, product.getSceneRasterHeight());
 

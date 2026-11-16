@@ -21,7 +21,7 @@ import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 /**
@@ -38,9 +38,9 @@ public final class AsarAbstractMetadata {
 
     private final String _productType;
     private final String _version;
-    private final File _file;
+    private final Path _file;
 
-    AsarAbstractMetadata(String type, String ver, File file) {
+    AsarAbstractMetadata(String type, String ver, Path file) {
         _productType = type;
         _version = ver;
         _file = file;
@@ -323,7 +323,7 @@ public final class AsarAbstractMetadata {
         addAbstractedAttribute("abstracted_metadata_version", METADATA_VERSION, absRoot, "AbsMetadata version");
     }
 
-    public static String getMission(final String productType, final File file) {
+    public static String getMission(final String productType, final Path file) {
         if (productType.startsWith("SAR")) {
             final String filename = file.toString().toUpperCase();
             if (filename.endsWith("E2") || filename.endsWith("E2.ZIP"))

@@ -23,7 +23,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.Map;
 
@@ -49,7 +49,7 @@ public class AatsrL0ProductFile extends ProductFile {
      * @param dataInputStream the seekable data input stream which will be used to read data from the product file.
      * @throws IOException if an I/O error occurs
      */
-    AatsrL0ProductFile(File file, ImageInputStream dataInputStream) throws IOException {
+    AatsrL0ProductFile(Path file, ImageInputStream dataInputStream) throws IOException {
         super(file, dataInputStream);
     }
 

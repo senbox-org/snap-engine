@@ -13,13 +13,13 @@ import org.opengis.referencing.operation.TransformException;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.logging.Level;
 
 public class AuxProductFile extends ProductFile {
 
-    public AuxProductFile(File file, ImageInputStream dataInputStream) throws IOException {
+    public AuxProductFile(Path file, ImageInputStream dataInputStream) throws IOException {
         super(file, dataInputStream);
     }
 

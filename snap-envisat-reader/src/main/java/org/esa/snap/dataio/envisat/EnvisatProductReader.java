@@ -34,7 +34,7 @@ import org.esa.snap.runtime.Config;
 import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -112,8 +112,8 @@ public class EnvisatProductReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         final Object input = getInput();
-        if (input instanceof String || input instanceof File) {
-            File file = getProductFile();
+        if (input instanceof String || input instanceof Path) {
+            Path file = getProductPath();
             try {
                 productFile = ProductFile.open(file);
             } catch (IOException e) {
@@ -228,10 +228,10 @@ public class EnvisatProductReader extends AbstractProductReader {
     private Product createProduct() throws IOException {
         Debug.assertNotNull(getEnvisatProductFile());
 
-        File file = getEnvisatProductFile().getFile();
+        Path file = getEnvisatProductFile().getFile();
         String productName;
         if (file != null) {
-            productName = file.getName();
+            productName = file.getFileName().toString();
         } else {
             productName = getEnvisatProductFile().getProductId();
         }

@@ -17,15 +17,18 @@
 package org.esa.snap.dataio.envisat;
 
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ProductFileTest {
 
@@ -33,8 +36,10 @@ public class ProductFileTest {
 
     @Before
     public void setUp() throws Exception {
-        File file = new File(getClass().getResource(
-                "ATS_TOA_1PRMAP20050504_080932_000000482037_00020_16607_0001.N1").toURI());
+        final URL fileURL = getClass().getResource("ATS_TOA_1PRMAP20050504_080932_000000482037_00020_16607_0001.N1");
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
+        assertNotNull(file);
         String productType = ProductFile.getProductType(file);
         assertEquals("ATS_TOA_1P", productType);
 

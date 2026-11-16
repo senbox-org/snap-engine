@@ -19,16 +19,17 @@ package org.esa.snap.dataio.envisat;
 import org.esa.snap.core.dataio.IllegalFileFormatException;
 import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.ImageUtils;
 
 import javax.imageio.stream.FileCacheImageInputStream;
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 
 
@@ -53,12 +54,12 @@ public class EnvisatAuxReader {
      */
     public void readProduct(Object input) throws IOException {
 
-        File file;
+        Path file;
         if (input instanceof String) {
             file = getFile((String) input);
-        } else if (input instanceof File) {
-            file = (File) input;
-            file = getFile(file.getAbsolutePath());
+        } else if (input instanceof Path) {
+            file = (Path) input;
+            file = getFile(file.toAbsolutePath().toString());
         } else {
             throw new IllegalArgumentException("input");
         }
@@ -123,20 +124,20 @@ public class EnvisatAuxReader {
         }
     }
 
-    public static File getFile(String filePath) throws FileNotFoundException {
-        File file = null;
+    public static Path getFile(String filePath) throws FileNotFoundException {
+        Path file = null;
 
         final String[] exts = new String[]{"", ".gz", ".zip"};
         for (String ext : exts) {
             final URI fileUri = getFileURI(filePath + ext);
             if (fileUri != null) {
-                file = new File(fileUri);
-                if (file.exists()) {
+                file = Path.of(fileUri);
+                if (Files.exists(file)) {
                     break;
                 }
             }
-            file = new File(filePath + ext);
-            if (file.exists()) {
+            file = Path.of(filePath + ext);
+            if (Files.exists(file)) {
                 break;
             }
         }
@@ -146,12 +147,12 @@ public class EnvisatAuxReader {
         return file;
     }
 
-    private static ImageInputStream getImageInputStream(final File file) throws IOException {
-        final String name = file.getName().toLowerCase();
+    private static ImageInputStream getImageInputStream(final Path file) throws IOException {
+        final String name = file.getFileName().toString().toLowerCase();
         if (name.endsWith(".zip") || name.endsWith(".gz")) {
             return new FileCacheImageInputStream(EnvisatProductReaderPlugIn.getInflaterInputStream(file), null);
         } else {
-            return new FileImageInputStream(file);
+            return ImageUtils.getImageInputStream(file);
         }
     }
 

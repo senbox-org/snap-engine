@@ -28,7 +28,7 @@ import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.StringUtils;
 
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -130,7 +130,7 @@ public final class AsarProductFile extends ProductFile {
      * @param dataInputStream the seekable data input stream which will be used to read data from the product file.
      * @throws java.io.IOException if an I/O error occurs
      */
-    protected AsarProductFile(File file, ImageInputStream dataInputStream) throws IOException {
+    protected AsarProductFile(Path file, ImageInputStream dataInputStream) throws IOException {
         super(file, dataInputStream);
     }
 

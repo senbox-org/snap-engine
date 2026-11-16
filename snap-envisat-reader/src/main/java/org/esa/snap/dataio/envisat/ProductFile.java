@@ -24,14 +24,15 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.core.util.ImageUtils;
 
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Color;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -60,7 +61,7 @@ public abstract class ProductFile {
     /**
      * The abstract file path representation.
      */
-    private final File file;
+    private final Path file;
 
     /**
      * The image seekable data input stream used to read data from ENVISAT products
@@ -169,7 +170,7 @@ public abstract class ProductFile {
      *
      * @throws java.io.IOException if an I/O error occurs
      */
-    protected ProductFile(File file, ImageInputStream dataInputStream) throws IOException {
+    protected ProductFile(Path file, ImageInputStream dataInputStream) throws IOException {
         this(file, dataInputStream, false);
     }
 
@@ -182,7 +183,7 @@ public abstract class ProductFile {
      *
      * @throws java.io.IOException if an I/O error occurs
      */
-    protected ProductFile(File file, ImageInputStream dataInputStream, boolean lineInterleaved) throws IOException {
+    protected ProductFile(Path file, ImageInputStream dataInputStream, boolean lineInterleaved) throws IOException {
         Debug.assertTrue(dataInputStream != null);
 
         this.file = file;
@@ -202,7 +203,7 @@ public abstract class ProductFile {
      * @exception IOException if an I/O error occurs
      */
     public static ProductFile open(String filePath) throws IOException {
-        return open(new File(filePath));
+        return open(Path.of(filePath));
     }
 
     /**
@@ -215,7 +216,7 @@ public abstract class ProductFile {
      *
      * @throws java.io.IOException if an I/O error occurs
      */
-    public static ProductFile open(File file) throws IOException {
+    public static ProductFile open(Path file) throws IOException {
         return open(file, ImageUtils.getImageInputStream(file));
     }
 
@@ -241,7 +242,7 @@ public abstract class ProductFile {
     /**
      * @return the abstract file path representation.
      */
-    public File getFile() {
+    public Path getFile() {
         return file;
     }
 
@@ -252,7 +253,7 @@ public abstract class ProductFile {
      *
      * @return <code>true</code> if so, <code>false</code> otherwise
      */
-    public static boolean isEnvisatFile(File file) {
+    public static boolean isEnvisatFile(Path file) {
         return getProductType(file) != null;
     }
 
@@ -273,11 +274,11 @@ public abstract class ProductFile {
      *
      * @return the file's product type or <code>null</code> if the product type could not be retrieved.
      */
-    public static String getProductType(File file) {
+    public static String getProductType(Path file) {
         ImageInputStream dataInputStream = null;
         String productType = null;
 
-        if (!file.exists() || !file.isFile()) {
+        if (!Files.exists(file) || !Files.isRegularFile(file)) {
             return null;
         }
 
@@ -1013,7 +1014,7 @@ public abstract class ProductFile {
      * @throws java.lang.IllegalArgumentException
      *                             if an I/O error occurs
      */
-    public static ProductFile open(File file, ImageInputStream dataInputStream) throws IOException {
+    public static ProductFile open(Path file, ImageInputStream dataInputStream) throws IOException {
         return open(file, dataInputStream, false);
     }
 
@@ -1034,7 +1035,7 @@ public abstract class ProductFile {
      * @throws java.lang.IllegalArgumentException
      *                             if an I/O error occurs
      */
-    public static ProductFile open(File file, ImageInputStream dataInputStream, boolean lineInterleaved) throws IOException {
+    public static ProductFile open(Path file, ImageInputStream dataInputStream, boolean lineInterleaved) throws IOException {
         Guardian.assertNotNull("dataInputStream", dataInputStream);
 
         String productType = readProductType(dataInputStream);
@@ -1131,7 +1132,7 @@ public abstract class ProductFile {
             try {
                 sensingStart = mph.getParamDate(KEY_SENSING_START);
             } catch (HeaderParseException e) {
-                getLogger().warning("failed to parse header parameter 'SENSING_START': " + e.getMessage()+file.getAbsolutePath());
+                getLogger().warning("failed to parse header parameter 'SENSING_START': " + e.getMessage()+file.toAbsolutePath());
             }
             try {
                 sensingStop = mph.getParamDate(KEY_SENSING_STOP);

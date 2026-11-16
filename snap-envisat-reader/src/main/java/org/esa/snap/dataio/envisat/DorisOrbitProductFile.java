@@ -24,7 +24,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.StringUtils;
 
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.Map;
 
@@ -45,7 +45,7 @@ public class DorisOrbitProductFile extends ProductFile {
      * @param dataInputStream the seekable data input stream which will be used to read data from the product file.
      * @throws java.io.IOException if an I/O error occurs
      */
-    protected DorisOrbitProductFile(File file, ImageInputStream dataInputStream) throws IOException {
+    protected DorisOrbitProductFile(Path file, ImageInputStream dataInputStream) throws IOException {
         super(file, dataInputStream);
     }
 

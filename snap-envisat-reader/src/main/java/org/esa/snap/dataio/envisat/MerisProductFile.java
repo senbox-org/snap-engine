@@ -24,7 +24,7 @@ import org.esa.snap.core.util.Debug;
 
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Color;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.Map;
 
@@ -194,7 +194,7 @@ public class MerisProductFile extends ProductFile {
      *
      * @throws java.io.IOException if an I/O error occurs
      */
-    protected MerisProductFile(File file, ImageInputStream dataInputStream, boolean lineInterleaved) throws
+    protected MerisProductFile(Path file, ImageInputStream dataInputStream, boolean lineInterleaved) throws
                                                                                                      IOException {
         super(file, dataInputStream, lineInterleaved);
     }

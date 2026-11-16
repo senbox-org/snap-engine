@@ -5,8 +5,8 @@ import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.ProductData;
 
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * @author Marco Peters
@@ -14,7 +14,7 @@ import java.io.IOException;
 public class AatsrAuxProductFile extends ProductFile {
     private static final String PARSE_SPH_ERR_MSG = "Failed to parse main header parameter '%s': %s";
 
-    public AatsrAuxProductFile(File file, ImageInputStream dataInputStream) throws IOException {
+    public AatsrAuxProductFile(Path file, ImageInputStream dataInputStream) throws IOException {
         super(file, dataInputStream);
     }
 
