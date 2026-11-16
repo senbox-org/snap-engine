@@ -18,10 +18,10 @@ package org.esa.snap.smart.configurator;
 import com.sun.management.OperatingSystemMXBean;
 import org.esa.snap.core.util.SystemUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -145,8 +145,13 @@ public class JavaSystemInfos implements SystemInfos {
 
     @Override
     public long getDiskFreeSize(String diskId) {
-        File thisDisk = new File(diskId);
-        long diskFreeSpaceInBytes = thisDisk.getFreeSpace();
+        Path thisDisk = Path.of(diskId);
+        long diskFreeSpaceInBytes;
+        try {
+            diskFreeSpaceInBytes = Files.getFileStore(thisDisk).getUnallocatedSpace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return Math.round(diskFreeSpaceInBytes / (1024 * 1024));
     }
 

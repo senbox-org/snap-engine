@@ -14,9 +14,10 @@ import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.graph.GraphIO;
 import org.esa.snap.core.gpf.graph.GraphProcessor;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 
 /**
@@ -29,7 +30,7 @@ import java.io.FileReader;
 public class StoredGraphOp extends Operator {
 
     @Parameter(label = "Graph xml file", description = "The file from which the graph is read.", notNull = true, notEmpty = true)
-    private File file;
+    private Path file;
 
     GraphProcessor processor = null;
     GraphContext graphContext = null;
@@ -40,15 +41,14 @@ public class StoredGraphOp extends Operator {
         if (file == null) {
             throw new OperatorException("'file' parameter must be set");
         }
-        try {
-            FileReader reader = new FileReader(file);
+        try (Reader reader = Files.newBufferedReader(file)){
             Graph graph = GraphIO.read(reader);
 
             processor = new GraphProcessor();
             graphContext = new GraphContext(graph);
         } catch (GraphException e) {
             throw new OperatorException(new OperatorException("Invalid graph xml file. Try to edit it using the Graph Builder."));
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new OperatorException("'file' not found");
         }
     }

@@ -218,7 +218,7 @@ public class PerformanceParameters {
 
         VMParameters netBeansVmParameters = VMParameters.load();
         actualParameters.setVMParameters(netBeansVmParameters.toString());
-        actualParameters.setCachePath(SystemUtils.getCacheDir().toPath());
+        actualParameters.setCachePath(SystemUtils.getCacheDir());
 
         final int defaultNbThreads = JavaSystemInfos.getInstance().getNbCPUs();
         actualParameters.setNbThreads(preferences.getInt(SystemUtils.SNAP_PARALLELISM_PROPERTY_NAME, defaultNbThreads));

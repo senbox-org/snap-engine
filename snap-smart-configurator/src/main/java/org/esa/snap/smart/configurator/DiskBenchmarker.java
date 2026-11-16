@@ -16,12 +16,14 @@
 
 package org.esa.snap.smart.configurator;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.SystemUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Random;
 import java.util.UUID;
 
@@ -148,8 +150,9 @@ public class DiskBenchmarker {
         long startTime = System.currentTimeMillis();
 
         for(int i=0 ; i<nbSamples ; i++) {
-            String fileName = dirName + File.separator + uniqueName + i;
-            FileOutputStream outputStream = new FileOutputStream(fileName);
+            String fileName = dirName + IOHelper.SEPARATOR + uniqueName + i;
+            Path filePath = Path.of(fileName);
+            OutputStream outputStream = Files.newOutputStream(filePath);
             outputStream.write(dataToWrite);
             outputStream.close();
         }
@@ -181,8 +184,8 @@ public class DiskBenchmarker {
         int numberOfBytesToRead = fileSize * 1024 * 1024;
         byte[] dataToRead = new byte[numberOfBytesToRead];
         for (int i = 0; i < nbSamples ; i++) {
-            String fileName = dirName + File.separator + uniqueName + i;
-            FileInputStream inputStream = new FileInputStream(fileName);
+            String fileName = dirName + IOHelper.SEPARATOR + uniqueName + i;
+            InputStream inputStream = Files.newInputStream(Path.of(fileName));
             int readResult = inputStream.read(dataToRead);
 
             if(readResult != numberOfBytesToRead) {
@@ -213,9 +216,9 @@ public class DiskBenchmarker {
     private static void cleanup(String uniqueName, String dirName, int nbSamples) throws IOException {
 
         for (int i = 0; i < nbSamples ; i++) {
-            String fileName = dirName + File.separator + uniqueName + i;
-            File file = new File(fileName);
-            if(!file.delete()) {
+            String fileName = dirName + IOHelper.SEPARATOR + uniqueName + i;
+            Path file = Path.of(fileName);
+            if(!Files.deleteIfExists(file)) {
                 SystemUtils.LOG.warning("Could not delete temporary benchmark file " + fileName);
             }
         }

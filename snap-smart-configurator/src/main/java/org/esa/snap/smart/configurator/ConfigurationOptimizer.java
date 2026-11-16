@@ -17,11 +17,9 @@
 
 package org.esa.snap.smart.configurator;
 
-import Jama.util.Maths;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -166,8 +164,8 @@ public class ConfigurationOptimizer {
                 if(writeSpeed > fastestForUserDirSpeed &&
                         sysInfos.getDiskFreeSize(diskName) > MIN_FREE_LARGE_CACHE_DISK_SPACE) {
                     fastestForUserDirSpeed = writeSpeed;
-                    File diskNameAsFile = new File(diskName);
-                    fastestForUserDir = FileUtils.getPathFromURI(diskNameAsFile.toURI()).resolve("cache");
+                    Path diskNameAsFile = Path.of(diskName);
+                    fastestForUserDir = FileUtils.getPathFromURI(diskNameAsFile.toUri()).resolve("cache");
                 }
             } catch (IOException e) {
                 SystemUtils.LOG.warning(
