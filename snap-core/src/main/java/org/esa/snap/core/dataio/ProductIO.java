@@ -38,6 +38,8 @@ import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -329,6 +331,28 @@ public class ProductIO {
                                     String filePath,
                                     String formatName) throws IOException {
         writeProduct(product, new File(filePath), formatName, false, ProgressMonitor.NULL);
+    }
+
+    /**
+     * Writes a product with the specified format to the given file path.
+     * <p>The method also writes all band data to the file. Therefore the band data must either
+     * <ul>
+     * <li>be completely loaded ({@link Band#getRasterData() Band.rasterData} is not <code>null</code>)</li>
+     * <li>or the product must be associated with a product reader ({@link Product#getProductReader() Product.productReader} is not <code>null</code>)
+     * so that unloaded data can be reloaded.</li>
+     * </ul>.
+     *
+     * @param product    the product, must not be <code>null</code>
+     * @param filePath   the file path
+     * @param formatName the name of a supported product format, e.g. "HDF5". If <code>null</code>, the default format
+     *                   "BEAM-DIMAP" will be used
+     *
+     * @throws IOException if an IOException occurs
+     */
+    public static void writeProduct(Product product,
+                                    Path filePath,
+                                    String formatName) throws IOException {
+        writeProduct(product, filePath, formatName, false, ProgressMonitor.NULL);
     }
 
     /**
