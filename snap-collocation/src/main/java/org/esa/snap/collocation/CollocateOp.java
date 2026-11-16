@@ -48,7 +48,7 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 
 import java.awt.Rectangle;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.*;
 
@@ -243,7 +243,7 @@ public class CollocateOp extends Operator {
 
         if (sourceProductPaths != null) {
             for (String sourceProductPath : sourceProductPaths) {
-                File file = new File(sourceProductPath);
+                Path file = Path.of(sourceProductPath);
                 try {
                     Product sourceProduct = ProductIO.readProduct(file);
                     if (sourceProduct.getName().equals(referenceProductName) && referenceProduct == null) {
