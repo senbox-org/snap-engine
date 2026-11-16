@@ -44,6 +44,10 @@ import java.util.zip.ZipOutputStream;
 
 public class IOHelper {
 
+    public static final String PATH_SEPARATOR = System.getProperty("path.separator");
+    public static final String SEPARATOR = FileSystems.getDefault().getSeparator();
+    public static final char SEPARATOR_CHAR = SEPARATOR.charAt(0);
+
     public static String getBaseName(File archiveFile) {
         String dirName = archiveFile.getName();
         int pos = dirName.lastIndexOf((int) '.');
