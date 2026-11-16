@@ -1,14 +1,16 @@
 package eu.esa.snap.sttm;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class STTMExtractorTest {
 
@@ -42,15 +44,15 @@ public class STTMExtractorTest {
 
     @Test
     @STTM("SNAP-3506")
-    public void testValidateInput_file_not_dir() throws IOException {
-        final File tempFile = File.createTempFile("whatever", "dont_care");
+    public void testValidateInput_file_not_dir() {
+        final Path tempFile = IOHelper.createTempFile("whatever", "dont_care");
         try {
-            STTMExtractor.validateInput(new String[]{tempFile.getAbsolutePath()});
+            STTMExtractor.validateInput(new String[]{tempFile.toAbsolutePath().toString()});
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException expected) {
         } finally {
-            if (!tempFile.delete()) {
-                fail("unable to delete temp file: " + tempFile.getAbsolutePath());
+            if (!IOHelper.delete(tempFile)) {
+                fail("unable to delete temp file: " + tempFile.toAbsolutePath());
             }
         }
     }
