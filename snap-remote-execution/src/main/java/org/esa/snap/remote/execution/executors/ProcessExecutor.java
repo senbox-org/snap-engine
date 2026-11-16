@@ -2,7 +2,7 @@ package org.esa.snap.remote.execution.executors;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,10 +13,10 @@ import java.io.OutputStream;
  */
 public class ProcessExecutor {
 
-    public static int executeWindowsCommand(String command, File workingDirectory, OutputConsole outputConsole) throws IOException {
+    public static int executeWindowsCommand(String command, Path workingDirectory, OutputConsole outputConsole) throws IOException {
         ProcessBuilder pb = new ProcessBuilder("cmd", "/c", command);
         if (workingDirectory != null) {
-            pb.directory(workingDirectory);
+            pb.directory(workingDirectory.toFile());
         }
         // redirect the error of the tool to the standard output
         pb.redirectErrorStream(true);
@@ -31,14 +31,14 @@ public class ProcessExecutor {
         }
     }
 
-    public static int executeUnixCommand(String command, String superUserPassword, File workingDirectory, OutputConsole outputConsole) throws IOException {
+    public static int executeUnixCommand(String command, String superUserPassword, Path workingDirectory, OutputConsole outputConsole) throws IOException {
         boolean asSuperUser = (superUserPassword != null);
         if (asSuperUser) {
             command = "sudo -S -p '' " + command;
         }
         ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", command);
         if (workingDirectory != null) {
-            pb.directory(workingDirectory);
+            pb.directory(workingDirectory.toFile());
         }
         // redirect the error of the tool to the standard output
         pb.redirectErrorStream(true);
