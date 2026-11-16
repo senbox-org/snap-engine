@@ -1,8 +1,13 @@
 package org.esa.snap.product.library.v2.database;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.quicklooks.QuicklookGenerator;
 import org.esa.snap.core.dataop.downloadable.StatusProgressMonitor;
 import org.esa.snap.core.util.ProductUtils;
@@ -15,14 +20,18 @@ import org.esa.snap.remote.products.repository.ThreadStatus;
 import org.esa.snap.remote.products.repository.geometry.Polygon2D;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.sql.SQLException;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +49,7 @@ public class LocalRepositoryFolderHelper {
     private final boolean scanRecursively;
     private final boolean generateQuickLookImages;
     private final boolean validateZips;
-    private Map<File, String> errorFiles;
+    private Map<Path, String> errorFiles;
 
     public LocalRepositoryFolderHelper(AllLocalFolderProductsRepository allLocalFolderProductsRepository, boolean scanRecursively,
                                        boolean generateQuickLookImages, boolean testZipFileForErrors) {
@@ -65,7 +74,7 @@ public class LocalRepositoryFolderHelper {
             savedProducts = scanFolderProducts(localRepositoryFolderPath, threadStatus, progressMonitor);
         } else {
             if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "The local repository folder '"+localRepositoryFolderPath.toString()+"' does not exist.");
+                logger.log(Level.FINE, "The local repository folder '"+ localRepositoryFolderPath +"' does not exist.");
             }
         }
         return savedProducts;
@@ -147,12 +156,12 @@ public class LocalRepositoryFolderHelper {
 
         List<SaveProductData> savedProducts = new ArrayList<>();
 
-        final List<File> foldersList = new ArrayList<>(20);
-        foldersList.add(localRepositoryFolderPath.toFile());
+        final List<Path> foldersList = new ArrayList<>(20);
+        foldersList.add(localRepositoryFolderPath);
 
         if (this.scanRecursively) {
             ProductFunctions.DirectoryFileFilter folderFilter = new ProductFunctions.DirectoryFileFilter();
-            List<File> subfoldersList = collectAllSubfolders(localRepositoryFolderPath.toFile(), folderFilter, 0, progressMonitor);
+            List<Path> subfoldersList = collectAllSubfolders(localRepositoryFolderPath, folderFilter, 0, progressMonitor);
             foldersList.addAll(subfoldersList);
         }
 
@@ -161,11 +170,11 @@ public class LocalRepositoryFolderHelper {
         }
 
         final ProductFunctions.ValidProductFileFilter fileFilter = new ProductFunctions.ValidProductFileFilter(false);
-        final List<File> fileList = new ArrayList<>(foldersList.size());
-        for (File file : foldersList) {
-            final File[] files = file.listFiles(fileFilter);
+        final List<Path> fileList = new ArrayList<>(foldersList.size());
+        for (Path file : foldersList) {
+            final Collection<Path> files = IOHelper.listFiles(file, fileFilter);
             if (files != null) {
-                fileList.addAll(Arrays.asList(files));
+                fileList.addAll(files);
             }
             progressMonitor.setTaskName("Collecting " + fileList.size() + " files...");
         }
@@ -191,12 +200,12 @@ public class LocalRepositoryFolderHelper {
             }
             progressMonitor.setTaskName(taskMsg);
 
-            Path productPath = fileList.get(i).toPath();
+            Path productPath = fileList.get(i);
 
             boolean canContinue = true;
             if (this.validateZips) {
-                if (ZipUtils.isZip(productPath) && !ZipUtils.isValid(productPath.toFile())) {
-                    this.errorFiles.put(productPath.toFile(), "Corrupt zip file");
+                if (ZipUtils.isZip(productPath) && !ZipUtils.isValid(productPath)) {
+                    this.errorFiles.put(productPath, "Corrupt zip file");
                     canContinue = false;
                 }
             }
@@ -253,7 +262,7 @@ public class LocalRepositoryFolderHelper {
                 } catch (java.lang.InterruptedException ie) {
                     throw ie;
                 } catch (Exception exception) {
-                    this.errorFiles.put(productPath.toFile(), "Product unreadable");
+                    this.errorFiles.put(productPath, "Product unreadable");
                     logger.log(Level.SEVERE, "Failed to save the local product from the path '" + productPath.toString() + "'.", exception);
                 }
             }
@@ -309,12 +318,12 @@ public class LocalRepositoryFolderHelper {
         return savedProducts;
     }
 
-    public Map<File, String> getErrorFiles() {
+    public Map<Path, String> getErrorFiles() {
         return errorFiles;
     }
 
     private Product readProduct(Path productPath) throws IOException {
-        Product product = ProductIO.readProduct(productPath.toFile());
+        Product product = ProductIO.readProduct(productPath);
         if (product == null) {
             // the local product has not been read
             if (logger.isLoggable(Level.FINE)) {
@@ -384,18 +393,18 @@ public class LocalRepositoryFolderHelper {
         executor.complete();
     }
 
-    private static List<File> collectAllSubfolders(final File dir, ProductFunctions.DirectoryFileFilter folderFilter, int count, final ProgressMonitor pm) {
-        final List<File> dirList = new ArrayList<>(20);
+    private static List<Path> collectAllSubfolders(final Path dir, ProductFunctions.DirectoryFileFilter folderFilter, int count, final ProgressMonitor pm) {
+        final List<Path> dirList = new ArrayList<>(20);
 
-        final File[] subDirs = dir.listFiles(folderFilter);
-        if (subDirs != null && subDirs.length > 0) {
-            count += subDirs.length;
+        final Collection<Path> subDirs = IOHelper.listFiles(dir, folderFilter);
+        if (subDirs != null && !subDirs.isEmpty()) {
+            count += subDirs.size();
             pm.setTaskName("Collecting " + count + " folders...");
 
-            for (final File subDir : subDirs) {
+            for (final Path subDir : subDirs) {
                 dirList.add(subDir);
 
-                List<File> dirs = collectAllSubfolders(subDir, folderFilter, count, pm);
+                List<Path> dirs = collectAllSubfolders(subDir, folderFilter, count, pm);
                 dirList.addAll(dirs);
             }
         }

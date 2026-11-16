@@ -1,9 +1,11 @@
 package org.esa.snap.product.library.v2.database;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.DateTimeUtils;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
@@ -28,18 +30,31 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 
-import javax.imageio.ImageIO;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -74,7 +89,7 @@ public class DataAccess {
     private static H2DatabaseParameters dbParams;
 
     public static void initialize() {
-            dbParams = new H2DatabaseParameters(SystemUtils.getApplicationDataDir(true).toPath().resolve("product-library"));
+            dbParams = new H2DatabaseParameters(SystemUtils.getApplicationDataDir(true).resolve("product-library"));
     }
 
     public static void setDbParams(H2DatabaseParameters dbParams) {
@@ -376,7 +391,7 @@ public class DataAccess {
                 LocalRepositoryProduct localProduct = (LocalRepositoryProduct) repositoryProduct;
                 Path quickLookImageFile = quickLookImagesFolder.resolve(localProduct.getId() + ".png");
                 if (Files.exists(quickLookImageFile)) {
-                    BufferedImage quickLookImage = ImageIO.read(quickLookImageFile.toFile());
+                    BufferedImage quickLookImage = ImageUtils.readImage(quickLookImageFile);
                     localProduct.setQuickLookImage(quickLookImage);
                 }
             }
@@ -766,7 +781,7 @@ public class DataAccess {
                     connection.prepareStatement(String.format("SELECT l.folder_path, p.relative_path FROM local_repositories l " +
                                                                       "join products p on p.local_repository_id = l.id where p.name ilike ? " +
                                                                       "or instr(?, left(l.folder_path || '%s' || p.relative_path, instr(l.folder_path || '%s' || p.relative_path, '%s',-1))) > 0",
-                                                              File.separator, File.separator, File.separator));
+                                                              IOHelper.SEPARATOR, IOHelper.SEPARATOR, IOHelper.SEPARATOR));
             statement.setString(1, name + "%");
             statement.setString(2, currentPath.toString());
             final ResultSet resultSet = statement.executeQuery();
@@ -807,7 +822,7 @@ public class DataAccess {
         Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
         FileIOUtils.ensureExists(quickLookImagesFolder);
         Path quickLookImageFile = quickLookImagesFolder.resolve(productId + ".png");
-        ImageIO.write(quickLookImage, "png", quickLookImageFile.toFile());
+        ImageUtils.writeImage(quickLookImage, "png", quickLookImageFile);
     }
 
     private static Integer getProductId(short localRepositoryId, Path relativePath) throws SQLException {
