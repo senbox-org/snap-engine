@@ -19,29 +19,44 @@ package org.esa.snap.dataio.gdal.writer;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.lib.gdal.activator.GDALDriverInfo;
-import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.dataio.gdal.GDALLoader;
-import org.esa.snap.dataio.gdal.drivers.*;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.dataio.gdal.GDALLoader;
+import org.esa.snap.dataio.gdal.drivers.Dataset;
+import org.esa.snap.dataio.gdal.drivers.Driver;
+import org.esa.snap.dataio.gdal.drivers.GCP;
+import org.esa.snap.dataio.gdal.drivers.GDAL;
+import org.esa.snap.dataio.gdal.drivers.GDALConst;
+import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.media.jai.JAI;
-import java.awt.*;
-import java.io.File;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -93,8 +108,6 @@ public class GDALProductWriter extends AbstractProductWriter {
     private static Path getFileInput(Object input) {
         if (input instanceof String) {
             return Paths.get((String) input);
-        } else if (input instanceof File) {
-            return ((File) input).toPath();
         } else if (input instanceof Path) {
             return (Path) input;
         }
@@ -148,7 +161,7 @@ public class GDALProductWriter extends AbstractProductWriter {
             }
         }
 
-        String fileName = outputFile.toFile().getName();
+        String fileName = outputFile.getFileName().toString();
         if (!StringUtils.endsWithIgnoreCase(fileName, this.writerDriver.getExtensionName())) {
             throw new IllegalArgumentException("The extension of the file name '" + fileName + "' is unknown.");
         }

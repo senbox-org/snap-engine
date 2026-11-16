@@ -1,10 +1,7 @@
 package org.esa.snap.dataio.gdal.writer;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.dataio.gdal.reader.GDALProductReader;
-import org.esa.snap.dataio.gdal.reader.plugins.AbstractDriverProductReaderPlugIn;
-import org.esa.snap.dataio.gdal.writer.plugins.AbstractDriverProductWriterPlugIn;
-import org.esa.snap.engine_utilities.utils.TestUtil;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.lib.gdal.activator.GDALDriverInfo;
 import org.esa.lib.gdal.activator.GDALInstallInfo;
 import org.esa.snap.core.dataio.ProductWriter;
@@ -17,6 +14,10 @@ import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.gdal.GDALLoader;
 import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.GDALConstConstants;
+import org.esa.snap.dataio.gdal.reader.GDALProductReader;
+import org.esa.snap.dataio.gdal.reader.plugins.AbstractDriverProductReaderPlugIn;
+import org.esa.snap.dataio.gdal.writer.plugins.AbstractDriverProductWriterPlugIn;
+import org.esa.snap.engine_utilities.utils.TestUtil;
 import org.geotools.referencing.CRS;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -27,7 +28,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.JAI;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +35,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -62,7 +66,7 @@ public abstract class AbstractTestDriverProductWriter {
 
     @BeforeClass
     public static void oneTimeSetUp() throws IOException {
-        testsFolderPath = Files.createTempDirectory("_temp");
+        testsFolderPath = IOHelper.createATempDir("_temp");
         if (!Files.exists(testsFolderPath)) {
             fail("The test directory path '"+testsFolderPath+"' is not valid.");
         }
@@ -70,7 +74,7 @@ public abstract class AbstractTestDriverProductWriter {
 
     @AfterClass
     public static void oneTimeTearDown() {
-        if (!FileUtils.deleteTree(testsFolderPath.toFile())) {
+        if (!FileUtils.deleteTree(testsFolderPath)) {
             fail("Unable to delete test directory.");
         }
     }
@@ -124,7 +128,7 @@ public abstract class AbstractTestDriverProductWriter {
             int gdalDataType = getBandDataTypeToSave(driverInfo);
             boolean canIgnore = driverNamesToIgnoreGeoCoding.contains(driverInfo.getDriverName());
             int bandDataType = GDALLoader.getInstance().getBandDataType(gdalDataType);
-            File file = new File(testsFolderPath.toFile(), this.driverName + driverInfo.getExtensionName());
+            final Path file = testsFolderPath.resolve(this.driverName + driverInfo.getExtensionName());
             try {
                 Product product = buildProductToSave(driverInfo, canIgnore, sceneRasterWidth, sceneRasterHeight, geoCodingToSave, bandDataType);
 
@@ -137,7 +141,7 @@ public abstract class AbstractTestDriverProductWriter {
                 } catch (Exception ignored) {
                     //nothing to do
                 }
-                file.delete();
+                Files.delete(file);
             }
         }
     }
@@ -190,7 +194,7 @@ public abstract class AbstractTestDriverProductWriter {
         return product;
     }
 
-    private static void checkSaveProductToFile(File file, AbstractDriverProductWriterPlugIn writerPlugIn, Product productToSave) throws IOException {
+    private static void checkSaveProductToFile(Path file, AbstractDriverProductWriterPlugIn writerPlugIn, Product productToSave) throws IOException {
         ProductWriter productWriter = writerPlugIn.createWriterInstance();
         try {
             productWriter.writeProductNodes(productToSave, file);
@@ -206,10 +210,10 @@ public abstract class AbstractTestDriverProductWriter {
         } finally {
             productWriter.close();
         }
-        assertTrue(file.length() > 0);
+        assertTrue(Files.size(file) > 0);
     }
 
-    private static void checkReadProductFromFile(File file, AbstractDriverProductReaderPlugIn readerPlugIn, Product savedProduct, boolean canIgnoreGeoCoding) throws IOException {
+    private static void checkReadProductFromFile(Path file, AbstractDriverProductReaderPlugIn readerPlugIn, Product savedProduct, boolean canIgnoreGeoCoding) throws IOException {
         GDALProductReader reader = (GDALProductReader)readerPlugIn.createReaderInstance();
         Product finalProduct = reader.readProductNodes(file, null);
         assertNotNull(finalProduct);

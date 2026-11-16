@@ -9,7 +9,7 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 import org.junit.Test;
 
 import javax.media.jai.JAI;
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -65,7 +65,7 @@ public abstract class AbstractTestDriverProductWriterPlugIn {
             assertEquals(2, classes.length);
 
             List<Class> list = Arrays.asList(classes);
-            assertTrue(list.contains(File.class));
+            assertTrue(list.contains(Path.class));
             assertTrue(list.contains(String.class));
         }
     }
