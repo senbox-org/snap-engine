@@ -18,7 +18,8 @@ package org.esa.snap.dataio.rtp;
 
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.esa.snap.dataio.rtp.RawTiledPyramidsProductCodecSpi.*;
 
@@ -29,15 +30,15 @@ class RawTiledPyramidsProductFileFilter extends SnapFileFilter {
     }
 
     @Override
-    public boolean accept(File file) {
-        if (isProductDir(file.getParentFile())) {
-            return file.getName().equals(HEADER_NAME);
+    public boolean accept(Path file) {
+        if (isProductDir(file.getParent())) {
+            return file.getFileName().toString().equals(HEADER_NAME);
         }
-        return file.isDirectory();
+        return Files.isDirectory(file);
     }
 
     @Override
-    public boolean isCompoundDocument(File dir) {
+    public boolean isCompoundDocument(Path dir) {
         return isProductDir(dir);
     }
 

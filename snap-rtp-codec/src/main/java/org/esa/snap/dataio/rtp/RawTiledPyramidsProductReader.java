@@ -27,9 +27,9 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.image.TiledFileMultiLevelSource;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class RawTiledPyramidsProductReader extends AbstractProductReader {
@@ -39,9 +39,9 @@ public class RawTiledPyramidsProductReader extends AbstractProductReader {
 
     protected Product readProductNodesImpl() throws IOException {
 
-        final File headerFile = RawTiledPyramidsProductCodecSpi.getHeaderFile(getInput());
+        final Path headerFile = RawTiledPyramidsProductCodecSpi.getHeaderFile(getInput());
         final XStream xStream = RawTiledPyramidsProductCodecSpi.createXStream();
-        try (FileReader reader = new FileReader(headerFile)) {
+        try (Reader reader = Files.newBufferedReader(headerFile)) {
             final ProductDescriptor productDescriptor = new ProductDescriptor();
             xStream.fromXML(reader, productDescriptor);
 
@@ -63,7 +63,7 @@ public class RawTiledPyramidsProductReader extends AbstractProductReader {
                                     ProductData.getType(bandDescriptor.getDataType()),
                                     product.getSceneRasterWidth(),
                                     product.getSceneRasterHeight());
-                    Path imageDir = headerFile.toPath().getParent().resolve(bandDescriptor.getName());
+                    Path imageDir = headerFile.getParent().resolve(bandDescriptor.getName());
                     band.setSourceImage(new DefaultMultiLevelImage(TiledFileMultiLevelSource.create(imageDir)));
                 }
                 band.setDescription(bandDescriptor.getDescription());

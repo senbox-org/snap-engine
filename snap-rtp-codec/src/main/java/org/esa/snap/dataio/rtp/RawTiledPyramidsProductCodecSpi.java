@@ -24,9 +24,11 @@ import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Locale;
 
 public class RawTiledPyramidsProductCodecSpi implements ProductReaderPlugIn, ProductWriterPlugIn {
@@ -36,8 +38,8 @@ public class RawTiledPyramidsProductCodecSpi implements ProductReaderPlugIn, Pro
     static final String[] NO_FILE_EXTENSIONS = new String[0];
 
     public DecodeQualification getDecodeQualification(Object input) {
-        final File headerFile = getHeaderFile(input);
-        return headerFile.isFile() ? DecodeQualification.INTENDED : DecodeQualification.UNABLE;
+        final Path headerFile = getHeaderFile(input);
+        return Files.isRegularFile(headerFile) ? DecodeQualification.INTENDED : DecodeQualification.UNABLE;
     }
 
     @Override
@@ -50,7 +52,7 @@ public class RawTiledPyramidsProductCodecSpi implements ProductReaderPlugIn, Pro
     }
 
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     public Class[] getOutputTypes() {
@@ -81,16 +83,19 @@ public class RawTiledPyramidsProductCodecSpi implements ProductReaderPlugIn, Pro
         return new RawTiledPyramidsProductFileFilter();
     }
 
-    static boolean isProductDir(File dir) {
-        return new File(dir, HEADER_NAME).isFile();
+    static boolean isProductDir(Path dir) {
+        return Files.isRegularFile(dir.resolve(HEADER_NAME));
     }
 
-    static File getHeaderFile(Object input) {
-        final File file = new File(input.toString());
-        if (HEADER_NAME.equals(file.getName())) {
+    static Path getHeaderFile(Object input) {
+        final Path file = ProductUtils.getProductPath(input);
+        if (file == null) {
+            return Path.of("no_header");
+        }
+        if (HEADER_NAME.equals(file.getFileName().toString())) {
             return file;
         }
-        return new File(file, HEADER_NAME);
+        return file.resolve(HEADER_NAME);
     }
 
     static XStream createXStream() {

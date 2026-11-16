@@ -18,6 +18,7 @@ package org.esa.snap.dataio.rtp;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.multilevel.MultiLevelImage;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
@@ -30,21 +31,23 @@ import org.esa.snap.core.datamodel.ProductNodeListener;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.image.ImageHeader;
 import org.esa.snap.core.image.TiledFileOpImage;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.FileUtils;
 
-import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Properties;
 
 public class RawTiledPyramidsProductWriter extends AbstractProductWriter {
 
-    private File headerFile;
+    private Path headerFile;
     private HashSet<Band> writtenBands;
     private final ProductNodeHandler productNodeHandler;
 
@@ -62,17 +65,14 @@ public class RawTiledPyramidsProductWriter extends AbstractProductWriter {
 
         final ProductDescriptor productDescriptor = createProductDescriptor(product);
         final XStream xStream = RawTiledPyramidsProductCodecSpi.createXStream();
-        final File productDir = headerFile.getParentFile();
-        if (productDir != null && !productDir.exists() && !productDir.mkdirs()) {
+        final Path productDir = headerFile.getParent();
+        if (productDir != null && !Files.exists(productDir) && !IOHelper.createDirectories(productDir)) {
             throw new IOException("Failed to create product folder.");
         }
-        final FileWriter writer = new FileWriter(headerFile);
-        try {
+        try (final Writer writer = Files.newBufferedWriter(headerFile)) {
             xStream.toXML(productDescriptor, writer);
         } catch (XStreamException e) {
             throw new IOException("Failed to write product header.", e);
-        } finally {
-            writer.close();
         }
     }
 
@@ -121,8 +121,8 @@ public class RawTiledPyramidsProductWriter extends AbstractProductWriter {
         }
 
         final MultiLevelImage image = band.getSourceImage();
-        final File productDir = headerFile.getParentFile();
-        final File bandDir = new File(productDir, band.getName());
+        final Path productDir = headerFile.getParent();
+        final Path bandDir = productDir.resolve(band.getName());
         if (!ensureDir(bandDir)) {
             return;
         }
@@ -140,7 +140,7 @@ public class RawTiledPyramidsProductWriter extends AbstractProductWriter {
                                                     + "," + flatmatrix[3]
                                                     + "," + flatmatrix[4]
                                                     + "," + flatmatrix[5]);
-        try (FileWriter writer = new FileWriter(new File(bandDir, "image.properties"))) {
+        try (Writer writer = Files.newBufferedWriter(bandDir.resolve("image.properties"))) {
             imageProperties.store(writer, "File created by " + getClass());
         }
 
@@ -148,21 +148,21 @@ public class RawTiledPyramidsProductWriter extends AbstractProductWriter {
         pm.beginTask("Writing tile data", levelCount);
         for (int level = 0; level < levelCount; level++) {
             final RenderedImage levelImage = image.getImage(level);
-            final File levelDir = new File(bandDir, "" + level);
+            final Path levelDir = bandDir.resolve("" + level);
             writeLevelImage(levelImage, levelDir, SubProgressMonitor.create(pm, 1));
         }
 
         writtenBands.add(band);
     }
 
-    private synchronized void writeLevelImage(RenderedImage levelImage, File levelDir, ProgressMonitor pm) throws IOException {
+    private synchronized void writeLevelImage(RenderedImage levelImage, Path levelDir, ProgressMonitor pm) throws IOException {
         if (!ensureDir(levelDir)) {
             return;
         }
         try {
             pm.beginTask("Writing image", levelImage.getNumXTiles() * levelImage.getNumYTiles());
             final ImageHeader imageHeader = new ImageHeader(levelImage, "raw");
-            try (FileWriter fileWriter = new FileWriter(new File(levelDir, "image.properties"))) {
+            try (Writer fileWriter = Files.newBufferedWriter(levelDir.resolve("image.properties"))) {
                 imageHeader.store(fileWriter, null);
             }
             for (int y = 0; y < levelImage.getNumYTiles(); y++) {
@@ -176,28 +176,21 @@ public class RawTiledPyramidsProductWriter extends AbstractProductWriter {
         }
     }
 
-    private synchronized void writeTile(RenderedImage levelImage, int tileX, int tileY, File levelDir) throws IOException {
+    private synchronized void writeTile(RenderedImage levelImage, int tileX, int tileY, Path levelDir) throws IOException {
         final Raster raster = levelImage.getTile(tileX, tileY);
 
-        final File tileFile = new File(levelDir, tileX + "-" + tileY + ".raw");
-        final FileImageOutputStream stream = new FileImageOutputStream(tileFile);
-        try {
+        final Path tileFile = levelDir.resolve(tileX + "-" + tileY + ".raw");
+        try (ImageOutputStream stream = ImageUtils.getImageOutputStream(tileFile)){
             TiledFileOpImage.writeRawDataTile(raster, stream);
-            stream.close();
         } catch (Throwable t) {
-            try {
-                stream.close();
-            } catch (IOException e) {
-                // ignore
-            }
-            tileFile.delete();
+            IOHelper.delete(tileFile);
             throw new IOException("Failed to write tile to " + tileFile, t);
         }
     }
 
 
-    private synchronized boolean ensureDir(File dir) {
-        return dir.isDirectory() || dir.mkdir();
+    private synchronized boolean ensureDir(Path dir) {
+        return Files.isDirectory(dir) || IOHelper.createDirectory(dir);
     }
 
     public synchronized void flush() throws IOException {
@@ -217,20 +210,20 @@ public class RawTiledPyramidsProductWriter extends AbstractProductWriter {
 
     public synchronized void deleteOutput() throws IOException {
         close();
-        headerFile.delete();
-        final File dir = headerFile.getParentFile();
+        IOHelper.delete(headerFile);
+        final Path dir = headerFile.getParent();
         if (dir == null) {
-            throw new IOException("Could not retrieve the parent directory of '" + headerFile.getAbsolutePath() + "'.");
+            throw new IOException("Could not retrieve the parent directory of '" + headerFile + "'.");
         }
         final Product product = getSourceProduct();
         final String[] bandNames = product.getBandNames();
         for (String bandName : bandNames) {
-            final File imageDir = new File(dir, bandName);
-            if (imageDir.isDirectory()) {
+            final Path imageDir = dir.resolve(bandName);
+            if (Files.isDirectory(imageDir)) {
                 FileUtils.deleteTree(imageDir);
             }
         }
-        dir.delete();
+        IOHelper.delete(dir);
     }
 
     private class ProductNodeHandler implements ProductNodeListener {
