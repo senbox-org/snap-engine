@@ -831,10 +831,10 @@ public class NaiveBayesClassifier {
 
         final Path modelFilePath = getClassifierFilePath(CLASSIFIER_FILE_EXTENSION);
 
-        FileOutputStream fos;
+        OutputStream fos;
         ObjectOutputStream out;
         try {
-            fos = new FileOutputStream(modelFilePath.toString());
+            fos = Files.newOutputStream(modelFilePath);
             out = new ObjectOutputStream(fos);
             out.writeObject(classifierDescriptor);
             out.close();
@@ -866,9 +866,9 @@ public class NaiveBayesClassifier {
         final String xmlContent = xstream.toXML(classifierUserInfo);
 
         final Path modelFilePath = getClassifierFilePath(CLASSIFIER_USER_INFO_FILE_EXTENSION);
-        File infoFile = new File(modelFilePath.toUri());
+        Path infoFile = Path.of(modelFilePath.toUri());
 
-        FileWriter fileWriter = new FileWriter(infoFile);
+        Writer fileWriter = Files.newBufferedWriter(infoFile);
         fileWriter.write(xmlContent);
         fileWriter.flush();
         fileWriter.close();
@@ -1036,7 +1036,7 @@ public class NaiveBayesClassifier {
         try {
             final Path filePath = getClassifierFilePath(CLASSIFIER_FILE_EXTENSION);
 
-            final FileInputStream fis = new FileInputStream(filePath.toFile());
+            final InputStream fis = Files.newInputStream(filePath);
             try (final ObjectInputStream in = new ObjectInputStream(fis)) {
 
                 classifierDescriptor = (ClassifierDescriptor) in.readObject();

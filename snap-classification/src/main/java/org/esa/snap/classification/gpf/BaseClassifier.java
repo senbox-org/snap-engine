@@ -17,6 +17,7 @@ package org.esa.snap.classification.gpf;
 
 import be.abeel.util.Pair;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.google.common.collect.ImmutableSet;
 import com.thoughtworks.xstream.XStream;
 import net.sf.javaml.classification.Classifier;
@@ -24,7 +25,13 @@ import net.sf.javaml.core.Dataset;
 import net.sf.javaml.core.DefaultDataset;
 import net.sf.javaml.core.DenseInstance;
 import net.sf.javaml.core.Instance;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.IndexCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
+import org.esa.snap.core.datamodel.VectorDataNode;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.downloadable.StatusProgressMonitor;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -38,12 +45,25 @@ import org.esa.snap.engine_utilities.gpf.StackUtils;
 import org.esa.snap.engine_utilities.gpf.TileIndex;
 import org.esa.snap.engine_utilities.util.VectorUtils;
 
-import java.awt.*;
-import java.io.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Base class for classifiers.
@@ -949,7 +969,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 resolve(CLASSIFIER_ROOT_FOLDER).resolve(params.classifierType);
 
         if (Files.notExists(classifierDir)) {
-            Files.createDirectories(classifierDir);
+            IOHelper.createDirectories(classifierDir);
         }
         return classifierDir.resolve(params.savedClassifierName + CLASSIFIER_FILE_EXTENSION);
     }
@@ -987,10 +1007,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         //System.out.println("BaseClassifier.readClassifierXML " + path.toString());
 
         ClassifierUserInfo info = new ClassifierUserInfo();
-        try {
-
-            final FileReader fileReader = new FileReader(path.toFile());
-            final BufferedReader bufferedReader = new BufferedReader(fileReader);
+        try (BufferedReader bufferedReader = Files.newBufferedReader(path)){
 
             String s;
             while ((s = bufferedReader.readLine()) != null) {
@@ -1011,8 +1028,6 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 }
             }
 
-            fileReader.close();
-
         } catch (Exception ex) {
             throw new OperatorException("Failed to read XML classifier " + ex.getMessage());
         }
@@ -1025,7 +1040,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         try {
             final Path filePath = getClassifierFilePath();
 
-            final FileInputStream fis = new FileInputStream(filePath.toString());
+            final InputStream fis = Files.newInputStream(filePath);
             try (final ObjectInputStream in = new ObjectInputStream(fis)) {
 
                 loadedClassifierDescriptor = (ClassifierDescriptor) in.readObject();
@@ -1502,10 +1517,10 @@ public abstract class BaseClassifier implements SupervisedClassifier {
 
         final Path filePath = getClassifierFilePath();
 
-        FileOutputStream fos;
+        OutputStream fos;
         ObjectOutputStream out;
         try {
-            fos = new FileOutputStream(filePath.toString());
+            fos = Files.newOutputStream(filePath);
             out = new ObjectOutputStream(fos);
             out.writeObject(classifierDescriptor);
             out.close();
@@ -1530,8 +1545,8 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         final XStream xstream = new XStream();
         xstream.processAnnotations(xmlToSave.getClass());
         final String xmlContent = xstream.toXML(xmlToSave);
-        final File infoFile = filePath.getParent().resolve(params.savedClassifierName + CLASSIFIER_USER_INFO_FILE_EXTENSION).toFile();
-        FileWriter fileWriter = new FileWriter(infoFile);
+        final Path infoFile = filePath.getParent().resolve(params.savedClassifierName + CLASSIFIER_USER_INFO_FILE_EXTENSION);
+        Writer fileWriter = Files.newBufferedWriter(infoFile);
         fileWriter.write(xmlContent);
         fileWriter.flush();
         fileWriter.close();

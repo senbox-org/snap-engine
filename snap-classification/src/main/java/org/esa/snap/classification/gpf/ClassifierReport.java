@@ -17,9 +17,7 @@ package org.esa.snap.classification.gpf;
 
 import org.esa.snap.core.util.SystemUtils;
 
-import java.awt.*;
-import java.io.File;
-import java.io.FileWriter;
+import java.awt.Desktop;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -74,7 +72,7 @@ public class ClassifierReport {
     }
 
     public void writeReport() throws IOException {
-        try (PrintWriter printWriter = new PrintWriter(new FileWriter(getReportFilePath().toFile()))) {
+        try (PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(getReportFilePath()))) {
             printWriter.println(classifierType + " classifier " + classifierName);
             printWriter.println();
 
@@ -100,10 +98,10 @@ public class ClassifierReport {
     }
 
     public void openClassifierReport() throws IOException {
-        final File reportFile = getReportFilePath().toFile();
-        if (Desktop.isDesktopSupported() && reportFile.exists()) {
+        final Path reportFile = getReportFilePath();
+        if (Desktop.isDesktopSupported() && Files.exists(reportFile)) {
             try {
-                Desktop.getDesktop().open(reportFile);
+                Desktop.getDesktop().open(reportFile.toFile());
             } catch (Exception e) {
                 SystemUtils.LOG.warning("Error opening report file " + e.getMessage());
                 // do nothing
