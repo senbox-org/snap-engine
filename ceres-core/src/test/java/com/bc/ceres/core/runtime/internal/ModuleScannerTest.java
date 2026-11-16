@@ -20,8 +20,7 @@ import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.ProgressMonitor;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FilenameFilter;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -56,7 +55,7 @@ public class ModuleScannerTest {
     public void testModuleDirIsNull() throws IOException, CoreException {
         ModuleLoader moduleLoader = new ModuleLoader(Logger.getAnonymousLogger());
 
-        moduleLoader.loadModules((File) null, ProgressMonitor.NULL);
+        moduleLoader.loadModules((Path) null, ProgressMonitor.NULL);
     }
 
     @Test(expected = NullPointerException.class)
@@ -68,7 +67,7 @@ public class ModuleScannerTest {
 
     @Test
     public void testClassPathScanner() throws IOException, CoreException {
-        File modulesDir = new File(Config.getDirForAppB(), "modules");
+        Path modulesDir = Config.getDirForAppB().resolve("modules");
         URL[] urls = getDirEntryUrls(modulesDir);
         URLClassLoader urlClassLoader = new URLClassLoader(urls, String.class.getClassLoader());
 
@@ -79,14 +78,14 @@ public class ModuleScannerTest {
 
     @Test
     public void testDirectoryScanner() throws IOException, CoreException {
-        File modulesDir = new File(Config.getDirForAppB(), "modules");
+        Path modulesDir = Config.getDirForAppB().resolve("modules");
 
         ModuleImpl[] modules = new ModuleLoader(Logger.getAnonymousLogger()).loadModules(modulesDir,
                                                                                          ProgressMonitor.NULL);
         testAppBContents(modulesDir, modules);
     }
 
-    private static void testAppBContents(File modulesDir, ModuleImpl[] modules) throws IOException {
+    private static void testAppBContents(Path modulesDir, ModuleImpl[] modules) throws IOException {
         assertNotNull(modules);
 
         Map<String, ModuleImpl> map = toMap(modules);
@@ -139,7 +138,7 @@ public class ModuleScannerTest {
     }
 
     private static void testModule(Map<String, ModuleImpl> map,
-                                   File modulesDir,
+                                   Path modulesDir,
                                    String moduleId,
                                    String fileName,
                                    String[] expectedImpliciteLibs,
@@ -147,7 +146,7 @@ public class ModuleScannerTest {
         ModuleImpl module = map.get(moduleId);
         assertNotNull(module);
 
-        URL expectedLocation = new File(modulesDir, fileName).toURI().toURL();
+        URL expectedLocation = modulesDir.resolve(fileName).toUri().toURL();
         assertEquals(expectedLocation, module.getLocation());
 
 
@@ -178,15 +177,11 @@ public class ModuleScannerTest {
     }
 
 
-    private static URL[] getDirEntryUrls(File modulesDir) throws MalformedURLException {
-        String[] dirs = new DirScanner(modulesDir).scan(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return true;
-            }
-        });
+    private static URL[] getDirEntryUrls(Path modulesDir) throws MalformedURLException {
+        String[] dirs = new DirScanner(modulesDir).scan(path -> true);
         URL[] urls = new URL[dirs.length];
         for (int i = 0; i < dirs.length; i++) {
-            urls[i] = new File(modulesDir, dirs[i]).toURI().toURL();
+            urls[i] = modulesDir.resolve(dirs[i]).toUri().toURL();
         }
         return urls;
     }

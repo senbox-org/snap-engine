@@ -19,13 +19,14 @@ package com.bc.ceres.launcher;
 import com.bc.ceres.core.runtime.RuntimeConfig;
 import com.bc.ceres.core.runtime.RuntimeConfigException;
 import com.bc.ceres.core.runtime.internal.DefaultRuntimeConfig;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.launcher.internal.BruteForceClasspathFactory;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -119,11 +120,11 @@ public final class Launcher {
         ArrayList<URL> urlList = new ArrayList<URL>(16);
         String paths = runtimeConfig.getMainClassPath();
         if (paths != null) {
-            StringTokenizer st = new StringTokenizer(paths, File.pathSeparator);
+            StringTokenizer st = new StringTokenizer(paths, IOHelper.PATH_SEPARATOR);
             while (st.hasMoreTokens()) {
                 String path = st.nextToken().trim();
                 try {
-                    URL url = new File(path).toURI().toURL();
+                    URL url = Path.of(path).toUri().toURL();
                     urlList.add(url);
                 } catch (MalformedURLException e) {
                     trace(MessageFormat.format("Invalid classpath entry: {0}", path));

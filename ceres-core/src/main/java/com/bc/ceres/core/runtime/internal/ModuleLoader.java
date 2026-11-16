@@ -21,17 +21,19 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.core.CanceledException;
+
 import static com.bc.ceres.core.runtime.Constants.MODULE_MANIFEST_NAME;
+
 import com.bc.ceres.core.runtime.ModuleState;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -91,29 +93,25 @@ public class ModuleLoader {
         }
     }
 
-    public ModuleImpl[] loadModules(File modulesDir, ProgressMonitor pm) throws IOException {
+    public ModuleImpl[] loadModules(Path modulesDir, ProgressMonitor pm) throws IOException {
         Assert.notNull(modulesDir, "modulesDir");
         Assert.notNull(pm, "pm");
 
-        if (!modulesDir.isDirectory()) {
+        if (!Files.isDirectory(modulesDir)) {
             throw new IOException(MessageFormat.format("Directory not found: [{0}]", modulesDir));
         }
-        File[] moduleFiles = modulesDir.listFiles(new FileFilter() {
-            public boolean accept(File file) {
-                return JarFilenameFilter.isJarName(file.getPath()) || file.isDirectory();
-            }
-        });
+        Collection<Path> moduleFiles = IOHelper.listFiles(modulesDir, path -> JarFilenameFilter.isJarName(path.toString()) || Files.isDirectory(path));
         if (moduleFiles == null) {
             return ModuleImpl.EMPTY_ARRAY;
         }
 
-        pm.beginTask("Scanning directory for modules", moduleFiles.length);
+        pm.beginTask("Scanning directory for modules", moduleFiles.size());
         try {
             ArrayList<ModuleImpl> moduleList = new ArrayList<>(32);
-            for (File moduleFile : moduleFiles) {
-                File uninstallMarker = new File(moduleFile.getPath() + RuntimeImpl.UNINSTALL_FILE_SUFFIX);
+            for (Path moduleFile : moduleFiles) {
+                Path uninstallMarker = Path.of(moduleFile.toString() + RuntimeImpl.UNINSTALL_FILE_SUFFIX);
                 int toWork = 1;
-                if (uninstallMarker.exists()) {
+                if (Files.exists(uninstallMarker)) {
                     logger.warning(MessageFormat.format("Skipping uninstalled (but not yet deleted) module file [{0}].", moduleFile));
                 } else {
                     URL locationUrl = UrlHelper.fileToUrl(moduleFile);
@@ -137,21 +135,21 @@ public class ModuleLoader {
     }
 
 
-    public ModuleImpl loadModule(File moduleFile, ProgressMonitor pm) throws CoreException {
+    public ModuleImpl loadModule(Path moduleFile, ProgressMonitor pm) throws CoreException {
         pm.beginTask("Loading module", 2);
         try {
             ModuleImpl module = new ModuleReader(logger).readFromLocation(moduleFile);
             pm.worked(1);
             if ("dir".equalsIgnoreCase(module.getPackaging())
-                    && !moduleFile.isDirectory()) {
-                logger.info(MessageFormat.format("Unpacking [{0}]...", moduleFile.getName()));
-                File archiveFile = moduleFile;
+                    && !Files.isDirectory(moduleFile)) {
+                logger.info(MessageFormat.format("Unpacking [{0}]...", moduleFile.getFileName()));
+                Path archiveFile = moduleFile;
                 try {
                     moduleFile = unpack(archiveFile, module.isNative(), SubProgressMonitor.create(pm, 1));
                 } catch (IOException e) {
                     throw new CoreException("Failed to install module [" + moduleFile + "]", e);
                 } finally {
-                    if (!archiveFile.delete()) {
+                    if (!IOHelper.delete(archiveFile)) {
                         logger.warning(MessageFormat.format("Failed to delete file [{0}], reason unknown.", archiveFile));
                     }
                 }
@@ -166,9 +164,9 @@ public class ModuleLoader {
         }
     }
 
-    private File unpack(File archiveFile, boolean isNative, ProgressMonitor pm) throws IOException, CanceledException {
+    private Path unpack(Path archiveFile, boolean isNative, ProgressMonitor pm) throws IOException, CanceledException {
         String dirName = IOHelper.getBaseName(archiveFile);
-        File moduleDir = new File(archiveFile.getParent(), dirName);
+        Path moduleDir = archiveFile.getParent().resolve(dirName);
 
         List<String> installedFiles = IOHelper.unpack(archiveFile, moduleDir, isNative, pm);
 
@@ -181,9 +179,9 @@ public class ModuleLoader {
         return moduleDir;
     }
 
-    private void writeInstallInfo(File moduleDir, List<String> installedFiles) throws IOException {
-        File installInfoFile = new File(moduleDir, ModuleInstaller.INSTALL_INFO_XML);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(installInfoFile))) {
+    private void writeInstallInfo(Path moduleDir, List<String> installedFiles) throws IOException {
+        Path installInfoFile = moduleDir.resolve(ModuleInstaller.INSTALL_INFO_XML);
+        try (BufferedWriter writer = new BufferedWriter(Files.newBufferedWriter(installInfoFile))) {
             InstallInfo installInfo = new InstallInfo(installedFiles.toArray(new String[installedFiles.size()]));
             installInfo.write(writer);
         }

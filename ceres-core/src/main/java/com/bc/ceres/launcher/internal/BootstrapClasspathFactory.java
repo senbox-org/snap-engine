@@ -17,35 +17,34 @@
 package com.bc.ceres.launcher.internal;
 
 import com.bc.ceres.core.runtime.RuntimeConfig;
-import com.bc.ceres.core.runtime.RuntimeConfigException;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class BootstrapClasspathFactory extends AbstractClasspathFactory {
 
-    private ArrayList<File> classpath;
-    private File ceresCoreFile;
+    private ArrayList<Path> classpath;
+    private Path ceresCoreFile;
 
     public BootstrapClasspathFactory(RuntimeConfig config) {
         super(config);
-        classpath = new ArrayList<File>(10);
+        classpath = new ArrayList<>(10);
     }
 
     @Override
-    protected File[] getClasspathFiles() throws RuntimeConfigException {
+    protected Path[] getClasspathFiles() {
         if (ceresCoreFile != null) {
             classpath.add(0, ceresCoreFile);
         }
-        return classpath.toArray(new File[classpath.size()]);
+        return classpath.toArray(new Path[classpath.size()]);
     }
 
     @Override
-    public void processClasspathFile(File file, LibType libType, int level) {
+    public void processClasspathFile(Path file, LibType libType, int level) {
         if (level > 0) {
             return;
         }
-        String name = file.getName().toLowerCase();
+        String name = file.getFileName().toString().toLowerCase();
 
         if (name.startsWith(CERES_CORE_PREFIX)) {
             ceresCoreFile = getMax(ceresCoreFile, file);
@@ -56,15 +55,15 @@ public class BootstrapClasspathFactory extends AbstractClasspathFactory {
         }
     }
 
-    static File getMax(File file1, File file2) {
+    static Path getMax(Path file1, Path file2) {
         if (file1 == null) {
             return file2;
         }
         if (file2 == null) {
             return file1;
         }
-        String nameNoExt1 = trimExt(file1.getName());
-        String nameNoExt2 = trimExt(file2.getName());
+        String nameNoExt1 = trimExt(file1.getFileName().toString());
+        String nameNoExt2 = trimExt(file2.getFileName().toString());
         if (nameNoExt1.compareToIgnoreCase(nameNoExt2) > 0) {
             return file1;
         } else {

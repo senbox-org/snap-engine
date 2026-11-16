@@ -16,20 +16,21 @@
 
 package com.bc.ceres.launcher.internal;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.function.Predicate;
 
-public class ClasspathFileFilter implements FileFilter {
+public class ClasspathFileFilter implements Predicate<Path> {
 
-    public boolean accept(File file) {
+    public boolean test(Path file) {
         return isFileAccepted(file);
     }
 
-    public static boolean isFileAccepted(File file) {
-        if (file.isDirectory()) {
+    public static boolean isFileAccepted(Path file) {
+        if (Files.isDirectory(file)) {
             return true;
         }
-        String name = file.getName().toLowerCase();
+        String name = file.getFileName().toString().toLowerCase();
         return name.endsWith(".jar") || name.endsWith(".zip");
     }
 }

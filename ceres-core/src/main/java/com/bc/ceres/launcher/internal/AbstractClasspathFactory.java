@@ -18,12 +18,15 @@ package com.bc.ceres.launcher.internal;
 
 import com.bc.ceres.core.runtime.RuntimeConfig;
 import com.bc.ceres.core.runtime.RuntimeConfigException;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.launcher.ClasspathFactory;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public abstract class AbstractClasspathFactory implements ClasspathFactory {
     protected static final String CERES_LAUNCHER_PREFIX = "ceres-launcher";
@@ -51,11 +54,11 @@ public abstract class AbstractClasspathFactory implements ClasspathFactory {
      */
     public URL[] createClasspath() throws RuntimeConfigException {
         processClasspathEntries();
-        File[] files = getClasspathFiles();
+        Path[] files = getClasspathFiles();
         ArrayList<URL> classpathUrls = new ArrayList<URL>(files.length);
-        for (File file : files) {
+        for (Path file : files) {
             try {
-                URL url = file.toURI().toURL();
+                URL url = file.toUri().toURL();
                 classpathUrls.add(url);
                 trace(String.format("Library added to classpath: [%s]", file));
             } catch (MalformedURLException e) {
@@ -66,9 +69,9 @@ public abstract class AbstractClasspathFactory implements ClasspathFactory {
         return classpathUrls.toArray(new URL[classpathUrls.size()]);
     }
 
-    protected abstract File[] getClasspathFiles() throws RuntimeConfigException;
+    protected abstract Path[] getClasspathFiles() throws RuntimeConfigException;
 
-    protected abstract void processClasspathFile(File file, LibType libType, int level);
+    protected abstract void processClasspathFile(Path file, LibType libType, int level);
 
     private void processClasspathEntries() {
         processLibs();
@@ -90,28 +93,28 @@ public abstract class AbstractClasspathFactory implements ClasspathFactory {
     }
 
     private void processClasspathEntries(String dirPath, LibType libType) {
-        File dir = new File(dirPath);
+        Path dir = Path.of(dirPath);
         if (!dir.isAbsolute()) {
-            dir = new File(config.getHomeDirPath(), dirPath);
+            dir = Path.of(config.getHomeDirPath()).resolve(dirPath);
         }
-        if (dir.isDirectory()) {
-            processClasspathEntries(dir.getAbsoluteFile(), libType, 0);
+        if (Files.isDirectory(dir)) {
+            processClasspathEntries(dir.toAbsolutePath(), libType, 0);
         }
     }
 
-    private void processClasspathEntries(File libDir, LibType libType, int level) {
-        File[] files = libDir.listFiles(new ClasspathFileFilter());
+    private void processClasspathEntries(Path libDir, LibType libType, int level) {
+        Collection<Path> files = IOHelper.listFiles(libDir, new ClasspathFileFilter());
         if (files == null) {
             return;
         }
-        for (File file : files) {
+        for (Path file : files) {
             processClasspathEntry(file, libType, level);
         }
     }
 
-    private void processClasspathEntry(File file, LibType libType, int level) {
+    private void processClasspathEntry(Path file, LibType libType, int level) {
         if (libType.equals(LibType.MODULE)) {
-            if (file.isDirectory()) {
+            if (Files.isDirectory(file)) {
                 processClasspathEntries(file, LibType.MODULE, level + 1);
             } else if (isUninstalledFile(file)) {
                 return;
@@ -119,14 +122,14 @@ public abstract class AbstractClasspathFactory implements ClasspathFactory {
         }
         
         boolean consider = libType.equals(LibType.LIBRARY) ||
-                libType.equals(LibType.MODULE) && (file.isDirectory() && level == 0 || !file.isDirectory());
+                libType.equals(LibType.MODULE) && (Files.isDirectory(file) && level == 0 || !Files.isDirectory(file));
         if (consider) {
             processClasspathFile(file, libType, level);
         }
     }
 
-    private boolean isUninstalledFile(File file) {
-        return new File(file.getParent(), file.getName() + ".uninstall").exists();
+    private boolean isUninstalledFile(Path file) {
+        return Files.exists(file.getParent().resolve(file.getFileName() + ".uninstall"));
     }
 
     private void trace(String msg) {

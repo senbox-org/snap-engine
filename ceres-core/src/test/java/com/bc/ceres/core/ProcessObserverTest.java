@@ -1,12 +1,15 @@
 package com.bc.ceres.core;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Norman Fomferra
@@ -19,7 +22,8 @@ public class ProcessObserverTest {
     @BeforeClass
     public static void setUp() throws Exception {
         URL location = TestExecutable.class.getProtectionDomain().getCodeSource().getLocation();
-        classPath = new File(location.toURI()).getCanonicalPath();
+        final Path file = UrlHelper.urlToFile(location);
+        classPath = file != null ? file.toRealPath().toString() : "";
     }
 
     @Test

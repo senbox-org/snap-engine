@@ -18,7 +18,7 @@ package com.bc.ceres.core.runtime.internal;
 
 import com.bc.ceres.core.runtime.ProxyConfig;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -89,7 +89,7 @@ public class UrlHelper {
         return new URI(url.toExternalForm().replace(" ", "%20"));
     }
 
-    public static File urlToFile(URL url) {
+    public static Path urlToFile(URL url) {
         try {
             if ("jar".equalsIgnoreCase(url.getProtocol())) {
                 String path = url.getPath();
@@ -108,7 +108,7 @@ public class UrlHelper {
                     && uri.getAuthority() == null
                     && uri.getFragment() == null
                     && uri.getQuery() == null) {
-                return new File(uri);
+                return Path.of(uri);
             }
         } catch (MalformedURLException | URISyntaxException e) {
             // ignored
@@ -116,9 +116,9 @@ public class UrlHelper {
         return null;
     }
 
-    public static URL fileToUrl(File file) {
+    public static URL fileToUrl(Path file) {
         try {
-            return file.toURI().toURL();
+            return file.toUri().toURL();
         } catch (MalformedURLException e) {
             return null;
         }

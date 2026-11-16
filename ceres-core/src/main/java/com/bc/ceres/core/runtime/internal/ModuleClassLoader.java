@@ -19,6 +19,7 @@ package com.bc.ceres.core.runtime.internal;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -56,7 +57,13 @@ class ModuleClassLoader extends URLClassLoader {
     protected String findLibrary(String libname) {
         for (URL url : nativeUrls) {
             if (url.toExternalForm().endsWith(System.mapLibraryName(libname))) {
-                String absolutePath = UrlHelper.urlToFile(url).getAbsolutePath();
+                final Path pathFromURL = UrlHelper.urlToFile(url);
+                final String absolutePath;
+                if (pathFromURL != null) {
+                    absolutePath = pathFromURL.toAbsolutePath().toString();
+                } else {
+                    absolutePath = "";
+                }
                 Logger logger = Logger.getLogger(System.getProperty("ceres.context", "ceres"));
                 Throwable throwable = new Throwable("This is not an exception.");
                 logger.log(Level.FINEST, "Native library found: " + absolutePath, throwable);

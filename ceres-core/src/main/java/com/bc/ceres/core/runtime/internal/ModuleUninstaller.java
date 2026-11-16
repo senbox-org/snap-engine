@@ -21,10 +21,10 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.core.runtime.ModuleState;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -48,14 +48,10 @@ public class ModuleUninstaller {
         module.setState(ModuleState.UNINSTALLED);
     }
 
-    public void uninstallModules(File moduleDir, ProgressMonitor pm) {
+    public void uninstallModules(Path moduleDir, ProgressMonitor pm) {
 
         DirScanner dirScanner = new DirScanner(moduleDir, false);
-        String[] uninstallMarkers = dirScanner.scan(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.endsWith(RuntimeImpl.UNINSTALL_FILE_SUFFIX);
-            }
-        });
+        String[] uninstallMarkers = dirScanner.scan(path -> path.getFileName().toString().toLowerCase().endsWith(RuntimeImpl.UNINSTALL_FILE_SUFFIX));
 
         if (uninstallMarkers.length == 0) {
             return;
@@ -65,11 +61,11 @@ public class ModuleUninstaller {
         for (String uninstallMarker : uninstallMarkers) {
             String moduleFileName = uninstallMarker.substring(0,
                                                               uninstallMarker.length() - RuntimeImpl.UNINSTALL_FILE_SUFFIX.length());
-            File moduleFile = new File(moduleDir, moduleFileName);
+            Path moduleFile = moduleDir.resolve(moduleFileName);
             boolean deleted = uninstallModuleFile(moduleFile, SubProgressMonitor.create(pm, 1));
             if (deleted) {
-                File uninstallMarkerFile = new File(moduleDir, uninstallMarker);
-                uninstallMarkerFile.delete();
+                Path uninstallMarkerFile = moduleDir.resolve(uninstallMarker);
+                IOHelper.delete(uninstallMarkerFile);
             }
         }
         pm.done();
@@ -79,25 +75,22 @@ public class ModuleUninstaller {
         URL location = module.getLocation();
         logger.info(MessageFormat.format("Marking module file [{0}] for deinstallation.", location));
 
-        File locationFile = UrlHelper.urlToFile(location);
+        Path locationFile = UrlHelper.urlToFile(location);
         if (locationFile == null) {
             throw new IOException("Location is not a file.");
         }
 
-        File markerFile = new File(locationFile.getPath() + RuntimeImpl.UNINSTALL_FILE_SUFFIX);
-        FileWriter writer = new FileWriter(markerFile);
-        try {
+        Path markerFile = Path.of(locationFile + RuntimeImpl.UNINSTALL_FILE_SUFFIX);
+        try (Writer writer = Files.newBufferedWriter(markerFile)) {
             writer.write(location.toString());
-        } finally {
-            writer.close();
         }
     }
 
-    private boolean uninstallModuleFile(File locationFile, ProgressMonitor pm) {
+    private boolean uninstallModuleFile(Path locationFile, ProgressMonitor pm) {
         logger.info(MessageFormat.format("Uninstalling module [{0}]...", locationFile));
         boolean deleted = true;
-        if (locationFile.exists()) {
-            if (locationFile.isDirectory()) {
+        if (Files.exists(locationFile)) {
+            if (Files.isDirectory(locationFile)) {
                 deleted = uninstallModuleDirectory(locationFile, pm);
             } else {
                 deleted = uninstallModuleArchive(locationFile, pm);
@@ -106,49 +99,45 @@ public class ModuleUninstaller {
         return deleted;
     }
 
-    private static boolean uninstallModuleArchive(File archiveFile, ProgressMonitor pm) {
-        pm.beginTask(MessageFormat.format("Uninstalling {0}", archiveFile.getName()), 1);
+    private static boolean uninstallModuleArchive(Path archiveFile, ProgressMonitor pm) {
+        pm.beginTask(MessageFormat.format("Uninstalling {0}", archiveFile.getFileName()), 1);
         try {
-            return archiveFile.delete();
+            return IOHelper.delete(archiveFile);
         } finally {
             pm.done();
         }
     }
 
-    private boolean uninstallModuleDirectory(File moduleDir, ProgressMonitor pm) {
-        File installInfoFile = new File(moduleDir, ModuleInstaller.INSTALL_INFO_XML);
+    private boolean uninstallModuleDirectory(Path moduleDir, ProgressMonitor pm) {
+        Path installInfoFile = moduleDir.resolve(ModuleInstaller.INSTALL_INFO_XML);
 
         InstallInfo installInfo;
         try {
-            FileReader reader = new FileReader(installInfoFile);
-            installInfo = null;
-            try {
+            try (Reader reader = Files.newBufferedReader(installInfoFile)) {
                 installInfo = InstallInfo.read(reader);
-            } finally {
-                reader.close();
             }
         } catch (FileNotFoundException e) {
             logger.warning(
-                    MessageFormat.format("[{0}] not found.", installInfoFile.getName()));
+                    MessageFormat.format("[{0}] not found.", installInfoFile.getFileName()));
             logger.warning(
-                    MessageFormat.format("Please remove directory [{1}] manually to get rid of this warning.", installInfoFile.getName(), moduleDir));
+                    MessageFormat.format("Please remove directory [{0}] manually to get rid of this warning.", moduleDir));
             return false;
         } catch (IOException e) {
             logger.warning(
-                    MessageFormat.format("Failed to read [{0}]: {1}", installInfoFile.getName(), e.getMessage()));
+                    MessageFormat.format("Failed to read [{0}]: {1}", installInfoFile.getFileName(), e.getMessage()));
             return false;
         }
 
         String[] items = installInfo.getItems();
-        pm.beginTask(MessageFormat.format("Uninstalling {0}", moduleDir.getName()), items.length);
+        pm.beginTask(MessageFormat.format("Uninstalling {0}", moduleDir.getFileName()), items.length);
         try {
             for (int i = items.length - 1; i >= 0; --i) {
                 String item = items[i];
-                File installedFile = new File(moduleDir, item);
-                pm.setTaskName(MessageFormat.format("Uninstalling {0}", installedFile.getName()));
-                if (installedFile.isFile()) {
+                Path installedFile = moduleDir.resolve(item);
+                pm.setTaskName(MessageFormat.format("Uninstalling {0}", installedFile.getFileName()));
+                if (Files.isRegularFile(installedFile)) {
                     long installTime = installInfo.getDate().getTime();
-                    long lastModifiedTime = installedFile.lastModified();
+                    long lastModifiedTime = IOHelper.getLastModifiedTime(installedFile);
                     long oneSecond = 1000L;
                     boolean fileIsOlderOrEqualInstallTime = lastModifiedTime <= installTime + oneSecond;
                     if (fileIsOlderOrEqualInstallTime) {
@@ -157,7 +146,7 @@ public class ModuleUninstaller {
                         logger.warning(MessageFormat.format("Module file component [{0}] has been modified since installation.",
                                                             installedFile));
                     }
-                } else if (installedFile.isDirectory()) {
+                } else if (Files.isDirectory(installedFile)) {
                     delete(installedFile);
                 } else {
                     logger.warning(MessageFormat.format("Module file component [{0}] no longer exists.", installedFile));
@@ -170,11 +159,11 @@ public class ModuleUninstaller {
             pm.done();
         }
 
-        return moduleDir.exists();
+        return Files.exists(moduleDir);
     }
 
-    private void delete(File file) {
-        if (file.delete()) {
+    private void delete(Path file) {
+        if (IOHelper.delete(file)) {
             logger.info(MessageFormat.format("Deleted module file component [{0}].", file));
         } else {
             logger.warning(MessageFormat.format("Unable to delete module file component [{0}].", file));

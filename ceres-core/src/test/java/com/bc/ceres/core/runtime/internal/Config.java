@@ -16,45 +16,40 @@
 
 package com.bc.ceres.core.runtime.internal;
 
-import java.io.File;
-import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.net.URL;
 
 
 public class Config {
 
-    private static final File TEST_DIR;
+    private static final Path TEST_DIR;
     private static final String TEST_DIRNAME = "testdirs";
 
     static {
-        File testDir = null;
+        Path testDir = null;
         URL resource = Config.class.getResource("/" + TEST_DIRNAME);
         if (resource != null) {
-            try {
-                testDir = new File(resource.toURI());
-            } catch (URISyntaxException e) {
-                // ok
-            }
+            testDir = UrlHelper.urlToFile(resource);
         }
         if (testDir == null) {
-            testDir = new File("target/test-classes/" + TEST_DIRNAME).getAbsoluteFile();
+            testDir = Path.of("target/test-classes/" + TEST_DIRNAME).toAbsolutePath();
         }
         TEST_DIR = testDir;
     }
 
-    public static File getDirForAppA() {
-        return new File(TEST_DIR, "app-a");
+    public static Path getDirForAppA() {
+        return TEST_DIR.resolve("app-a");
     }
 
-    public static File getDirForAppB() {
-        return new File(TEST_DIR, "app-b");
+    public static Path getDirForAppB() {
+        return TEST_DIR.resolve("app-b");
     }
 
-    public static File getDirForAppC() {
-        return new File(TEST_DIR, "app-c");
+    public static Path getDirForAppC() {
+        return TEST_DIR.resolve("app-c");
     }
 
-    public static File getRepositoryDir() {
-        return new File(TEST_DIR, "repository");
+    public static Path getRepositoryDir() {
+        return TEST_DIR.resolve("repository");
     }
 }

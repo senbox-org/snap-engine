@@ -1,5 +1,6 @@
 package com.bc.ceres.nbmgen;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -7,14 +8,13 @@ import org.jdom2.Namespace;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.bc.ceres.nbmgen.CeresModuleProject.*;
+import static com.bc.ceres.nbmgen.CeresModuleProject.getFile;
 
 /**
  * Usage:
@@ -39,11 +39,11 @@ import static com.bc.ceres.nbmgen.CeresModuleProject.*;
  */
 public class NbmGenTool implements CeresModuleProject.Processor {
 
-    File projectDir;
+    Path projectDir;
     String cluster;
     boolean dryRun;
 
-    public NbmGenTool(File projectDir, String cluster, boolean dryRun) {
+    public NbmGenTool(Path projectDir, String cluster, boolean dryRun) {
         this.projectDir = projectDir;
         this.cluster = cluster;
         this.dryRun = dryRun;
@@ -51,7 +51,7 @@ public class NbmGenTool implements CeresModuleProject.Processor {
 
     public static void main(String[] args) throws JDOMException, IOException {
 
-        File projectDir = new File(args[0]);
+        Path projectDir = Path.of(args[0]);
         String cluster = args[1];
         boolean dryRun = args[2].equals("true");
 
@@ -67,11 +67,11 @@ public class NbmGenTool implements CeresModuleProject.Processor {
     @Override
     public void process(CeresModuleProject project) throws JDOMException, IOException {
 
-        System.out.println("Project [" + project.projectDir.getName() + "]:");
+        System.out.println("Project [" + project.projectDir.getFileName() + "]:");
 
-        File originalPomFile = getFile(project.projectDir, CeresModuleProject.ORIGINAL_POM_XML);
-        File pomFile = getFile(project.projectDir, CeresModuleProject.POM_XML);
-        File manifestBaseFile = getFile(project.projectDir, "src", "main", "nbm", "manifest.mf");
+        Path originalPomFile = getFile(project.projectDir, CeresModuleProject.ORIGINAL_POM_XML);
+        Path pomFile = getFile(project.projectDir, CeresModuleProject.POM_XML);
+        Path manifestBaseFile = getFile(project.projectDir, "src", "main", "nbm", "manifest.mf");
 
         Element projectElement = project.pomDocument.getRootElement();
         Namespace ns = projectElement.getNamespace();
@@ -165,9 +165,9 @@ public class NbmGenTool implements CeresModuleProject.Processor {
                              "follow NB instructions see http://bits.netbeans.org/dev/javadoc/org-openide-modules/org/openide/modules/doc-files/api.html#how-layer");
         }
 
-        if (!originalPomFile.exists()) {
+        if (!Files.exists(originalPomFile)) {
             if (!dryRun) {
-                Files.copy(project.pomFile.toPath(), originalPomFile.toPath());
+                Files.copy(project.pomFile, originalPomFile);
             }
             infoModuleDetail("Copied " + project.pomFile + " to " + originalPomFile);
         }
@@ -183,7 +183,7 @@ public class NbmGenTool implements CeresModuleProject.Processor {
 
         //noinspection ResultOfMethodCallIgnored
         if (!dryRun) {
-            manifestBaseFile.getParentFile().mkdirs();
+            IOHelper.createDirectories(manifestBaseFile.getParent());
             writeManifest(manifestBaseFile, manifestContent);
         }
         infoModuleDetail("Written " + manifestBaseFile);
@@ -201,8 +201,8 @@ public class NbmGenTool implements CeresModuleProject.Processor {
         System.out.println("- WARNING: " + msg);
     }
 
-    private static void writeManifest(File manifestBaseFile, Map<String, String> nbmConfiguration) throws IOException {
-        try (ManifestWriter manifestWriter = new ManifestWriter(new FileWriter(manifestBaseFile))) {
+    private static void writeManifest(Path manifestBaseFile, Map<String, String> nbmConfiguration) throws IOException {
+        try (ManifestWriter manifestWriter = new ManifestWriter(Files.newBufferedWriter(manifestBaseFile))) {
             for (Map.Entry<String, String> entry : nbmConfiguration.entrySet()) {
                 manifestWriter.write(entry.getKey(), entry.getValue());
             }
@@ -245,12 +245,12 @@ public class NbmGenTool implements CeresModuleProject.Processor {
         return getOrAddElement(parent, name, -1, ns);
     }
 
-    private static void writeXml(File file, Document document) throws IOException {
+    private static void writeXml(Path file, Document document) throws IOException {
         XMLOutputter xmlOutput = new XMLOutputter();
         Format format = Format.getPrettyFormat();
         format.setIndent("    ");
         xmlOutput.setFormat(format);
-        xmlOutput.output(document, new FileWriter(file));
+        xmlOutput.output(document, Files.newBufferedWriter(file));
     }
 
 

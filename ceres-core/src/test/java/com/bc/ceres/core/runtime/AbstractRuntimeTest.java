@@ -16,12 +16,14 @@
 
 package com.bc.ceres.core.runtime;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ import java.util.ArrayList;
 import static org.junit.Assert.*;
 
 public abstract class AbstractRuntimeTest {
-    private ArrayList<File> fileStack = new ArrayList<>();
+    private final ArrayList<Path> fileStack = new ArrayList<>();
     private String baseDirPath;
     private String dirPath;
     private String contextId;
@@ -48,11 +50,11 @@ public abstract class AbstractRuntimeTest {
 
     @Before
     public void setUp() throws Exception {
-        File targetDir = new File("target");
-        File testdataDir = new File(targetDir, "test-data");
+        Path targetDir = IOHelper.createATempDir().resolve("target");
+        Path testdataDir = targetDir.resolve("test-data");
         mkdir0(targetDir);
         mkdir0(testdataDir);
-        baseDirPath = testdataDir.getAbsolutePath();
+        baseDirPath = testdataDir.toAbsolutePath().toString();
     }
 
     @After
@@ -125,14 +127,14 @@ public abstract class AbstractRuntimeTest {
     protected static void testPath(String expectedPath, String actualPath) {
         assertNotNull(actualPath);
         try {
-            assertEquals(new File(expectedPath).getCanonicalPath(), new File(actualPath).getCanonicalPath());
+            assertEquals(Path.of(expectedPath).toRealPath().toString(), Path.of(actualPath).toRealPath().toString());
         } catch (IOException e) {
             fail("Cannot compare pathes: " + e.getMessage());
         }
     }
 
     protected void mkdir(String dirPath) throws IOException {
-        mkdir0(new File(baseDirPath, dirPath));
+        mkdir0(Path.of(baseDirPath).resolve(dirPath));
     }
 
     protected void touch(String filePath) throws IOException {
@@ -140,39 +142,39 @@ public abstract class AbstractRuntimeTest {
     }
 
     protected void touch(String filePath, byte[] data) throws IOException {
-        touch0(new File(baseDirPath, filePath), data);
+        touch0(Path.of(baseDirPath).resolve(filePath), data);
     }
 
     protected URL toMainURL(String filePath) throws IOException {
-        return new File(filePath).toURI().toURL();
+        return Path.of(filePath).toUri().toURL();
     }
 
     protected URL toDefaultURL(String filePath) throws IOException {
-        final File file = new File(filePath);
+        final Path file = Path.of(filePath);
         if (file.isAbsolute()) {
-            return file.toURI().toURL();
+            return file.toUri().toURL();
         } else {
-            return new File(getBaseDirPath(), file.getPath()).toURI().toURL();
+            return Path.of(getBaseDirPath()).resolve(file.toString()).toUri().toURL();
         }
     }
 
-    private void mkdir0(File dir) throws IOException {
-        if (dir.mkdir()) {
-            if (!dir.isDirectory()) {
+    private void mkdir0(Path dir) throws IOException {
+        if (IOHelper.createDirectory(dir)) {
+            if (!Files.isDirectory(dir)) {
                 throw new IOException("failed to create " + dir);
             }
             addFile(dir);
         }
     }
 
-    private void touch0(File file, byte[] data) throws IOException {
-        FileOutputStream stream = new FileOutputStream(file);
+    private void touch0(Path file, byte[] data) throws IOException {
+        OutputStream stream = Files.newOutputStream(file);
         stream.write(data);
         stream.close();
         addFile(file);
     }
 
-    private void addFile(File file) {
+    private void addFile(Path file) {
         fileStack.add(file);
         // System.out.println("added file to stack: " + file);
     }
@@ -180,8 +182,8 @@ public abstract class AbstractRuntimeTest {
     private void deleteFileStack() {
         // delete all files created, but not first 'target'
         for (int i = fileStack.size() - 1; i > 0; --i) {
-            File file = fileStack.get(i);
-            boolean b = file.delete();
+            Path file = fileStack.get(i);
+            boolean b = IOHelper.delete(file);
             if (!b) {
                 System.err.println("failed to delete " + file);
             }

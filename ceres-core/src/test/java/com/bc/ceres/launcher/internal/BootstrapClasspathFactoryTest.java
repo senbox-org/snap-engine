@@ -20,7 +20,7 @@ import com.bc.ceres.core.runtime.RuntimeConfigException;
 import com.bc.ceres.core.runtime.internal.DefaultRuntimeConfig;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,64 +30,64 @@ public class BootstrapClasspathFactoryTest {
     public void testGetFiles() throws RuntimeConfigException {
         DefaultRuntimeConfig config = new DefaultRuntimeConfig();
         BootstrapClasspathFactory btcf = new BootstrapClasspathFactory(config);
-        btcf.processClasspathFile(new File("lib/xpp3-1.3.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/xstream-1.2.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/jdom-1.0.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/jhall-2.0.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/ceres-launcher.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("modules/ceres-core-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-        btcf.processClasspathFile(new File("modules/ceres-ui-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-        btcf.processClasspathFile(new File("modules/beam-core-4.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-        File[] files = btcf.getClasspathFiles();
+        btcf.processClasspathFile(Path.of("lib/xpp3-1.3.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/xstream-1.2.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/jdom-1.0.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/jhall-2.0.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/ceres-launcher.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("modules/ceres-core-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+        btcf.processClasspathFile(Path.of("modules/ceres-ui-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+        btcf.processClasspathFile(Path.of("modules/beam-core-4.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+        Path[] files = btcf.getClasspathFiles();
         assertEquals(5, files.length);
-        assertEquals(new File("modules/ceres-core-1.0.jar"), files[0]);
-        assertEquals(new File("lib/xpp3-1.3.4.jar"), files[1]);
-        assertEquals(new File("lib/xstream-1.2.jar"), files[2]);
-        assertEquals(new File("lib/jdom-1.0.jar"), files[3]);
-        assertEquals(new File("lib/jhall-2.0.4.jar"), files[4]);
+        assertEquals(Path.of("modules/ceres-core-1.0.jar"), files[0]);
+        assertEquals(Path.of("lib/xpp3-1.3.4.jar"), files[1]);
+        assertEquals(Path.of("lib/xstream-1.2.jar"), files[2]);
+        assertEquals(Path.of("lib/jdom-1.0.jar"), files[3]);
+        assertEquals(Path.of("lib/jhall-2.0.4.jar"), files[4]);
     }
 
     @Test
     public void testGetFilesWithMultCeresCore_1() throws RuntimeConfigException {
         DefaultRuntimeConfig config = new DefaultRuntimeConfig();
         BootstrapClasspathFactory btcf = new BootstrapClasspathFactory(config);
-        btcf.processClasspathFile(new File("lib/xpp3-1.3.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/xstream-1.2.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/jdom-1.0.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/jhall-2.0.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/ceres-launcher.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("modules/ceres-core-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-        btcf.processClasspathFile(new File("modules/ceres-core-1.0.1.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-        btcf.processClasspathFile(new File("modules/ceres-ui-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-        btcf.processClasspathFile(new File("modules/beam-core-4.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-        File[] files = btcf.getClasspathFiles();
+        btcf.processClasspathFile(Path.of("lib/xpp3-1.3.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/xstream-1.2.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/jdom-1.0.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/jhall-2.0.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/ceres-launcher.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("modules/ceres-core-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+        btcf.processClasspathFile(Path.of("modules/ceres-core-1.0.1.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+        btcf.processClasspathFile(Path.of("modules/ceres-ui-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+        btcf.processClasspathFile(Path.of("modules/beam-core-4.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+        Path[] files = btcf.getClasspathFiles();
         assertEquals(5, files.length);
-        assertEquals(new File("modules/ceres-core-1.0.1.jar"), files[0]);
-        assertEquals(new File("lib/xpp3-1.3.4.jar"), files[1]);
-        assertEquals(new File("lib/xstream-1.2.jar"), files[2]);
-        assertEquals(new File("lib/jdom-1.0.jar"), files[3]);
-        assertEquals(new File("lib/jhall-2.0.4.jar"), files[4]);
+        assertEquals(Path.of("modules/ceres-core-1.0.1.jar"), files[0]);
+        assertEquals(Path.of("lib/xpp3-1.3.4.jar"), files[1]);
+        assertEquals(Path.of("lib/xstream-1.2.jar"), files[2]);
+        assertEquals(Path.of("lib/jdom-1.0.jar"), files[3]);
+        assertEquals(Path.of("lib/jhall-2.0.4.jar"), files[4]);
     }
 
     @Test
     public void testGetFilesWithMultCeresCore_2() throws RuntimeConfigException {
         DefaultRuntimeConfig config = new DefaultRuntimeConfig();
         BootstrapClasspathFactory btcf = new BootstrapClasspathFactory(config);
-        btcf.processClasspathFile(new File("lib/xpp3-1.3.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/xstream-1.2.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/jdom-1.0.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/jhall-2.0.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("lib/ceres-launcher.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-        btcf.processClasspathFile(new File("modules/ceres-core-1.0.1.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-        btcf.processClasspathFile(new File("modules/ceres-core-1.2.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-        btcf.processClasspathFile(new File("modules/ceres-ui-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-        btcf.processClasspathFile(new File("modules/beam-core-4.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-        File[] files = btcf.getClasspathFiles();
+        btcf.processClasspathFile(Path.of("lib/xpp3-1.3.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/xstream-1.2.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/jdom-1.0.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/jhall-2.0.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("lib/ceres-launcher.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+        btcf.processClasspathFile(Path.of("modules/ceres-core-1.0.1.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+        btcf.processClasspathFile(Path.of("modules/ceres-core-1.2.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+        btcf.processClasspathFile(Path.of("modules/ceres-ui-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+        btcf.processClasspathFile(Path.of("modules/beam-core-4.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+        Path[] files = btcf.getClasspathFiles();
         assertEquals(5, files.length);
-        assertEquals(new File("modules/ceres-core-1.2.jar"), files[0]);
-        assertEquals(new File("lib/xpp3-1.3.4.jar"), files[1]);
-        assertEquals(new File("lib/xstream-1.2.jar"), files[2]);
-        assertEquals(new File("lib/jdom-1.0.jar"), files[3]);
-        assertEquals(new File("lib/jhall-2.0.4.jar"), files[4]);
+        assertEquals(Path.of("modules/ceres-core-1.2.jar"), files[0]);
+        assertEquals(Path.of("lib/xpp3-1.3.4.jar"), files[1]);
+        assertEquals(Path.of("lib/xstream-1.2.jar"), files[2]);
+        assertEquals(Path.of("lib/jdom-1.0.jar"), files[3]);
+        assertEquals(Path.of("lib/jhall-2.0.4.jar"), files[4]);
     }
 }

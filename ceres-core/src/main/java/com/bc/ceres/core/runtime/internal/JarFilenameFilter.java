@@ -16,12 +16,13 @@
 
 package com.bc.ceres.core.runtime.internal;
 
-import java.io.File;
-import java.io.FilenameFilter;
+import java.nio.file.Path;
+import java.util.function.Predicate;
 
-public class JarFilenameFilter implements FilenameFilter {
-    public boolean accept(File dir, String name) {
-        return isJarName(name);
+public class JarFilenameFilter implements Predicate<Path> {
+    @Override
+    public boolean test(Path path) {
+        return isJarName(path.getFileName().toString());
     }
 
     public static boolean isJarName(String name) {

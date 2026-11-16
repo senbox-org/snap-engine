@@ -3,7 +3,6 @@ package com.bc.ceres.core;
 import com.thoughtworks.xstream.XStream;
 import org.junit.Test;
 
-import java.io.File;
 import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -35,7 +34,7 @@ public class ResourceLocatorTest {
         dumpPathProperties(ResourceLocatorTest.class.getResource("ResourceLocatorTest.class").toURI());
         dumpPathProperties(ResourceLocatorTest.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         dumpPathProperties(XStream.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-        dumpPathProperties(new File(".").getAbsoluteFile().toURI());
+        dumpPathProperties(Path.of(".").toAbsolutePath().toUri());
     }
 
     private void dumpPathProperties(URI uri) {

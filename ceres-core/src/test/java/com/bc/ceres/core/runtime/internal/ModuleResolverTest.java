@@ -23,7 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -34,8 +34,9 @@ public class ModuleResolverTest {
 
     private ModuleRegistry moduleRegistry;
 
-    private static File getCanonicalFile(URL url) throws IOException, URISyntaxException {
-        return new File(url.toURI()).getCanonicalFile();
+    private static Path getCanonicalFile(URL url) throws IOException {
+        final Path file = UrlHelper.urlToFile(url);
+        return file != null ? file.toRealPath() : null;
     }
 
     private static void testSingleModuleDependency(ModuleRegistry moduleRegistry, String declaringModuleName,
@@ -227,12 +228,12 @@ public class ModuleResolverTest {
         ModuleClassLoader mclE = (ModuleClassLoader) clE;
         URL[] dependencyUrls = mclE.getURLs();
         assertTrue(dependencyUrls.length > 0);
-        File location = getCanonicalFile(getModule("module-e").getLocation());
-        File dependencyUrl = getCanonicalFile(dependencyUrls[0]);
+        Path location = getCanonicalFile(getModule("module-e").getLocation());
+        Path dependencyUrl = getCanonicalFile(dependencyUrls[0]);
         assertEquals(dependencyUrl, location);
 
-        File expectedFile;
-        File actualFile;
+        Path expectedFile;
+        Path actualFile;
 
         ModuleClassLoader delegateToB = (ModuleClassLoader) mclE.getDelegates()[0];
         expectedFile = getCanonicalFile(delegateToB.getURLs()[0]);

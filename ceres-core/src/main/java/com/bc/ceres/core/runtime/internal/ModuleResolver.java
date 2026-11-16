@@ -24,9 +24,10 @@ import com.bc.ceres.core.runtime.Module;
 import com.bc.ceres.core.runtime.ModuleState;
 import com.bc.ceres.core.runtime.Version;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -194,12 +195,12 @@ public class ModuleResolver {
     private static URL[] getNativeLibs(ModuleImpl module) {
         List<URL> libPaths = new ArrayList<URL>();
         if (module.isNative()) {
-            File moduleDir = UrlHelper.urlToFile(module.getLocation());
-            if (moduleDir.isDirectory()) {
+            Path moduleDir = UrlHelper.urlToFile(module.getLocation());
+            if (Files.isDirectory(moduleDir)) {
                 String[] impliciteNativeLibs = module.getImpliciteNativeLibs();
                 for (String libPath : impliciteNativeLibs) {
-                    File libFile = new File(moduleDir, libPath);
-                    if (libFile.isFile() && libFile.canRead()) {
+                    Path libFile = moduleDir.resolve(libPath);
+                    if (Files.isRegularFile(libFile) && Files.isReadable(libFile)) {
                         libPaths.add(UrlHelper.fileToUrl(libFile));
                     } else {
                         String msg = String.format("Native library [%s] found in module [%s] is not accessible.",
@@ -238,7 +239,7 @@ public class ModuleResolver {
             throw new IllegalStateException("module.getImpliciteLibs() == null");
         }
 
-        File moduleFile = UrlHelper.urlToFile(module.getLocation());
+        Path moduleFile = UrlHelper.urlToFile(module.getLocation());
         if (moduleFile == null) {
             return new URL[0];
         }
@@ -254,29 +255,29 @@ public class ModuleResolver {
 
         // add all implicite libs to the classpath
         for (String impliciteLib : module.getImpliciteLibs()) {
-            collectLibDependency(module, new File(moduleFile, impliciteLib), libDependencies);
+            collectLibDependency(module, moduleFile.resolve(impliciteLib), libDependencies);
         }
 
         return libDependencies.toArray(new URL[0]);
     }
 
-    private static void resolveLibs(ModuleImpl module, File moduleFile,
+    private static void resolveLibs(ModuleImpl module, Path moduleFile,
                                     boolean resolvingLibs, List<URL> libDependencies) {
         Dependency[] declaredDependencies = module.getDeclaredDependencies();
         for (Dependency dependency : declaredDependencies) {
             if (dependency.getLibName() != null) {
                 boolean libResolved = false;
                 // look in this modules location
-                File file = resolveFile(moduleFile, dependency.getLibName(), resolvingLibs);
+                Path file = resolveFile(moduleFile, dependency.getLibName(), resolvingLibs);
                 if (file != null) {
                     collectLibDependency(module, file, libDependencies);
                     libResolved = true;
                 } else {
                     for (ModuleImpl moduleDependency : module.getModuleDependencies()) {
                         // look in the modules dependencies' location
-                        File moduleDependencyFile = UrlHelper.urlToFile(moduleDependency.getLocation());
+                        Path moduleDependencyFile = UrlHelper.urlToFile(moduleDependency.getLocation());
                         if (moduleDependencyFile != null) {
-                            File file2 = resolveFile(moduleDependencyFile, dependency.getLibName(), resolvingLibs);
+                            Path file2 = resolveFile(moduleDependencyFile, dependency.getLibName(), resolvingLibs);
                             if (file2 != null) {
                                 collectLibDependency(module, file2, libDependencies);
                                 libResolved = true;
@@ -298,10 +299,10 @@ public class ModuleResolver {
         }
     }
 
-    private static File resolveFile(File parent, String libPath, boolean checkExists) {
-        if (parent.isDirectory()) {
-            File file = new File(parent, libPath);
-            if (!checkExists || file.exists()) {
+    private static Path resolveFile(Path parent, String libPath, boolean checkExists) {
+        if (Files.isDirectory(parent)) {
+            Path file = parent.resolve(libPath);
+            if (!checkExists || Files.exists(file)) {
                 return file;
             }
         }
@@ -446,7 +447,7 @@ public class ModuleResolver {
         dependencyItems.add(new DependencyItem(dependencyModule, optional));
     }
 
-    private static void collectLibDependency(ModuleImpl module, File lib, List<URL> list) {
+    private static void collectLibDependency(ModuleImpl module, Path lib, List<URL> list) {
         try {
             URL url = convertToURL(lib);
             if (!list.contains(url)) {
@@ -454,13 +455,13 @@ public class ModuleResolver {
             }
         } catch (MalformedURLException e) {
             String msg = String.format("Library file path [%s] used by module [%s] cannot be converted to an URL.",
-                                       lib.getPath(),
+                                       lib,
                                        module.getSymbolicName());
             module.addResolveError(new ResolveException(msg, e));
         }
     }
 
-    private static URL convertToURL(File lib) throws MalformedURLException {
-        return lib.toURI().toURL();
+    private static URL convertToURL(Path lib) throws MalformedURLException {
+        return lib.toUri().toURL();
     }
 }

@@ -17,9 +17,11 @@
 package com.bc.ceres.launcher.internal;
 
 import com.bc.ceres.core.runtime.internal.DefaultRuntimeConfig;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 
@@ -29,40 +31,40 @@ public class BruteForceClasspathFactoryTest {
     public void testGetFiles() throws Exception {
         DefaultRuntimeConfig config = new DefaultRuntimeConfig();
         BruteForceClasspathFactory bfcf = new BruteForceClasspathFactory(config);
-        final File modulesDir = new File("modules");
-        modulesDir.mkdir();
-        final File beamHelpDir = new File(modulesDir, "beam-help-4.0");
-        beamHelpDir.mkdir();
+        final Path modulesDir = IOHelper.createATempDir().resolve("modules");
+        Files.createDirectory(modulesDir);
+        final Path beamHelpDir = modulesDir.resolve("beam-help-4.0");
+        Files.createDirectory(beamHelpDir);
         try {
-            bfcf.processClasspathFile(new File("lib/xpp3-1.3.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-            bfcf.processClasspathFile(new File("lib/xstream-1.2.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-            bfcf.processClasspathFile(new File("lib/jdom-1.0.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-            bfcf.processClasspathFile(new File("lib/jhall-2.0.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-            bfcf.processClasspathFile(new File("lib/ceres-launcher.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
-            bfcf.processClasspathFile(new File("modules/ceres-core-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-            bfcf.processClasspathFile(new File("modules/ceres-ui-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-            bfcf.processClasspathFile(new File("modules/beam-core-4.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
-            bfcf.processClasspathFile(new File("modules/beam-help-4.0"), BruteForceClasspathFactory.LibType.MODULE, 0);
-            bfcf.processClasspathFile(new File("modules/beam-help-4.0/lib/lib.jar"), BruteForceClasspathFactory.LibType.MODULE, 2);
-            bfcf.processClasspathFile(new File("modules/beam-help-4.0/lib/tile.zip"), BruteForceClasspathFactory.LibType.MODULE, 2);
-            bfcf.processClasspathFile(new File("modules/beam-help-4.0/foo/foo.jar"), BruteForceClasspathFactory.LibType.MODULE, 2);
-            bfcf.processClasspathFile(new File("modules/beam-help-4.0/dgg/tile.zip"), BruteForceClasspathFactory.LibType.MODULE, 2);
-            bfcf.processClasspathFile(new File("modules/beam-help-4.0/first-level.jar"), BruteForceClasspathFactory.LibType.MODULE, 1);
-            File[] files = bfcf.getClasspathFiles();
+            bfcf.processClasspathFile(Path.of("lib/xpp3-1.3.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+            bfcf.processClasspathFile(Path.of("lib/xstream-1.2.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+            bfcf.processClasspathFile(Path.of("lib/jdom-1.0.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+            bfcf.processClasspathFile(Path.of("lib/jhall-2.0.4.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+            bfcf.processClasspathFile(Path.of("lib/ceres-launcher.jar"), BruteForceClasspathFactory.LibType.LIBRARY, 0);
+            bfcf.processClasspathFile(Path.of("modules/ceres-core-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+            bfcf.processClasspathFile(Path.of("modules/ceres-ui-1.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+            bfcf.processClasspathFile(Path.of("modules/beam-core-4.0.jar"), BruteForceClasspathFactory.LibType.MODULE, 0);
+            bfcf.processClasspathFile(Path.of("modules/beam-help-4.0"), BruteForceClasspathFactory.LibType.MODULE, 0);
+            bfcf.processClasspathFile(Path.of("modules/beam-help-4.0/lib/lib.jar"), BruteForceClasspathFactory.LibType.MODULE, 2);
+            bfcf.processClasspathFile(Path.of("modules/beam-help-4.0/lib/tile.zip"), BruteForceClasspathFactory.LibType.MODULE, 2);
+            bfcf.processClasspathFile(Path.of("modules/beam-help-4.0/foo/foo.jar"), BruteForceClasspathFactory.LibType.MODULE, 2);
+            bfcf.processClasspathFile(Path.of("modules/beam-help-4.0/dgg/tile.zip"), BruteForceClasspathFactory.LibType.MODULE, 2);
+            bfcf.processClasspathFile(Path.of("modules/beam-help-4.0/first-level.jar"), BruteForceClasspathFactory.LibType.MODULE, 1);
+            Path[] files = bfcf.getClasspathFiles();
             assertEquals(10, files.length);
-            assertEquals(new File("lib/xpp3-1.3.4.jar"), files[0]);
-            assertEquals(new File("lib/xstream-1.2.jar"), files[1]);
-            assertEquals(new File("lib/jdom-1.0.jar"), files[2]);
-            assertEquals(new File("lib/jhall-2.0.4.jar"), files[3]);
-            assertEquals(new File("modules/ceres-core-1.0.jar"), files[4]);
-            assertEquals(new File("modules/ceres-ui-1.0.jar"), files[5]);
-            assertEquals(new File("modules/beam-core-4.0.jar"), files[6]);
-            assertEquals(new File("modules/beam-help-4.0"), files[7]);
-            assertEquals(new File("modules/beam-help-4.0/lib/lib.jar"), files[8]);
-            assertEquals(new File("modules/beam-help-4.0/lib/tile.zip"), files[9]);
+            assertEquals(Path.of("lib/xpp3-1.3.4.jar"), files[0]);
+            assertEquals(Path.of("lib/xstream-1.2.jar"), files[1]);
+            assertEquals(Path.of("lib/jdom-1.0.jar"), files[2]);
+            assertEquals(Path.of("lib/jhall-2.0.4.jar"), files[3]);
+            assertEquals(Path.of("modules/ceres-core-1.0.jar"), files[4]);
+            assertEquals(Path.of("modules/ceres-ui-1.0.jar"), files[5]);
+            assertEquals(Path.of("modules/beam-core-4.0.jar"), files[6]);
+            assertEquals(Path.of("modules/beam-help-4.0"), files[7]);
+            assertEquals(Path.of("modules/beam-help-4.0/lib/lib.jar"), files[8]);
+            assertEquals(Path.of("modules/beam-help-4.0/lib/tile.zip"), files[9]);
         } finally {
-            beamHelpDir.delete();
-            modulesDir.delete();
+            Files.delete(beamHelpDir);
+            Files.delete(modulesDir);
         }
     }
 }

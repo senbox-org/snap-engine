@@ -20,14 +20,14 @@ import com.bc.ceres.core.runtime.RuntimeConfig;
 import com.bc.ceres.core.runtime.RuntimeConfigException;
 import com.bc.ceres.util.TemplateReader;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.CodeSource;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -210,7 +210,7 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
         consoleLogKey = String.format("%s.%s", contextId, CONFIG_KEY_CONSOLE_LOG);
 
         // Initialize default file and directory paths
-        char sep = File.separatorChar;
+        char sep = IOHelper.SEPARATOR_CHAR;
         defaultRelConfigFilePath = String.format("%s/%s", DEFAULT_CONFIG_DIR_NAME, configFileKey).replace('/', sep);
         defaultHomeConfigFilePath = String.format("${%s}/%s", homeDirKey, defaultRelConfigFilePath).replace('/', sep);
         defaultHomeModulesDirPath = String.format("${%s}/%s", homeDirKey, DEFAULT_MODULES_DIR_NAME).replace('/', sep);
@@ -247,12 +247,12 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
         String homeDirPath = getProperty(homeDirKey);
         if (!isNullOrEmptyString(homeDirPath)) {
             // ok set: must be an existing directory
-            File homeDir = new File(homeDirPath);
-            if (!homeDir.isDirectory()) {
+            Path homeDir = Path.of(homeDirPath);
+            if (!Files.isDirectory(homeDir)) {
                 throw createInvalidPropertyValueException(homeDirKey, homeDirPath);
             }
             try {
-                this.homeDirPath = homeDir.getCanonicalPath();
+                this.homeDirPath = homeDir.toRealPath().toString();
             } catch (IOException e) {
                 throw new RuntimeConfigException(e.getMessage(), e);
             }
@@ -262,13 +262,13 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
     private void maybeInitConfigFile() throws RuntimeConfigException {
         String configFilePath = getProperty(configFileKey);
         if (!isNullOrEmptyString(configFilePath)) {
-            File configFile = new File(configFilePath);
+            Path configFile = Path.of(configFilePath);
             // ok set: must be an existing file
-            if (!configFile.isFile()) {
-                throw createInvalidPropertyValueException(configFileKey, configFile.getPath());
+            if (!Files.isRegularFile(configFile)) {
+                throw createInvalidPropertyValueException(configFileKey, configFile.toString());
             }
             try {
-                this.configFilePath = configFile.getCanonicalPath();
+                this.configFilePath = configFile.toRealPath().toString();
             } catch (IOException e) {
                 throw new RuntimeConfigException(e.getMessage(), e);
             }
@@ -276,38 +276,38 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
     }
 
     private void maybeInitDefaultConfigFile() {
-        File configFile = new File(substitute(defaultHomeConfigFilePath));
-        if (configFile.isFile()) {
-            configFilePath = configFile.getPath();
+        Path configFile = Path.of(substitute(defaultHomeConfigFilePath));
+        if (Files.isRegularFile(configFile)) {
+            configFilePath = configFile.toString();
         }
     }
 
     private void assumeHomeDir() {
-        List<File> possibleHomeDirList = createPossibleHomeDirList();
+        List<Path> possibleHomeDirList = createPossibleHomeDirList();
         List<String> homeContentPathList = createHomeContentPathList();
         // The existance of the files in homeContentPathList is optional.
         // We assume that the home directory is the one in which most files of homeContentPathList are present.
         trace("Auto-detecting home directory...");
-        File mostLikelyHomeDir = findMostLikelyHomeDir(possibleHomeDirList, homeContentPathList);
+        Path mostLikelyHomeDir = findMostLikelyHomeDir(possibleHomeDirList, homeContentPathList);
         if (mostLikelyHomeDir != null) {
-            homeDirPath = mostLikelyHomeDir.getPath();
+            homeDirPath = mostLikelyHomeDir.toString();
         } else {
-            homeDirPath = new File(".").getAbsolutePath();
+            homeDirPath = Path.of(".").toAbsolutePath().toString();
         }
         homeDirAssumed = true;
         setProperty(homeDirKey, homeDirPath);
     }
 
-    private File findMostLikelyHomeDir(List<File> possibleHomeDirList, List<String> homeContentPathList) {
+    private Path findMostLikelyHomeDir(List<Path> possibleHomeDirList, List<String> homeContentPathList) {
         int numFoundMax = 0;
-        File mostLikelyHomeDir = null;
-        for (File possibleHomeDir : possibleHomeDirList) {
+        Path mostLikelyHomeDir = null;
+        for (Path possibleHomeDir : possibleHomeDirList) {
             trace(String.format("Is [%s] my home directory?", possibleHomeDir));
 
             int numFound = 0;
             for (String homeContentPath : homeContentPathList) {
-                File homeContentFile = new File(possibleHomeDir, homeContentPath);
-                if (homeContentFile.exists()) {
+                Path homeContentFile = possibleHomeDir.resolve(homeContentPath);
+                if (Files.exists(homeContentFile)) {
                     trace(String.format("  [%s] contained? Yes.", homeContentPath));
                     numFound++;
                 } else {
@@ -321,7 +321,7 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
             }
             if (numFound > numFoundMax) {
                 try {
-                    mostLikelyHomeDir = possibleHomeDir.getCanonicalFile();
+                    mostLikelyHomeDir = possibleHomeDir.toRealPath();
                     numFoundMax = numFound;
                 } catch (IOException e) {
                     // ???
@@ -331,20 +331,20 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
         return mostLikelyHomeDir;
     }
 
-    private static List<File> createPossibleHomeDirList() {
-        List<File> homeDirCheckList = new ArrayList<>(4);
+    private static List<Path> createPossibleHomeDirList() {
+        List<Path> homeDirCheckList = new ArrayList<>(4);
 
         // include codeSource dir in check list
         CodeSource lib = DefaultRuntimeConfig.class.getProtectionDomain().getCodeSource();
         if (lib != null) {
             URL libUrl = lib.getLocation();
             if (libUrl.getProtocol().equals("file")) {
-                String libPath = libUrl.getPath();
-                File libParentDir = new File(libPath).getParentFile();
-                if (libParentDir != null) {
+                Path libPath = UrlHelper.urlToFile(libUrl);
+                if (libPath != null && libPath.getParent() != null) {
+                    Path libParentDir = libPath.getParent();
                     // include one above libParentDir
-                    if (libParentDir.getParentFile() != null) {
-                        homeDirCheckList.add(libParentDir.getParentFile());
+                    if (libParentDir.getParent() != null) {
+                        homeDirCheckList.add(libParentDir.getParent());
                     }
                     // include libParentDir
                     homeDirCheckList.add(libParentDir);
@@ -352,9 +352,9 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
             }
         }
         // include CWD in check list
-        homeDirCheckList.add(new File(".").getAbsoluteFile());
+        homeDirCheckList.add(Path.of(".").toAbsolutePath());
         // include one above CWD in check list
-        homeDirCheckList.add(new File("..").getAbsoluteFile());
+        homeDirCheckList.add(Path.of("..").toAbsolutePath());
         return homeDirCheckList;
     }
 
@@ -370,7 +370,7 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
     private void loadConfiguration() throws RuntimeConfigException {
         trace(String.format("Loading configuration from [%s]", configFilePath));
         try {
-            try (InputStream stream = new FileInputStream(configFilePath)) {
+            try (InputStream stream = Files.newInputStream(Path.of(configFilePath))) {
                 Properties fileProperties = new Properties();
                 fileProperties.load(stream);
                 // @todo check tests - code was not backward compatible with Java 5
@@ -416,12 +416,12 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
             maybeInitHomeDir();
         }
         if (homeDirPath == null) {
-            homeDirPath = new File(".").getAbsolutePath();
+            homeDirPath = Path.of(".").toAbsolutePath().toString();
             homeDirAssumed = true;
         }
         // remove redundant '.'s and '..'s.
         try {
-            homeDirPath = new File(homeDirPath).getCanonicalPath();
+            homeDirPath = Path.of(homeDirPath).toRealPath().toString();
         } catch (IOException e) {
             throw new RuntimeConfigException("Home directory is invalid.", e);
         }
@@ -447,16 +447,16 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
         String modulesDirPath = getProperty(modulesDirKey);
         try {
             if (modulesDirPath != null) {
-                File modulesDir = new File(modulesDirPath);
-                if (!modulesDir.isDirectory()) {
+                Path modulesDir = Path.of(modulesDirPath);
+                if (!Files.isDirectory(modulesDir)) {
                     throw createInvalidPropertyValueException(modulesDirKey, modulesDirPath);
                 }
-                this.modulesDirPath = modulesDir.getCanonicalPath();
+                this.modulesDirPath = modulesDir.toRealPath().toString();
             } else {
                 // try default
-                File modulesDir = new File(substitute(defaultHomeModulesDirPath));
-                if (modulesDir.isDirectory()) {
-                    this.modulesDirPath = modulesDir.getCanonicalPath();
+                Path modulesDir = Path.of(substitute(defaultHomeModulesDirPath));
+                if (Files.isDirectory(modulesDir)) {
+                    this.modulesDirPath = modulesDir.toRealPath().toString();
                 }
             }
         } catch (IOException e) {
@@ -471,8 +471,8 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
         if (libDirPathsString != null) {
             String[] libDirPaths = splitLibDirPaths(libDirPathsString);
             for (String libDirPath : libDirPaths) {
-                File libDir = new File(libDirPath);
-                if (!libDir.isDirectory()) {
+                Path libDir = Path.of(libDirPath);
+                if (!Files.isDirectory(libDir)) {
                     throw createInvalidPropertyValueException(libDirsKey, libDirPathsString);
                 }
             }
@@ -480,8 +480,8 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
         } else {
             // try default
             libDirPathsString = substitute(defaultHomeLibDirPath);
-            File libDir = new File(libDirPathsString);
-            if (libDir.isDirectory()) {
+            Path libDir = Path.of(libDirPathsString);
+            if (Files.isDirectory(libDir)) {
                 this.libDirPaths = new String[]{libDirPathsString};
             }
         }
@@ -553,9 +553,9 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
                 logger.addHandler(consoleHandler);
             }
             String userHomePath = getProperty("user.home", ".");
-            File logDir = new File(userHomePath, '.' + contextId + "/log");
-            logDir.mkdirs();
-            String logFilePattern = new File(logDir, contextId + "-%g.log").getPath();
+            Path logDir = Path.of(userHomePath).resolve('.' + contextId + "/log");
+            IOHelper.createDirectories(logDir);
+            String logFilePattern = logDir.resolve(contextId + "-%g.log").toString();
             try {
                 FileHandler fileHandler = new FileHandler(logFilePattern);
                 fileHandler.setFormatter(formatter);
@@ -630,7 +630,7 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
 
     private static String[] splitLibDirPaths(String libDirPathsString) {
         List<String> libDirPathList = new ArrayList<>(8);
-        StringTokenizer stringTokenizer = new StringTokenizer(libDirPathsString, File.pathSeparator);
+        StringTokenizer stringTokenizer = new StringTokenizer(libDirPathsString, IOHelper.PATH_SEPARATOR);
         while (stringTokenizer.hasMoreElements()) {
             String libDirPath = (String) stringTokenizer.nextElement();
             libDirPathList.add(libDirPath);
@@ -642,7 +642,7 @@ public final class DefaultRuntimeConfig implements RuntimeConfig {
         StringBuilder sb = new StringBuilder(64);
         for (String libDirPath : libDirPaths) {
             if (sb.length() > 0) {
-                sb.append(File.pathSeparator);
+                sb.append(IOHelper.PATH_SEPARATOR);
             }
             sb.append(libDirPath);
         }

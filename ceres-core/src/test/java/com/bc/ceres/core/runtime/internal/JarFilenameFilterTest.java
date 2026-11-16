@@ -18,7 +18,7 @@ package com.bc.ceres.core.runtime.internal;
 
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
@@ -36,20 +36,20 @@ public class JarFilenameFilterTest {
     @Test
     public void testAccept() {
         JarFilenameFilter filter = new JarFilenameFilter();
-        File dir = new File(".");
-        assertTrue(filter.accept(dir, "xstream.jar"));
-        assertTrue(filter.accept(dir, "xstream.JAR"));
-        assertTrue(filter.accept(dir, "xstream.zip"));
-        assertTrue(filter.accept(dir, "xstream.ZIP"));
-        assertTrue(filter.accept(dir, "lib/xstream.jar"));
-        assertTrue(filter.accept(dir, "lib/xstream.JAR"));
-        assertTrue(filter.accept(dir, "lib/xstream.zip"));
-        assertTrue(filter.accept(dir, "lib/xstream.ZIP"));
-        assertFalse(filter.accept(dir, "xstream"));
-        assertFalse(filter.accept(dir, "xstream.txt"));
-        assertFalse(filter.accept(dir, "xstream.JaR"));
-        assertFalse(filter.accept(dir, ".jar"));
-        assertFalse(filter.accept(dir, ""));
+        Path dir = Path.of(".");
+        assertTrue(filter.test(dir.resolve("xstream.jar")));
+        assertTrue(filter.test(dir.resolve("xstream.JAR")));
+        assertTrue(filter.test(dir.resolve("xstream.zip")));
+        assertTrue(filter.test(dir.resolve("xstream.ZIP")));
+        assertTrue(filter.test(dir.resolve("lib/xstream.jar")));
+        assertTrue(filter.test(dir.resolve("lib/xstream.JAR")));
+        assertTrue(filter.test(dir.resolve("lib/xstream.zip")));
+        assertTrue(filter.test(dir.resolve("lib/xstream.ZIP")));
+        assertFalse(filter.test(dir.resolve("xstream")));
+        assertFalse(filter.test(dir.resolve("xstream.txt")));
+        assertFalse(filter.test(dir.resolve("xstream.JaR")));
+        assertFalse(filter.test(dir.resolve(".jar")));
+        assertFalse(filter.test(dir.resolve("")));
     }
 
     @Test

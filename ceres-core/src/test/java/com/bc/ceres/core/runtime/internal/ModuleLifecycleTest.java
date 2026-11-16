@@ -22,7 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 public class ModuleLifecycleTest {
 
-    private static final File MODULES_DIR = new File(Config.getDirForAppA(), "modules");
+    private static final Path MODULES_DIR = Config.getDirForAppA().resolve("modules");
     private ModuleRegistry moduleRegistry;
 
     @Before

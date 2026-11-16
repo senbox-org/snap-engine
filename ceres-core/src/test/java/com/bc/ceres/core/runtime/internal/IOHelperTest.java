@@ -19,7 +19,7 @@ package com.bc.ceres.core.runtime.internal;
 import com.bc.ceres.core.runtime.Constants;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -40,8 +40,8 @@ public class IOHelperTest {
 
     @Test
     public void testUrlToFileWithValidFileUrl() throws MalformedURLException {
-        File file = new File("").getAbsoluteFile();
-        URL fileUrl = file.toURI().toURL();
+        Path file = Path.of("").toAbsolutePath();
+        URL fileUrl = file.toUri().toURL();
         assertEquals(file, UrlHelper.urlToFile(fileUrl));
     }
 
@@ -53,18 +53,18 @@ public class IOHelperTest {
 
     @Test
     public void testUrlToFileWithAJarEntry() throws MalformedURLException {
-        File dir = new File("").getAbsoluteFile();
-        File file = new File(dir, "test.jar");
-        URL fileUrl = file.toURI().toURL();
+        Path dir = Path.of("").toAbsolutePath();
+        Path file = dir.resolve("test.jar");
+        URL fileUrl = file.toUri().toURL();
         URL jarUrl = new URL("jar:" + fileUrl + "!/module.xml");
         assertEquals(file, UrlHelper.urlToFile(jarUrl));
     }
 
     @Test
     public void testUrlToFileWithAJarFile() throws MalformedURLException {
-        File dir = new File("").getAbsoluteFile();
-        File file = new File(dir, "test.jar");
-        URL fileUrl = file.toURI().toURL();
+        Path dir = Path.of("").toAbsolutePath();
+        Path file = dir.resolve("test.jar");
+        URL fileUrl = file.toUri().toURL();
         URL jarUrl = new URL("jar:" + fileUrl + "!/");
         assertEquals(file, UrlHelper.urlToFile(jarUrl));
     }
@@ -81,19 +81,19 @@ public class IOHelperTest {
 
     @Test
     public void testFileToUrlWithValidFile() throws MalformedURLException {
-        File file = new File("").getAbsoluteFile();
-        URL fileUrl = file.toURI().toURL();
+        Path file = Path.of("").toAbsolutePath();
+        URL fileUrl = file.toUri().toURL();
         assertEquals(fileUrl, UrlHelper.fileToUrl(file));
     }
 
     // prerequisite for ...
     @Test
     public void testThatDirectoryUrlsAlwaysEndWithASlash() {
-        File dir = new File("").getAbsoluteFile();
+        Path dir = Path.of("").toAbsolutePath();
         while (dir != null) {
             URL url = UrlHelper.fileToUrl(dir);
-            assertTrue(dir.getPath(), url.getPath().endsWith("/"));
-            dir = dir.getParentFile();
+            assertTrue(dir.toString(), url.getPath().endsWith("/"));
+            dir = dir.getParent();
         }
     }
 

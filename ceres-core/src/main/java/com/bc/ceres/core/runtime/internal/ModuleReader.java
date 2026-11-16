@@ -19,10 +19,15 @@ package com.bc.ceres.core.runtime.internal;
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.runtime.ProxyConfig;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -39,18 +44,18 @@ public class ModuleReader {
     }
 
 
-    public ModuleImpl readFromLocation(File locationFile) throws CoreException {
+    public ModuleImpl readFromLocation(Path locationFile) throws CoreException {
         final ModuleImpl module;
-        if (locationFile.isDirectory()) {
-            module = readFromManifest(new File(locationFile, MODULE_MANIFEST_NAME));
+        if (Files.isDirectory(locationFile)) {
+            module = readFromManifest(locationFile.resolve(MODULE_MANIFEST_NAME));
         } else {
             try {
-                ZipFile zipFile = new ZipFile(locationFile);
+                ZipFile zipFile = new ZipFile(locationFile.toFile());
                 try {
                     ZipEntry entry = zipFile.getEntry(MODULE_MANIFEST_NAME);
                     if (entry == null) {
                         throw new CoreException(
-                                String.format("Manifest [%s] not found in [%s]", MODULE_MANIFEST_NAME, locationFile.getName()));
+                                String.format("Manifest [%s] not found in [%s]", MODULE_MANIFEST_NAME, locationFile.getFileName()));
                     }
                     InputStream inputStream = zipFile.getInputStream(entry);
                     module = readFromManifest(inputStream);
@@ -59,7 +64,7 @@ public class ModuleReader {
                 }
             } catch (IOException e) {
                 throw new CoreException(
-                        String.format("Failed to read manifest [%s] from [%s]", MODULE_MANIFEST_NAME, locationFile.getName()), e);
+                        String.format("Failed to read manifest [%s] from [%s]", MODULE_MANIFEST_NAME, locationFile.getFileName()), e);
             }
         }
         initModule(module, UrlHelper.fileToUrl(locationFile), locationFile);
@@ -81,12 +86,11 @@ public class ModuleReader {
         return new ModuleManifestParser().parse(inputStream);
     }
 
-    public ModuleImpl readFromManifest(File manifestFile) throws CoreException {
-        try {
-            final Reader reader = new FileReader(manifestFile);
+    public ModuleImpl readFromManifest(Path manifestFile) throws CoreException {
+        try (final Reader reader = Files.newBufferedReader(manifestFile)) {
             // Note: reader is closed in readFromXML
             return new ModuleManifestParser().parse(reader);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new CoreException("Module manifest [" + manifestFile + "] not found", e);
         }
     }
@@ -103,16 +107,16 @@ public class ModuleReader {
     }
 
 
-    private void initModule(ModuleImpl module, URL locationUrl, File locationFile) {
+    private void initModule(ModuleImpl module, URL locationUrl, Path locationFile) {
         module.setLocation(locationUrl);
         module.setImpliciteLibs(NO_LIBS);
         module.setImpliciteNativeLibs(NO_LIBS);
         if (locationFile != null) {
-            module.setContentLength(locationFile.length());
-            module.setLastModified(locationFile.lastModified());
-            if (locationFile.isDirectory()) {
-                File implicitLibDir = new File(locationFile, "lib");
-                if (implicitLibDir.exists() && implicitLibDir.isDirectory()) {
+            module.setContentLength(IOHelper.size(locationFile));
+            module.setLastModified(IOHelper.getLastModifiedTime(locationFile));
+            if (Files.isDirectory(locationFile)) {
+                Path implicitLibDir = locationFile.resolve("lib");
+                if (Files.exists(implicitLibDir) && Files.isDirectory(implicitLibDir)) {
                     String[] libs = scanImpliciteLibs(implicitLibDir);
                     for (int i = 0; i < libs.length; i++) {
                         libs[i] = "lib/" + libs[i];
@@ -131,39 +135,27 @@ public class ModuleReader {
     }
 
 
-    private static String[] scanImpliciteLibs(File dir) {
+    private static String[] scanImpliciteLibs(Path dir) {
         return new DirScanner(dir, true, true).scan(new JarFilenameFilter());
     }
 
-    private static String[] scanImpliciteNativeLibs(File dir) {
+    private static String[] scanImpliciteNativeLibs(Path dir) {
         // todo - see FileHelper for similar OS dependent construct --> try to generyfy this in a class 'OS'
-        FilenameFilter ff;
+        Predicate<Path> ff;
         String osNameLC = System.getProperty("os.name", "").toLowerCase();
         if (osNameLC.contains("windows")) {
-            ff = new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.toLowerCase().endsWith(".dll");
-                }
-            };
+            ff = path -> path.getFileName().toString().toLowerCase().endsWith(".dll");
         } else if (osNameLC.contains("mac os x")) {
-            ff = new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".jnilib") || name.endsWith(".dylib");
-                }
-            };
+            ff = path -> path.getFileName().toString().toLowerCase().endsWith(".jnilib") || path.getFileName().toString().toLowerCase().endsWith(".dylib");
         } else {
-            ff = new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".so");
-                }
-            };
+            ff = path -> path.getFileName().toString().toLowerCase().endsWith(".so");
         }
         // first search for native libraries in architecture specific directories
         Platform currentPlatform = Platform.getCurrentPlatform();
         if (currentPlatform != null) {
             String platformPath = Platform.getSourcePathPrefix(currentPlatform.getId(), currentPlatform.getBitCount());
-            File platformDir = new File(dir, platformPath);
-            if (platformDir.exists() && platformDir.isDirectory()) {
+            Path platformDir = dir.resolve(platformPath);
+            if (Files.exists(platformDir) && Files.isDirectory(platformDir)) {
                 String[] result = new DirScanner(platformDir, true, true).scan(ff);
                 if (result.length > 0) {
                     String[] fullResult = new String[result.length];

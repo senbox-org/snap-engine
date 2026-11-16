@@ -25,7 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +80,7 @@ public class RuntimeAppBTest {
             String[] impliciteNativeLibs = nativeModuleImpl.getImpliciteNativeLibs();
             List<String> libNames = new ArrayList<>();
             for (String libPath : impliciteNativeLibs) {
-                libNames.add(new File(libPath).getName());
+                libNames.add(Path.of(libPath).getFileName().toString());
             }
             assertTrue(libNames.contains(System.mapLibraryName("jhdf")));
             assertTrue(libNames.contains(System.mapLibraryName("jhdf5")));

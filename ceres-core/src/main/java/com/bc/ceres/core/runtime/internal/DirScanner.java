@@ -18,32 +18,34 @@ package com.bc.ceres.core.runtime.internal;
 
 import com.bc.ceres.core.Assert;
 
-import java.io.File;
-import java.io.FilenameFilter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.function.Predicate;
 
 public class DirScanner {
 
-    private File baseDir;
+    private Path baseDir;
     private boolean recursive;
     private boolean filesOnly;
 
-    public DirScanner(File baseDir) {
+    public DirScanner(Path baseDir) {
         this(baseDir, false);
     }
 
-    public DirScanner(File baseDir, boolean recursive) {
+    public DirScanner(Path baseDir, boolean recursive) {
         this(baseDir, recursive, false);
     }
 
-    public DirScanner(File baseDir, boolean recursive, boolean filesOnly) {
+    public DirScanner(Path baseDir, boolean recursive, boolean filesOnly) {
         Assert.notNull(baseDir, "baseDir");
         this.baseDir = baseDir;
         this.recursive = recursive;
         this.filesOnly = filesOnly;
     }
 
-    public File getBaseDir() {
+    public Path getBaseDir() {
         return baseDir;
     }
 
@@ -52,42 +54,43 @@ public class DirScanner {
     }
 
     public String[] scan() {
-        return scan(new NullFilenameFilter());
+        return scan(new NullFilter());
     }
 
-    public String[] scan(FilenameFilter filter) {
+    public String[] scan(Predicate<Path> filter) {
         Assert.notNull(filter, "filter");
         ArrayList<String> strings = new ArrayList<String>(16);
         collectFiles(filter, "", strings);
         return strings.toArray(new String[0]);
     }
 
-    private void collectFiles(FilenameFilter filter, String relDirPath, ArrayList<String> entries) {
-        File dir = new File(baseDir, relDirPath);
-        String[] fileNames = dir.list();
+    private void collectFiles(Predicate<Path> filter, String relDirPath, ArrayList<String> entries) {
+        Path dir = baseDir.resolve(relDirPath);
+        Collection<String> fileNames = IOHelper.list(dir);
         if (fileNames != null) {
             for (String fileName : fileNames) {
                 String relFilePath = relDirPath + fileName;
-                File file = new File(baseDir, relFilePath);
-                if (file.isDirectory()) {
-                    if (!filesOnly && filter.accept(dir, fileName)) {
+                Path file = baseDir.resolve(relFilePath);
+                if (Files.isDirectory(file)) {
+                    if (!filesOnly && filter.test(file)) {
                         entries.add(relFilePath);
                     }
                     if (recursive) {
                         collectFiles(filter, relFilePath + '/', entries);
                     }
-                } else if (filter.accept(dir, fileName)) {
+                } else if (filter.test(file)) {
                     entries.add(relFilePath);
                 }
             }
         }
     }
 
-    private static class NullFilenameFilter implements FilenameFilter {
+    private static class NullFilter implements Predicate<Path> {
         /**
          * @return always returns <code>true</code>
          */
-        public boolean accept(File dir, String name) {
+        @Override
+        public boolean test(Path path) {
             return true;
         }
     }

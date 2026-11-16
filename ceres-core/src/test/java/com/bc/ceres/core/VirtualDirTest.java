@@ -17,18 +17,16 @@
 package com.bc.ceres.core;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
@@ -37,7 +35,7 @@ public class VirtualDirTest {
 
     @Test
     public void testNestedZip() throws Exception {
-        File zipFile = getTestDataDir("VirtualDirTestNested.zip");
+        Path zipFile = getTestDataDir("VirtualDirTestNested.zip");
         final VirtualDir virtualDir = VirtualDir.create(zipFile);
         assertNotNull(virtualDir);
         try {
@@ -70,12 +68,13 @@ public class VirtualDirTest {
 
     @Test
     public void testZip() throws IOException {
-        File zipFile = getTestDataDir("VirtualDirTest.zip");
+        Path zipFile = getTestDataDir("VirtualDirTest.zip");
         final VirtualDir virtualDir = VirtualDir.create(zipFile);
-        final File file1 = virtualDir.getFile("File1");
-        assertTrue(file1.exists());
+        assertNotNull(virtualDir);
+        final Path file1 = virtualDir.getFile("File1");
+        assertTrue(Files.exists(file1));
         assertFalse("Path of File1 should not contain the parent path of the zip file.",
-                file1.getAbsolutePath().contains(zipFile.getParent()));
+                file1.toAbsolutePath().toString().contains(zipFile.getParent().toString()));
 
         testFileNode(zipFile, virtualDir);
 
@@ -87,11 +86,12 @@ public class VirtualDirTest {
     public void testZip_Path() throws IOException {
         Path testDataPath = getTestDataPath("VirtualDirTest.zip");
         final VirtualDir virtualDir = VirtualDir.create(testDataPath);
-        final File file1 = virtualDir.getFile("File1");
-        assertTrue(file1.exists());
+        assertNotNull(virtualDir);
+        final Path file1 = virtualDir.getFile("File1");
+        assertTrue(Files.exists(file1));
 
         assertFalse("Path of File1 should not contain the parent path of the zip file.",
-                file1.getAbsolutePath().contains(testDataPath.getParent().toString()));
+                file1.toAbsolutePath().toString().contains(testDataPath.getParent().toString()));
 
 
         testFileNode(testDataPath, virtualDir);
@@ -102,13 +102,14 @@ public class VirtualDirTest {
 
     @Test
     public void testDir() throws IOException {
-        final File file = getTestDataDir("VirtualDirTest.dir");
+        final Path file = getTestDataDir("VirtualDirTest.dir");
         // make empty "dir2", because git removes empty dirs
-        final File dir2 = new File(file, "dir2");
-        dir2.mkdir();
-        dir2.deleteOnExit();
+        final Path dir2 = file.resolve("dir2");
+        Files.createDirectory(dir2);
+        IOHelper.deleteOnExit(dir2);
 
         final VirtualDir virtualDir = VirtualDir.create(file);
+        assertNotNull(virtualDir);
         testFileNode(file, virtualDir);
 
         assertFalse(virtualDir.isCompressed());
@@ -124,6 +125,7 @@ public class VirtualDirTest {
         Files.createDirectories(dir2);
         try {
             final VirtualDir virtualDir = VirtualDir.create(inputPath);
+            assertNotNull(virtualDir);
             testFileNode(inputPath, virtualDir);
 
             assertFalse(virtualDir.isCompressed());
@@ -135,16 +137,13 @@ public class VirtualDirTest {
 
     private static void deleteTree(Path path) throws IOException {
         try (Stream<Path> filePathStream = Files.walk(path)) {
-            filePathStream.forEach(new Consumer<Path>() {
-                @Override
-                public void accept(Path filePath) {
-                    try {
-                        Files.delete(path);
-                    } catch (IOException e) {
-                        System.out.println(e.getMessage());
-                        System.out.println(filePath);
-                        throw new RuntimeException(e);
-                    }
+            filePathStream.forEach(filePath -> {
+                try {
+                    Files.delete(path);
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
+                    System.out.println(filePath);
+                    throw new RuntimeException(e);
                 }
             });
         }
@@ -152,7 +151,7 @@ public class VirtualDirTest {
 
     @Test
     public void testNoZip() throws IOException {
-        File file = getTestDataDir("VirtualDirTest.nozip");
+        Path file = getTestDataDir("VirtualDirTest.nozip");
         VirtualDir virtualDir = VirtualDir.create(file);
         assertNull(virtualDir);
     }
@@ -160,7 +159,7 @@ public class VirtualDirTest {
     @Test
     public void testNullArg() throws IOException {
         try {
-            VirtualDir.create((File) null);
+            VirtualDir.create(null);
             fail("NullPointerException?");
         } catch (NullPointerException e) {
             // ok
@@ -176,40 +175,42 @@ public class VirtualDirTest {
 
     @Test
     public void testFinalize() throws Throwable {
-        File zipFile = getTestDataDir("VirtualDirTest.zip");
+        Path zipFile = getTestDataDir("VirtualDirTest.zip");
         final VirtualDir virtualDir = VirtualDir.create(zipFile);
-        final File file1 = virtualDir.getFile("File1");   // triggers the unzipping
+        assertNotNull(virtualDir);
+        virtualDir.getFile("File1");   // triggers the unzipping
 
-        final File tempDir = virtualDir.getTempDir();
+        final Path tempDir = virtualDir.getTempDir();
         assertNotNull(tempDir);
 
-        assertTrue(tempDir.isDirectory());
+        assertTrue(Files.isDirectory(tempDir));
 
         virtualDir.close();
 
-        assertFalse(tempDir.isDirectory());
+        assertFalse(Files.isDirectory(tempDir));
     }
 
     @Test
     public void testFinalize_withSubdirectories() throws Throwable {
-        File zipFile = getTestDataDir("VirtualDirTest.zip");
+        Path zipFile = getTestDataDir("VirtualDirTest.zip");
         final VirtualDir virtualDir = VirtualDir.create(zipFile);
-        final File file3 = virtualDir.getFile("dir1/File3");   // triggers the unzipping
+        assertNotNull(virtualDir);
+        virtualDir.getFile("dir1/File3");   // triggers the unzipping
 
-        final File tempDir = virtualDir.getTempDir();
+        final Path tempDir = virtualDir.getTempDir();
         assertNotNull(tempDir);
 
-        assertTrue(tempDir.isDirectory());
+        assertTrue(Files.isDirectory(tempDir));
 
         virtualDir.close();
 
-        assertFalse(tempDir.isDirectory());
+        assertFalse(Files.isDirectory(tempDir));
     }
 
     @Test
     @STTM("SNAP-4105")
     public void testNio_closeCleansTempDir_andRegistrationIsAccepted() throws Exception {
-        Path sourceRoot = Files.createTempDirectory("virtualdir-nio-src");
+        Path sourceRoot = IOHelper.createATempDir("virtualdir-nio-src");
         Path sourceFile = sourceRoot.resolve("sample.txt");
         Files.writeString(sourceFile, "hello");
 
@@ -228,16 +229,16 @@ public class VirtualDirTest {
                     true
             );
 
-            File localCopy = virtualDir.getFile("sample.txt");
-            assertTrue(localCopy.exists());
+            Path localCopy = virtualDir.getFile("sample.txt");
+            assertTrue(Files.exists(localCopy));
 
-            File tempDir = virtualDir.getTempDir();
+            Path tempDir = virtualDir.getTempDir();
             assertNotNull(tempDir);
-            assertTrue(tempDir.isDirectory());
+            assertTrue(Files.isDirectory(tempDir));
 
             virtualDir.close();
 
-            assertFalse(tempDir.exists());
+            assertFalse(Files.exists(tempDir));
         } finally {
             if (virtualDir != null) {
                 try {
@@ -250,35 +251,30 @@ public class VirtualDirTest {
         }
     }
 
-    private static File getTestDataDir() {
-        File dir = new File("./src/test/data/");
-        if (!dir.exists()) {
-            dir = new File("./ceres-core/src/test/data/");
-            if (!dir.exists()) {
+    private static Path getTestDataDir() {
+        Path dir = Path.of("./src/test/data/");
+        if (!Files.exists(dir)) {
+            dir = Path.of("./ceres-core/src/test/data/");
+            if (!Files.exists(dir)) {
                 fail("Can't find my test data. Where is '" + dir + "'?");
             }
         }
         return dir;
     }
 
-    private static File getTestDataDir(String path) {
-        return new File(getTestDataDir(), path);
+    private static Path getTestDataDir(String path) {
+        return getTestDataDir().resolve(path);
     }
 
     private static Path getTestDataPath(String path) {
-        final File testDataDir = getTestDataDir();
-        final Path testDataPath = Paths.get(testDataDir.getAbsolutePath());
+        final Path testDataPath = getTestDataDir();
         return testDataPath.resolve(path);
     }
 
-    private void testFileNode(Path inputPath, VirtualDir virtualDir) throws IOException {
-        testFileNode(inputPath.toFile(), virtualDir);
-    }
-
-    private void testFileNode(File file, VirtualDir virtualDir) throws IOException {
+    private void testFileNode(Path file, VirtualDir virtualDir) throws IOException {
         assertNotNull(virtualDir);
         try {
-            assertEquals(file.getPath(), virtualDir.getBasePath());
+            assertEquals(file.toString(), virtualDir.getBasePath());
             assertNotNull(virtualDir.getFile("File1"));
             assertNotNull(virtualDir.getFile("File2"));
             assertNotNull(virtualDir.getFile("File5.gz"));
@@ -290,7 +286,7 @@ public class VirtualDirTest {
             assertTrue(virtualDir.exists("File2"));
             assertFalse(virtualDir.exists("nonExistentFile"));
 
-            assertEquals(36, virtualDir.getFile("File5.gz").length());
+            assertEquals(36, Files.size(virtualDir.getFile("File5.gz")));
             try (LineNumberReader reader = new LineNumberReader(virtualDir.getReader("File5.gz"))) {
                 assertEquals("Norman was was was here!", reader.readLine());
             }

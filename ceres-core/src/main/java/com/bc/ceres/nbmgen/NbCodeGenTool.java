@@ -1,16 +1,17 @@
 package com.bc.ceres.nbmgen;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,14 +38,14 @@ public class NbCodeGenTool implements CeresModuleProject.Processor {
         void convert(CeresModuleProject project, String point, Element extensionElement) throws IOException;
     }
 
-    final File projectDir;
+    final Path projectDir;
     final boolean dryRun;
-    final File outputDir;
+    final Path outputDir;
 
     VelocityEngine velocityEngine;
     HashMap<String, Converter> converters;
 
-    public NbCodeGenTool(File projectDir, boolean dryRun, File outputDir) {
+    public NbCodeGenTool(Path projectDir, boolean dryRun, Path outputDir) {
         this.projectDir = projectDir;
         this.dryRun = dryRun;
         this.outputDir = outputDir;
@@ -90,9 +91,9 @@ public class NbCodeGenTool implements CeresModuleProject.Processor {
 
     public static void main(String[] args) throws JDOMException, IOException {
 
-        File projectDir = new File(args[0]);
+        Path projectDir = Path.of(args[0]);
         boolean dryRun = args[1].equals("true");
-        File outputDir = args.length > 2 ? new File(args[2]) : projectDir;
+        Path outputDir = args.length > 2 ? Path.of(args[2]) : projectDir;
 
         NbCodeGenTool processor = new NbCodeGenTool(projectDir, dryRun, outputDir);
 
@@ -107,7 +108,7 @@ public class NbCodeGenTool implements CeresModuleProject.Processor {
     @Override
     public void process(CeresModuleProject project) throws JDOMException, IOException {
 
-        System.out.println("Project [" + project.projectDir.getName() + "]:");
+        System.out.println("Project [" + project.projectDir.getFileName().toString() + "]:");
 
         Element moduleElement = project.moduleDocument.getRootElement();
 
@@ -336,12 +337,12 @@ public class NbCodeGenTool implements CeresModuleProject.Processor {
             addProperty(unusedProperties, "targetProductNameSuffix", targetProductNameSuffix);
             addProperty(velocityContext, "properties", unusedProperties);
 
-            File javaFile = CeresModuleProject.getFile(outputDir, project.projectDir.getName(), "src", "main", "java", packageName.replace('.', File.separatorChar), classNameBase + "Action.java");
+            Path javaFile = CeresModuleProject.getFile(outputDir, project.projectDir.getFileName().toString(), "src", "main", "java", packageName.replace('.', IOHelper.SEPARATOR_CHAR), classNameBase + "Action.java");
 
             if (!dryRun) {
                 //noinspection ResultOfMethodCallIgnored
-                javaFile.getParentFile().mkdirs();
-                try (FileWriter writer = new FileWriter(javaFile)) {
+                IOHelper.createDirectories(javaFile.getParent());
+                try (Writer writer = Files.newBufferedWriter(javaFile)) {
                     NbCodeGenTool.this.evaluate(velocityContext, "Action.vm", writer);
                 }
             }

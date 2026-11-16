@@ -22,6 +22,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.runtime.RuntimeConfig;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -35,8 +36,9 @@ import java.awt.SplashScreen;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.StringTokenizer;
 
 /**
@@ -284,7 +286,10 @@ public class SplashScreenProgressMonitor extends NullProgressMonitor {
 
     private static BufferedImage loadImage(String imageFilePath) {
         try {
-            return ImageIO.read(new File(imageFilePath));
+            final Path imageFile = Paths.get(imageFilePath);
+            try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(imageFile)) {
+                return ImageIO.read(imageInputStream);
+            }
         } catch (IOException e) {
             return null;
         }

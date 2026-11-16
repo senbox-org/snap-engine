@@ -16,6 +16,7 @@
 
 package com.bc.ceres.core;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.util.CleanUpState;
 import com.bc.ceres.util.CleanerRegistry;
 import org.slf4j.Logger;
@@ -23,9 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -64,9 +63,9 @@ public abstract class VirtualDir {
     public abstract String getBasePath();
 
     /**
-     * @return The File object of the directory.
+     * @return The Path object of the directory.
      */
-    public abstract File getBaseFile();
+    public abstract Path getBaseFile();
 
     /**
      * Opens a reader for the given relative path.
@@ -96,7 +95,7 @@ public abstract class VirtualDir {
      * @return Gets the file or directory for the specified file path.
      * @throws IOException If the file or directory does not exist or if it can't be extracted from a ZIP-file.
      */
-    public abstract File getFile(String path) throws IOException;
+    public abstract Path getFile(String path) throws IOException;
 
     /**
      * Returns an array of strings naming the files and directories in the
@@ -136,33 +135,13 @@ public abstract class VirtualDir {
      */
     public abstract void close();
 
-    /**
-     * Creates an instance of a virtual directory object from a given directory or ZIP-file.
-     *
-     * @param file A directory or a ZIP-file.
-     * @return The virtual directory instance, or {@code null} if {@code file} is not a directory or a ZIP-file or
-     * the ZIP-file could not be opened for read access..
-     */
-    public static VirtualDir create(File file) {
-        if (file.isDirectory()) {
-            return new Dir(file);
-        }
-        try {
-            return new Zip(new ZipFile(file));
-        } catch (IOException ignored) {
-            return null;
-        }
-    }
-
     public static VirtualDir create(Path inputPath) {
         if (Files.isDirectory(inputPath)) {
-            // @todo 2 tb/tb create constructor using Path as input 2024-12-09
-            return new Dir(inputPath.toFile());
+            return new Dir(inputPath);
         }
 
         try {
-            // @todo 2 tb/tb create constructor using Path as input 2024-12-09
-            return new Zip(new ZipFile(inputPath.toFile()));
+            return new Zip(inputPath);
         } catch (IOException ignored) {
             return null;
         }
@@ -172,31 +151,31 @@ public abstract class VirtualDir {
 
     public abstract boolean isArchive();
 
-    public File getTempDir() throws IOException {
+    public Path getTempDir() throws IOException {
         return null;
     }
 
     private static class Dir extends VirtualDir {
 
-        private final File dir;
+        private final Path dir;
 
-        private Dir(File file) {
+        private Dir(Path file) {
             dir = file;
         }
 
         @Override
         public String getBasePath() {
-            return dir.getPath();
+            return dir.toString();
         }
 
         @Override
-        public File getBaseFile() {
+        public Path getBaseFile() {
             return dir;
         }
 
         @Override
         public InputStream getInputStream(String path) throws IOException {
-            final InputStream inputStream = new BufferedInputStream(Files.newInputStream(getFile(path).toPath()));
+            final InputStream inputStream = new BufferedInputStream(Files.newInputStream(getFile(path)));
             if (path.endsWith(".gz")) {
                 return new GZIPInputStream(inputStream);
             }
@@ -204,25 +183,25 @@ public abstract class VirtualDir {
         }
 
         @Override
-        public File getFile(String path) throws IOException {
-            File child = dir.toPath().resolve(path).toFile();
-            if (!child.exists()) {
-                throw new FileNotFoundException(child.getPath());
+        public Path getFile(String path) throws IOException {
+            Path child = dir.resolve(path);
+            if (!Files.exists(child)) {
+                throw new FileNotFoundException(child.toString());
             }
             return child;
         }
 
         @Override
         public String[] list(String path) throws IOException {
-            File child = getFile(path);
-            return child.list();
+            final Path child = getFile(path);
+            return IOHelper.list(child).toArray(new String[0]);
         }
 
         @Override
         public boolean exists(String path) {
             try {
-                final File child = getFile(path);
-                return child.exists();
+                final Path child = getFile(path);
+                return Files.exists(child);
             } catch (IOException e) {
                 return false;
             }
@@ -230,27 +209,11 @@ public abstract class VirtualDir {
 
         @Override
         public String[] listAllFiles() throws IOException {
-            Path path = dir.toPath();
-            try (Stream<Path> pathStream = Files.walk(path)) {
-                Stream<Path> filteredstream = pathStream.filter(new Predicate<Path>() {
-                    @Override
-                    public boolean test(Path path) {
-                        return Files.isRegularFile(path);
-                    }
-                });
-                final int baseLength = path.toUri().toString().length();
-                Stream<String> fileStream = filteredstream.map(new Function<Path, String>() {
-                    @Override
-                    public String apply(Path path) {
-                        return path.toUri().toString().substring(baseLength);
-                    }
-                });
-                return fileStream.toArray(new IntFunction<String[]>() {
-                    @Override
-                    public String[] apply(int value) {
-                        return new String[value];
-                    }
-                });
+            try (Stream<Path> pathStream = Files.walk(dir)) {
+                final Stream<Path> filteredstream = pathStream.filter(Files::isRegularFile);
+                final int baseLength = dir.toUri().toString().length();
+                final Stream<String> relativeFilesStream = filteredstream.map(path -> path.toUri().toString().substring(baseLength));
+                return relativeFilesStream.toArray(String[]::new);
             }
         }
 
@@ -274,8 +237,8 @@ public abstract class VirtualDir {
         private static final int BUFFER_SIZE = 4 * 1024 * 1024;
         private final ZipResourceState resources;
 
-        private Zip(ZipFile zipFile) {
-            this.resources = new ZipResourceState(zipFile);
+        private Zip(Path zipFile) throws IOException {
+            this.resources = new ZipResourceState(new ZipFile(zipFile.toFile()));
             CleanerRegistry.getInstance().register(this, resources);
         }
 
@@ -285,8 +248,8 @@ public abstract class VirtualDir {
         }
 
         @Override
-        public File getBaseFile() {
-            return new File(requireZipFile().getName());
+        public Path getBaseFile() {
+            return Path.of(requireZipFile().getName());
         }
 
         @Override
@@ -295,7 +258,7 @@ public abstract class VirtualDir {
         }
 
         @Override
-        public File getFile(String path) throws IOException {
+        public Path getFile(String path) throws IOException {
 
             ZipEntry zipEntry = getEntry(path);
 
@@ -303,14 +266,14 @@ public abstract class VirtualDir {
                 resources.tempZipFileDir = VirtualDir.createUniqueTempDir();
             }
 
-            File tempFile = new File(resources.tempZipFileDir, zipEntry.getName());
-            if (tempFile.exists()) {
+            Path tempFile = resources.tempZipFileDir.resolve(zipEntry.getName());
+            if (Files.exists(tempFile)) {
                 return tempFile;
             }
 
             // System.out.println("Extracting ZIP-entry to " + tempFile);
             if (zipEntry.isDirectory()) {
-                tempFile.mkdirs();
+                IOHelper.createDirectories(tempFile);
             } else {
                 unzip(zipEntry, tempFile);
             }
@@ -391,7 +354,7 @@ public abstract class VirtualDir {
         }
 
         @Override
-        public File getTempDir() throws IOException {
+        public Path getTempDir() throws IOException {
             return resources.tempZipFileDir;
         }
 
@@ -412,18 +375,18 @@ public abstract class VirtualDir {
             return zipEntry;
         }
 
-        private void unzip(ZipEntry zipEntry, File tempFile) throws IOException {
+        private void unzip(ZipEntry zipEntry, Path tempFile) throws IOException {
             try (InputStream is = requireZipFile().getInputStream(zipEntry)) {
                 if (is != null) {
-                    tempFile.getParentFile().mkdirs();
-                    try (BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(tempFile), BUFFER_SIZE)) {
+                    IOHelper.createDirectories(tempFile.getParent());
+                    try (BufferedOutputStream os = new BufferedOutputStream(Files.newOutputStream(tempFile), BUFFER_SIZE)) {
                         byte[] bytes = new byte[1024];
                         int n;
                         while ((n = is.read(bytes)) > 0) {
                             os.write(bytes, 0, n);
                         }
                     } catch (IOException ioe) {
-                        throw new IOException("Failed to unzip '" + zipEntry.getName() + "'to '" + tempFile.getAbsolutePath() + "'", ioe);
+                        throw new IOException("Failed to unzip '" + zipEntry.getName() + "'to '" + tempFile.toAbsolutePath() + "'", ioe);
                     }
                 }
             }
@@ -439,7 +402,7 @@ public abstract class VirtualDir {
 
         private static final class ZipResourceState implements CleanUpState {
             private ZipFile zipFile;
-            private File tempZipFileDir;
+            private Path tempZipFileDir;
 
             private ZipResourceState(ZipFile zipFile) {
                 this.zipFile = zipFile;
@@ -454,7 +417,7 @@ public abstract class VirtualDir {
                     zipFile = null;
                 }
                 if (tempZipFileDir != null) {
-                    deleteFileTree(tempZipFileDir);
+                    IOHelper.deleteFileTree(tempZipFileDir);
                     tempZipFileDir = null;
                 }
             }
@@ -486,8 +449,8 @@ public abstract class VirtualDir {
         }
 
         @Override
-        public File getBaseFile() {
-            return virtualDirPath.toFile();
+        public Path getBaseFile() {
+            return virtualDirPath;
         }
 
         @Override
@@ -505,7 +468,7 @@ public abstract class VirtualDir {
         }
 
         @Override
-        public synchronized File getFile(String path) throws IOException {
+        public synchronized Path getFile(String path) throws IOException {
             Path resolve = virtualDirPath.resolve(path);
             if (!Files.exists(resolve)) {
                 throw new FileNotFoundException(resolve.toString());
@@ -513,7 +476,7 @@ public abstract class VirtualDir {
 
             if (localCopyRequired) {
                 if (nioResourceState.tempZipFilePathStore == null) {
-                    nioResourceState.tempZipFilePathStore = VirtualDir.createUniqueTempDir().toPath();
+                    nioResourceState.tempZipFilePathStore = VirtualDir.createUniqueTempDir();
                 }
                 Path tempFilePath = nioResourceState.tempZipFilePathStore.resolve(path);
                 if (Files.notExists(tempFilePath)) {
@@ -522,9 +485,9 @@ public abstract class VirtualDir {
                     }
                     Files.copy(resolve, tempFilePath);
                 }
-                return tempFilePath.toFile();
+                return tempFilePath;
             } else {
-                return resolve.toFile();
+                return resolve;
             }
         }
 
@@ -594,8 +557,8 @@ public abstract class VirtualDir {
         }
 
         @Override
-        public File getTempDir() throws IOException {
-            return nioResourceState.tempZipFilePathStore.toFile();
+        public Path getTempDir() {
+            return nioResourceState.tempZipFilePathStore;
         }
 
 
@@ -605,50 +568,26 @@ public abstract class VirtualDir {
             @Override
             public synchronized void run() {
                 if (tempZipFilePathStore != null) {
-                    deleteFileTree(tempZipFilePathStore.toFile());
+                    IOHelper.deleteFileTree(tempZipFilePathStore);
                     tempZipFilePathStore = null;
                 }
             }
         }
     }
 
-    /**
-     * Deletes the directory <code>treeRoot</code> and all the content recursively.
-     *
-     * @param treeRoot directory to be deleted
-     */
-    @SuppressWarnings({"ResultOfMethodCallIgnored"})
-    public static void deleteFileTree(File treeRoot) {
-        Assert.notNull(treeRoot);
-
-        File[] files = treeRoot.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    deleteFileTree(file);
-                } else {
-                    boolean deleted = file.delete();
-                    if (!deleted) {
-                        LOG.warn("Failed to delete file: {}", file);
-                    }
-                }
-            }
-        }
-        boolean rootDeleted = treeRoot.delete();
-        if (!rootDeleted) {
-            LOG.warn("Failed to delete dir: {}", treeRoot);
-        }
-    }
-
     private static final int TEMP_DIR_ATTEMPTS = 10000;
 
-    public static File createUniqueTempDir() throws IOException {
-        File baseDir = getBaseTempDir();
-        String baseName = System.currentTimeMillis() + "-";
+    public static Path createUniqueTempDir() throws IOException {
+        return createUniqueTempDir("");
+    }
+
+    public static Path createUniqueTempDir(String name) throws IOException {
+        Path baseDir = getBaseTempDir();
+        String baseName = name + System.currentTimeMillis() + "-";
 
         for (int counter = 0; counter < TEMP_DIR_ATTEMPTS; counter++) {
-            File tempDir = new File(baseDir, baseName + counter);
-            if (tempDir.mkdir()) {
+            Path tempDir = baseDir.resolve(baseName + counter);
+            if (IOHelper.createDirectory(tempDir)) {
                 return tempDir;
             }
         }
@@ -658,26 +597,26 @@ public abstract class VirtualDir {
     }
 
     public static void clearTempFiles() throws IOException {
-        final File baseDir = getBaseTempDir();
-        deleteFileTree(baseDir);
+        final Path baseDir = getBaseTempDir();
+        IOHelper.deleteFileTree(baseDir);
     }
 
-    private static File getBaseTempDir() throws IOException {
+    private static Path getBaseTempDir() throws IOException {
         String contextId = "snap";
-        File tempDir;
+        Path tempDir;
         String tempDirName = System.getProperty("java.io.tmpdir");
         if (tempDirName != null) {
-            tempDir = new File(tempDirName);
-            if (tempDir.exists()) {
+            tempDir = Path.of(tempDirName);
+            if (Files.exists(tempDir)) {
                 String userName = System.getProperty("user.name");
-                tempDir = new File(tempDir, contextId + "-" + userName);
-                tempDir.mkdir();
+                tempDir = tempDir.resolve(contextId + "-" + userName);
+                IOHelper.createDirectory(tempDir);
             }
         } else {
-            tempDir = new File(System.getProperty("user.home", "."), "." + contextId + "/temp");
-            tempDir.mkdirs();
+            tempDir = Path.of(System.getProperty("user.home", "."), "." + contextId + "/temp");
+            IOHelper.createDirectories(tempDir);
         }
-        if (!tempDir.exists()) {
+        if (!Files.exists(tempDir)) {
             throw new IOException("Temporary directory not available: " + tempDir);
         }
         return tempDir;

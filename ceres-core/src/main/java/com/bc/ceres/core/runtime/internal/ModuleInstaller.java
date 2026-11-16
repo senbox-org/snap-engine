@@ -23,7 +23,8 @@ import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.core.runtime.ProxyConfig;
 import com.bc.ceres.core.runtime.ModuleState;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -44,7 +45,7 @@ public class ModuleInstaller {
         this.logger = logger;
     }
 
-    public ModuleImpl installModule(URL url, ProxyConfig proxyConfig, File modulesDir, ProgressMonitor pm) throws CoreException {
+    public ModuleImpl installModule(URL url, ProxyConfig proxyConfig, Path modulesDir, ProgressMonitor pm) throws CoreException {
         Assert.notNull(url, "url");
         Assert.notNull(proxyConfig, "proxyConfig");
         Assert.notNull(modulesDir, "modulesDir");
@@ -56,11 +57,11 @@ public class ModuleInstaller {
 
         try {
             String fileName = IOHelper.getFileName(url);
-            File tempFile = new File(modulesDir, fileName + ".incomplete");
-            File targetFile = new File(modulesDir, fileName);
+            Path tempFile = modulesDir.resolve(fileName + ".incomplete");
+            Path targetFile = modulesDir.resolve(fileName);
 
             try {
-                logger.info(MessageFormat.format("Downloading [{0}] to [{1}]...", url, tempFile.getName()));
+                logger.info(MessageFormat.format("Downloading [{0}] to [{1}]...", url, tempFile.getFileName()));
                 pm.setSubTaskName(MessageFormat.format("Downloading [{0}]", fileName));
                 URLConnection urlConnection = UrlHelper.openConnection(url, proxyConfig, "GET");
                 IOHelper.copy(urlConnection, tempFile, SubProgressMonitor.create(pm, 90));
@@ -69,7 +70,7 @@ public class ModuleInstaller {
                 pm.setSubTaskName(MessageFormat.format("Copying [{0}]", fileName));
                 IOHelper.copy(tempFile, targetFile, SubProgressMonitor.create(pm, 10));
             } finally {
-                if (!tempFile.delete()) {
+                if (!Files.deleteIfExists(tempFile)) {
                     logger.warning(MessageFormat.format("Failed to delete file [{0}], reason unknown.", tempFile));
                 }
             }

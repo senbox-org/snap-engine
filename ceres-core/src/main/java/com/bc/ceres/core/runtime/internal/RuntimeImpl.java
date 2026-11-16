@@ -28,7 +28,8 @@ import com.bc.ceres.core.runtime.ProxyConfig;
 import com.bc.ceres.core.runtime.RuntimeConfig;
 import com.bc.ceres.core.runtime.RuntimeRunnable;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.URL;
 import java.security.CodeSource;
@@ -98,7 +99,7 @@ public class RuntimeImpl extends ExtensibleObject implements ModuleRuntime {
         if (modulesDirPath == null) {
             throw new CoreException("Modules directory not set");
         }
-        File modulesDir = new File(modulesDirPath);
+        Path modulesDir = Path.of(modulesDirPath);
         ModuleInstaller moduleInstaller = new ModuleInstaller(getLogger());
         ModuleImpl module = moduleInstaller.installModule(url, proxyConfig, modulesDir, pm);
         registerModule(module, newModuleId());
@@ -200,13 +201,13 @@ public class RuntimeImpl extends ExtensibleObject implements ModuleRuntime {
 
     private void uninstallModules(ProgressMonitor pm) {
         ModuleUninstaller moduleUninstaller = new ModuleUninstaller(getLogger());
-        moduleUninstaller.uninstallModules(new File(config.getModulesDirPath()), pm);
+        moduleUninstaller.uninstallModules(Path.of(config.getModulesDirPath()), pm);
     }
 
     private void loadModulesFromModulesDir(ModuleLoader moduleLoader, ProgressMonitor pm) throws CoreException {
-        File modulesDir = new File(config.getModulesDirPath());
-        if (modulesDir.isDirectory()) {
-            getLogger().info(String.format("Searching for modules in [%s]...", modulesDir.getPath()));
+        Path modulesDir = Path.of(config.getModulesDirPath());
+        if (Files.isDirectory(modulesDir)) {
+            getLogger().info(String.format("Searching for modules in [%s]...", modulesDir));
             try {
                 ModuleImpl[] modules = moduleLoader.loadModules(modulesDir, pm);
                 getLogger().info(String.format("%d module(s) found.", modules.length));
