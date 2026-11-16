@@ -21,7 +21,7 @@ import com.bc.ceres.swing.binding.BindingContext;
 import org.junit.Test;
 
 import javax.swing.*;
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
@@ -31,7 +31,7 @@ public class FileEditorTest {
     public void testIsApplicable() {
         FileEditor fileEditor = new FileEditor();
 
-        PropertyDescriptor fileDescriptor = new PropertyDescriptor("test", File.class);
+        PropertyDescriptor fileDescriptor = new PropertyDescriptor("test", Path.class);
         assertTrue(fileEditor.isValidFor(fileDescriptor));
 
         PropertyDescriptor doubleDescriptor = new PropertyDescriptor("test", Double.TYPE);
@@ -45,7 +45,7 @@ public class FileEditorTest {
         PropertyContainer propertyContainer = PropertyContainer.createValueBacked(V.class);
         BindingContext bindingContext = new BindingContext(propertyContainer);
         PropertyDescriptor propertyDescriptor = propertyContainer.getDescriptor("file");
-        assertSame(File.class, propertyDescriptor.getType());
+        assertSame(Path.class, propertyDescriptor.getType());
 
         assertTrue(fileEditor.isValidFor(propertyDescriptor));
         JComponent editorComponent = fileEditor.createEditorComponent(propertyDescriptor, bindingContext);
@@ -59,6 +59,6 @@ public class FileEditorTest {
     }
 
     private static class V {
-        File file;
+        Path file;
     }
 }

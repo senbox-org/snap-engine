@@ -5,7 +5,7 @@ import com.bc.ceres.swing.figure.FigureFactory;
 import com.bc.ceres.swing.figure.support.DefaultFigureFactory;
 
 import javax.swing.JOptionPane;
-import java.io.File;
+import java.nio.file.Path;
 
 public class FigureEditorDemo extends FigureEditorApp {
 
@@ -19,12 +19,12 @@ public class FigureEditorDemo extends FigureEditorApp {
     }
 
     @Override
-    protected void loadFigureCollection(File file, FigureCollection figureCollection) {
+    protected void loadFigureCollection(Path file, FigureCollection figureCollection) {
         JOptionPane.showMessageDialog(getFrame(), "Not implemented in demo.");
     }
 
     @Override
-    protected void storeFigureCollection(FigureCollection figureCollection, File file) {
+    protected void storeFigureCollection(FigureCollection figureCollection, Path file) {
         JOptionPane.showMessageDialog(getFrame(), "Not implemented in demo.");
     }
 }

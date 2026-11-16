@@ -74,8 +74,8 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.prefs.Preferences;
@@ -115,9 +115,9 @@ public abstract class FigureEditorApp {
 
     protected abstract FigureFactory getFigureFactory();
 
-    protected abstract void loadFigureCollection(File file, FigureCollection figureCollection) throws IOException;
+    protected abstract void loadFigureCollection(Path file, FigureCollection figureCollection) throws IOException;
 
-    protected abstract void storeFigureCollection(FigureCollection figureCollection, File file) throws IOException;
+    protected abstract void storeFigureCollection(FigureCollection figureCollection, Path file) throws IOException;
 
     private void init() {
 
@@ -425,8 +425,8 @@ public abstract class FigureEditorApp {
 
         @Override
         public void actionPerformed(ActionEvent event) {
-            File lastDir = new File(Preferences.userNodeForPackage(FigureEditorApp.class).get("lastDir", "."));
-            JFileChooser chooser = new JFileChooser(lastDir);
+            Path lastDir = Path.of(Preferences.userNodeForPackage(FigureEditorApp.class).get("lastDir", "."));
+            JFileChooser chooser = new JFileChooser(lastDir.toFile());
             chooser.setAcceptAllFileFilterUsed(true);
             int i = chooser.showOpenDialog(frame);
             if (i == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
@@ -434,7 +434,7 @@ public abstract class FigureEditorApp {
                 figureEditorPanel.getFigureEditor().getFigureSelection().removeAllFigures();
                 figureEditorPanel.getFigureEditor().getFigureCollection().removeAllFigures();
                 try {
-                    loadFigureCollection(chooser.getSelectedFile(), figureEditorPanel.getFigureEditor().getFigureCollection());
+                    loadFigureCollection(chooser.getSelectedFile().toPath(), figureEditorPanel.getFigureEditor().getFigureCollection());
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(getFrame(), "Error: " + e.getMessage());
                 }
@@ -450,14 +450,14 @@ public abstract class FigureEditorApp {
 
         @Override
         public void actionPerformed(ActionEvent event) {
-            File lastDir = new File(Preferences.userNodeForPackage(FigureEditorApp.class).get("lastDir", "."));
-            JFileChooser chooser = new JFileChooser(lastDir);
+            Path lastDir = Path.of(Preferences.userNodeForPackage(FigureEditorApp.class).get("lastDir", "."));
+            JFileChooser chooser = new JFileChooser(lastDir.toFile());
             chooser.setAcceptAllFileFilterUsed(true);
             int i = chooser.showSaveDialog(frame);
             if (i == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
                 Preferences.userNodeForPackage(FigureEditorApp.class).put("lastDir", chooser.getCurrentDirectory().getPath());
                 try {
-                    storeFigureCollection(figureEditorPanel.getFigureEditor().getFigureCollection(), chooser.getSelectedFile());
+                    storeFigureCollection(figureEditorPanel.getFigureEditor().getFigureCollection(), chooser.getSelectedFile().toPath());
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(getFrame(), "Error: " + e.getMessage());
                 }

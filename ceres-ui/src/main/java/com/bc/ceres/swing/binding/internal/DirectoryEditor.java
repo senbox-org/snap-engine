@@ -25,7 +25,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * An editor for directory names using a file chooser dialog with file selection mode DIRECTORIES_ONLY.
@@ -36,7 +36,7 @@ public class DirectoryEditor extends PropertyEditor {
 
     @Override
     public boolean isValidFor(PropertyDescriptor propertyDescriptor) {
-        return File.class.isAssignableFrom(propertyDescriptor.getType())
+        return Path.class.isAssignableFrom(propertyDescriptor.getType())
                && Boolean.TRUE.equals(propertyDescriptor.getAttribute("directory"));
     }
 

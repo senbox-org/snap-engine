@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 
@@ -88,6 +88,6 @@ public class PropertyPaneTest {
         int maxIterationCount = 10;
         String resamplingMethod = "NN";
         String productDescription = "All purpose";
-        File imageFile = new File(".").getAbsoluteFile();
+        Path imageFile = Path.of(".").toAbsolutePath();
     }
 }

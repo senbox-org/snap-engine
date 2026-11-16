@@ -28,7 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * An editor for file names using a file chooser dialog.
@@ -41,7 +41,7 @@ public class FileEditor extends PropertyEditor {
 
     @Override
     public boolean isValidFor(PropertyDescriptor propertyDescriptor) {
-        return File.class.isAssignableFrom(propertyDescriptor.getType())
+        return Path.class.isAssignableFrom(propertyDescriptor.getType())
                && !Boolean.TRUE.equals(propertyDescriptor.getAttribute("directory"));
     }
 
@@ -58,12 +58,12 @@ public class FileEditor extends PropertyEditor {
         etcButton.setMinimumSize(size);
         etcButton.addActionListener(e -> {
             final JFileChooser fileChooser = new JFileChooser();
-            File currentFile = (File) binding.getPropertyValue();
+            Path currentFile = (Path) binding.getPropertyValue();
             if (currentFile != null) {
-                fileChooser.setSelectedFile(currentFile);
+                fileChooser.setSelectedFile(currentFile.toFile());
             } else {
-                File selectedFile = (File) propertyDescriptor.getDefaultValue();
-                fileChooser.setSelectedFile(selectedFile);
+                Path selectedFile = (Path) propertyDescriptor.getDefaultValue();
+                fileChooser.setSelectedFile(selectedFile.toFile());
             }
             int i = fileChooser.showDialog(editorPanel, "Select");
             if (i == JFileChooser.APPROVE_OPTION && fileChooser.getSelectedFile() != null) {

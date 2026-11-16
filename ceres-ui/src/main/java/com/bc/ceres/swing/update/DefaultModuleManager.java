@@ -23,11 +23,13 @@ import com.bc.ceres.core.runtime.Module;
 import com.bc.ceres.core.runtime.ModuleContext;
 import com.bc.ceres.core.runtime.ProxyConfig;
 import com.bc.ceres.core.runtime.RuntimeContext;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.core.runtime.internal.ModuleImpl;
 import com.bc.ceres.core.runtime.internal.RepositoryScanner;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class DefaultModuleManager implements ModuleManager {
@@ -36,7 +38,7 @@ public class DefaultModuleManager implements ModuleManager {
     private URL repositoryUrl;
     private ProxyConfig proxyConfig;
     private Module[] installedModules;
-    private ArrayList<File> generatedFileList;
+    private final ArrayList<Path> generatedPathList;
     private ModuleItem[] installedModuleItems;
     private ModuleItem[] updatableModuleItems;
     private ModuleItem[] availableModuleItems;
@@ -48,7 +50,7 @@ public class DefaultModuleManager implements ModuleManager {
     public DefaultModuleManager(ModuleContext context) {
         this.context = context;
         this.proxyConfig = ProxyConfig.NULL;
-        this.generatedFileList = new ArrayList<File>(8);
+        this.generatedPathList = new ArrayList<>(8);
     }
 
     public URL getRepositoryUrl() {
@@ -113,7 +115,7 @@ public class DefaultModuleManager implements ModuleManager {
     public Module installModule(Module newModule, ProgressMonitor pm) throws CoreException {
         URL location = newModule.getLocation();
         Module installedModule = context.installModule(location, proxyConfig, pm);
-        generatedFileList.add(new File(installedModule.getLocation().getPath()));
+        generatedPathList.add(Path.of(installedModule.getLocation().getPath()));
         return installedModule;
     }
 
@@ -130,24 +132,24 @@ public class DefaultModuleManager implements ModuleManager {
 
     public void uninstallModule(Module oldModule, ProgressMonitor pm) throws CoreException {
         oldModule.uninstall(pm);
-        File file = new File(oldModule.getLocation().getPath());
-        generatedFileList.add(new File(file.getParent(), file.getName() + ".uninstall"));
+        Path file = Path.of(oldModule.getLocation().getPath());
+        generatedPathList.add(file.getParent().resolve(file.getFileName() + ".uninstall"));
     }
 
     public void startTransaction() {
-        generatedFileList.clear();
+        generatedPathList.clear();
     }
 
     public void endTransaction() {
-        generatedFileList.clear();
+        generatedPathList.clear();
     }
 
     public void rollbackTransaction() {
-        for (File file : generatedFileList) {
+        for (Path file : generatedPathList) {
             try {
                 context.getLogger().info(String.format("Module manager rollback: Deleting file [%s]", file));
-                if (!file.delete()) {
-                    file.deleteOnExit();
+                if (!Files.deleteIfExists(file)) {
+                    IOHelper.deleteOnExit(file);
                 }
             } catch (Exception e) {
                 context.getLogger().severe(String.format("Module manager rollback: %s", e.getMessage()));
