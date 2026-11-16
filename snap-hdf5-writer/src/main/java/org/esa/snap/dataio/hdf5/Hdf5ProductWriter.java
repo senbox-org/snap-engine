@@ -16,6 +16,7 @@
 package org.esa.snap.dataio.hdf5;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
@@ -25,7 +26,20 @@ import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.ColorPaletteDef;
+import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.MapGeoCoding;
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductNode;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
+import org.esa.snap.core.datamodel.Stx;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.maptransf.MapInfo;
 import org.esa.snap.core.dataop.maptransf.MapProjection;
 import org.esa.snap.core.dataop.maptransf.MapTransform;
@@ -33,14 +47,30 @@ import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
 import org.esa.snap.core.param.Parameter;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.*;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_FORWARD_CODING_KEY;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_GEO_CHECKS;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_GEO_CRS;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_INVERSE_CODING_KEY;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_LAT_VARIABLE_NAME;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_LON_VARIABLE_NAME;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_OFFSET_X;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_OFFSET_Y;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_RASTER_RESOLUTION_KM;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_SUBSAMPLING_X;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_SUBSAMPLING_Y;
 
 /**
  * A product writer implementation for the HDF5 format.
@@ -50,7 +80,7 @@ import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.*
  */
 public class Hdf5ProductWriter extends AbstractProductWriter {
 
-    private File outputFile;
+    private Path outputFile;
     private Map<Band, Long> bandIDs;
     private long fileID;
     private boolean hdf5LibInit;
@@ -69,7 +99,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     /**
      * Returns the output file of the product being written.
      */
-    public File getOutputFile() {
+    public Path getOutputFile() {
         return outputFile;
     }
 
@@ -111,18 +141,14 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
             }
         }
 
-        if (getOutput() instanceof String) {
-            outputFile = new File((String) getOutput());
-        } else if (getOutput() instanceof File) {
-            outputFile = (File) getOutput();
-        }
+        outputFile = ProductUtils.getProductPath(getOutput());
         Debug.assertNotNull(outputFile); // super.writeProductNodes should have checked this already
 
         outputFile = FileUtils.ensureExtension(outputFile, Hdf5ProductWriterPlugIn.HDF5_FILE_EXTENSION);
 
         try {
-            Debug.trace("creating HDF5 file " + outputFile.getPath());
-            fileID = H5.H5Fcreate(outputFile.getPath(), HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            Debug.trace("creating HDF5 file " + outputFile.toString());
+            fileID = H5.H5Fcreate(outputFile.toString(), HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         } catch (HDF5LibraryException e) {
             throw new ProductIOException(createErrorMessage(e), e);
         }
@@ -267,7 +293,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
      */
     public void deleteOutput() {
         if (outputFile != null) {
-            outputFile.delete();
+            IOHelper.delete(outputFile);
         }
     }
 
