@@ -29,4 +29,13 @@ public interface SpectralLibraryIO {
     boolean canRead(Path path);
     boolean canWrite(Path path);
     List<String> getFileExtensions();
+
+    /**
+     * Reads every spectral library represented by a source.  Traditional file
+     * formats represent exactly one library; container formats such as
+     * GeoPackage may represent several independent libraries.
+     */
+    default List<SpectralLibrary> readAll(Path path) throws IOException {
+        return List.of(read(path));
+    }
 }
