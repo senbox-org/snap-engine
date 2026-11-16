@@ -16,17 +16,18 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.Debug;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.io.FileUtils;
 
-import javax.imageio.stream.FileImageInputStream;
-import java.io.File;
-import java.io.IOException;
+import javax.imageio.stream.ImageInputStream;
 import java.net.URL;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -44,15 +45,14 @@ public class TiffReadingPerformanceTest {
     public static void main(String[] args) throws Exception {
 
         final URL resource = TiffReadingPerformanceTest.class.getResource("20180623_185222_ssc4d2_0024_visual.tif");
-        final String filePath = resource.getFile();
-        File file = new File(filePath);
+        Path file = UrlHelper.urlToFile(resource);
         final GeoTiffProductReader reader = new GeoTiffProductReader(new GeoTiffProductReaderPlugIn());
         Debug.setEnabled(true);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        FileImageInputStream imageInputStream = new FileImageInputStream(file);
+        ImageInputStream imageInputStream = ImageUtils.getImageInputStream(file);
         GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
-        String defaultProductName = FileUtils.getFilenameWithoutExtension(file.getName().toString());
+        String defaultProductName = FileUtils.getFilenameWithoutExtension(file.getFileName().toString());
         final Product product = reader.readProduct(geoTiffImageReader, defaultProductName);
         stopWatch.stopAndTrace("Opening product");
         assertNotNull(product);

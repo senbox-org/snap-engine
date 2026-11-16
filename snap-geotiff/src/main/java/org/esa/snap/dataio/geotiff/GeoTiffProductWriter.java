@@ -16,19 +16,22 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNode;
+import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.geotiff.internal.TiffHeader;
 
-import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * A product writer implementation for the GeoTIFF format.
@@ -40,7 +43,7 @@ import java.io.IOException;
  */
 public class GeoTiffProductWriter extends AbstractProductWriter {
 
-    private File outputFile;
+    private Path outputFile;
     private ImageOutputStream outputStream;
     private GeoTiffBandWriter bandWriter;
 
@@ -66,19 +69,14 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
         outputStream = null;
         bandWriter = null;
 
-        final File file;
-        if (getOutput() instanceof String) {
-            file = new File((String) getOutput());
-        } else {
-            file = (File) getOutput();
-        }
+        final Path file = ProductUtils.getProductPath(getOutput());
 
         outputFile = FileUtils.ensureExtension(file, GeoTiffProductWriterPlugIn.GEOTIFF_FILE_EXTENSION[0]);
         deleteOutput();
 
         ensureNamingConvention();
 
-        writeGeoTIFFProduct(new FileImageOutputStream(outputFile), getSourceProduct());
+        writeGeoTIFFProduct(ImageUtils.getImageOutputStream(outputFile), getSourceProduct());
     }
 
     private void ensureNamingConvention() {
@@ -121,8 +119,8 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
      */
     @Override
     public void deleteOutput() {
-        if (outputFile != null && outputFile.isFile()) {
-            outputFile.delete();
+        if (outputFile != null && Files.isRegularFile(outputFile)) {
+            IOHelper.delete(outputFile);
         }
     }
 

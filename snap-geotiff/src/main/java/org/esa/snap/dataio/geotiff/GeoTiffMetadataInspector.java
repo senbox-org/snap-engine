@@ -1,10 +1,8 @@
 package org.esa.snap.dataio.geotiff;
 
-import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.dataio.ImageRegistryUtils;
+import org.esa.snap.core.metadata.MetadataInspector;
 
-import javax.imageio.spi.ImageInputStreamSpi;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -18,24 +16,15 @@ public class GeoTiffMetadataInspector implements MetadataInspector {
 
     @Override
     public Metadata getMetadata(Path productPath) throws IOException {
-        try {
-            ImageInputStreamSpi imageInputStreamSpi = ImageRegistryUtils.registerImageInputStreamSpi();
-            try {
-                Product product = GeoTiffProductReader.readMetadataProduct(productPath, true);
+        try (Product product = GeoTiffProductReader.readMetadataProduct(productPath, true)){
+            Metadata metadata = new Metadata(product.getSceneRasterWidth(), product.getSceneRasterHeight());
 
-                Metadata metadata = new Metadata(product.getSceneRasterWidth(), product.getSceneRasterHeight());
-
-                for (int i = 0; i < product.getNumBands(); i++) {
-                    metadata.addBandName(product.getBandAt(i).getName());
-                }
-                metadata.setGeoCoding(product.getSceneGeoCoding());
-
-                return metadata;
-            } finally {
-                if (imageInputStreamSpi != null) {
-                    ImageRegistryUtils.deregisterImageInputStreamSpi(imageInputStreamSpi);
-                }
+            for (int i = 0; i < product.getNumBands(); i++) {
+                metadata.addBandName(product.getBandAt(i).getName());
             }
+            metadata.setGeoCoding(product.getSceneGeoCoding());
+
+            return metadata;
         } catch (RuntimeException | IOException exception) {
             throw exception;
         } catch (Exception exception) {

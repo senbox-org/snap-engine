@@ -28,37 +28,57 @@ import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.dimap.DimapProductHelpers;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.ColorPaletteDef;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.FilterBand;
+import org.esa.snap.core.datamodel.GcpDescriptor;
+import org.esa.snap.core.datamodel.GcpGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.ImageInfo;
+import org.esa.snap.core.datamodel.IndexCoding;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Placemark;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.geotiff.EPSGCodes;
 import org.esa.snap.core.util.geotiff.GeoTIFFCodes;
 import org.esa.snap.core.util.io.FileUtils;
-import org.esa.snap.dataio.ImageRegistryUtils;
 import org.esa.snap.dataio.geotiff.internal.GeoKeyEntry;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.jdom2.Document;
 import org.jdom2.input.DOMBuilder;
 import org.xml.sax.SAXException;
 
-import javax.imageio.spi.ImageInputStreamSpi;
 import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class GeoTiffProductReader extends AbstractProductReader {
 
@@ -67,17 +87,10 @@ public class GeoTiffProductReader extends AbstractProductReader {
     private static final int TIFFTAG_GDAL_METADATA = 42112;
     private static final int TIFFTAG_GDAL_NODATA = 42113;
 
-    private ImageInputStreamSpi imageInputStreamSpi;
     private GeoTiffImageReader geoTiffImageReader;
 
     public GeoTiffProductReader(ProductReaderPlugIn readerPlugIn) {
-        this(readerPlugIn, ImageRegistryUtils.registerImageInputStreamSpi());
-    }
-
-    public GeoTiffProductReader(ProductReaderPlugIn readerPlugIn, ImageInputStreamSpi imageInputStreamSpi) {
         super(readerPlugIn);
-
-        this.imageInputStreamSpi = imageInputStreamSpi;
     }
 
     @Override
@@ -87,15 +100,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
             Object productInput = super.getInput(); // invoke the 'getInput' method from the parent class
             ProductSubsetDef subsetDef = super.getSubsetDef(); // invoke the 'getSubsetDef' method from the parent class
 
-            Path productPath = null;
-            if (productInput instanceof String) {
-                productPath = new File((String) productInput).toPath();
-                this.geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath);
-            } else if (productInput instanceof File) {
-                productPath = ((File) productInput).toPath();
-                this.geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath);
-            } else if (productInput instanceof Path) {
-                productPath = (Path) productInput;
+            Path productPath = getProductPath();
+            if (productInput instanceof String || productInput instanceof Path) {
                 this.geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath);
             } else if (productInput instanceof InputStream) {
                 this.geoTiffImageReader = new GeoTiffImageReader((InputStream) productInput, null);
@@ -110,7 +116,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
             Product product = readProduct(this.geoTiffImageReader, defaultProductName, subsetDef);
             if (productPath != null) {
-                product.setFileLocation(productPath.toFile());
+                product.setFileLocation(productPath);
             }
 
             success = true;
@@ -195,16 +201,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     private void closeResources() {
-        try {
-            if (this.geoTiffImageReader != null) {
-                this.geoTiffImageReader.close();
-                this.geoTiffImageReader = null;
-            }
-        } finally {
-            if (this.imageInputStreamSpi != null) {
-                ImageRegistryUtils.deregisterImageInputStreamSpi(this.imageInputStreamSpi);
-                this.imageInputStreamSpi = null;
-            }
+        if (this.geoTiffImageReader != null) {
+            this.geoTiffImageReader.close();
+            this.geoTiffImageReader = null;
         }
         System.gc();
     }

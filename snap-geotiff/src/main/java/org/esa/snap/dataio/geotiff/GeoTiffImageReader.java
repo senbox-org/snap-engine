@@ -43,7 +43,7 @@ import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.io.BufferedInputStream;
 import java.io.Closeable;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,7 +89,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         CleanerRegistry.getInstance().register(this, state);
     }
 
-    public GeoTiffImageReader(File file) throws IOException {
+    public GeoTiffImageReader(Path file) throws IOException {
         this.imageReader = buildImageReader(file);
         this.closeable = new NullCloseable();
         this.noDataValue = readNoDataValue();
@@ -319,7 +319,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
                 Path child = productPath.resolve(childRelativePath);
                 if (Files.exists(child)) {
                     if (Files.isRegularFile(child)) {
-                        return new GeoTiffImageReader(child.toFile());
+                        return new GeoTiffImageReader(child);
                     } else {
                         throw new NotRegularFileException("The product folder '" + productPath.toString() + "' does not contain the file '" + childRelativePath + "'.");
                     }
@@ -335,7 +335,7 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
                         return buildGeoTiffImageReaderFromZipArchive(productPath, childRelativePath);
                     }
                 } else {
-                    return new GeoTiffImageReader(productPath.toFile());
+                    return new GeoTiffImageReader(productPath);
                 }
             } else {
                 // the product path does not represent a folder or a file

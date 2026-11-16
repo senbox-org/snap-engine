@@ -17,6 +17,8 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import com.sun.media.jai.codec.ByteArraySeekableStream;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
@@ -68,9 +70,9 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Iterator;
 
 import static org.junit.Assert.assertEquals;
@@ -94,13 +96,13 @@ public class GeoTiffWriteReadTest {
     private Product outProduct;
     private ByteArrayOutputStream outputStream;
     private GeoTiffProductReader reader;
-    private File location;
+    private Path location;
 
     @Before
     public void setup() {
         reader = (GeoTiffProductReader) new GeoTiffProductReaderPlugIn().createReaderInstance();
         outputStream = new ByteArrayOutputStream();
-        location = new File("memory.tif");
+        location = IOHelper.createATempDir().resolve("memory.tif");
         final int width = 14;
         final int height = 14;
         outProduct = new Product("P", "T", width, height);
@@ -217,8 +219,9 @@ public class GeoTiffWriteReadTest {
     @Test
     public void testReadProductWithHighestFlagSet() throws Exception {
         URL resource = getClass().getResource("C2RCC_max_flag_test.dim");
-        final Product probeProduct = ProductIO.readProduct(new File(resource.toURI()));
-        final File tiffFileToTest = File.createTempFile("C2RCC_FLag", ".tif");
+        assertNotNull(resource);
+        final Product probeProduct = ProductIO.readProduct(UrlHelper.urlToFile(resource));
+        final Path tiffFileToTest = IOHelper.createTempFile("C2RCC_FLag", ".tif");
         ProductIO.writeProduct(probeProduct, tiffFileToTest, "GeoTIFF", false);
         Product product = reader.readProductNodes(tiffFileToTest, null);
         final Band c2rcc_flags = product.getBand("c2rcc_flags");
@@ -566,7 +569,7 @@ public class GeoTiffWriteReadTest {
         MemoryCacheImageInputStream imageInputStream = new MemoryCacheImageInputStream(inputStream);
         GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
         try {
-            String defaultProductName = FileUtils.getFilenameWithoutExtension(location.toPath().getFileName().toString());
+            String defaultProductName = FileUtils.getFilenameWithoutExtension(location.getFileName().toString());
             Product product = reader.readProduct(geoTiffImageReader, defaultProductName);
             assertNotNull(product);
             assertNull(product.getFileLocation());

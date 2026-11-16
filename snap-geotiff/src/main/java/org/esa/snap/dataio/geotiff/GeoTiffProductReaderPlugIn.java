@@ -20,6 +20,7 @@ import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.metadata.MetadataInspector;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
@@ -29,14 +30,11 @@ import org.esa.snap.engine_utilities.util.ZipFileSystemBuilder;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Locale;
@@ -60,27 +58,19 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
     @Override
     public DecodeQualification getDecodeQualification(Object productInputFile) {
         try {
-            Path productPath = null;
-            if (productInputFile instanceof String) {
-                productPath = Paths.get((String) productInputFile);
-            } else if (productInputFile instanceof File) {
-                productPath = ((File) productInputFile).toPath();
-            } else if (productInputFile instanceof Path) {
-                productPath = (Path) productInputFile;
-            } else if (productInputFile instanceof InputStream) {
-                try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(productInputFile)) {
+            if (productInputFile instanceof InputStream) {
+                try (ImageInputStream imageInputStream = ImageUtils.getImageInputStream(productInputFile)) {
                     return getDecodeQualificationImpl(imageInputStream);
                 }
             }
+            final Path productPath = getProductPath(productInputFile);
             if (productPath != null) {
                 String fileExtension = FileUtils.getExtension(productPath.getFileName().toString());
                 if (fileExtension != null) {
                     boolean extensionMatches = Arrays.stream(TIFF_FILE_EXTENSION).anyMatch(fileExtension::equalsIgnoreCase);
                     if (extensionMatches) {
-                        try (InputStream fileInputStream = productPath.getFileSystem().provider().newInputStream(productPath, StandardOpenOption.READ)) {
-                            try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(fileInputStream)) {
-                                return getDecodeQualificationImpl(imageInputStream);
-                            }
+                        try (ImageInputStream imageInputStream = ImageUtils.getImageInputStream(productPath)) {
+                            return getDecodeQualificationImpl(imageInputStream);
                         }
                     } else if (fileExtension.equalsIgnoreCase(ZIP_FILE_EXTENSION)) {
                         return checkZipArchive(productPath);
@@ -165,7 +155,7 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class, InputStream.class,};
+        return new Class[]{String.class, Path.class, InputStream.class,};
     }
 
     @Override

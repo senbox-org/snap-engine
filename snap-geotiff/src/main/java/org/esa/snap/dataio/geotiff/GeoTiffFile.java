@@ -78,7 +78,7 @@ public class GeoTiffFile implements Closeable {
                     if (this.imageRelativeFilePath != null) {
                         throw new IllegalStateException("The relative file path '"+this.imageRelativeFilePath+"' must be null.");
                     }
-                    return new GeoTiffImageReader(this.imageParentPath.toFile());
+                    return new GeoTiffImageReader(this.imageParentPath);
                 }
             } else {
                 // the product path does not represent a folder or a file
@@ -97,7 +97,7 @@ public class GeoTiffFile implements Closeable {
         Path child = this.imageParentPath.resolve(this.imageRelativeFilePath);
         if (Files.exists(child)) {
             if (Files.isRegularFile(child)) {
-                return new GeoTiffImageReader(child.toFile());
+                return new GeoTiffImageReader(child);
             } else {
                 throw new NotRegularFileException("The product folder '"+this.imageParentPath.toString()+"' does not contain the file '" + this.imageRelativeFilePath + "'.");
             }
@@ -125,7 +125,7 @@ public class GeoTiffFile implements Closeable {
                     // the entry exists into the zip archive
                     if (this.copyFileFromZipArchiveOnLocalDisk) {
                         copyFileOnLocalDisk(findChildFileVisitor.getExistingChildFile());
-                        return new GeoTiffImageReader(state.localFile.toFile());
+                        return new GeoTiffImageReader(state.localFile);
                     } else {
                         GeoTiffImageReader geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReaderObject(findChildFileVisitor.getExistingChildFile(), fileSystem);
                         success = true;
@@ -144,7 +144,7 @@ public class GeoTiffFile implements Closeable {
     private GeoTiffImageReader processLocalCopiedFile() throws IOException {
         if (state.localFile != null && Files.exists(state.localFile)) {
             if (Files.isRegularFile(state.localFile)) {
-                return new GeoTiffImageReader(state.localFile.toFile());
+                return new GeoTiffImageReader(state.localFile);
             } else {
                 // the path does not represent a folder or a file
                 throw new NotRegularFileException(state.localFile.toString());
@@ -169,7 +169,7 @@ public class GeoTiffFile implements Closeable {
             if (!Files.exists(parentFolder)) {
                 Files.createDirectories(parentFolder);
             }
-            FileHelper.copyFileUsingInputStream(sourcePath, state.localFile.toString(), AbstractFile.BUFFER_SIZE);
+            FileHelper.copyFileUsingInputStream(sourcePath, state.localFile, AbstractFile.BUFFER_SIZE);
         }
     }
 

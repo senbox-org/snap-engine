@@ -26,7 +26,7 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -76,7 +76,7 @@ public class GeoTiffProductWriterPlugInTest {
         assertNotNull(classes);
         assertEquals(2, classes.length);
         final List<Class> list = Arrays.asList(classes);
-        assertEquals(true, list.contains(File.class));
+        assertEquals(true, list.contains(Path.class));
         assertEquals(true, list.contains(String.class));
     }
 

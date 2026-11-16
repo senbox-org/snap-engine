@@ -25,7 +25,7 @@ import org.esa.snap.core.datamodel.MapGeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Locale;
 
 /**
@@ -97,7 +97,7 @@ public class GeoTiffProductWriterPlugIn implements ProductWriterPlugIn {
     public Class[] getOutputTypes() {
         return new Class[]{
                 String.class,
-                File.class,
+                Path.class,
         };
     }
 

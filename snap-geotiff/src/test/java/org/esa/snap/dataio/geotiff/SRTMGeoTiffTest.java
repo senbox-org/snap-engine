@@ -1,11 +1,12 @@
 package org.esa.snap.dataio.geotiff;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.junit.Test;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -17,7 +18,7 @@ public class SRTMGeoTiffTest {
         URL resource = getClass().getResource("srtm_05_09.zip");
         assertNotNull(resource);
 
-        File file = new File(resource.toURI());
+        Path file = UrlHelper.urlToFile(resource);
         GeoTiffProductReader productReader = buildProductReader();
 
         Product product = productReader.readProductNodes(file, null);

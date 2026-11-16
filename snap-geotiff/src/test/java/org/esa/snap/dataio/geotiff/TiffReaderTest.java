@@ -16,15 +16,15 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.io.FileUtils;
-import com.bc.ceres.test.LongTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.imageio.stream.FileCacheImageInputStream;
-import java.io.File;
 import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
@@ -44,8 +44,7 @@ public class TiffReaderTest {
         final URL resource = getClass().getResource("tiger-minisblack-strip-16.tif");
         FileCacheImageInputStream imageInputStream = new FileCacheImageInputStream(resource.openStream(), null);
         try (GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream)) {
-            String filePath = resource.getFile();
-            String defaultProductName = FileUtils.getFilenameWithoutExtension(new File(filePath).getName().toString());
+            String defaultProductName = FileUtils.getFilenameWithoutExtension(UrlHelper.urlToFile(resource).getFileName().toString());
             final GeoTiffProductReader reader = new GeoTiffProductReader(new GeoTiffProductReaderPlugIn());
             Product product = reader.readProduct(geoTiffImageReader, defaultProductName);
             assertNotNull(product);

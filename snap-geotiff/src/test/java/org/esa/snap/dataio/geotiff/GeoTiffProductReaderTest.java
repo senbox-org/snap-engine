@@ -17,6 +17,7 @@ package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet;
 import it.geosolutions.imageio.plugins.tiff.TIFFField;
 import it.geosolutions.imageio.plugins.tiff.TIFFTag;
@@ -32,12 +33,15 @@ import org.junit.Test;
 
 import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +59,7 @@ public class GeoTiffProductReaderTest {
         URL resource = getClass().getResource("tiger-minisblack-strip-16.tif");
         assertNotNull(resource);
 
-        File productFile = new File(resource.toURI());
+        Path productFile = UrlHelper.urlToFile(resource);
         ProductReader productReader = buildProductReader();
         Product product = productReader.readProductNodes(productFile, null);
 
@@ -91,7 +95,7 @@ public class GeoTiffProductReaderTest {
         URL resource = getClass().getResource("tiger-minisblack-strip-16.tif");
         assertNotNull(resource);
 
-        File productFile = new File(resource.toURI());
+        Path productFile = UrlHelper.urlToFile(resource);
 
         ProductReader productReader = buildProductReader();
 
@@ -138,11 +142,11 @@ public class GeoTiffProductReaderTest {
     }
 
     @Test
-    public void testReadProductWithVirtualBand() throws URISyntaxException, IOException {
+    public void testReadProductWithVirtualBand() throws IOException {
         URL resource = getClass().getResource("subset_0_of_radar_bandep.tif");
         assertNotNull(resource);
 
-        File productFile = new File(resource.toURI());
+        Path productFile = UrlHelper.urlToFile(resource);
 
         ProductReader productReader = buildProductReader();
         Product product = productReader.readProductNodes(productFile, null);

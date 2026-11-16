@@ -17,6 +17,7 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import com.sun.media.jai.codec.ByteArraySeekableStream;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.datamodel.Band;
@@ -35,10 +36,11 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -83,15 +85,21 @@ public class GeoTiffProductReaderPlugInTest {
     }
 
     @Test
-    public void testDecodeQualification() throws URISyntaxException {
+    public void testDecodeQualification() {
 
-        final File zippedgeoTiff = new File(getClass().getResource("nearGreenwichMeridian.zip").toURI());
-        if(zippedgeoTiff.exists()) {
+        URL fileURL = getClass().getResource("nearGreenwichMeridian.zip");
+        assertNotNull(fileURL);
+        final Path zippedgeoTiff = UrlHelper.urlToFile(fileURL);
+        assertNotNull(zippedgeoTiff);
+        if(Files.exists(zippedgeoTiff)) {
             assertEquals(DecodeQualification.SUITABLE, plugIn.getDecodeQualification(zippedgeoTiff));
         }
 
-        final File tifInDirInZip = new File(getClass().getResource("tifInDirInZip.zip").toURI());
-        if (tifInDirInZip.exists()) {
+        fileURL = getClass().getResource("tifInDirInZip.zip");
+        assertNotNull(fileURL);
+        final Path tifInDirInZip = UrlHelper.urlToFile(fileURL);
+        assertNotNull(tifInDirInZip);
+        if (Files.exists(tifInDirInZip)) {
             assertEquals(DecodeQualification.UNABLE, plugIn.getDecodeQualification(tifInDirInZip));
         }
 
@@ -126,7 +134,7 @@ public class GeoTiffProductReaderPlugInTest {
         assertNotNull(classes);
         assertEquals(3, classes.length);
         final List<Class> list = Arrays.asList(classes);
-        assertEquals(true, list.contains(File.class));
+        assertEquals(true, list.contains(Path.class));
         assertEquals(true, list.contains(String.class));
         assertEquals(true, list.contains(InputStream.class));
     }

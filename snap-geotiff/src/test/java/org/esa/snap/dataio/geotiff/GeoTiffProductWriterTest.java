@@ -17,6 +17,8 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.io.EnhancedNIORandomAccessFile;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -26,20 +28,22 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.nio.file.StandardOpenOption;
 
 import static org.junit.Assert.*;
 
 public class GeoTiffProductWriterTest {
 
-    private static final String FILENAME = "temp.tif";
+    private String FILENAME = "temp.tif";
     private GeoTiffProductWriter _productWriter;
     private Product _product;
 
     @Before
     public void setUp() throws Exception {
+        FILENAME = IOHelper.createATempDir().resolve(FILENAME).toString();
         _productWriter = new GeoTiffProductWriter(new GeoTiffProductWriterPlugIn());
 
         _product = new Product("temp", "type", 10, 20);
@@ -50,10 +54,10 @@ public class GeoTiffProductWriterTest {
     @After
     public void tearDown() throws Exception {
         _productWriter.close();
-        File testFile = new File(FILENAME);
-        if (testFile.isFile()) {
-            if (!testFile.delete()) {
-                fail("unable to delete test file: " + testFile.getName());
+        Path testFile = Path.of(FILENAME);
+        if (Files.isRegularFile(testFile)) {
+            if (!IOHelper.delete(testFile)) {
+                fail("unable to delete test file: " + testFile.getFileName());
             }
         }
     }
@@ -72,7 +76,7 @@ public class GeoTiffProductWriterTest {
 
     @Test
     public void testThatFileIsAValidOutput() throws IOException {
-        _productWriter.writeProductNodes(_product, new File(FILENAME));
+        _productWriter.writeProductNodes(_product, Path.of(FILENAME));
     }
 
     @Test
@@ -80,7 +84,7 @@ public class GeoTiffProductWriterTest {
         _productWriter.writeProductNodes(_product, FILENAME);
         _productWriter.close();
 
-        assertTrue(new File(FILENAME).length() > 0);
+        assertTrue(Files.size(Path.of(FILENAME)) > 0);
     }
 
     @Test
@@ -92,7 +96,7 @@ public class GeoTiffProductWriterTest {
         writeAllBands(_product);
         _productWriter.close();
 
-        assertEquals(expectedSize, new File(FILENAME).length());
+        assertEquals(expectedSize, Files.size(Path.of(FILENAME)));
     }
 
     private void writeAllBands(final Product product) throws IOException {
@@ -105,8 +109,8 @@ public class GeoTiffProductWriterTest {
     }
 
     private void createBiggerFile(final long expectedSize) throws IOException {
-        final RandomAccessFile raf = new RandomAccessFile(FILENAME, "rw");
-        raf.setLength(expectedSize + 10);
+        final EnhancedNIORandomAccessFile raf = new EnhancedNIORandomAccessFile(Path.of(FILENAME), StandardOpenOption.READ, StandardOpenOption.WRITE);
+        raf.setMinLength(expectedSize);
         raf.close();
     }
 
