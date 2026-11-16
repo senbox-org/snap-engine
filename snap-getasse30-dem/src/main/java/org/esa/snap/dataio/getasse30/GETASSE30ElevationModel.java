@@ -22,7 +22,7 @@ import org.esa.snap.core.dataop.dem.BaseElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.resamp.Resampling;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 public class GETASSE30ElevationModel extends BaseElevationModel {
@@ -53,11 +53,11 @@ public class GETASSE30ElevationModel extends BaseElevationModel {
 
     @Override
     protected void createElevationFile(final ElevationFile[][] elevationFiles,
-                                       final int x, final int y, final File demInstallDir) {
+                                       final int x, final int y, final Path demInstallDir) {
         final int minLon = x * DEGREE_RES - 180;
         final int minLat = y * DEGREE_RES - 90;
         final String fileName = createTileFilename(minLat, minLon);
-        final File localFile = new File(demInstallDir, fileName);
+        final Path localFile = demInstallDir.resolve(fileName);
         elevationFiles[x][NUM_Y_TILES - 1 - y] = new GETASSE30File(this, localFile, productReaderPlugIn.createReaderInstance());
     }
 

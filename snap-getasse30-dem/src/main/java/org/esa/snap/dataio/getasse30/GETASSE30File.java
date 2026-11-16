@@ -21,7 +21,7 @@ import org.esa.snap.core.dataop.dem.BaseElevationTile;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 /**
@@ -33,7 +33,7 @@ public final class GETASSE30File extends ElevationFile {
 
     private static final String remoteHTTP = "http://step.esa.int/auxdata/dem/GETASSE30/";
 
-    public GETASSE30File(final GETASSE30ElevationModel model, final File localFile, final ProductReader reader) {
+    public GETASSE30File(final GETASSE30ElevationModel model, final Path localFile, final ProductReader reader) {
         super(localFile, reader);
         this.demModel = model;
     }

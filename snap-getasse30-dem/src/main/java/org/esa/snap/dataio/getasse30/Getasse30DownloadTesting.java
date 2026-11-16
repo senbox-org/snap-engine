@@ -1,13 +1,13 @@
 package org.esa.snap.dataio.getasse30;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class Getasse30DownloadTesting {
         ElevationFile[][] elevationFiles = new ElevationFile[descriptor.getNumXTiles()][descriptor.getNumYTiles()];
 
         for (double[] coordinate : coordinates) {
-            File folder = Files.createTempDirectory(this.getClass().getSimpleName()).toFile();
+            Path folder = IOHelper.createATempDir(this.getClass().getSimpleName());
 
             int x = (int) Math.floor((coordinate[0] + 180.0) / 360 * descriptor.getNumXTiles());
             int y = (int) Math.floor((coordinate[1] + 90.0) / 360 * descriptor.getNumYTiles());

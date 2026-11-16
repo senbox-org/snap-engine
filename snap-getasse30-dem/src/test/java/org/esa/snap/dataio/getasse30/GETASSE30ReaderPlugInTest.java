@@ -22,7 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -52,7 +52,7 @@ public class GETASSE30ReaderPlugInTest {
 
     private void testValidInput(final String s) {
         assertSame(_plugIn.getDecodeQualification(s), DecodeQualification.INTENDED);
-        assertSame(_plugIn.getDecodeQualification(new File(s)), DecodeQualification.INTENDED);
+        assertSame(_plugIn.getDecodeQualification(Path.of(s)), DecodeQualification.INTENDED);
     }
 
     @Test
@@ -75,13 +75,13 @@ public class GETASSE30ReaderPlugInTest {
 
     private void testInvalidInput(final String s) {
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(s));
-        assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(new File(s)));
+        assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(Path.of(s)));
     }
 
     @Test
     public void testThatOtherTypesCannotBeDecoded() throws MalformedURLException {
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(null));
-        final URL url = new File("./GETASSE30/readme.txt").toURL();
+        final URL url = Path.of("./GETASSE30/readme.txt").toUri().toURL();
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(url));
         final Object object = new Object();
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(object));
@@ -99,7 +99,7 @@ public class GETASSE30ReaderPlugInTest {
         assertNotNull(inputTypes);
         assertEquals(2, inputTypes.length);
         assertEquals(String.class, inputTypes[0]);
-        assertEquals(File.class, inputTypes[1]);
+        assertEquals(Path.class, inputTypes[1]);
     }
 
     @Test

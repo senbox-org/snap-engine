@@ -20,8 +20,9 @@ import org.esa.snap.core.dataop.dem.EastingNorthingParser;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
@@ -83,11 +84,11 @@ public class GETASSE30FileInfo {
         return _noDataValue;
     }
 
-    public static GETASSE30FileInfo create(final File file) throws IOException {
+    public static GETASSE30FileInfo create(final Path file) throws IOException {
         return createFromDataFile(file);
     }
 
-    private static GETASSE30FileInfo createFromDataFile(final File dataFile) throws IOException {
+    private static GETASSE30FileInfo createFromDataFile(final Path dataFile) throws IOException {
         final GETASSE30FileInfo fileInfo = new GETASSE30FileInfo();
         fileInfo.setFromData(dataFile);
         return fileInfo;
@@ -104,11 +105,11 @@ public class GETASSE30FileInfo {
         return null;
     }
 
-    private void setFromData(final File dataFile) throws IOException {
-        final String ext = FileUtils.getExtension(dataFile.getName());
+    private void setFromData(final Path dataFile) throws IOException {
+        final String ext = FileUtils.getExtension(dataFile.getFileName());
         if (".zip".equalsIgnoreCase(ext)) {
-            final String baseName = FileUtils.getFilenameWithoutExtension(dataFile.getName()) + ".GETASSE30";
-            final ZipFile zipFile = new ZipFile(dataFile);
+            final String baseName = FileUtils.getFilenameWithoutExtension(dataFile.getFileName()) + ".GETASSE30";
+            final ZipFile zipFile = new ZipFile(dataFile.toFile());
             try {
                 final ZipEntry zipEntry = getZipEntryIgnoreCase(zipFile, baseName);
                 if (zipEntry == null) {
@@ -119,7 +120,7 @@ public class GETASSE30FileInfo {
                 zipFile.close();
             }
         } else {
-            setFromData(dataFile.getName(), dataFile.length());
+            setFromData(dataFile.getFileName().toString(), Files.size(dataFile));
         }
     }
 

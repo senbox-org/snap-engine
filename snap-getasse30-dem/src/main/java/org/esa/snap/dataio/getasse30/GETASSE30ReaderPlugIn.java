@@ -21,7 +21,7 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Locale;
 
 
@@ -38,7 +38,7 @@ public class GETASSE30ReaderPlugIn implements ProductReaderPlugIn {
     };
     public static final Class[] INPUT_TYPES = new Class[]{
             String.class,
-            File.class,
+            Path.class,
     };
     public static final String DESCRIPTION = "GETASSE30 Data Product Tile";
 
@@ -50,9 +50,9 @@ public class GETASSE30ReaderPlugIn implements ProductReaderPlugIn {
      * is capable of decoding the input's content.
      */
     public DecodeQualification getDecodeQualification(final Object input) {
-        final File file = getInputFile(input);
+        final Path file = getInputFile(input);
         if (file != null) {
-            final String fileName = file.getName().toLowerCase();
+            final String fileName = file.getFileName().toString().toLowerCase();
             final String[] extensions = getDefaultFileExtensions();
             for (final String extension : extensions) {
                 if (fileName.endsWith(extension) && !fileName.equals(extension)) {
@@ -63,12 +63,12 @@ public class GETASSE30ReaderPlugIn implements ProductReaderPlugIn {
         return DecodeQualification.UNABLE;
     }
 
-    public static File getInputFile(final Object input) {
-        File file = null;
+    public static Path getInputFile(final Object input) {
+        Path file = null;
         if (input instanceof String) {
-            file = new File((String) input);
-        } else if (input instanceof File) {
-            file = (File) input;
+            file = Path.of((String) input);
+        } else if (input instanceof Path) {
+            file = (Path) input;
         }
         return file;
     }

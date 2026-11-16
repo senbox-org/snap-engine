@@ -18,6 +18,7 @@ package org.esa.snap.dataio.getasse30;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MapGeoCoding;
@@ -33,9 +34,10 @@ import org.esa.snap.core.util.io.FileUtils;
 
 import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -67,18 +69,18 @@ public class GETASSE30Reader extends AbstractProductReader {
     protected Product readProductNodesImpl() throws IOException {
         initReader();
 
-        final File dataFile = GETASSE30ReaderPlugIn.getInputFile(getInput());
+        final Path dataFile = GETASSE30ReaderPlugIn.getInputFile(getInput());
         _fileInfo = GETASSE30FileInfo.create(dataFile);
 
         final String fileName;
         try {
             final String ext = FileUtils.getExtension(dataFile);
             if (".zip".equalsIgnoreCase(ext)) {
-                final String entryName = FileUtils.getFilenameWithoutExtension(dataFile.getName()) + ".GETASSE30";
-                _zipFile = new ZipFile(dataFile);
+                final String entryName = FileUtils.getFilenameWithoutExtension(dataFile.getFileName()) + ".GETASSE30";
+                _zipFile = new ZipFile(dataFile.toFile());
                 final ZipEntry entry = getZipEntryIgnoreCase(entryName);
                 final InputStream inputStream = _zipFile.getInputStream(entry);
-                _imageInputStream = new FileCacheImageInputStream(inputStream, createCacheDir());
+                _imageInputStream = new FileCacheImageInputStream(inputStream, createCacheDir().toFile());
                 fileName = FileUtils.getFilenameWithoutExtension(entryName);
             } else {
                 _imageInputStream = ImageUtils.getImageInputStream(dataFile);
@@ -178,11 +180,11 @@ public class GETASSE30Reader extends AbstractProductReader {
         _fileInfo = null;
     }
 
-    private static File createCacheDir() throws IOException {
-        final File cacheDir = new File(SystemUtils.getCacheDir(), "temp");
-        if (!cacheDir.exists()) {
-            cacheDir.mkdirs();
-            if (!cacheDir.exists()) {
+    private static Path createCacheDir() throws IOException {
+        final Path cacheDir = SystemUtils.getCacheDir().resolve("temp");
+        if (!Files.exists(cacheDir)) {
+            IOHelper.createDirectories(cacheDir);
+            if (!Files.exists(cacheDir)) {
                 throw new IOException(String.format("Failed to create directory '%s'.", cacheDir));
             }
         }
