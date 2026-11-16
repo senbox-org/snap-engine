@@ -15,16 +15,15 @@
  */
 package org.esa.snap.stac;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.stac.extensions.Assets;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -50,8 +49,8 @@ public class TestStacItemUnit {
     public void testCreateFromFile() throws Exception {
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
         assertNotNull(resource);
-        Path path = Paths.get(resource.toURI());
-        StacItem item = new StacItem(path.toFile());
+        Path path = UrlHelper.urlToFile(resource);
+        StacItem item = new StacItem(path);
 
         assertEquals("CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124", item.getId());
         assertNotNull(item.getJSONFile());
@@ -89,7 +88,7 @@ public class TestStacItemUnit {
     @Test
     public void testCreateFromNonExistentFileThrows() {
         try {
-            new StacItem(new File("nonexistent_file.json"));
+            new StacItem(Path.of("nonexistent_file.json"));
             fail("Expected IOException");
         } catch (IOException e) {
             assertEquals("Unable to parse JSON from given local file.", e.getMessage());
@@ -254,7 +253,8 @@ public class TestStacItemUnit {
     @Test
     public void testGetGeometryFromCapella() throws Exception {
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
-        StacItem item = new StacItem(Paths.get(resource.toURI()).toFile());
+        assertNotNull(resource);
+        StacItem item = new StacItem(UrlHelper.urlToFile(resource));
 
         JSONObject geometry = item.getGeometry();
         assertNotNull(geometry);
@@ -264,7 +264,8 @@ public class TestStacItemUnit {
     @Test
     public void testGetGeometryAsWKTFromCapella() throws Exception {
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
-        StacItem item = new StacItem(Paths.get(resource.toURI()).toFile());
+        assertNotNull(resource);
+        StacItem item = new StacItem(UrlHelper.urlToFile(resource));
 
         String wkt = item.getGeometryAsWKT();
         assertNotNull(wkt);
@@ -275,7 +276,8 @@ public class TestStacItemUnit {
     @Test
     public void testGetBoundingBoxFromCapella() throws Exception {
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
-        StacItem item = new StacItem(Paths.get(resource.toURI()).toFile());
+        assertNotNull(resource);
+        StacItem item = new StacItem(UrlHelper.urlToFile(resource));
 
         JSONArray bbox = item.getBoundingBox();
         assertNotNull(bbox);
@@ -287,14 +289,16 @@ public class TestStacItemUnit {
     @Test
     public void testGetVersionFromCapella() throws Exception {
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
-        StacItem item = new StacItem(Paths.get(resource.toURI()).toFile());
+        assertNotNull(resource);
+        StacItem item = new StacItem(UrlHelper.urlToFile(resource));
         assertEquals("0.9.0", item.getVersion());
     }
 
     @Test
     public void testGetTime() throws Exception {
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
-        StacItem item = new StacItem(Paths.get(resource.toURI()).toFile());
+        assertNotNull(resource);
+        StacItem item = new StacItem(UrlHelper.urlToFile(resource));
         assertNotNull(item.getTime());
     }
 
@@ -307,21 +311,24 @@ public class TestStacItemUnit {
     @Test
     public void testIsStacItemStaticWithValidPath() throws Exception {
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
-        Path path = Paths.get(resource.toURI());
+        assertNotNull(resource);
+        Path path = UrlHelper.urlToFile(resource);
         assertTrue(StacItem.isStacItem(path));
     }
 
     @Test
     public void testIsStacItemStaticWithCatalog() throws Exception {
         URL resource = StacItem.class.getResource("catalog/snapplanet.json");
-        Path path = Paths.get(resource.toURI());
+        assertNotNull(resource);
+        Path path = UrlHelper.urlToFile(resource);
         assertFalse(StacItem.isStacItem(path));
     }
 
     @Test
     public void testGetPropertiesFromCapella() throws Exception {
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
-        StacItem item = new StacItem(Paths.get(resource.toURI()).toFile());
+        assertNotNull(resource);
+        StacItem item = new StacItem(UrlHelper.urlToFile(resource));
 
         JSONObject properties = item.getProperties();
         assertNotNull(properties);
@@ -332,7 +339,8 @@ public class TestStacItemUnit {
     @Test
     public void testGetProductTypeFromCapella() throws Exception {
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
-        StacItem item = new StacItem(Paths.get(resource.toURI()).toFile());
+        assertNotNull(resource);
+        StacItem item = new StacItem(UrlHelper.urlToFile(resource));
         assertEquals("GEO", item.getProductType());
     }
 
@@ -341,7 +349,7 @@ public class TestStacItemUnit {
         StacItem item = new StacItem("file-test");
         assertNull(item.getJSONFile());
 
-        File file = new File("test.json");
+        Path file = Path.of("test.json");
         item.setJSONFile(file);
         assertEquals(file, item.getJSONFile());
     }

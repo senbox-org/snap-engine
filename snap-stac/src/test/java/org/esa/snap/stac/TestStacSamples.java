@@ -15,11 +15,11 @@
  */
 package org.esa.snap.stac;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.junit.Test;
 
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -48,10 +48,10 @@ public class TestStacSamples {
 
         URL resource = StacItem.class.getResource(stacPath);
         assertNotNull(resource);
-        Path path = Paths.get(resource.toURI());
+        Path path = UrlHelper.urlToFile(resource);
         assertTrue(StacItem.isStacItem(path));
 
-        final StacItem stacItem = new StacItem(path.toFile());
+        final StacItem stacItem = new StacItem(path);
 
         //StacItemValidator validator = new StacItemValidator();
         //validator.validate(stacItem);

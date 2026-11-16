@@ -22,8 +22,8 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.engine_utilities.gpf.ReaderUtils;
 import org.esa.snap.stac.StacItem;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 
@@ -38,7 +38,7 @@ public class STACProductReaderPlugIn implements ProductReaderPlugIn {
     public static final String METADATA_EXT = ".json";
     public static final String IMAGE_GEOTIFF_EXT = ".tif";
 
-    private final Class[] VALID_INPUT_TYPES = new Class[]{Path.class, File.class, String.class, InputStream.class};
+    private final Class[] VALID_INPUT_TYPES = new Class[]{Path.class, Path.class, String.class, InputStream.class};
 
     /**
      * Checks whether the given object is an acceptable input for this product reader and if so, the method checks if it
@@ -140,10 +140,10 @@ public class STACProductReaderPlugIn implements ProductReaderPlugIn {
          * @param file the file to be or not be accepted.
          * @return <code>true</code> if given file is accepted by this filter
          */
-        public boolean accept(final File file) {
+        public boolean accept(final Path file) {
             if (super.accept(file)) {
-                final String filename = file.getName().toLowerCase();
-                return file.isDirectory() || filename.endsWith(METADATA_EXT);
+                final String filename = file.getFileName().toString().toLowerCase();
+                return Files.isDirectory(file) || filename.endsWith(METADATA_EXT);
             }
             return false;
         }

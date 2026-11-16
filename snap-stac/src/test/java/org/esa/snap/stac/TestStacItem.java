@@ -15,6 +15,7 @@
  */
 package org.esa.snap.stac;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.EstablishedModifiers;
 import org.json.simple.JSONObject;
@@ -24,11 +25,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -104,7 +103,7 @@ public class TestStacItem {
     public void testConstructorWithInvalidFile() {
         try {
             // Provide a non-existent file
-            new StacItem(new File("nonexistent.json"));
+            new StacItem(Path.of("nonexistent.json"));
             fail("Expected ParseException for unable to parse JSON from given local file");
         } catch (IOException e) {
             assertEquals("Unable to parse JSON from given local file.", e.getMessage());
@@ -117,16 +116,16 @@ public class TestStacItem {
     public void testIsStacItemCapella() throws Exception {
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
         assertNotNull(resource);
-        Path path = Paths.get(resource.toURI());
+        Path path = UrlHelper.urlToFile(resource);
 
         assertTrue(StacItem.isStacItem(path));
     }
 
     @Test
-    public void testIsStacItemCatalog() throws Exception {
+    public void testIsStacItemCatalog() {
         URL resource = StacItem.class.getResource("catalog/snapplanet.json");
         assertNotNull(resource);
-        Path path = Paths.get(resource.toURI());
+        Path path = UrlHelper.urlToFile(resource);
 
         assertFalse(StacItem.isStacItem(path));
     }

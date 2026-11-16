@@ -31,10 +31,10 @@ import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.SnapStacProduct;
 
 import javax.media.jai.ImageLayout;
-import java.awt.*;
-import java.io.File;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -90,10 +90,10 @@ public class STACProductReader extends AbstractProductReader {
             if(path == null) {
                 throw new IOException("Unable to get Path from " + input);
             }
-            File metadataFile = path.toFile();
-            if (metadataFile.isDirectory()) {
+            Path metadataFile = path;
+            if (Files.isDirectory(metadataFile)) {
                 metadataFile = null;//STACProductReaderPlugIn.findMetadataFile(path);
-            } else if (metadataFile.getName().toLowerCase().endsWith(".zip")) {
+            } else if (metadataFile.getFileName().toString().toLowerCase().endsWith(".zip")) {
                 throw new IOException("Zipped STAC not supported");
             }
 
@@ -104,8 +104,8 @@ public class STACProductReader extends AbstractProductReader {
             final Map<String, Assets.Asset> imageAssets = stacItem.getImageAssets();
 
             for (Assets.Asset imageAsset : imageAssets.values()) {
-                final File imageFile = new File(metadataFile.getParentFile(), imageAsset.href.substring(imageAsset.href.lastIndexOf('/')));
-                if (imageFile.exists() && imageFile.length() > 0) {
+                final Path imageFile = metadataFile.getParent().resolve(imageAsset.href.substring(imageAsset.href.lastIndexOf('/')));
+                if (Files.exists(imageFile) && Files.size(imageFile) > 0) {
 
                     final ProductReader imageReader = createReaderInstance();
                     if (imageReader == null) {

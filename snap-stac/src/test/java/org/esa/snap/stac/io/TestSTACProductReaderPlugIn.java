@@ -15,6 +15,8 @@
  */
 package org.esa.snap.stac.io;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.util.io.SnapFileFilter;
@@ -22,13 +24,10 @@ import org.esa.snap.stac.StacItem;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -69,7 +68,7 @@ public class TestSTACProductReaderPlugIn {
         boolean hasPath = false, hasFile = false, hasString = false, hasInputStream = false;
         for (Class c : types) {
             if (c == Path.class) hasPath = true;
-            if (c == File.class) hasFile = true;
+            if (c == Path.class) hasFile = true;
             if (c == String.class) hasString = true;
             if (c == InputStream.class) hasInputStream = true;
         }
@@ -93,20 +92,20 @@ public class TestSTACProductReaderPlugIn {
     }
 
     @Test
-    public void testGetDecodeQualificationSuitableForStacJson() throws Exception {
+    public void testGetDecodeQualificationSuitableForStacJson() {
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
         assertNotNull(resource);
-        Path path = Paths.get(resource.toURI());
+        Path path = UrlHelper.urlToFile(resource);
 
         DecodeQualification qual = plugIn.getDecodeQualification(path);
         assertEquals(DecodeQualification.SUITABLE, qual);
     }
 
     @Test
-    public void testGetDecodeQualificationUnableForCatalog() throws Exception {
+    public void testGetDecodeQualificationUnableForCatalog() {
         URL resource = StacItem.class.getResource("catalog/snapplanet.json");
         assertNotNull(resource);
-        Path path = Paths.get(resource.toURI());
+        Path path = UrlHelper.urlToFile(resource);
 
         DecodeQualification qual = plugIn.getDecodeQualification(path);
         assertEquals(DecodeQualification.UNABLE, qual);
@@ -114,13 +113,13 @@ public class TestSTACProductReaderPlugIn {
 
     @Test
     public void testGetDecodeQualificationUnableForNonJson() {
-        DecodeQualification qual = plugIn.getDecodeQualification(new File("test.tif"));
+        DecodeQualification qual = plugIn.getDecodeQualification(Path.of("test.tif"));
         assertEquals(DecodeQualification.UNABLE, qual);
     }
 
     @Test
     public void testGetDecodeQualificationUnableForNonExistent() {
-        DecodeQualification qual = plugIn.getDecodeQualification(new File("nonexistent.json"));
+        DecodeQualification qual = plugIn.getDecodeQualification(Path.of("nonexistent.json"));
         assertEquals(DecodeQualification.UNABLE, qual);
     }
 
@@ -136,14 +135,14 @@ public class TestSTACProductReaderPlugIn {
 
         URL resource = StacItem.class.getResource("capella/CAPELLA_ARL_SP_GEO_VV_20190927234024_20190927234124.json");
         assertNotNull(resource);
-        File file = new File(resource.toURI());
+        Path file = UrlHelper.urlToFile(resource);
         assertTrue(filter.accept(file));
     }
 
     @Test
     public void testFileFilterAcceptsDirectories() {
         STACProductReaderPlugIn.FileFilter filter = new STACProductReaderPlugIn.FileFilter();
-        File dir = new File(System.getProperty("java.io.tmpdir"));
+        Path dir = IOHelper.createATempDir();
         assertTrue(filter.accept(dir));
     }
 }

@@ -24,7 +24,7 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -66,7 +66,7 @@ public class TestSTACProductWriterPlugIn {
         boolean hasString = false, hasFile = false;
         for (Class c : types) {
             if (c == String.class) hasString = true;
-            if (c == File.class) hasFile = true;
+            if (c == Path.class) hasFile = true;
         }
         assertTrue(hasString);
         assertTrue(hasFile);

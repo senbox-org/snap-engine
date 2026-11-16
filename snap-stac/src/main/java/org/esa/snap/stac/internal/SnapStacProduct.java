@@ -42,7 +42,8 @@ import org.json.simple.JSONObject;
 import javax.media.jai.ImageLayout;
 import java.awt.*;
 import java.io.Closeable;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -139,7 +140,7 @@ public class SnapStacProduct implements Closeable {
         final List<JSONObject> addedBandPropertiesList = new ArrayList<>();
 
         if (!imageAssets.isEmpty()) {
-            final File metadataFile = stacItem.getJSONFile();
+            final Path metadataFile = stacItem.getJSONFile();
             if (metadataFile != null) {
 
                 for (Object bandObj : stacItem.getBands()) {
@@ -153,9 +154,9 @@ public class SnapStacProduct implements Closeable {
                     if (imageAssets.containsKey(name)) {
                         final Assets.Asset imageAsset = imageAssets.get(name);
 
-                        final File imageFile = new File(metadataFile.getParentFile(), imageAsset.href);
-                        bandProperties.put("file", imageFile.getName());
-                        if (imageFile.exists() && imageFile.length() > 0) {
+                        final Path imageFile = metadataFile.getParent().resolve(imageAsset.href);
+                        bandProperties.put("file", imageFile.getFileName());
+                        if (Files.exists(imageFile) && Files.size(imageFile) > 0) {
 
                             final ProductReader imageReader = geoTiffReaderPlugin.createReaderInstance();
                             imageReaderList.add(imageReader);
@@ -169,9 +170,9 @@ public class SnapStacProduct implements Closeable {
 
                     } else {
                         for (Assets.Asset imageAsset : imageAssets.values()) {
-                            final File imageFile = new File(metadataFile.getParentFile(), imageAsset.href);
+                            final Path imageFile = metadataFile.getParent().resolve(imageAsset.href);
                             if (imageAsset.name.toLowerCase().contains(name.toLowerCase())) {
-                                bandProperties.put("file", imageFile.getName());
+                                bandProperties.put("file", imageFile.getFileName());
                             }
                         }
                         processAssetBands(product, imageAssets, metadataFile, addedBandPropertiesList);
@@ -192,7 +193,7 @@ public class SnapStacProduct implements Closeable {
     }
 
     private void processAssetBands(final Product product, final Map<String, Assets.Asset> imageAssets,
-                                   final File metadataFile, final List<JSONObject> addedBandPropertiesList) throws Exception {
+                                   final Path metadataFile, final List<JSONObject> addedBandPropertiesList) throws Exception {
         JSONArray eoBands = stacItem.getBands();
         for (Assets.Asset imageAsset : imageAssets.values()) {
             if (!bandProductMap.containsKey(imageAsset)) {
@@ -204,9 +205,9 @@ public class SnapStacProduct implements Closeable {
                     }
                 }
 
-                final File imageFile = new File(metadataFile.getParentFile(), imageAsset.href);
+                final Path imageFile = metadataFile.getParent().resolve(imageAsset.href);
                 Product bandProduct = null;
-                if (imageFile.exists() && imageFile.length() > 0) {
+                if (Files.exists(imageFile) && Files.size(imageFile) > 0) {
 
                     final ProductReader imageReader = geoTiffReaderPlugin.createReaderInstance();
                     imageReaderList.add(imageReader);

@@ -36,13 +36,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +64,7 @@ public class StacItem implements StacComponent {
 
     private String itemURL;
     private String version;
-    private File jsonFile;
+    private Path jsonFile;
     private final HashMap<String, Assets.Asset> assetsById = new HashMap<>();
     private final List<Assets.Asset> dataAssets = new ArrayList<>();
     private final List<Assets.Asset> metadataAssets = new ArrayList<>();
@@ -104,10 +104,10 @@ public class StacItem implements StacComponent {
      * @param productInputFile The file of the StacItem
      * @throws IOException
      */
-    public StacItem(File productInputFile) throws IOException {
+    public StacItem(Path productInputFile) throws IOException {
         try {
             jsonFile = productInputFile;
-            initStacItem((JSONObject) new JSONParser().parse(new FileReader(productInputFile)));
+            initStacItem((JSONObject) new JSONParser().parse(Files.newBufferedReader(productInputFile)));
         } catch (Exception e) {
             throw new IOException("Unable to parse JSON from given local file.", e);
         }
@@ -371,11 +371,11 @@ public class StacItem implements StacComponent {
         throw new IOException("EO band properties not found");
     }
 
-    public void setJSONFile(File file) {
+    public void setJSONFile(Path file) {
         this.jsonFile = file;
     }
 
-    public File getJSONFile() {
+    public Path getJSONFile() {
         return jsonFile;
     }
 
@@ -390,7 +390,7 @@ public class StacItem implements StacComponent {
     public static boolean isStacItem(final Path path) {
         try {
             final JSONParser parser = new JSONParser();
-            try (FileReader reader = new FileReader(path.toFile())) {
+            try (Reader reader = Files.newBufferedReader(path)) {
                 final JSONObject json = (JSONObject) parser.parse(reader);
                 final StacItem stacItem = new StacItem(json);
                 return stacItem.isStacItem();

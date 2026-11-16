@@ -46,7 +46,7 @@ public abstract class AbstractDatabase implements Database {
     public void initialize() throws Exception {
         // load H2 driver
         Class.forName("org.h2.Driver");
-        dbParams = new H2DatabaseParameters(SystemUtils.getApplicationDataDir(true).toPath().resolve(getDatabaseName()));
+        dbParams = new H2DatabaseParameters(SystemUtils.getApplicationDataDir(true).resolve(getDatabaseName()));
         getConnection();
         upgradeDatabase();
     }

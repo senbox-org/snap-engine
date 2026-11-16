@@ -15,6 +15,7 @@
  */
 package org.esa.snap.stac;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.EstablishedModifiers;
@@ -23,12 +24,12 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,8 +41,7 @@ public class TestClient {
 
     StacClient client;
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    public Path tempFolder = IOHelper.createATempDir();
 
     @Rule
     public final TestRule skipOnExternalServiceFlake = new StacExternalServiceFlakeRule();
@@ -73,10 +73,10 @@ public class TestClient {
                 null);
         Assert.assertEquals(2, results.length);
 
-        File tmpDir = tempFolder.newFolder("stac");
-        File folder = client.downloadItem(results[0], tmpDir);
-        Assert.assertTrue(folder.exists());
-        Assert.assertEquals(4, folder.listFiles().length);
+        Path tmpDir = tempFolder.resolve("stac");
+        Path folder = client.downloadItem(results[0], tmpDir);
+        Assert.assertTrue(Files.exists(folder));
+        Assert.assertEquals(4, IOHelper.listFiles(folder).size());
     }
 
     @Test
@@ -87,10 +87,10 @@ public class TestClient {
                 null);
         Assert.assertEquals(1, results.length);
 
-        File tmpDir = tempFolder.newFolder("stac");
-        File folder = client.downloadItem(results[0], tmpDir);
-        Assert.assertTrue(folder.exists());
-        Assert.assertEquals(3, folder.listFiles().length);
+        Path tmpDir = tempFolder.resolve("stac");
+        Path folder = client.downloadItem(results[0], tmpDir);
+        Assert.assertTrue(Files.exists(folder));
+        Assert.assertEquals(3, IOHelper.listFiles(folder).size());
     }
 
     @Test
@@ -111,11 +111,11 @@ public class TestClient {
         StacItem item = new StacItem(itemURL);
         Assets.Asset asset = item.getAsset(item.listAssetIds()[0]);
 
-        File tmpDir = tempFolder.newFolder("stac");
-        File outputFile = client.downloadAsset(asset, tmpDir);
-        Assert.assertTrue(outputFile.exists());
-        Assert.assertEquals(117392, outputFile.length());
-        outputFile.delete();
+        Path tmpDir = tempFolder.resolve("stac");
+        Path outputFile = client.downloadAsset(asset, tmpDir);
+        Assert.assertTrue(Files.exists(outputFile));
+        Assert.assertEquals(117392, Files.size(outputFile));
+        Files.delete(outputFile);
 
     }
 
@@ -124,9 +124,9 @@ public class TestClient {
 //    public void testDownloadItem() throws Exception {
 //        String itemURL = "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_047028_20221031_02_T2";
 //        StacItem item = new StacItem(itemURL);
-//        File tmpDir = tempFolder.newFolder("stac");
-//        File folder = client.downloadItem(item, tmpDir);
-//        Assert.assertTrue(folder.exists());
+//        Path tmpDir = tempFolder.resolve("stac");
+//        Path folder = client.downloadItem(item, tmpDir);
+//        Assert.assertTrue(Files.exists(folder));
 //    }
 
 

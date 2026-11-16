@@ -17,6 +17,7 @@ package org.esa.snap.stac;
 
 // Author Alex McVittie, SkyWatch Space Applications Inc. January 2024
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.DownloadModifier;
 import org.esa.snap.stac.internal.EstablishedModifiers;
@@ -24,11 +25,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 
@@ -212,8 +214,8 @@ public class StacClient {
         return inputStream;
     }
 
-    public File downloadAsset(Assets.Asset asset, File targetFolder) throws IOException {
-        targetFolder.mkdirs();
+    public Path downloadAsset(Assets.Asset asset, Path targetFolder) throws IOException {
+        IOHelper.createDirectories(targetFolder);
         String outputFilename = asset.getFileName();
         if(outputFilename.contains("?")) {
             outputFilename = outputFilename.substring(0, outputFilename.indexOf("?"));
@@ -222,20 +224,20 @@ public class StacClient {
         System.out.println("Downloading asset " + asset.getId());
         String downloadURL = signURL(asset);
         try (BufferedInputStream in = new BufferedInputStream(new URL(downloadURL).openStream());
-             FileOutputStream fileOutputStream = new FileOutputStream(new File(targetFolder.getAbsolutePath(), outputFilename))) {
+             OutputStream fileOutputStream = Files.newOutputStream(targetFolder.toAbsolutePath().resolve(outputFilename))) {
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
-            return new File(targetFolder.getAbsolutePath(), outputFilename);
+            return targetFolder.toAbsolutePath().resolve(outputFilename);
         }
     }
 
-    public File downloadItem(StacItem item, File targetFolder) throws IOException {
-        File outputFolder = new File(targetFolder, item.getId());
-        outputFolder.mkdirs();
-        System.out.println("Downloading STAC item " + item.getId() + " to directory " + outputFolder.getAbsolutePath());
+    public Path downloadItem(StacItem item, Path targetFolder) throws IOException {
+        Path outputFolder = targetFolder.resolve(item.getId());
+        IOHelper.createDirectories(outputFolder);
+        System.out.println("Downloading STAC item " + item.getId() + " to directory " + outputFolder.toAbsolutePath());
         for (String s : item.listAssetIds()) {
             Assets.Asset curAsset = item.getAsset(s);
             downloadAsset(curAsset, outputFolder);

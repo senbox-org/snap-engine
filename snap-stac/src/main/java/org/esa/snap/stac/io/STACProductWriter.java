@@ -16,6 +16,7 @@
 package org.esa.snap.stac.io;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
 import org.esa.snap.core.dataio.ProductWriter;
@@ -33,9 +34,10 @@ import org.esa.snap.stac.extensions.Assets;
 import org.esa.snap.stac.internal.JsonUtils;
 import org.esa.snap.stac.internal.SnapStacProduct;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -61,19 +63,14 @@ public class STACProductWriter extends AbstractProductWriter {
 
         final Product srcProduct = getSourceProduct();
 
-        File imageFile;
-        if (getOutput() instanceof String) {
-            imageFile = new File((String) getOutput());
-        } else {
-            imageFile = (File) getOutput();
-        }
-        imageFile.getParentFile().mkdirs();
+        Path imageFile = ProductUtils.getProductPath(getOutput());
+        IOHelper.createDirectories(imageFile.getParent());
 
         final StacItem stacItem = new StacItem(srcProduct.getName());
         SnapStacProduct snapStacProduct = new SnapStacProduct(stacItem);
         snapStacProduct.writeProductProperties(srcProduct);
 
-        String baseName = imageFile.getName();
+        String baseName = imageFile.getFileName().toString();
         if (baseName.endsWith(STACProductReaderPlugIn.IMAGE_GEOTIFF_EXT)) {
             baseName = baseName.substring(0, baseName.length() - 4);
         }
@@ -84,7 +81,7 @@ public class STACProductWriter extends AbstractProductWriter {
                 if (bandWriter == null) {
                     throw new IOException("No writer found for GDAL-GTiff-WRITER");
                 }
-                imageFile = new File(imageFile.getParentFile(), baseName + "_" + srcBand.getName() + STACProductReaderPlugIn.IMAGE_GEOTIFF_EXT);
+                imageFile = imageFile.getParent().resolve(baseName + "_" + srcBand.getName() + STACProductReaderPlugIn.IMAGE_GEOTIFF_EXT);
 
                 Product trgProduct = new Product(srcProduct.getName(), srcProduct.getProductType(), srcProduct.getSceneRasterWidth(), srcProduct.getSceneRasterHeight());
                 ProductUtils.copyMetadata(srcProduct, trgProduct);
@@ -116,7 +113,7 @@ public class STACProductWriter extends AbstractProductWriter {
             bandWriter.writeProductNodes(srcProduct, imageFile);
 
             stacItem.addAsset(Assets.raster, "Raster image", null,
-                    FileUtils.getFilenameWithoutExtension(imageFile.getName()), Assets.type_image_tiff, null);
+                    FileUtils.getFilenameWithoutExtension(imageFile.getFileName()), Assets.type_image_tiff, null);
 
             for (Band srcBand : srcProduct.getBands()) {
                 bandWriterMap.put(srcBand, bandWriter);
@@ -135,13 +132,13 @@ public class STACProductWriter extends AbstractProductWriter {
         return null;
     }
 
-    private void writeProductMetadata(final File imageFile, final StacItem stacItem) throws IOException {
+    private void writeProductMetadata(final Path imageFile, final StacItem stacItem) throws IOException {
 
-        final File metadataFile = FileUtils.exchangeExtension(imageFile, STACProductReaderPlugIn.METADATA_EXT);
-        final FileWriter metaStringWriter = new FileWriter(metadataFile);
+        final Path metadataFile = FileUtils.exchangeExtension(imageFile, STACProductReaderPlugIn.METADATA_EXT);
+        final Writer metaStringWriter = Files.newBufferedWriter(metadataFile);
 
-        stacItem.addAsset(Assets.metadata, metadataFile.getName(), null,
-                FileUtils.getFilenameWithoutExtension(metadataFile.getName()), Assets.type_json, null);
+        stacItem.addAsset(Assets.metadata, metadataFile.getFileName().toString(), null,
+                FileUtils.getFilenameWithoutExtension(metadataFile.getFileName()), Assets.type_json, null);
 
         metaStringWriter.write(JsonUtils.prettyPrint(stacItem.getJSON()));
         metaStringWriter.close();
