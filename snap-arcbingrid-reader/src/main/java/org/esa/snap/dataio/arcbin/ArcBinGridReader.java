@@ -46,8 +46,9 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 
@@ -63,13 +64,13 @@ public class ArcBinGridReader extends AbstractProductReader {
 
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        File file = new File(String.valueOf(getInput()));
-        File gridDir = file.getParentFile();
+        Path file = Path.of(String.valueOf(getInput()));
+        Path gridDir = file.getParent();
 
         GeorefBounds georefBounds = GeorefBounds.create(getCaseInsensitiveFile(gridDir, GeorefBounds.FILE_NAME));
         RasterStatistics rasterStatistics = RasterStatistics.create(
                 getCaseInsensitiveFile(gridDir, RasterStatistics.FILE_NAME));
-        File headerFile = getCaseInsensitiveFile(gridDir, Header.FILE_NAME);
+        Path headerFile = getCaseInsensitiveFile(gridDir, Header.FILE_NAME);
         final Header header = Header.create(headerFile);
         final int width = MathUtils.floorInt((georefBounds.upperRightX - georefBounds.lowerLeftX) / header.pixelSizeX);
         final int height = MathUtils.floorInt((georefBounds.upperRightY - georefBounds.lowerLeftY) / header.pixelSizeY);
@@ -78,7 +79,7 @@ public class ArcBinGridReader extends AbstractProductReader {
         TileIndex tileIndex = TileIndex.create(getCaseInsensitiveFile(gridDir, TileIndex.FILE_NAME), numTiles);
         rasterDataFile = RasterDataFile.create(getCaseInsensitiveFile(gridDir, RasterDataFile.FILE_NAME));
 
-        Product product = new Product(gridDir.getName(), PRODUCT_TYPE, width, height);
+        Product product = new Product(gridDir.getFileName().toString(), PRODUCT_TYPE, width, height);
         product.setFileLocation(headerFile);
         final Dimension gridTileSize = new Dimension(header.tileXSize, header.tileYSize);
         int tileExtend = Math.max(header.tileXSize, header.tileYSize);
@@ -119,7 +120,7 @@ public class ArcBinGridReader extends AbstractProductReader {
         MultiLevelImage image = new DefaultMultiLevelImage(multiLevelSource);
         band.setSourceImage(image);
 
-        File colorPaletteFile = ColorPalette.findColorPaletteFile(gridDir);
+        Path colorPaletteFile = ColorPalette.findColorPaletteFile(gridDir);
         if (colorPaletteFile != null) {
             ColorPaletteDef colorPaletteDef = ColorPalette.createColorPalette(colorPaletteFile, rasterStatistics);
             if (colorPaletteDef != null) {
@@ -142,7 +143,7 @@ public class ArcBinGridReader extends AbstractProductReader {
         return product;
     }
 
-    protected void initMetadata(final Product product, final File inputFile) throws IOException {
+    protected void initMetadata(final Product product, final Path inputFile) throws IOException {
 
     }
 
@@ -229,13 +230,13 @@ public class ArcBinGridReader extends AbstractProductReader {
         }
     }
 
-    static File getCaseInsensitiveFile(File dir, String lowerCaseName) {
-        File lowerCaseFile = new File(dir, lowerCaseName);
-        if (lowerCaseFile.exists()) {
+    static Path getCaseInsensitiveFile(Path dir, String lowerCaseName) {
+        final Path lowerCaseFile = dir.resolve(lowerCaseName);
+        if (Files.exists(lowerCaseFile)) {
             return lowerCaseFile;
         }
-        File upperCaseFile = new File(dir, lowerCaseName.toUpperCase());
-        if (upperCaseFile.exists()) {
+        final Path upperCaseFile = dir.resolve(lowerCaseName.toUpperCase());
+        if (Files.exists(upperCaseFile)) {
             return upperCaseFile;
         }
         return null;

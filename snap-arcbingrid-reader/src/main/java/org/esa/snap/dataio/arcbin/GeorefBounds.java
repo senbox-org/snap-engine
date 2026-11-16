@@ -20,9 +20,10 @@ import com.bc.ceres.binio.CompoundType;
 import com.bc.ceres.binio.DataContext;
 import com.bc.ceres.binio.DataFormat;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.nio.file.StandardOpenOption;
 
 import static com.bc.ceres.binio.TypeBuilder.*;
 
@@ -54,9 +55,9 @@ public class GeorefBounds {
         this.upperRightY = upperRightY;
     }
 
-    public static GeorefBounds create(File file) throws IOException {
+    public static GeorefBounds create(Path file) throws IOException {
         DataFormat dataFormat = new DataFormat(TYPE, ByteOrder.BIG_ENDIAN);
-        DataContext context = dataFormat.createContext(file, "r");
+        DataContext context = dataFormat.createContext(file, StandardOpenOption.READ);
         CompoundData data = context.createData();
 
         GeorefBounds georefBounds = new GeorefBounds(data.getDouble(0), data.getDouble(1),

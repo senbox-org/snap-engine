@@ -21,7 +21,8 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Locale;
 
 public class ArcBinGridReaderPlugIn implements ProductReaderPlugIn {
@@ -30,13 +31,13 @@ public class ArcBinGridReaderPlugIn implements ProductReaderPlugIn {
     private static final String[] FILE_EXTENSIONS = new String[]{""};
     private static final String FORMAT_NAME = "ARC_INFO_BIN_GRID";
     private static final String[] FORMAT_NAMES = new String[]{FORMAT_NAME};
-    private static final Class[] INPUT_TYPES = new Class[]{String.class, File.class};
+    private static final Class[] INPUT_TYPES = new Class[]{String.class, Path.class};
     private static final SnapFileFilter FILE_FILTER = new ArcBinGridFileFilter();
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
-        File file = new File(String.valueOf(input));
-        if (isGridDirectory(file.getParentFile())) {
+        Path file = Path.of(String.valueOf(input));
+        if (isGridDirectory(file.getParent())) {
             return DecodeQualification.INTENDED;
         }
         return DecodeQualification.UNABLE;
@@ -80,16 +81,16 @@ public class ArcBinGridReaderPlugIn implements ProductReaderPlugIn {
         }
 
         @Override
-        public boolean accept(final File file) {
-            return file.isDirectory() || isGridDirectory(file.getParentFile());
+        public boolean accept(final Path file) {
+            return Files.isDirectory(file) || isGridDirectory(file.getParent());
         }
     }
 
-    static boolean isGridDirectory(File dir) {
+    static boolean isGridDirectory(Path dir) {
         if (dir == null) {
             return false;
         }
-        if (!dir.isDirectory()) {
+        if (!Files.isDirectory(dir)) {
             return false;
         }
         if (ArcBinGridReader.getCaseInsensitiveFile(dir, Header.FILE_NAME) == null) {

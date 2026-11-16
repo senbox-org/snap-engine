@@ -20,10 +20,10 @@ import com.bc.ceres.binio.CompoundType;
 import com.bc.ceres.binio.DataContext;
 import com.bc.ceres.binio.DataFormat;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import static com.bc.ceres.binio.TypeBuilder.*;
 
@@ -54,12 +54,12 @@ class RasterStatistics {
         this.stddev = stddev;
     }
 
-    public static RasterStatistics create(File file) {
+    public static RasterStatistics create(Path file) {
         DataFormat dataFormat = new DataFormat(TYPE, ByteOrder.BIG_ENDIAN);
         DataContext context;
         try {
-            context = dataFormat.createContext(file, "r");
-        } catch (FileNotFoundException ignored) {
+            context = dataFormat.createContext(file, StandardOpenOption.READ);
+        } catch (IOException ignored) {
             return null;
         }
         CompoundData data = context.createData();

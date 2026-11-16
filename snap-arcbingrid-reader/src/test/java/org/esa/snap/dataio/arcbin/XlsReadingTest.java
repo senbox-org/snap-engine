@@ -16,25 +16,26 @@
 
 package org.esa.snap.dataio.arcbin;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Map;
 
-import static junit.framework.Assert.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class XlsReadingTest {
 
     @Test
-    public void testFirstCreateXlsDescriptionMap() throws URISyntaxException, FileNotFoundException {
-        File file = new File(getClass().getResource("test_1_legend.xls").toURI());
+    public void testFirstCreateXlsDescriptionMap() {
+        final URL fileURL = getClass().getResource("test_1_legend.xls");
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
         assertNotNull(file);
-        file = LegendFile.findXlsLegendFile(file);
-        assertNotNull(file);
-        file = new File(getClass().getResource("test_1_legend.xls").toURI());
+        final Path legendFile = LegendFile.findXlsLegendFile(file);
+        assertNotNull(legendFile);
         final Map<Integer, String> map = LegendFile.createXlsDescriptionMap(file);
         assertEquals("broadleaved evergreen forest", map.get(3));
         assertEquals("seaside wet lands", map.get(7));
@@ -45,13 +46,13 @@ public class XlsReadingTest {
     }
 
     @Test
-    public void testSecondCreateXlsDescriptionMap() throws URISyntaxException, FileNotFoundException {
-
-        File file = new File(getClass().getResource("test_2_legend.xls").toURI());
+    public void testSecondCreateXlsDescriptionMap() {
+        final URL fileURL = getClass().getResource("test_2_legend.xls");
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
         assertNotNull(file);
-        file = LegendFile.findXlsLegendFile(file);
-        assertNotNull(file);
-        file = new File(getClass().getResource("test_2_legend.xls").toURI());
+        final Path legendFile = LegendFile.findXlsLegendFile(file);
+        assertNotNull(legendFile);
         final Map<Integer, String> map = LegendFile.createXlsDescriptionMap(file);
         assertEquals("", map.get(0));
         assertEquals("Open forest (Eucalyptus)", map.get(3));
@@ -62,12 +63,13 @@ public class XlsReadingTest {
     }
 
     @Test
-    public void testThirdCreateXlsDescriptionMap() throws URISyntaxException, FileNotFoundException {
-        File file = new File(getClass().getResource("test_3_legend.xls").toURI());
+    public void testThirdCreateXlsDescriptionMap() {
+        final URL fileURL = getClass().getResource("test_3_legend.xls");
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
         assertNotNull(file);
-        file = LegendFile.findXlsLegendFile(file);
-        assertNotNull(file);
-        file = new File(getClass().getResource("test_3_legend.xls").toURI());
+        final Path legendFile = LegendFile.findXlsLegendFile(file);
+        assertNotNull(legendFile);
         final Map<Integer, String> map = LegendFile.createXlsDescriptionMap(file);
         assertEquals("Tropical and sub-tropical mountain forests , broadleaved, evergreen >1000m", map.get(3));
         assertEquals("Swamp forest and woodlands", map.get(7));

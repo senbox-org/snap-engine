@@ -15,17 +15,18 @@
  */
 package org.esa.snap.dataio.arcbin;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
-import com.bc.ceres.test.LongTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
 
 import static junit.framework.Assert.assertNotNull;
 
@@ -37,8 +38,10 @@ public class ArcBinGridTest {
 
 
     @Test
-    public void testProductIO() throws URISyntaxException, IOException {
-        File file = new File(getClass().getResource("elevation/hdr.adf").toURI());
+    public void testProductIO() throws IOException {
+        final URL fileURL = getClass().getResource("elevation/hdr.adf");
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
         Product product = ProductIO.readProduct(file);
         assertNotNull(product);
 
@@ -46,8 +49,10 @@ public class ArcBinGridTest {
     }
 
     @Test
-    public void testReader() throws URISyntaxException, IOException {
-        File file = new File(getClass().getResource("elevation/hdr.adf").toURI());
+    public void testReader() throws IOException {
+        final URL fileURL = getClass().getResource("elevation/hdr.adf");
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
         ArcBinGridReaderPlugIn plugin = new ArcBinGridReaderPlugIn();
         assert(plugin.getDecodeQualification(file) == DecodeQualification.INTENDED);
 

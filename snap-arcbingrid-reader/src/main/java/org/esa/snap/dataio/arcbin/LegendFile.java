@@ -16,6 +16,7 @@
 
 package org.esa.snap.dataio.arcbin;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
@@ -24,13 +25,13 @@ import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.StringUtils;
 import org.geotools.data.shapefile.dbf.DbaseFileReader;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,8 +41,8 @@ public class LegendFile {
     private LegendFile() {
     }
 
-    static Map<Integer, String> createDescriptionMap(final File dir) throws IOException {
-        File file = findDbfLegendFile(dir);
+    static Map<Integer, String> createDescriptionMap(final Path dir) throws IOException {
+        Path file = findDbfLegendFile(dir);
         if (file != null) {
             return createDbfDescriptionMap(file);
         }
@@ -54,11 +55,11 @@ public class LegendFile {
         return Collections.emptyMap();
     }
 
-    static Map<Integer, String> createXlsDescriptionMap(final File file) {
+    static Map<Integer, String> createXlsDescriptionMap(final Path file) {
         Workbook workbook = null;
-        final Map<Integer, String> map = new HashMap<Integer, String>();
-        try {
-            workbook = Workbook.getWorkbook(file);
+        final Map<Integer, String> map = new HashMap<>();
+        try (InputStream is = Files.newInputStream(file)) {
+            workbook = Workbook.getWorkbook(is);
             Sheet sheet = workbook.getSheet(0);
 
             int descColIndex = getSheetColIndex(sheet);
@@ -108,7 +109,7 @@ public class LegendFile {
         return descColIndex;
     }
 
-    static Map<Integer, String> createDbfDescriptionMap(final File file) throws IOException {
+    static Map<Integer, String> createDbfDescriptionMap(final Path file) throws IOException {
 
         final DbaseFileReader reader = new DbaseFileReader(createChannel(file), true, Charset.defaultCharset());
         Map<Integer, String> map = new HashMap<Integer, String>();
@@ -126,42 +127,32 @@ public class LegendFile {
         return map;
     }
 
-    static File findXlsLegendFile(final File dir) {
-        final File parentDir = dir.getParentFile();
+    static Path findXlsLegendFile(final Path dir) {
+        final Path parentDir = dir.getParent();
 
-        final File[] legendFiles = parentDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return !name.startsWith(".") && name.toLowerCase().endsWith("_legend.xls");
-            }
-        });
+        final Collection<Path> legendFiles = IOHelper.listFiles(parentDir, p -> !p.getFileName().toString().startsWith(".") && p.getFileName().toString().toLowerCase().endsWith("_legend.xls"));
 
-        if (legendFiles.length > 0) {
-            return legendFiles[0];
+        if (legendFiles != null && !legendFiles.isEmpty()) {
+            return legendFiles.iterator().next();
         } else {
             return null;
         }
     }
 
-    static File findDbfLegendFile(final File dir) {
-        final File parentDir = dir.getParentFile();
+    static Path findDbfLegendFile(final Path dir) {
+        final Path parentDir = dir.getParent();
 
-        final File[] legendFiles = parentDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return !name.startsWith(".") && name.toLowerCase().endsWith("_legend.dbf");
-            }
-        });
+        final Collection<Path> legendFiles = IOHelper.listFiles(parentDir, p -> !p.getFileName().toString().startsWith(".") && p.getFileName().toString().toLowerCase().endsWith("_legend.dbf"));
 
-        if (legendFiles.length > 0) {
-            return legendFiles[0];
+        if (legendFiles != null && !legendFiles.isEmpty()) {
+            return legendFiles.iterator().next();
         } else {
             return null;
         }
     }
 
-    static ReadableByteChannel createChannel(File legendFile) throws FileNotFoundException {
-        return new FileInputStream(legendFile).getChannel();
+    static ReadableByteChannel createChannel(Path legendFile) throws IOException {
+        return Files.newByteChannel(legendFile);
     }
 
 }

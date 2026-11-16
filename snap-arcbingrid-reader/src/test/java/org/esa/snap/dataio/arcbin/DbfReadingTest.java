@@ -16,26 +16,29 @@
 
 package org.esa.snap.dataio.arcbin;
 
-import jxl.read.biff.BiffException;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.geotools.data.shapefile.dbf.DbaseFileHeader;
 import org.geotools.data.shapefile.dbf.DbaseFileReader;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.channels.FileChannel;
+import java.net.URL;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class DbfReadingTest {
 
     @Test
-    public void testFirstCreateDbfDescriptionMap() throws URISyntaxException, IOException {
-        File file = new File(getClass().getResource("test_legend_1.dbf").toURI());
+    public void testFirstCreateDbfDescriptionMap() throws IOException {
+        final URL fileURL = getClass().getResource("test_legend_1.dbf");
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
         final Map<Integer, String> map = LegendFile.createDbfDescriptionMap(file);
         assertEquals("Tropical Broadleaved Forest", map.get(1));
         assertEquals("Fragmented Tropical Broadleav", map.get(2));
@@ -43,8 +46,10 @@ public class DbfReadingTest {
     }
 
     @Test
-    public void testSecondCreateDbfDescriptionMap() throws URISyntaxException, IOException {
-        File file = new File(getClass().getResource("test_legend_2.dbf").toURI());
+    public void testSecondCreateDbfDescriptionMap() throws IOException {
+        final URL fileURL = getClass().getResource("test_legend_2.dbf");
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
         final Map<Integer, String> map = LegendFile.createDbfDescriptionMap(file);
         assertEquals("Unclassified", map.get(0));
         assertEquals("Mosaic Forest / shrub cover", map.get(9));
@@ -53,9 +58,12 @@ public class DbfReadingTest {
     }
 
     @Test
-    public void testLegend1() throws BiffException, IOException, URISyntaxException {
-        final FileChannel channel = new FileInputStream(
-                new File(DbfReadingTest.class.getResource("test_legend_1.dbf").toURI())).getChannel();
+    public void testLegend1() throws IOException {
+        final URL fileURL = getClass().getResource("test_legend_1.dbf");
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
+        assertNotNull(file);
+        final ReadableByteChannel channel = Files.newByteChannel(file);
         final DbaseFileReader reader = new DbaseFileReader(channel, true, Charset.defaultCharset());
 
         final DbaseFileHeader dbfHeader = reader.getHeader();
@@ -78,9 +86,12 @@ public class DbfReadingTest {
     }
 
     @Test
-    public void testLegend2() throws BiffException, IOException, URISyntaxException {
-        final FileChannel channel = new FileInputStream(
-                new File(DbfReadingTest.class.getResource("test_legend_2.dbf").toURI())).getChannel();
+    public void testLegend2() throws IOException {
+        final URL fileURL = getClass().getResource("test_legend_2.dbf");
+        assertNotNull(fileURL);
+        final Path file = UrlHelper.urlToFile(fileURL);
+        assertNotNull(file);
+        final ReadableByteChannel channel = Files.newByteChannel(file);
         final DbaseFileReader reader = new DbaseFileReader(channel, true, Charset.defaultCharset());
 
         final DbaseFileHeader dbfHeader = reader.getHeader();

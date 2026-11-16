@@ -15,13 +15,13 @@
  */
 package org.esa.snap.dataio.arcbin;
 
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.dataio.arcbin.TileIndex.IndexEntry;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.nio.file.Path;
 
 class RasterDataFile {
 
@@ -46,8 +46,8 @@ class RasterDataFile {
         return bytes;
     }
 
-    static RasterDataFile create(File file) throws IOException {
-        ImageInputStream imageInputStream = new FileImageInputStream(file);
+    static RasterDataFile create(Path file) throws IOException {
+        ImageInputStream imageInputStream = ImageUtils.getImageInputStream(file);
         imageInputStream.setByteOrder(ByteOrder.BIG_ENDIAN);
         return new RasterDataFile(imageInputStream);
     }

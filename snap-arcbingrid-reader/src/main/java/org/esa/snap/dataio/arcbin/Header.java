@@ -22,9 +22,10 @@ import com.bc.ceres.binio.DataFormat;
 import com.bc.ceres.binio.SequenceData;
 import org.esa.snap.core.dataio.ProductIOException;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.nio.file.StandardOpenOption;
 
 import static com.bc.ceres.binio.TypeBuilder.*;
 
@@ -80,9 +81,9 @@ public class Header {
         this.tileYSize = tileYSize;
     }
 
-    public static Header create(File file) throws IOException {
+    public static Header create(Path file) throws IOException {
         DataFormat dataFormat = new DataFormat(TYPE, ByteOrder.BIG_ENDIAN);
-        DataContext context = dataFormat.createContext(file, "r");
+        DataContext context = dataFormat.createContext(file, StandardOpenOption.READ);
         CompoundData data = context.createData();
 
         SequenceData magic = data.getSequence("HMagic");

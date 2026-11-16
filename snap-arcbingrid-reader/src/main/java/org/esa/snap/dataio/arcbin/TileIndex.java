@@ -21,9 +21,10 @@ import com.bc.ceres.binio.DataContext;
 import com.bc.ceres.binio.DataFormat;
 import com.bc.ceres.binio.SequenceData;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,9 +47,9 @@ class TileIndex {
         return tileIndex.get(index);
     }
 
-    static TileIndex create(File file, int numTiles) throws IOException {
+    static TileIndex create(Path file, int numTiles) throws IOException {
         DataFormat dataFormat = new DataFormat(createType(numTiles), ByteOrder.BIG_ENDIAN);
-        DataContext context = dataFormat.createContext(file, "r");
+        DataContext context = dataFormat.createContext(file, StandardOpenOption.READ);
         CompoundData data = context.createData();
 
         Map<Integer, IndexEntry> index = new HashMap<Integer, IndexEntry>(numTiles);

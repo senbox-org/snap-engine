@@ -15,19 +15,21 @@
  */
 package org.esa.snap.dataio.arcbin;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
 import org.esa.snap.core.datamodel.ColorPaletteDef.Point;
 import org.esa.snap.core.datamodel.IndexCoding;
 
 import java.awt.Color;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 
 class ColorPalette {
@@ -35,36 +37,36 @@ class ColorPalette {
     private ColorPalette() {
     }
 
-    private static final class ColorPaletteFilenameFilter implements FilenameFilter {
+    private static final class ColorPaletteFilenameFilter implements Predicate<Path> {
 
         @Override
-        public boolean accept(File dir, String name) {
-            return name.endsWith(".clr") || name.endsWith(".CLR");
+        public boolean test(Path dir) {
+            return dir.endsWith(".clr") || dir.endsWith(".CLR");
         }
     }
 
-    static File findColorPaletteFile(File gridDir) {
-        FilenameFilter filter = new ColorPaletteFilenameFilter();
-        File result = findFileInDir(gridDir, filter);
+    static Path findColorPaletteFile(Path gridDir) {
+        Predicate<Path> filter = new ColorPaletteFilenameFilter();
+        Path result = findFileInDir(gridDir, filter);
         if (result == null) {
-            result = findFileInDir(gridDir.getParentFile(), filter);
+            result = findFileInDir(gridDir.getParent(), filter);
         }
         return result;
     }
 
-    private static File findFileInDir(File dir, FilenameFilter filter) {
-        File[] fileList = dir.listFiles(filter);
-        if (fileList.length > 0) {
-            return fileList[0];
+    private static Path findFileInDir(Path dir, Predicate<Path> filter) {
+        Collection<Path> fileList = IOHelper.listFiles(dir, filter);
+        if (fileList != null && !fileList.isEmpty()) {
+            return fileList.iterator().next();
         }
         return null;
     }
 
-    static ColorPaletteDef createColorPalette(File file, RasterStatistics statistics) {
+    static ColorPaletteDef createColorPalette(Path file, RasterStatistics statistics) {
         BufferedReader reader = null;
         List<ColorPaletteDef.Point> pointList = new ArrayList<ColorPaletteDef.Point>();
         try {
-            reader = new BufferedReader(new FileReader(file));
+            reader = Files.newBufferedReader(file);
             String line = reader.readLine();
             while (line != null) {
                 line = line.trim();
