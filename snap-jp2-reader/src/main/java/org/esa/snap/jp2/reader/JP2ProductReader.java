@@ -27,6 +27,7 @@ import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.metadata.XmlMetadataParser;
 import org.esa.snap.core.metadata.XmlMetadataParserFactory;
 import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.jp2.reader.internal.JP2MultiLevelSource;
 import org.esa.snap.jp2.reader.internal.JP2ProductReaderConstants;
 import org.esa.snap.jp2.reader.metadata.CodeStreamInfo;
@@ -91,7 +92,7 @@ public class JP2ProductReader extends AbstractProductReader {
             Object productInput = super.getInput(); // invoke the 'getInput' method from the parent class
             ProductSubsetDef subsetDef = super.getSubsetDef(); // invoke the 'getSubsetDef' method from the parent class
 
-            Path jp2File = AbstractProductReader.convertInputToPath(productInput);
+            Path jp2File = ProductUtils.getProductPath(productInput);
 
             if (getReaderPlugIn().getDecodeQualification(productInput) == DecodeQualification.UNABLE) {
                 throw new IOException("The selected product cannot be read with the current reader.");
@@ -128,7 +129,7 @@ public class JP2ProductReader extends AbstractProductReader {
                 productBounds = subsetDef.getSubsetRegion().computeProductPixelRegion(productDefaultGeoCoding, defaultImageWidth, defaultImageHeight, false);
             }
             Product product = new Product(this.virtualJp2File.getFileName(), JP2ProductReaderConstants.TYPE, productBounds.width, productBounds.height);
-            product.setFileLocation(jp2File.toFile());
+            product.setFileLocation(jp2File);
             product.setProductReader(this);
 
             Dimension defaultJAIReadTileSize = JAI.getDefaultTileSize();

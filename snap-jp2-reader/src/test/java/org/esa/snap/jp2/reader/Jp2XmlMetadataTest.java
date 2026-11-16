@@ -1,5 +1,6 @@
 package org.esa.snap.jp2.reader;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.metadata.XmlMetadataParser;
 import org.esa.snap.core.metadata.XmlMetadataParserFactory;
 import org.esa.snap.jp2.reader.metadata.Jp2XmlMetadata;
@@ -11,13 +12,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.awt.geom.Point2D;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 
 import static org.esa.snap.lib.openjpeg.utils.OpenJpegUtils.validateOpenJpegExecutables;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class Jp2XmlMetadataTest {
 
@@ -30,11 +32,12 @@ public class Jp2XmlMetadataTest {
     }
 
     @Test
-    public void testJp2XmlMetadata_usual_use_case() throws URISyntaxException, IOException, InterruptedException {
+    public void testJp2XmlMetadata_usual_use_case() throws IOException, InterruptedException {
         URL resource = getClass().getResource("S2_subset_sample.jp2");
         XmlMetadataParserFactory.registerParser(Jp2XmlMetadata.class, new XmlMetadataParser<>(Jp2XmlMetadata.class));
         assertNotNull(resource);
-        File productFile = new File(resource.toURI());
+        Path productFile = UrlHelper.urlToFile(resource);
+        assertNotNull(productFile);
 
         OpjDumpFile opjDumpFile = new OpjDumpFile();
         if (OpenJpegUtils.canReadJP2FileHeaderWithOpenJPEG()) {
@@ -42,9 +45,9 @@ public class Jp2XmlMetadataTest {
                 throw new IOException("Invalid OpenJpeg executables");
             }
 
-            opjDumpFile.readHeaderWithOpenJPEG(productFile.toPath());
+            opjDumpFile.readHeaderWithOpenJPEG(productFile);
         } else {
-            opjDumpFile.readHeaderWithInputStream(productFile.toPath(), 5 * 1024, true);
+            opjDumpFile.readHeaderWithInputStream(productFile, 5 * 1024, true);
         }
         Jp2XmlMetadata metadataHeader = opjDumpFile.getMetadata();
 
@@ -60,7 +63,8 @@ public class Jp2XmlMetadataTest {
         URL resource = getClass().getResource("subset_epsg_4326_axis_order_y_x_300.jp2");
         XmlMetadataParserFactory.registerParser(Jp2XmlMetadata.class, new XmlMetadataParser<>(Jp2XmlMetadata.class));
         assertNotNull(resource);
-        File productFile = new File(resource.toURI());
+        Path productFile = UrlHelper.urlToFile(resource);
+        assertNotNull(productFile);
 
         OpjDumpFile opjDumpFile = new OpjDumpFile();
         if (OpenJpegUtils.canReadJP2FileHeaderWithOpenJPEG()) {
@@ -68,9 +72,9 @@ public class Jp2XmlMetadataTest {
                 throw new IOException("Invalid OpenJpeg executables");
             }
 
-            opjDumpFile.readHeaderWithOpenJPEG(productFile.toPath());
+            opjDumpFile.readHeaderWithOpenJPEG(productFile);
         } else {
-            opjDumpFile.readHeaderWithInputStream(productFile.toPath(), 5 * 1024, true);
+            opjDumpFile.readHeaderWithInputStream(productFile, 5 * 1024, true);
         }
         Jp2XmlMetadata metadataHeader = opjDumpFile.getMetadata();
 

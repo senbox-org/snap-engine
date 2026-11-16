@@ -1,19 +1,19 @@
 package org.esa.snap.jp2.reader;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.jp2.reader.metadata.JP2MetadataInspector;
 import org.esa.snap.runtime.LogUtils4Tests;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -35,10 +35,10 @@ public class JP2MetadataInspectorTest {
         URL resource = getClass().getResource("S2_subset_sample.jp2");
         assertNotNull(resource);
 
-        File productFile = new File(resource.toURI());
+        Path productFile = UrlHelper.urlToFile(resource);
 
         JP2MetadataInspector metadataInspector = new JP2MetadataInspector();
-        MetadataInspector.Metadata metadata = metadataInspector.getMetadata(productFile.toPath());
+        MetadataInspector.Metadata metadata = metadataInspector.getMetadata(productFile);
         assertNotNull(metadata);
         assertEquals(400, metadata.getProductWidth());
         assertEquals(300, metadata.getProductHeight());

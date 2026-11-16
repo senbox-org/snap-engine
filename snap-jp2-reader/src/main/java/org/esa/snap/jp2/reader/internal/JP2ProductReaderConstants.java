@@ -17,13 +17,13 @@
 
 package org.esa.snap.jp2.reader.internal;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Created by kraftek on 7/9/2015.
  */
 public class JP2ProductReaderConstants {
-    public static final Class[] INPUT_TYPES = new Class[] { String.class, File.class };
+    public static final Class[] INPUT_TYPES = new Class[] { String.class, Path.class };
     public static final String[] FORMAT_NAMES = new String[] { "JPEG2000" };
     public static final String[] DEFAULT_EXTENSIONS = new String[] { ".jp2" };
     public static final String DESCRIPTION = "JPEG-2000 Files";

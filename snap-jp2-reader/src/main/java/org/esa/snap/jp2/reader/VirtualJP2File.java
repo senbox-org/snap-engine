@@ -1,5 +1,6 @@
 package org.esa.snap.jp2.reader;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.ModuleMetadata;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.file.AbstractFile;
@@ -41,10 +42,10 @@ public class VirtualJP2File extends AbstractFile implements JP2LocalFile {
 
     public void deleteLocalFilesOnExit() throws IOException {
         List<Path> files = PathUtils.listFiles(this.localCacheFolder);
-        this.localCacheFolder.toFile().deleteOnExit();
+        IOHelper.deleteOnExit(this.localCacheFolder);
         if (files != null) {
             for (Path file : files) {
-                file.toFile().deleteOnExit();
+                IOHelper.deleteOnExit(file);
             }
         }
     }

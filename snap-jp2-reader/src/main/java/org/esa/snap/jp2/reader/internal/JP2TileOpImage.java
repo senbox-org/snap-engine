@@ -1,5 +1,6 @@
 package org.esa.snap.jp2.reader.internal;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import org.esa.snap.core.image.DecompressedImageSupport;
 import org.esa.snap.core.util.ImageUtils;
@@ -22,7 +23,6 @@ import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -196,10 +196,10 @@ public class JP2TileOpImage extends SourcelessOpImage {
         //String imageFileName = PathUtils.getFileNameWithoutExtension(localImageFile).toLowerCase() + "_tile_" + String.valueOf(this.decompressTileIndex) + "_" + String.valueOf(level) + ".tif";
         final String imageFileName = this.tileFilePrefix + "_" + this.decompressTileIndex + "_" + level + ".tif";
         Path tileFile = PathUtils.get(this.bandData.getLocalCacheFolder(), imageFileName);
-        if ((!Files.exists(tileFile)) || (Utils.diffLastModifiedTimes(tileFile.toFile(), localImageFile.toFile()) < 0L)) {
+        if ((!Files.exists(tileFile)) || (Utils.diffLastModifiedTimes(tileFile, localImageFile) < 0L)) {
             String tileFileName;
             if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS && (tileFile.getParent() != null)) {
-                tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + File.separator + tileFile.getName(tileFile.getNameCount() - 1);
+                tileFileName = Utils.GetIterativeShortPathNameW(tileFile.getParent().toString()) + IOHelper.SEPARATOR + tileFile.getName(tileFile.getNameCount() - 1);
             } else {
                 tileFileName = tileFile.toString();
             }
@@ -288,7 +288,7 @@ public class JP2TileOpImage extends SourcelessOpImage {
             if (this.imageReader == null) {
                 throw new NullPointerException("Tiff imageReader not found");
             }
-            this.inputStream = ImageIO.createImageInputStream(input.toFile());
+            this.inputStream = ImageUtils.getImageInputStream(input);
             if (this.inputStream == null) {
                 throw new NullPointerException("The image stream is null.");
             }

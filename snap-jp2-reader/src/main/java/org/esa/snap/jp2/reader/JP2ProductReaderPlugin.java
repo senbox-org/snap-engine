@@ -19,6 +19,7 @@ package org.esa.snap.jp2.reader;
 
 import org.esa.snap.core.dataio.*;
 import org.esa.snap.core.metadata.MetadataInspector;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.jp2.reader.internal.JP2ProductReaderConstants;
 import org.esa.snap.jp2.reader.metadata.JP2MetadataInspector;
@@ -43,7 +44,7 @@ public class JP2ProductReaderPlugin implements ProductReaderPlugIn {
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
-        Path path = AbstractProductReader.convertInputToPath(input);
+        Path path = ProductUtils.getProductPath(input);
         DecodeQualification result = DecodeQualification.UNABLE;
         String fileName = path.getFileName().toString();
         int pointIndex = fileName.lastIndexOf(".");

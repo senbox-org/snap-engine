@@ -1,6 +1,7 @@
 package org.esa.snap.jp2.reader;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import com.bc.ceres.multilevel.MultiLevelImage;
 import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.dataio.ProductReader;
@@ -17,8 +18,8 @@ import javax.media.jai.PlanarImage;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -40,7 +41,7 @@ public class JP2ProductReaderTest {
         URL resource = getClass().getResource("S2_subset_sample.jp2");
         assertNotNull(resource);
 
-        File productFile = new File(resource.toURI());
+        Path productFile = UrlHelper.urlToFile(resource);
 
         ProductReader productReader = buildProductReader();
         Product product = productReader.readProductNodes(productFile, null);
@@ -93,7 +94,7 @@ public class JP2ProductReaderTest {
         URL resource = getClass().getResource("S2_subset_sample.jp2");
         assertNotNull(resource);
 
-        File productFile = new File(resource.toURI());
+        Path productFile = UrlHelper.urlToFile(resource);
 
         Rectangle subsetRegion = new Rectangle(100, 100, 278, 189);
         ProductSubsetDef subsetDef = new ProductSubsetDef();
