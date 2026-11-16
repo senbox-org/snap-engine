@@ -15,17 +15,134 @@
  */
 package org.esa.snap.engine_utilities.download;
 
-import java.io.File;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 
 /**
  * Created by lveci on 11/02/2015.
  */
-public class DownloadableArchiveFile extends File implements DownloadableFile {
+public class DownloadableArchiveFile implements Path, DownloadableFile {
 
-    public DownloadableArchiveFile(final File file) {
-        super(file.getAbsolutePath());
+    private final Path file;
+
+    public DownloadableArchiveFile(final Path file) {
+        this.file = file;
     }
 
     public void dispose() {
+    }
+
+    @Override
+    public @NonNull FileSystem getFileSystem() {
+        return file.getFileSystem();
+    }
+
+    @Override
+    public boolean isAbsolute() {
+        return file.isAbsolute();
+    }
+
+    @Override
+    public Path getRoot() {
+        return file.getRoot();
+    }
+
+    @Override
+    public Path getFileName() {
+        return file.getFileName();
+    }
+
+    @Override
+    public Path getParent() {
+        return file.getParent();
+    }
+
+    @Override
+    public int getNameCount() {
+        return file.getNameCount();
+    }
+
+    @Override
+    public @NonNull Path getName(int index) {
+        return file.getName(index);
+    }
+
+    @Override
+    public @NonNull Path subpath(int beginIndex, int endIndex) {
+        return file.subpath(beginIndex, endIndex);
+    }
+
+    @Override
+    public boolean startsWith(@NonNull Path other) {
+        return file.startsWith(other);
+    }
+
+    @Override
+    public boolean endsWith(@NonNull Path other) {
+        return file.endsWith(other);
+    }
+
+    @Override
+    public @NonNull Path normalize() {
+        return file.normalize();
+    }
+
+    @Override
+    public @NonNull Path resolve(@NonNull Path other) {
+        return file.resolve(other);
+    }
+
+    @Override
+    public @NonNull Path relativize(@NonNull Path other) {
+        return file.relativize(other);
+    }
+
+    @Override
+    public @NonNull URI toUri() {
+        return file.toUri();
+    }
+
+    @Override
+    public @NonNull Path toAbsolutePath() {
+        return file.toAbsolutePath();
+    }
+
+    @Override
+    public @NonNull Path toRealPath(@NonNull @NotNull LinkOption... options) throws IOException {
+        return file.toRealPath(options);
+    }
+
+    @Override
+    public @NonNull WatchKey register(WatchService watcher, WatchEvent.Kind<?>[] events, WatchEvent.Modifier... modifiers) throws IOException {
+        return file.register(watcher, events, modifiers);
+    }
+
+    @Override
+    public int compareTo(@NonNull Path other) {
+        return file.compareTo(other);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return file.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        return file.hashCode();
+    }
+
+    @Override
+    public @NonNull String toString() {
+        return file.toString();
     }
 }

@@ -30,7 +30,8 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,21 +52,21 @@ public final class AbstractMetadataIO {
     private final static String ATTRIB = "attrib";
 
     public static boolean loadExternalMetadata(final Product product, final MetadataElement absRoot,
-                                               final File productFile) throws IOException {
+                                               final Path productFile) throws IOException {
         // load metadata xml file if found
-        final String metadataStr = FileUtils.exchangeExtension(productFile.getAbsolutePath(), ".xml");
-        File metadataFile = new File(metadataStr);
-        if (metadataFile.exists() && AbstractMetadataIO.Load(product, absRoot, metadataFile)) {
+        final String metadataStr = FileUtils.exchangeExtension(productFile.toAbsolutePath().toString(), ".xml");
+        Path metadataFile = Path.of(metadataStr);
+        if (Files.exists(metadataFile) && AbstractMetadataIO.Load(product, absRoot, metadataFile)) {
             return true;
         } else {
-            metadataFile = new File(productFile.getParentFile(), "metadata.xml");
-            return metadataFile.exists() && AbstractMetadataIO.Load(product, absRoot, metadataFile);
+            metadataFile = productFile.getParent().resolve("metadata.xml");
+            return Files.exists(metadataFile) && AbstractMetadataIO.Load(product, absRoot, metadataFile);
         }
     }
 
-    public static void saveExternalMetadata(final Product product, final MetadataElement absRoot, final File productFile) {
-        final String metadataStr = FileUtils.exchangeExtension(productFile.getAbsolutePath(), ".xml");
-        final File metadataFile = new File(metadataStr);
+    public static void saveExternalMetadata(final Product product, final MetadataElement absRoot, final Path productFile) {
+        final String metadataStr = FileUtils.exchangeExtension(productFile.toAbsolutePath().toString(), ".xml");
+        final Path metadataFile = Path.of(metadataStr);
         try {
             AbstractMetadataIO.Save(product, absRoot, metadataFile);
         } catch (IOException e) {
@@ -73,7 +74,7 @@ public final class AbstractMetadataIO {
         }
     }
 
-    public static void Save(final Product product, final MetadataElement metadataElem, final File metadataFile) throws IOException {
+    public static void Save(final Product product, final MetadataElement metadataElem, final Path metadataFile) throws IOException {
 
         final Element root = new Element("Metadata");
         final Document doc = new Document(root);
@@ -89,15 +90,15 @@ public final class AbstractMetadataIO {
             writeTiePointGrids(product, tiePointGridsElem);
         }
 
-        XMLSupport.SaveXML(doc, metadataFile.getAbsoluteFile().toString());
+        XMLSupport.SaveXML(doc, metadataFile.toAbsolutePath().toString());
     }
 
-    public static boolean Load(final Product product, final MetadataElement metadataElem, final File metadataFile)
+    public static boolean Load(final Product product, final MetadataElement metadataElem, final Path metadataFile)
             throws IOException {
 
         Document doc;
         try {
-            doc = XMLSupport.LoadXML(metadataFile.getAbsolutePath());
+            doc = XMLSupport.LoadXML(metadataFile.toAbsolutePath().toString());
         } catch (IOException e) {
             System.out.println(e.getMessage());
             return false;
@@ -117,12 +118,12 @@ public final class AbstractMetadataIO {
         return true;
     }
 
-    public static boolean Load(final Product product, final MetadataElement metadataElem, final File metadataFile,
+    public static boolean Load(final Product product, final MetadataElement metadataElem, final Path metadataFile,
                                final String elementName) throws IOException {
 
         Document doc;
         try {
-            doc = XMLSupport.LoadXML(metadataFile.getAbsolutePath());
+            doc = XMLSupport.LoadXML(metadataFile.toAbsolutePath().toString());
         } catch (IOException e) {
             System.out.println(e.getMessage());
             return false;

@@ -15,33 +15,25 @@
  */
 package org.esa.snap.engine_utilities.util;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.TreeCopier;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Properties;
 
 /**
  * Look up paths to resources
  */
 public final class ResourceUtils {
-
-    public static void deleteFile(final File file) {
-        if (file.isDirectory()) {
-            for (String aChild : file.list()) {
-                deleteFile(new File(file, aChild));
-            }
-        }
-        if (!file.delete())
-            System.out.println("Could not delete " + file.getName());
-    }
 
     public static Properties loadProperties(final String filename) throws IOException {
         try (final InputStream dbPropInputStream = getResourceAsStream(filename, ResourceUtils.class)) {
@@ -60,14 +52,25 @@ public final class ResourceUtils {
     }
 
     public static InputStream getResourceAsStream(final String filename, final Class theClass) throws IOException {
-        final Path basePath = ResourceInstaller.findModuleCodeBasePath(theClass);
-        return Files.newInputStream(basePath.resolve(filename));
+        final Path resPath = getResourceAsPath(filename, theClass);
+        return Files.newInputStream(resPath);
     }
 
-    public static File getReportFolder() {
-        final File reportFolder = new File(SystemUtils.getApplicationDataDir(true) + File.separator + "var" + File.separator + "log");
-        if (!reportFolder.exists()) {
-            if(!reportFolder.mkdirs()) {
+    public static Path getResourceAsPath(final String filename, final Class theClass) {
+        final Path basePath = ResourceInstaller.findModuleCodeBasePath(theClass);
+        return basePath.resolve(filename);
+    }
+
+    public static Path getTestResourceAsPath(final String filename, final Class theClass) {
+        final Path basePath = ResourceInstaller.findModuleCodeBasePath(theClass);
+        final String testResourcePath = theClass.getPackageName().replace(".", "/");
+        return basePath.resolve(testResourcePath).resolve(filename);
+    }
+
+    public static Path getReportFolder() {
+        final Path reportFolder = SystemUtils.getApplicationDataDir(true).resolve( "var").resolve("log");
+        if (!Files.exists(reportFolder)) {
+            if (!IOHelper.createDirectories(reportFolder)) {
                 SystemUtils.LOG.severe("Unable to create folders in "+reportFolder);
             }
         }
@@ -75,11 +78,11 @@ public final class ResourceUtils {
     }
 
     public static Path getGraphFolder(final String subFolder) {
-        return SystemUtils.getApplicationDataDir().toPath().resolve("graphs").resolve(subFolder);
+        return SystemUtils.getApplicationDataDir().resolve("graphs").resolve(subFolder);
     }
 
-    public static File getResFolder() {
-        return new File(SystemUtils.getApplicationHomeDir(), "resource");
+    public static Path getResFolder() {
+        return SystemUtils.getApplicationHomeDir().resolve("resource");
     }
 
     public static void installGraphs(final Class callingClass, final String path) {
@@ -100,23 +103,27 @@ public final class ResourceUtils {
         }
     }
 
-    public static void sortFileList(final File[] filelist) {
-        Comparator<File> byDirThenAlpha = new DirAlphaComparator();
+    public static void sortFileList(final Collection<Path> filelist) {
+        Comparator<Path> byDirThenAlpha = new DirAlphaComparator();
 
-        Arrays.sort(filelist, byDirThenAlpha);
+        List<Path> sortedFilelist = new ArrayList<>(filelist);
+        sortedFilelist.sort(byDirThenAlpha);
+
+        filelist.clear();
+        filelist.addAll(sortedFilelist);
     }
 
-    private static class DirAlphaComparator implements Comparator<File> {
+    private static class DirAlphaComparator implements Comparator<Path> {
 
         // Comparator interface requires defining compare method.
-        public int compare(File filea, File fileb) {
+        public int compare(Path filea, Path fileb) {
             //... Sort directories before files, otherwise alphabetical ignoring case.
-            if (filea.isDirectory() && !fileb.isDirectory()) {
+            if (Files.isDirectory(filea) && !Files.isDirectory(fileb)) {
                 return -1;
-            } else if (!filea.isDirectory() && fileb.isDirectory()) {
+            } else if (!Files.isDirectory(filea) && Files.isDirectory(fileb)) {
                 return 1;
             } else {
-                return filea.getName().compareToIgnoreCase(fileb.getName());
+                return filea.getFileName().toString().compareToIgnoreCase(fileb.getFileName().toString());
             }
         }
     }

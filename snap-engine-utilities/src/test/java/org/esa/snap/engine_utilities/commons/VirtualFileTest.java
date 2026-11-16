@@ -1,13 +1,16 @@
 package org.esa.snap.engine_utilities.commons;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class VirtualFileTest {
@@ -16,7 +19,7 @@ public class VirtualFileTest {
     @Test
     @STTM("SNAP-4105")
     public void test_close_deletesLocalTempFolder() throws IOException {
-        Path input = Files.createTempFile("virtual-file", ".tmp");
+        Path input = IOHelper.createTempFile("virtual-file", ".tmp");
         TestVirtualFile virtualFile = new TestVirtualFile(input);
 
         Path tempFolder = virtualFile.exposeLocalTempFolder();
@@ -33,7 +36,7 @@ public class VirtualFileTest {
     @Test
     @STTM("SNAP-4105")
     public void test_close_isIdempotent() throws IOException {
-        Path input = Files.createTempFile("virtual-file", ".tmp");
+        Path input = IOHelper.createTempFile("virtual-file", ".tmp");
         TestVirtualFile virtualFile = new TestVirtualFile(input);
 
         Path tempFolder = virtualFile.exposeLocalTempFolder();

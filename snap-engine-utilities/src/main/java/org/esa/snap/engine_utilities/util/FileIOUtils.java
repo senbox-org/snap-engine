@@ -45,10 +45,10 @@ public class FileIOUtils {
      * @param newText replacement text
      * @throws IOException on io error
      */
-    public static void replaceText(final File inFile, final File outFile,
+    public static void replaceText(final Path inFile, final Path outFile,
                                    final String oldText, final String newText) throws IOException {
         final List<String> lines;
-        try (FileReader fileReader = new FileReader(inFile)) {
+        try (Reader fileReader = Files.newBufferedReader(inFile)) {
             lines = IOUtils.readLines(fileReader);
 
             for (int i = 0; i < lines.size(); ++i) {
@@ -60,7 +60,7 @@ public class FileIOUtils {
         }
 
         if (!lines.isEmpty()) {
-            try (FileWriter fileWriter = new FileWriter(outFile)) {
+            try (Writer fileWriter = Files.newBufferedWriter(outFile)) {
                 IOUtils.writeLines(lines, "\n", fileWriter);
             }
 

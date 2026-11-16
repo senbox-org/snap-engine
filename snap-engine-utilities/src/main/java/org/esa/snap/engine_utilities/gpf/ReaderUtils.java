@@ -17,14 +17,19 @@ package org.esa.snap.engine_utilities.gpf;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductWriter;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.datamodel.Unit;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -140,7 +145,7 @@ public final class ReaderUtils {
     }
 
     /**
-     * Returns a <code>Path</code> if the given input is a <code>String</code>,a <code>File</code> or <code>Path</code>,
+     * Returns a <code>Path</code> if the given input is a <code>String</code>,a <code>Path</code> or <code>Path</code>,
      * otherwise it returns null;
      *
      * @param input an input object of unknown type
@@ -149,8 +154,6 @@ public final class ReaderUtils {
     public static Path getPathFromInput(final Object input) {
         if (input instanceof String) {
             return Paths.get((String) input);
-        } else if (input instanceof File) {
-            return ((File) input).toPath();
         } else if (input instanceof Path) {
             return (Path) input;
         }

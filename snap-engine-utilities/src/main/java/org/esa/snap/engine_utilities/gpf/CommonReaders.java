@@ -6,7 +6,7 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Product;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -31,7 +31,7 @@ public class CommonReaders {
         return itr != null && itr.hasNext() ? itr.next() : null;
     }
 
-    public static Product readProduct(final File file) throws IOException {
+    public static Product readProduct(final Path file) throws IOException {
         Product product = CommonReaders.readCommonProductReader(file);
         if(product == null) {
             //SystemUtils.LOG.warning("Reading uncommon "+file);
@@ -47,8 +47,8 @@ public class CommonReaders {
      * @return the product
      * @throws java.io.IOException if can't be read
      */
-    public static Product readCommonProductReader(final File file) throws IOException {
-        final String filename = file.getName().toLowerCase();
+    public static Product readCommonProductReader(final Path file) throws IOException {
+        final String filename = file.getFileName().toString().toLowerCase();
         if (filename.endsWith("dim")) {
             return read(file, dimapReadPlugIn);
         } else if (filename.endsWith("n1") || filename.endsWith("e1") || filename.endsWith("e2")) {
@@ -80,7 +80,7 @@ public class CommonReaders {
         return null;
     }
 
-    private static Product read(final File file, final ProductReaderPlugIn selectedPlugIn) throws IOException {
+    private static Product read(final Path file, final ProductReaderPlugIn selectedPlugIn) throws IOException {
         if(selectedPlugIn == null)
             return null;
         final ProductReader productReader = selectedPlugIn.createReaderInstance();
@@ -93,8 +93,8 @@ public class CommonReaders {
      * @param file input file
      * @return the product format or null
      */
-    public static String findCommonProductFormat(final File file) {
-        final String filename = file.getName().toLowerCase();
+    public static String findCommonProductFormat(final Path file) {
+        final String filename = file.getFileName().toString().toLowerCase();
         if (filename.endsWith("dim")) {
             return "BEAM-DIMAP";
         } else if (filename.endsWith("n1") || filename.endsWith("e1") || filename.endsWith("e2")) {
@@ -139,7 +139,7 @@ public class CommonReaders {
      * @param file input file
      * @return the product reader or null
      */
-    public static ProductReader findCommonProductReader(final File file) {
+    public static ProductReader findCommonProductReader(final Path file) {
         final String format = findCommonProductFormat(file);
         if (format != null) {
             return ProductIO.getProductReader(format);

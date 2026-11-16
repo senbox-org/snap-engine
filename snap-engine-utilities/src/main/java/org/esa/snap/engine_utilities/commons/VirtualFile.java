@@ -1,12 +1,12 @@
 package org.esa.snap.engine_utilities.commons;
 
 import com.bc.ceres.core.VirtualDir;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.util.CleanUpState;
 import com.bc.ceres.util.CleanerRegistry;
 import org.esa.snap.engine_utilities.file.AbstractFile;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -28,7 +28,7 @@ public class VirtualFile extends AbstractFile implements Closeable {
         if (fileState.localTempFolder == null) {
             fileState.localTempFolder = VirtualDir.createUniqueTempDir();
         }
-        return fileState.localTempFolder.toPath();
+        return fileState.localTempFolder;
     }
 
     @Override
@@ -38,12 +38,12 @@ public class VirtualFile extends AbstractFile implements Closeable {
 
 
     private static final class VirtualFileState implements CleanUpState {
-        private File localTempFolder;
+        private Path localTempFolder;
 
         @Override
         public synchronized void run() {
             if (localTempFolder != null) {
-                VirtualDir.deleteFileTree(localTempFolder);
+                IOHelper.deleteFileTree(localTempFolder);
                 localTempFolder = null;
             }
         }

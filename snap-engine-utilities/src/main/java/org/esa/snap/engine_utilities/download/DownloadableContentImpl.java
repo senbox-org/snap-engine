@@ -15,8 +15,9 @@
  */
 package org.esa.snap.engine_utilities.download;
 
-import org.esa.snap.core.dataop.downloadable.StatusProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataop.downloadable.FtpDownloader;
+import org.esa.snap.core.dataop.downloadable.StatusProgressMonitor;
 import org.esa.snap.core.util.DefaultPropertyMap;
 import org.esa.snap.core.util.PropertyMap;
 import org.esa.snap.core.util.SystemUtils;
@@ -24,14 +25,14 @@ import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -43,8 +44,8 @@ import java.util.zip.ZipFile;
  */
 public abstract class DownloadableContentImpl implements DownloadableContent {
 
-    private File localFile;
-    private final File localZipFile;
+    private final Path localFile;
+    private final Path localZipFile;
     private boolean localFileExists = false;
     private boolean remoteFileExists = true;
     private boolean errorInLocalFile = false;
@@ -59,7 +60,7 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
 
     private final static String versionFileName = "contentVersion.txt";
 
-    public DownloadableContentImpl(final File localFile,
+    public DownloadableContentImpl(final Path localFile,
                                    final URL remoteURL, final String archiveExt) {
         this.remoteURL = remoteURL;
 
@@ -89,13 +90,13 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
     }
 
     public String getFileName() {
-        return localFile.getName();
+        return localFile.getFileName().toString();
     }
 
-    protected abstract DownloadableFile createContentFile(final File dataFile);
+    protected abstract DownloadableFile createContentFile(final Path dataFile);
 
     private boolean findLocalFile() {
-        return (localFile.exists() && localFile.isFile()) || (localZipFile.exists() && localZipFile.isFile());
+        return (Files.exists(localFile) && Files.isRegularFile(localFile)) || (Files.exists(localZipFile) && Files.isRegularFile(localZipFile));
     }
 
     private boolean getRemoteFile() throws IOException {
@@ -112,7 +113,7 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
                     return true;
                 }
             } catch (Exception e) {
-                SystemUtils.LOG.warning("http error:" + e.getMessage() + " on " + remoteURL.toString() + localZipFile.getName());
+                SystemUtils.LOG.warning("http error:" + e.getMessage() + " on " + remoteURL + localZipFile.getFileName());
                 remoteFileExists = false;
                 return false;
             }
@@ -122,53 +123,53 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
         return false;
     }
 
-    private boolean checkForNewRemoteHttpFile(final URL remoteURL, final File localZipFile) throws IOException {
+    private boolean checkForNewRemoteHttpFile(final URL remoteURL, final Path localZipFile) throws IOException {
 
-        final File remoteVersionFile = new File(localZipFile.getParent(), "remote_"+versionFileName);
+        final Path remoteVersionFile = localZipFile.getParent().resolve("remote_"+versionFileName);
         try {
-            downloadFile(new URL(remoteURL.toString() + remoteVersionFile.getName()), remoteVersionFile);
+            downloadFile(new URL(remoteURL.toString() + remoteVersionFile.getFileName()), remoteVersionFile);
         } catch (Exception e) {
             // remote version file not found
             // continue
         }
 
         boolean newVersion = true;
-        if(remoteVersionFile.exists()) {
+        if(Files.exists(remoteVersionFile)) {
             final PropertyMap remoteVersionMap = new DefaultPropertyMap();
-            remoteVersionMap.load(remoteVersionFile.toPath());
+            remoteVersionMap.load(remoteVersionFile);
 
-            remoteVersion = remoteVersionMap.getPropertyInt(localZipFile.getName());
+            remoteVersion = remoteVersionMap.getPropertyInt(localZipFile.getFileName().toString());
 
-            final File localVersionFile = new File(localZipFile.getParent(), versionFileName);
-            if(localVersionFile.exists()) {
+            final Path localVersionFile = localZipFile.getParent().resolve(versionFileName);
+            if(Files.exists(localVersionFile)) {
 
                 final PropertyMap localVersionMap = new DefaultPropertyMap();
-                localVersionMap.load(localVersionFile.toPath());
+                localVersionMap.load(localVersionFile);
 
-                int localVersion = localVersionMap.getPropertyInt(localZipFile.getName());
+                int localVersion = localVersionMap.getPropertyInt(localZipFile.getFileName().toString());
 
                 if(remoteVersion != 0 && localVersion != 0 && remoteVersion == localVersion) {
                     newVersion = false;
                 }
             }
-            remoteVersionFile.delete();
+            Files.delete(remoteVersionFile);
         }
 
         return newVersion;
     }
 
-    private void saveNewVersion(final File localZipFile) throws IOException {
+    private void saveNewVersion(final Path localZipFile) throws IOException {
         if(remoteVersion == 0)
             return;
 
-        final File localVersionFile = new File(localZipFile.getParent(), versionFileName);
+        final Path localVersionFile = localZipFile.getParent().resolve(versionFileName);
         final PropertyMap localVersionMap = new DefaultPropertyMap();
-        if(localVersionFile.exists()) {
-            localVersionMap.load(localVersionFile.toPath());
+        if(Files.exists(localVersionFile)) {
+            localVersionMap.load(localVersionFile);
         }
 
-        localVersionMap.setPropertyInt(localZipFile.getName(), remoteVersion);
-        localVersionMap.store(localVersionFile.toPath(), "");
+        localVersionMap.setPropertyInt(localZipFile.getFileName().toString(), remoteVersion);
+        localVersionMap.store(localVersionFile, "");
     }
 
     private synchronized void findFile() throws IOException {
@@ -189,7 +190,7 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
                 errorInLocalFile = false;
             } else {
                 if (!remoteFileExists && localFileExists) {
-                    SystemUtils.LOG.warning("Unable to read product " + localFile.getAbsolutePath());
+                    SystemUtils.LOG.warning("Unable to read product " + localFile.toAbsolutePath());
                 }
                 localFileExists = false;
                 errorInLocalFile = true;
@@ -206,19 +207,19 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
     }
 
     private void getLocalFile() throws IOException {
-        File dataFile = localFile;
-        if (!dataFile.exists())
+        Path dataFile = localFile;
+        if (!Files.exists(dataFile))
             dataFile = getFileFromZip(localZipFile);
         if (dataFile != null) {
             contentFile = createContentFile(dataFile);
         }
     }
 
-    public static File getRemoteHttpFile(final URL remoteURL, final File localZipFile) throws IOException {
-        final String remotePath = remoteURL.toString() + localZipFile.getName();
+    public static Path getRemoteHttpFile(final URL remoteURL, final Path localZipFile) {
+        final String remotePath = remoteURL.toString() + localZipFile.getFileName();
         SystemUtils.LOG.info("http retrieving " + remotePath);
 
-        final AtomicReference<File> returnValue = new AtomicReference<>();
+        final AtomicReference<Path> returnValue = new AtomicReference<>();
         Runnable operation = () -> {
             try {
                 returnValue.set(downloadFile(new URL(remotePath), localZipFile));
@@ -237,29 +238,29 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
      *
      * @param fileUrl      the URL of the file to be downloaded
      * @param localZipFile the target file
-     * @return File the downloaded file
+     * @return Path the downloaded file
      * @throws java.io.IOException if an I/O error occurs
      */
-    private static File downloadFile(final URL fileUrl, final File localZipFile) throws IOException {
-        final File outputFile = new File(localZipFile.getParentFile(), new File(fileUrl.getFile()).getName());
+    private static Path downloadFile(final URL fileUrl, final Path localZipFile) throws IOException {
+        final Path outputFile = localZipFile.getParent().resolve(Path.of(fileUrl.getFile()).getFileName());
         final URLConnection urlConnection = fileUrl.openConnection();
         final int contentLength = urlConnection.getContentLength();
         final InputStream is = new BufferedInputStream(urlConnection.getInputStream(), contentLength);
         final OutputStream os;
         try {
-            if (!outputFile.getParentFile().exists()) {
-                if(!outputFile.getParentFile().mkdirs()) {
-                    SystemUtils.LOG.severe("Unable to create folders in "+outputFile.getParentFile());
+            if (!Files.exists(outputFile.getParent())) {
+                if(!IOHelper.createDirectories(outputFile.getParent())) {
+                    SystemUtils.LOG.severe("Unable to create folders in "+outputFile.getParent());
                 }
             }
-            os = new BufferedOutputStream(new FileOutputStream(outputFile));
+            os = new BufferedOutputStream(Files.newOutputStream(outputFile));
         } catch (IOException e) {
             is.close();
             throw e;
         }
 
         final StatusProgressMonitor pm = new StatusProgressMonitor(StatusProgressMonitor.TYPE.DATA_TRANSFER);
-        pm.beginTask("Downloading " + localZipFile.getName() + "... ", contentLength);
+        pm.beginTask("Downloading " + localZipFile.getFileName() + "... ", contentLength);
 
         try {
             final int size = 32768;
@@ -278,7 +279,7 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
                 os.write(b);
             }
         } catch (IOException e) {
-            outputFile.delete();
+            Files.delete(outputFile);
             throw e;
         } finally {
             try {
@@ -298,7 +299,7 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
                 fileSizeMap = FtpDownloader.readRemoteFileList(ftp, remoteURL.getHost(), remoteURL.getPath());
             }
 
-            final String remoteFileName = localZipFile.getName();
+            final String remoteFileName = localZipFile.getFileName().toString();
             final Long fileSize = fileSizeMap.get(remoteFileName);
 
             final FtpDownloader.FTPError result = ftp.retrieveFile(remoteURL.getPath() + remoteFileName, localZipFile, fileSize);
@@ -310,7 +311,7 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
                 } else {
                     dispose();
                 }
-                localZipFile.delete();
+                Files.delete(localZipFile);
             }
             return false;
         } catch (SocketException e) {
@@ -328,23 +329,23 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
         return false;
     }
 
-    private File getFileFromZip(final File dataFile) throws IOException {
-        final String ext = FileUtils.getExtension(dataFile.getName());
+    private Path getFileFromZip(final Path dataFile) throws IOException {
+        final String ext = FileUtils.getExtension(dataFile.getFileName());
         if (".zip".equalsIgnoreCase(ext)) {
-            final String baseName = localFile.getName();
-            final File newFile = new File(SystemUtils.getCacheDir(), baseName);
-            if (newFile.exists())
+            final String baseName = localFile.getFileName().toString();
+            final Path newFile = SystemUtils.getCacheDir().resolve(baseName);
+            if (Files.exists(newFile))
                 return newFile;
 
-            try (ZipFile zipFile = new ZipFile(dataFile);
-                BufferedOutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(newFile))){
+            try (ZipFile zipFile = new ZipFile(dataFile.toFile());
+                BufferedOutputStream fileOutputStream = new BufferedOutputStream(Files.newOutputStream(newFile))){
 
                 ZipEntry zipEntry = zipFile.getEntry(baseName);
                 if (zipEntry == null) {
                     zipEntry = zipFile.getEntry(baseName.toLowerCase());
                     if (zipEntry == null) {
-                        final String folderName = FileUtils.getFilenameWithoutExtension(dataFile.getName());
-                        zipEntry = zipFile.getEntry(folderName + '/' + localFile.getName());
+                        final String folderName = FileUtils.getFilenameWithoutExtension(dataFile.getFileName());
+                        zipEntry = zipFile.getEntry(folderName + '/' + localFile.getFileName());
                         if (zipEntry == null) {
                             localFileExists = false;
                             throw new IOException("Entry '" + baseName + "' not found in zip file.");
@@ -363,7 +364,7 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
                 return newFile;
             } catch (Exception e) {
                 SystemUtils.LOG.warning(e.getMessage());
-                dataFile.delete();
+                Files.delete(dataFile);
                 return null;
             }
         }

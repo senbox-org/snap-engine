@@ -36,11 +36,11 @@ public class TestSettings {
 
     @Before
     public void SetUp() throws IOException {
-        Path propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("snap-engine").resolve("etc/snap.auxdata.properties");
+        Path propFile = SystemUtils.getApplicationHomeDir().resolve("snap-engine").resolve("etc/snap.auxdata.properties");
         if(!Files.exists(propFile)) {
-            propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../etc/snap.auxdata.properties");
+            propFile = SystemUtils.getApplicationHomeDir().resolve("../etc/snap.auxdata.properties");
         }
-        if(!propFile.toFile().exists()) {
+        if(!Files.exists(propFile)) {
             throw new IOException("Unable to locate snap.auxdata.properties");
         }
         Config.instance(Settings.SNAP_AUXDATA).load(propFile);

@@ -25,7 +25,6 @@ import org.esa.snap.engine_utilities.util.FileSystemUtils;
 import org.esa.snap.engine_utilities.util.ZipFileSystemBuilder;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.*;
@@ -82,7 +81,7 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
                     return new VirtualDirTgz(path);
                 } else {
                     // check if the file represents a zip archive
-                    path = FileUtils.getCachedFile(path.toFile()).toPath();
+                    path = FileUtils.getCachedFile(path);
                     boolean zipFile;
                     try {
                         zipFile = FileSystemUtils.isZipFile(path);
@@ -222,8 +221,8 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
      * @return An array of file names
      */
     public String[] listAll(Pattern... patterns) {
-        File baseFile = getBaseFile();
-        if (VirtualDirEx.isTar(baseFile.getPath()) || VirtualDirTgz.isTgz(baseFile.getPath()) || VirtualDirEx.isGz(baseFile.getPath())) {
+        Path baseFile = getBaseFile();
+        if (VirtualDirEx.isTar(baseFile.toString()) || VirtualDirTgz.isTgz(baseFile.toString()) || VirtualDirEx.isGz(baseFile.toString())) {
             return listAll();
         } else {
             List<String> filesAndFolders;
@@ -241,9 +240,9 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
         }
     }
 
-    private List<String> listFilesFromZipArchive(File baseFile, Pattern... patterns) throws IOException {
+    private List<String> listFilesFromZipArchive(Path baseFile, Pattern... patterns) throws IOException {
         List<String> filesAndFolders = new ArrayList<>();
-        try (FileSystem fileSystem = ZipFileSystemBuilder.newZipFileSystem(baseFile.toPath())) {
+        try (FileSystem fileSystem = ZipFileSystemBuilder.newZipFileSystem(baseFile)) {
             for (Path root : fileSystem.getRootDirectories()) {
                 FileVisitor<Path> visitor = new ListFilesAndFolderVisitor() {
                     @Override
@@ -271,9 +270,9 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                         String zipEntryPath = remoteFirstSeparatorIfExists(file.toString());
                         if (isTar(zipEntryPath)) {
-                            File temporaryFile = getFile(zipEntryPath);
+                            Path temporaryFile = getFile(zipEntryPath);
                             try {
-                                VirtualDirTgz innerTar = new VirtualDirTgz(temporaryFile.toPath()) {
+                                VirtualDirTgz innerTar = new VirtualDirTgz(temporaryFile) {
                                     @Override
                                     public void close() {
                                         // do nothing
@@ -287,7 +286,7 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
                                     }
                                 }
                             } finally {
-                                temporaryFile.delete();
+                                Files.delete(temporaryFile);
                             }
                         } else {
                             if (matchFilters(zipEntryPath, patterns)) {
@@ -303,9 +302,9 @@ public abstract class VirtualDirEx extends VirtualDir implements Closeable {
         return filesAndFolders;
     }
 
-    private List<String> listFilesFromFolder(File parent, Pattern... filters) throws IOException {
+    private List<String> listFilesFromFolder(Path parent, Pattern... filters) throws IOException {
         List<String> filesAndFolders = new ArrayList<>();
-        Path parentPath = parent.toPath();
+        Path parentPath = parent;
         FileVisitor<Path> visitor = new ListFilesAndFolderVisitor() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {

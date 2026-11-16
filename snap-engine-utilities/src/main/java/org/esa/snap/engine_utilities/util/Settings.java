@@ -18,7 +18,7 @@ package org.esa.snap.engine_utilities.util;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.prefs.Preferences;
 
 /**
@@ -65,8 +65,8 @@ public final class Settings {
         return path;
     }
 
-    public File getAuxDataFolder() {
-        return new File(auxdataPreferences.get("AuxDataPath", ""));
+    public Path getAuxDataFolder() {
+        return Path.of(auxdataPreferences.get("AuxDataPath", ""));
     }
 
 }

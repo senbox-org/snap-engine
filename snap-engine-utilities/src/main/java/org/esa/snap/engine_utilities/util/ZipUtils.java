@@ -36,15 +36,6 @@ public class ZipUtils {
 
     private final static String[] extList = {".zip", ".gz", ".z"};
 
-    public static boolean isZipped(final File file) {
-        final String name = file.getName().toLowerCase();
-        for (String ext : extList) {
-            if (name.endsWith(ext))
-                return true;
-        }
-        return false;
-    }
-
     public static boolean isZipped(final Path path) {
         if(path.getFileName() == null)
             return false;
@@ -56,32 +47,27 @@ public class ZipUtils {
         return false;
     }
 
-    public static boolean isZip(final File inputFile) {
-        return inputFile.getName().toLowerCase().endsWith(".zip");
-    }
-
     public static boolean isZip(final Path inputPath) {
         return inputPath.getFileName() != null && inputPath.getFileName().toString().toLowerCase().endsWith(".zip");
     }
 
     @Deprecated
-    public static boolean findInZip(final File file, final String prefix, final String suffix) {
+    public static boolean findInZip(final Path file, final String prefix, final String suffix) {
         return findInZip(file, prefix, suffix, "") != null;
     }
 
-    public static ZipEntry findInZip(final File file, final String prefix, final String suffix, final String contains) {
-        try {
-            final File cachedFile = FileUtils.getCachedFile(file);
-            final ZipFile productZip = new ZipFile(cachedFile, ZipFile.OPEN_READ);
+    public static ZipEntry findInZip(final Path file, final String prefix, final String suffix, final String contains) {
+        final Path cachedFile = FileUtils.getCachedFile(file);
+        try (final ZipFile productZip = new ZipFile(cachedFile.toFile(), ZipFile.OPEN_READ)){
 
-            final Optional result = productZip.stream()
+            final Optional<? extends ZipEntry> result = productZip.stream()
                     .filter(ze -> !ze.isDirectory())
                     .filter(ze -> ze.getName().toLowerCase().endsWith(suffix.toLowerCase()))
                     .filter(ze -> ze.getName().toLowerCase().startsWith(prefix.toLowerCase()))
                     .filter(ze -> ze.getName().toLowerCase().contains(contains.toLowerCase()))
                     .findFirst();
             if(result.isPresent()) {
-                return (ZipEntry)result.get();
+                return result.get();
             }
         } catch (Exception e) {
             SystemUtils.LOG.warning("unable to read zip file " + file + ": " + e.getMessage());
@@ -89,29 +75,32 @@ public class ZipUtils {
         return null;
     }
 
-    public static String getRootFolder(final File file, final String headerFileName) throws IOException {
-        final ZipFile productZip = new ZipFile(file, ZipFile.OPEN_READ);
+    public static String getRootFolder(final Path file, final String headerFileName) throws IOException {
+        try (ZipFile productZip = new ZipFile(file.toFile(), ZipFile.OPEN_READ)) {
 
-        final Optional result = productZip.stream()
-                .filter(ze -> !ze.isDirectory())
-                .filter(ze -> ze.getName().toLowerCase().endsWith(headerFileName))
-                .findFirst();
-        if (result.isPresent()) {
-            ZipEntry ze = (ZipEntry) result.get();
-            String path = ze.toString();
-            int sepIndex = path.lastIndexOf('/');
-            if (sepIndex > 0) {
-                return path.substring(0, sepIndex) + '/';
-            } else {
-                return "";
+            final Optional<? extends ZipEntry> result = productZip.stream()
+                    .filter(ze -> !ze.isDirectory())
+                    .filter(ze -> ze.getName().toLowerCase().endsWith(headerFileName))
+                    .findFirst();
+            if (result.isPresent()) {
+                ZipEntry ze = result.get();
+                String path = ze.toString();
+                int sepIndex = path.lastIndexOf('/');
+                if (sepIndex > 0) {
+                    return path.substring(0, sepIndex) + '/';
+                } else {
+                    return "";
+                }
             }
+        } catch (Exception e) {
+            SystemUtils.LOG.warning("unable to read zip file " + file + ": " + e.getMessage());
         }
         return "";
     }
 
-    public static boolean isValid(final File file) {
-        try (ZipFile zipfile = new ZipFile(file)) {
-            try (ZipInputStream zis = new ZipInputStream(new FileInputStream(file))) {
+    public static boolean isValid(final Path file) {
+        try (ZipFile zipfile = new ZipFile(file.toFile())) {
+            try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(file))) {
                 ZipEntry ze = zis.getNextEntry();
                 if (ze == null) {
                     return false;
@@ -158,7 +147,7 @@ public class ZipUtils {
                     } else {
                         try (InputStream inputStream = zipFile.getInputStream(entry)) {
                             try (BufferedOutputStream bos = new BufferedOutputStream(
-                                    new FileOutputStream(keepFolderStructure ? filePath.toFile() : strippedFilePath.toFile()))) {
+                                    Files.newOutputStream(keepFolderStructure ? filePath : strippedFilePath))) {
                                 buffer = new byte[4096];
                                 int read;
                                 while ((read = inputStream.read(buffer)) > 0) {
@@ -172,19 +161,19 @@ public class ZipUtils {
         }
     }
 
-    public static void zipFile(final File file, final File outputZipFile) throws IOException {
+    public static void zipFile(final Path file, final Path outputZipFile) throws IOException {
 
-        try (ZipOutputStream zipStream = new ZipOutputStream(new FileOutputStream(outputZipFile))) {
+        try (ZipOutputStream zipStream = new ZipOutputStream(Files.newOutputStream(outputZipFile))) {
             addToZipFile(file, zipStream);
         }
     }
 
-    private static void addToZipFile(File file, ZipOutputStream zipStream) {
+    private static void addToZipFile(Path file, ZipOutputStream zipStream) {
 
-        try (FileInputStream inputStream = new FileInputStream(file.getPath())) {
+        try (InputStream inputStream = Files.newInputStream(file)) {
 
-            ZipEntry entry = new ZipEntry(file.getName());
-            entry.setCreationTime(FileTime.fromMillis(file.lastModified()));
+            ZipEntry entry = new ZipEntry(file.getFileName().toString());
+            entry.setCreationTime(FileTime.fromMillis(Files.getLastModifiedTime(file).toMillis()));
             zipStream.putNextEntry(entry);
 
             final byte[] readBuffer = new byte[2048];

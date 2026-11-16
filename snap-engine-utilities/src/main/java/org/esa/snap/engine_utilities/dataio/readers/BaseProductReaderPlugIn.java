@@ -18,21 +18,31 @@
 package org.esa.snap.engine_utilities.dataio.readers;
 
 import eu.esa.snap.core.lib.FileHelper;
-import org.esa.snap.engine_utilities.dataio.VirtualDirEx;
-import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
+import org.esa.snap.engine_utilities.dataio.VirtualDirEx;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -94,7 +104,7 @@ public abstract class BaseProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     public static Path convertInputToPath(Object input) {
-        return AbstractProductReader.convertInputToPath(input);
+        return ProductUtils.getProductPath(input);
     }
 
     @Override
@@ -188,11 +198,11 @@ public abstract class BaseProductReaderPlugIn implements ProductReaderPlugIn {
      * @return The list of files
      * @throws IOException
      */
-    static List<String> listFiles(File parent, int depth) throws IOException {
+    static List<String> listFiles(Path parent, int depth) throws IOException {
         if (parent == null)
             return null;
         List<String> files = new ArrayList<>();
-        Files.walkFileTree(Paths.get(parent.getAbsolutePath()),
+        Files.walkFileTree(parent,
                 EnumSet.noneOf(FileVisitOption.class),
                 depth,
                 new FileVisitor<Path>() {
@@ -203,7 +213,7 @@ public abstract class BaseProductReaderPlugIn implements ProductReaderPlugIn {
 
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                        files.add(file.toFile().getAbsolutePath().replace(parent.getAbsolutePath(), "").substring(1));
+                        files.add(file.toAbsolutePath().toString().replace(parent.toAbsolutePath().toString(), "").substring(1));
                         return FileVisitResult.CONTINUE;
                     }
 
@@ -225,7 +235,7 @@ public abstract class BaseProductReaderPlugIn implements ProductReaderPlugIn {
      */
     private class BaseProductFileFilter extends SnapFileFilter {
 
-        private final Map<File, Boolean> processed;
+        private final Map<Path, Boolean> processed;
         private final int depth;
 
         public BaseProductFileFilter(BaseProductReaderPlugIn plugIn, int folderDepth) {
@@ -236,10 +246,10 @@ public abstract class BaseProductReaderPlugIn implements ProductReaderPlugIn {
         }
 
         @Override
-        public boolean accept(File file) {
+        public boolean accept(Path file) {
             boolean shouldAccept = super.accept(file);
-            if (shouldAccept && file.isFile() && !VirtualDirEx.isPackedFile(file.toPath())) {
-                File folder = file.getParentFile();
+            if (shouldAccept && Files.isRegularFile(file) && !VirtualDirEx.isPackedFile(file)) {
+                Path folder = file.getParent();
                 if (!processed.containsKey(folder)) {
                     try {
                         List<String> files = listFiles(folder, depth);

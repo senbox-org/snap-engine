@@ -1,32 +1,35 @@
 package org.esa.snap.engine_utilities.dataio;
 
 import com.bc.ceres.core.VirtualDir;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.util.CleanUpState;
 import com.bc.ceres.util.CleanerRegistry;
-import org.apache.commons.lang3.ArrayUtils;
-import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.engine_utilities.commons.FilePath;
-import org.esa.snap.engine_utilities.commons.FilePathInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.apache.commons.lang3.ArrayUtils;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.engine_utilities.commons.FilePath;
+import org.esa.snap.engine_utilities.commons.FilePathInputStream;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 /**
@@ -38,15 +41,6 @@ public class VirtualDirTgz extends VirtualDirEx {
 
     private final Path archiveFile;
     private final VirtualDirTgzState state;
-
-    public VirtualDirTgz(File tgz) {
-        if (tgz == null) {
-            throw new IllegalArgumentException("Input file shall not be null");
-        }
-        archiveFile = tgz.toPath();
-        state = new VirtualDirTgzState();
-        CleanerRegistry.getInstance().register(this, state);
-    }
 
     public VirtualDirTgz(Path tgz) {
         if (tgz == null) {
@@ -70,12 +64,12 @@ public class VirtualDirTgz extends VirtualDirEx {
 
     @Override
     public String getBasePath() {
-        return archiveFile.toFile().getPath();
+        return archiveFile.toString();
     }
 
     @Override
-    public File getBaseFile() {
-        return archiveFile.toFile();
+    public Path getBaseFile() {
+        return archiveFile;
     }
 
     @Override
@@ -92,7 +86,7 @@ public class VirtualDirTgz extends VirtualDirEx {
 
     @Override
     public FilePathInputStream getInputStream(String childRelativePath) throws IOException {
-        Path file = getFile(childRelativePath).toPath();
+        Path file = getFile(childRelativePath);
         InputStream inputStream = Files.newInputStream(file);
         BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
         return new FilePathInputStream(file, bufferedInputStream, null);
@@ -100,18 +94,18 @@ public class VirtualDirTgz extends VirtualDirEx {
 
     @Override
     public FilePath getFilePath(String childRelativePath) throws IOException {
-        Path file = getFile(childRelativePath).toPath();
+        Path file = getFile(childRelativePath);
         return new FilePath(file, null);
     }
 
     @Override
-    public File getFile(String childRelativePath) throws IOException {
+    public Path getFile(String childRelativePath) throws IOException {
         ensureUnpacked(null);
-        File file = new File(state.extractDir, childRelativePath);
-        if (!(file.isFile() || file.isDirectory())) {
-            final File fileFromMapping = state.locationMap.get(childRelativePath);
+        Path file = state.extractDir.resolve(childRelativePath);
+        if (!(Files.isRegularFile(file) || Files.isDirectory(file))) {
+            final Path fileFromMapping = state.locationMap.get(childRelativePath);
             if (fileFromMapping == null) {
-                throw new FileNotFoundException("The path '" + childRelativePath + "' does not exist in the folder '" + state.extractDir.getAbsolutePath() + "'.");
+                throw new FileNotFoundException("The path '" + childRelativePath + "' does not exist in the folder '" + state.extractDir.toAbsolutePath() + "'.");
             }
             return fileFromMapping;
         }
@@ -120,8 +114,8 @@ public class VirtualDirTgz extends VirtualDirEx {
 
     @Override
     public String[] list(String path) throws IOException {
-        final File file = getFile(path);
-        return file.list();
+        final Path file = getFile(path);
+        return IOHelper.list(file).toArray(new String[0]);
     }
 
     @Override
@@ -161,7 +155,7 @@ public class VirtualDirTgz extends VirtualDirEx {
 
 
     @Override
-    public File getTempDir() {
+    public Path getTempDir() {
         return state.extractDir;
     }
 
@@ -170,10 +164,10 @@ public class VirtualDirTgz extends VirtualDirEx {
         if (state.extractDir == null) {
             state.extractDir = VirtualDir.createUniqueTempDir();
         }
-        return state.extractDir.toPath();
+        return state.extractDir;
     }
 
-    public void ensureUnpacked(File unpackFolder) throws IOException {
+    public void ensureUnpacked(Path unpackFolder) throws IOException {
         if (state.extractDir == null) {
             state.extractDir = (unpackFolder == null) ? VirtualDir.createUniqueTempDir() : unpackFolder;
 
@@ -190,7 +184,7 @@ public class VirtualDirTgz extends VirtualDirEx {
                         longLink = null;
                     }
                     if (entry.isDirectory()) {
-                        File directory = new File(state.extractDir, entryName);
+                        Path directory = state.extractDir.resolve(entryName);
                         ensureDirectory(directory, state.extractDir);
 
                         continue;
@@ -203,26 +197,26 @@ public class VirtualDirTgz extends VirtualDirEx {
                         tarPath = entryName.substring(0, pathIndex - 1);
                     }
 
-                    File targetDir;
+                    Path targetDir;
                     if (tarPath == null) {
                         targetDir = state.extractDir;
                     } else {
-                        targetDir = new File(state.extractDir, tarPath);
+                        targetDir = state.extractDir.resolve(tarPath);
                     }
 
-                    final File ensuredDirectory = ensureDirectory(targetDir, state.extractDir);
-                    final File targetFile = new File(ensuredDirectory, fileNameFromPath);
-                    if (!entryIsLink && targetFile.isFile()) {
+                    final Path ensuredDirectory = ensureDirectory(targetDir, state.extractDir);
+                    final Path targetFile = ensuredDirectory.resolve(fileNameFromPath);
+                    if (!entryIsLink && Files.isRegularFile(targetFile)) {
                         continue;
                     }
 
-                    if (!entryIsLink && !targetFile.createNewFile()) {
-                        throw new IOException("Unable to create file: " + targetFile.getAbsolutePath());
+                    if (!entryIsLink && !IOHelper.createFile(targetFile)) {
+                        throw new IOException("Unable to create file: " + targetFile.toAbsolutePath());
                     }
 
                     state.locationMap.put(entryName, targetFile);
 
-                    try (FileOutputStream fileOutputStream = new FileOutputStream(targetFile);
+                    try (OutputStream fileOutputStream = Files.newOutputStream(targetFile);
                          BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream)) {
 
                         int count;
@@ -263,15 +257,15 @@ public class VirtualDirTgz extends VirtualDirEx {
         }
     }
 
-    private File ensureDirectory(File targetDir, File extractDir) throws IOException {
-        if (!targetDir.isDirectory()) {
-            if (!targetDir.mkdirs()) {
+    private Path ensureDirectory(Path targetDir, Path extractDir) throws IOException {
+        if (!Files.isDirectory(targetDir)) {
+            if (!IOHelper.createDirectories(targetDir)) {
                 // if this fails, we try to correct eventually present invalid characters in the path or
                 // shorten the path if it is too long for windows.
-                final File ensuredTargetDir = ensureCorrectPathSegments(targetDir, extractDir);
-                if (!ensuredTargetDir.isDirectory()) {
-                    if (!ensuredTargetDir.mkdirs()) {
-                        throw new IOException("unable to create directory: " + ensuredTargetDir.getAbsolutePath());
+                final Path ensuredTargetDir = ensureCorrectPathSegments(targetDir, extractDir);
+                if (!Files.isDirectory(ensuredTargetDir)) {
+                    if (!IOHelper.createDirectories(ensuredTargetDir)) {
+                        throw new IOException("unable to create directory: " + ensuredTargetDir.toAbsolutePath());
                     }
                 }
                 return ensuredTargetDir;
@@ -281,9 +275,9 @@ public class VirtualDirTgz extends VirtualDirEx {
         return targetDir;
     }
 
-    static File ensureCorrectPathSegments(File targetDir, File extractDir) {
+    static Path ensureCorrectPathSegments(Path targetDir, Path extractDir) {
         final String extractDirName = FileUtils.getFilenameWithoutExtension(extractDir);
-        final StringTokenizer stringTokenizer = new StringTokenizer(targetDir.getAbsolutePath(), File.separator);
+        final StringTokenizer stringTokenizer = new StringTokenizer(targetDir.toAbsolutePath().toString(), IOHelper.SEPARATOR);
 
         final ArrayList<String> segmentList = new ArrayList<>();
         int pathLength = 0;
@@ -297,20 +291,20 @@ public class VirtualDirTgz extends VirtualDirEx {
         // overall target path is too long for windows, replace with a unique, shorter path
         if (pathLength > 255) {
             final long nanoTime = System.nanoTime();
-            Path path = Paths.get(extractDir.getAbsolutePath());
+            Path path = Paths.get(extractDir.toAbsolutePath().toString());
             path = path.resolve(Long.toString(nanoTime));
-            return path.toFile();
+            return path;
         }
 
         final String[] segments = segmentList.toArray(new String[0]);
         final int index = ArrayUtils.indexOf(segments, extractDirName) + 1;
-        Path path = Paths.get(extractDir.getAbsolutePath());
+        Path path = Paths.get(extractDir.toAbsolutePath().toString());
         for (int i = index; i < segments.length; i++) {
             segments[i] = StringUtils.createValidName(segments[i], new char[]{'.', '-', '/'}, '_');
             path = path.resolve(segments[i]);
         }
 
-        return path.toFile();
+        return path;
     }
 
     @Override
@@ -353,8 +347,8 @@ public class VirtualDirTgz extends VirtualDirEx {
 
 
     private static final class VirtualDirTgzState implements CleanUpState {
-        private File extractDir;
-        private HashMap<String, File> locationMap;
+        private Path extractDir;
+        private HashMap<String, Path> locationMap;
 
         @Override
         public synchronized void run() {

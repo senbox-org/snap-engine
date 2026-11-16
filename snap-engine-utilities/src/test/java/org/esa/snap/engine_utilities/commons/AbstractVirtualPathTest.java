@@ -1,14 +1,18 @@
 package org.esa.snap.engine_utilities.commons;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class AbstractVirtualPathTest {
@@ -23,7 +27,7 @@ public class AbstractVirtualPathTest {
         assertNotNull(tempFolder);
         assertTrue(Files.exists(tempFolder));
         assertTrue(Files.isDirectory(tempFolder));
-        assertEquals(tempFolder.toFile(), virtualPath.getTempDir());
+        assertEquals(tempFolder, virtualPath.getTempDir());
 
         virtualPath.close();
 
@@ -48,6 +52,8 @@ public class AbstractVirtualPathTest {
 
     private static final class TestVirtualPath extends AbstractVirtualPath {
 
+        final Path baseDir = IOHelper.createATempDir();
+
         private TestVirtualPath(boolean copyFilesOnLocalDisk) {
             super(copyFilesOnLocalDisk);
         }
@@ -59,7 +65,7 @@ public class AbstractVirtualPathTest {
 
         @Override
         public String getFileSystemSeparator() {
-            return File.separator;
+            return IOHelper.SEPARATOR;
         }
 
         @Override
@@ -88,12 +94,12 @@ public class AbstractVirtualPathTest {
         }
 
         @Override
-        public File getBaseFile() {
-            return new File(".");
+        public Path getBaseFile() {
+            return baseDir;
         }
 
         @Override
-        public File getFile(String path) {
+        public Path getFile(String path) {
             throw new UnsupportedOperationException();
         }
 

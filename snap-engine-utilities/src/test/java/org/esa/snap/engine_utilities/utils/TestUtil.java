@@ -20,7 +20,7 @@ package org.esa.snap.engine_utilities.utils;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -33,19 +33,19 @@ public class TestUtil {
         return (testDataDir != null) && !testDataDir.isEmpty() && Files.exists( Paths.get( testDataDir ) );
     }
 
-    public static File getTestFile(String file) {
-        final File testTgz = getTestFileOrDirectory(file);
-        Assert.assertTrue(String.format("Looking for file: [%s]", testTgz.getAbsolutePath()), testTgz.isFile());
+    public static Path getTestFile(String file) {
+        final Path testTgz = getTestFileOrDirectory(file);
+        Assert.assertTrue(String.format("Looking for file: [%s]", testTgz.toAbsolutePath()), Files.isRegularFile(testTgz));
         return testTgz;
     }
 
-    public static File getTestDirectory(String file) {
-        final File testTgz = getTestFileOrDirectory(file);
-        Assert.assertTrue(String.format("Is directory: [%s]", testTgz.getAbsolutePath()), testTgz.isDirectory());
+    public static Path getTestDirectory(String file) {
+        final Path testTgz = getTestFileOrDirectory(file);
+        Assert.assertTrue(String.format("Is directory: [%s]", testTgz.toAbsolutePath()), Files.isDirectory(testTgz));
         return testTgz;
     }
 
-    private static File getTestFileOrDirectory(String file) {
+    private static Path getTestFileOrDirectory(String file) {
         String partialPath = file;
         if(SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_MAC_OSX)
         {
@@ -53,6 +53,6 @@ public class TestUtil {
         }
 
         String path = System.getProperty(PROPERTYNAME_DATA_DIR);
-        return new File(path, partialPath);
+        return Path.of(path).resolve(partialPath);
     }
 }

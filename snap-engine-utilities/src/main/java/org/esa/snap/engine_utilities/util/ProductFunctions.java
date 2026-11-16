@@ -15,6 +15,7 @@
  */
 package org.esa.snap.engine_utilities.util;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
@@ -23,8 +24,11 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.engine_utilities.eo.Constants;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.function.Predicate;
 
 /**
 
@@ -52,8 +56,8 @@ public class ProductFunctions {
             "support", "quality", "source_images", "schemas", "aux_data", "granule", "datastrip", "rep_info",
             "html", "iif", "tools"};
 
-    public static boolean isValidProduct(final File file) {
-        final String name = file.getName().toLowerCase();
+    public static boolean isValidProduct(final Path file) {
+        final String name = file.getFileName().toString().toLowerCase();
         for (String str : validExtensions) {
             if (name.endsWith(str)) {
                 return true;
@@ -84,15 +88,15 @@ public class ProductFunctions {
      * @param inputFolder starting folder
      * @param pathList    list of products found
      */
-    public static void scanForValidProducts(final File inputFolder, final ArrayList<String> pathList) {
+    public static void scanForValidProducts(final Path inputFolder, final ArrayList<String> pathList) {
         final ValidProductFileFilter dirFilter = new ValidProductFileFilter();
-        final File[] files = inputFolder.listFiles(dirFilter);
+        final Collection<Path> files = IOHelper.listFiles(inputFolder, dirFilter);
         if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
+            for (Path file : files) {
+                if (Files.isDirectory(file)) {
                     scanForValidProducts(file, pathList);
                 } else if (isValidProduct(file)) {
-                    pathList.add(file.getAbsolutePath());
+                    pathList.add(file.toAbsolutePath().toString());
                 }
             }
         }
@@ -101,7 +105,7 @@ public class ProductFunctions {
     /**
      * any files (not folders) that could be products
      */
-    public static class ValidProductFileFilter implements java.io.FileFilter {
+    public static class ValidProductFileFilter implements Predicate<Path> {
         private final boolean includeFolders;
 
         public ValidProductFileFilter() {
@@ -112,11 +116,11 @@ public class ProductFunctions {
             this.includeFolders = includeFolders;
         }
 
-        public boolean accept(final File file) {
-            if (file.isDirectory())
+        public boolean test(final Path file) {
+            if (Files.isDirectory(file))
                 return includeFolders;
 
-            final String name = file.getName().toLowerCase();
+            final String name = file.getFileName().toString().toLowerCase();
             for (String ext : validExtensions) {
                 if (name.endsWith(ext)) {
                     return true;
@@ -156,11 +160,11 @@ public class ProductFunctions {
     /**
      * collect valid folders to scan
      */
-    public static class DirectoryFileFilter implements java.io.FileFilter {
+    public static class DirectoryFileFilter implements Predicate<Path> {
 
-        public boolean accept(final File file) {
-            if (!file.isDirectory()) return false;
-            final String name = file.getName().toLowerCase();
+        public boolean test(final Path file) {
+            if (!Files.isDirectory(file)) return false;
+            final String name = file.getFileName().toString().toLowerCase();
             if (name.endsWith(DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION))
                 return false;
             if (name.endsWith("safe"))

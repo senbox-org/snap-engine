@@ -43,9 +43,9 @@ public abstract class AbstractFile {
                     localFile = localTempFolder.resolve(fileName);
                     if (FileHelper.canCopyOrReplaceFile(this.file, localFile)) {
                         if (logger.isLoggable(Level.FINE)) {
-                            logger.log(Level.FINE, "Copy file '" + this.file.toString() + "' to local folder '" + localTempFolder.toString() + "'.");
+                            logger.log(Level.FINE, "Copy file '" + this.file + "' to local folder '" + localTempFolder + "'.");
                         }
-                        FileHelper.copyFileUsingInputStream(this.file, localFile.toString(), AbstractFile.BUFFER_SIZE);
+                        FileHelper.copyFileUsingInputStream(this.file, localFile, AbstractFile.BUFFER_SIZE);
                     }
                 }
                 return localFile;

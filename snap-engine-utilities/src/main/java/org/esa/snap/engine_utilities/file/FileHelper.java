@@ -17,9 +17,16 @@
 
 package org.esa.snap.engine_utilities.file;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.engine_utilities.util.NotRegularFileException;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -31,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -62,13 +70,16 @@ public class FileHelper {
         return copyOrReplaceFile;
     }
 
-    public static void copyFileUsingInputStream(Path sourcePath, String destinationLocalFilePath, int maximumBufferSize) throws IOException {
+    public static void copyFileUsingInputStream(Path sourcePath, Path destinationLocalFilePath, int maximumBufferSize) throws IOException {
         try (InputStream inputStream = sourcePath.getFileSystem().provider().newInputStream(sourcePath);
              BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, maximumBufferSize);
              ReadableByteChannel readableByteChannel = Channels.newChannel(bufferedInputStream);
-             FileOutputStream fileOutputStream = new FileOutputStream(destinationLocalFilePath, false)) {
+             OutputStream fileOutputStream = Files.newOutputStream(destinationLocalFilePath,
+                     StandardOpenOption.CREATE,
+                     StandardOpenOption.TRUNCATE_EXISTING,
+                     StandardOpenOption.WRITE)) {
 
-            FileChannel destinationFileChannel = fileOutputStream.getChannel();
+            WritableByteChannel destinationFileChannel = Channels.newChannel(fileOutputStream);
             ByteBuffer buffer = ByteBuffer.allocate(maximumBufferSize);
             while (readableByteChannel.read(buffer) > 0) {
                 // prepare the buffer to be drained
@@ -102,14 +113,17 @@ public class FileHelper {
         }
     }
 
-    public static void copyFileUsingFileChannel(Path sourcePath, String destinationLocalFilePath) throws IOException {
+    public static void copyFileUsingFileChannel(Path sourcePath, Path destinationLocalFilePath) throws IOException {
         Set<? extends OpenOption> options = Collections.emptySet();
         FileSystemProvider fileSystemProvider = sourcePath.getFileSystem().provider();
         try (FileChannel sourceFileChannel = fileSystemProvider.newFileChannel(sourcePath, options);
-             FileOutputStream fileOutputStream = new FileOutputStream(destinationLocalFilePath, false)) {
+             OutputStream fileOutputStream = Files.newOutputStream(destinationLocalFilePath,
+                     StandardOpenOption.CREATE,
+                     StandardOpenOption.TRUNCATE_EXISTING,
+                     StandardOpenOption.WRITE)) {
 
             long sourceFileSize = sourceFileChannel.size();
-            FileChannel destinationFileChannel = fileOutputStream.getChannel();
+            WritableByteChannel destinationFileChannel = Channels.newChannel(fileOutputStream);
             long transferredSize = 0;
             long bytesReadNow;
             while ((bytesReadNow = sourceFileChannel.transferTo(transferredSize, sourceFileSize - transferredSize, destinationFileChannel)) > 0) {
@@ -124,22 +138,22 @@ public class FileHelper {
      *
      * @param basePath  The parent folder
      * @param pathFragments Additional subfolders that should end with the file name
-     * @return  The File object
+     * @return  The Path object
      * @throws java.io.IOException
      */
-    public static File getFile(String basePath, String...pathFragments) throws IOException {
-        File file = new File(basePath);
-        if (!file.exists()) {
-            file.mkdirs();
+    public static Path getFile(String basePath, String...pathFragments) throws IOException {
+        Path file = Path.of(basePath);
+        if (!Files.exists(file)) {
+            IOHelper.createDirectories(file);
         }
         if (pathFragments != null) {
             for (int i = 0; i < pathFragments.length; i++) {
-                file = new File(file, pathFragments[i]);
+                file = file.resolve(pathFragments[i]);
                 if (i < pathFragments.length - 1) {
-                    file.mkdirs();
+                    IOHelper.createDirectories(file);
                 } else {
-                    if (!file.exists()) {
-                        file.createNewFile();
+                    if (!Files.exists(file)) {
+                        IOHelper.createFile(file);
                     }
                 }
             }
@@ -151,22 +165,15 @@ public class FileHelper {
         if (sourceURL == null || destinationFile == null) {
             throw new IllegalArgumentException("One of the arguments is null");
         }
-        InputStream inputStream = sourceURL.openStream();
-        try {
-            File dest = destinationFile.toFile();
-            dest.getParentFile().mkdirs();
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dest));
-            try {
+        try (InputStream inputStream = sourceURL.openStream()) {
+            IOHelper.createDirectories(destinationFile.getParent());
+            try (BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(destinationFile))) {
                 byte[] buffer = new byte[4096];
                 int read;
                 while ((read = inputStream.read(buffer)) > 0) {
                     bos.write(buffer, 0, read);
                 }
-            } finally {
-                bos.close();
             }
-        } finally {
-            inputStream.close();
         }
     }
 
@@ -182,10 +189,10 @@ public class FileHelper {
                             Path zipEntryPath = Paths.get(zipEntry.getName());
                             Path zipEntryDir = zipEntryPath.getParent();
                             Path zipEntryAbsolutePath = zipDir.resolve(zipEntryDir);
-                            String targetAbsolutePath = new File(zipEntryAbsolutePath.resolve(target).toString()).getCanonicalPath();
+                            Path targetAbsolutePath = zipEntryAbsolutePath.resolve(target).toRealPath();
                             Path linkPath = zipEntryAbsolutePath.resolve(zipEntryPath.getFileName());
                             // make sure we compare two canonical paths
-                            if (targetAbsolutePath.startsWith(new File(zipDir.toString()).getCanonicalPath().toString())) {
+                            if (targetAbsolutePath.startsWith(zipDir.toRealPath())) {
                                 Files.createSymbolicLink(linkPath, target);
                                 return true;
                             }
@@ -222,7 +229,7 @@ public class FileHelper {
                     } else if(!wasSymlink(zipFile, entry)){
                         try (InputStream inputStream = zipFile.getInputStream(entry)) {
                             try (BufferedOutputStream bos = new BufferedOutputStream(
-                                    new FileOutputStream(keepFolderStructure ? filePath.toFile() : strippedFilePath.toFile()))) {
+                                    Files.newOutputStream(keepFolderStructure ? filePath : strippedFilePath))) {
                                 buffer = new byte[4096];
                                 int read;
                                 while ((read = inputStream.read(buffer)) > 0) {

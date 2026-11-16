@@ -15,11 +15,14 @@
  */
 package org.esa.snap.engine_utilities.gpf;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.engine_utilities.util.ProductFunctions;
 import org.esa.snap.engine_utilities.util.TestUtils;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
 
 /**
 
@@ -27,19 +30,19 @@ import java.io.File;
 public abstract class RecursiveProcessor {
 
 
-    public int recurseProcessFolder(final File folder, int iterations, int maxIteration,
+    public int recurseProcessFolder(final Path folder, int iterations, int maxIteration,
                                     final String[] productTypeExemptions,
                                     final String[] exceptionExemptions) throws Exception {
-        final File[] fileList = folder.listFiles(new ProductFunctions.ValidProductFileFilter(true));
+        final Collection<Path> fileList = IOHelper.listFiles(folder, new ProductFunctions.ValidProductFileFilter(true));
         if(fileList == null)
             return iterations;
 
-        for (File file : fileList) {
+        for (Path file : fileList) {
             if (maxIteration > 0 && iterations >= maxIteration)
                 break;
 
-            if (file.isDirectory()) {
-                if (!file.getName().contains(TestUtils.SKIPTEST)) {
+            if (Files.isDirectory(file)) {
+                if (!file.getFileName().toString().contains(TestUtils.SKIPTEST)) {
                     iterations = recurseProcessFolder(file, iterations, maxIteration, productTypeExemptions, exceptionExemptions);
                 }
             } else {

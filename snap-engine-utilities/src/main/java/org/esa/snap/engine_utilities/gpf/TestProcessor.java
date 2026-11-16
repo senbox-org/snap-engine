@@ -16,6 +16,7 @@
 package org.esa.snap.engine_utilities.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
@@ -33,8 +34,10 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.util.ProductFunctions;
 import org.esa.snap.engine_utilities.util.TestUtils;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
 
 /**
  * Utilities for Operator unit tests
@@ -117,7 +120,7 @@ public class TestProcessor {
         subsetDef.setTreatVirtualBandsAsRealBands(true);
 
         final Product subsetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
-        final File tmpFile = new File(SystemUtils.getCacheDir(), "tmp_subset.dim");
+        final Path tmpFile = SystemUtils.getCacheDir().resolve("tmp_subset.dim");
         final WriteOp writer = new WriteOp(subsetProduct, tmpFile, DimapProductConstants.DIMAP_FORMAT_NAME);
         writer.writeProduct(ProgressMonitor.NULL);
 
@@ -128,17 +131,17 @@ public class TestProcessor {
         return Math.max(0, Math.min(val, max));
     }
 
-    private int recurseProcessFolder(final OperatorSpi spi, final File origFolder,
+    private int recurseProcessFolder(final OperatorSpi spi, final Path origFolder,
                                             final String format, int iterations,
                                             final String[] productTypeExemptions,
                                             final String[] exceptionExemptions) throws Exception {
 
-        final File[] folderList = origFolder.listFiles(ProductFunctions.directoryFileFilter);
+        final Collection<Path> folderList = IOHelper.listFiles(origFolder, ProductFunctions.directoryFileFilter);
         if(folderList != null) {
-            for (File folder : folderList) {
+            for (Path folder : folderList) {
                 if (maxIteration > 0 && iterations >= maxIteration)
                     break;
-                if (!folder.getName().contains(TestUtils.SKIPTEST)) {
+                if (!folder.getFileName().toString().contains(TestUtils.SKIPTEST)) {
                     iterations = recurseProcessFolder(spi, folder, format, iterations, productTypeExemptions, exceptionExemptions);
                 }
             }
@@ -149,9 +152,9 @@ public class TestProcessor {
             reader = ProductIO.getProductReader(format);
         }
 
-        final File[] fileList = origFolder.listFiles(new ProductFunctions.ValidProductFileFilter());
+        final Collection<Path> fileList = IOHelper.listFiles(origFolder, new ProductFunctions.ValidProductFileFilter());
         if(fileList != null) {
-            for (File file : fileList) {
+            for (Path file : fileList) {
                 if (maxIteration > 0 && iterations >= maxIteration)
                     break;
 
@@ -186,7 +189,7 @@ public class TestProcessor {
 
                         ++iterations;
                     } else {
-                        SystemUtils.LOG.warning(file.getAbsolutePath() + " is non valid");
+                        SystemUtils.LOG.warning(file.toAbsolutePath() + " is non valid");
                     }
                 } catch (Exception e) {
                     boolean ok = false;
@@ -229,7 +232,7 @@ public class TestProcessor {
      * @param exceptionExemptions   exceptions that are ok and can be ignored for the test
      * @throws Exception general exception
      */
-    public void testProcessAllInPath(final OperatorSpi spi, final File[] folderPaths,
+    public void testProcessAllInPath(final OperatorSpi spi, final Path[] folderPaths,
                                             final String[] productTypeExemptions,
                                             final String[] exceptionExemptions) throws Exception {
         testProcessAllInPath(spi, folderPaths, null, productTypeExemptions, exceptionExemptions);
@@ -245,13 +248,13 @@ public class TestProcessor {
      * @param exceptionExemptions   exceptions that are ok and can be ignored for the test
      * @throws Exception general exception
      */
-    public void testProcessAllInPath(final OperatorSpi spi, final File[] folderPaths,
+    public void testProcessAllInPath(final OperatorSpi spi, final Path[] folderPaths,
                                             final String format,
                                             final String[] productTypeExemptions,
                                             final String[] exceptionExemptions) throws Exception {
         if (canTestProcessingOnAllProducts) {
-            for (File folder : folderPaths) {
-                if (!folder.exists()) {
+            for (Path folder : folderPaths) {
+                if (!Files.exists(folder)) {
                     TestUtils.skipTest(spi, folder + " not found");
                     continue;
                 }
@@ -264,15 +267,15 @@ public class TestProcessor {
 
     private final static ProductFunctions.ValidProductFileFilter fileFilter = new ProductFunctions.ValidProductFileFilter(false);
 
-    public void recurseReadFolder(final Object callingClass, final File[] folderPaths,
+    public void recurseReadFolder(final Object callingClass, final Path[] folderPaths,
                                          final ProductReaderPlugIn readerPlugin,
                                          final ProductReader reader,
                                          final String[] productTypeExemptions,
                                          final String[] exceptionExemptions) throws Exception {
         if (!canTestReadersOnAllProducts)
             return;
-        for (File folderPath : folderPaths) {
-            if (!folderPath.exists()) {
+        for (Path folderPath : folderPaths) {
+            if (!Files.exists(folderPath)) {
                 TestUtils.skipTest(callingClass, "Folder " + folderPath + " not found");
                 continue;
             }
@@ -280,16 +283,16 @@ public class TestProcessor {
         }
     }
 
-    private int recurseReadFolder(final File origFolder,
+    private int recurseReadFolder(final Path origFolder,
                                          final ProductReaderPlugIn readerPlugin,
                                          ProductReader reader,
                                          final String[] productTypeExemptions,
                                          final String[] exceptionExemptions,
                                          int iterations) throws Exception {
-        final File[] folderList = origFolder.listFiles(ProductFunctions.directoryFileFilter);
+        final Collection<Path> folderList = IOHelper.listFiles(origFolder, ProductFunctions.directoryFileFilter);
         if(folderList != null) {
-            for (File folder : folderList) {
-                if (!folder.getName().contains(TestUtils.SKIPTEST)) {
+            for (Path folder : folderList) {
+                if (!folder.getFileName().toString().contains(TestUtils.SKIPTEST)) {
                     iterations = recurseReadFolder(folder, readerPlugin, reader, productTypeExemptions, exceptionExemptions, iterations);
                     if (maxIteration > 0 && iterations >= maxIteration)
                         return iterations;
@@ -297,9 +300,9 @@ public class TestProcessor {
             }
         }
 
-        final File[] files = origFolder.listFiles(fileFilter);
+        final Collection<Path> files = IOHelper.listFiles(origFolder, fileFilter);
         if(files != null) {
-            for (File file : files) {
+            for (Path file : files) {
                 if (readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
 
                     try {

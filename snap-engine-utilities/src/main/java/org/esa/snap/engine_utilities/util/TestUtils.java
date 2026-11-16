@@ -16,6 +16,7 @@
 package org.esa.snap.engine_utilities.util;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Band;
@@ -35,7 +36,6 @@ import org.esa.snap.engine_utilities.gpf.OperatorUtils;
 import org.esa.snap.engine_utilities.gpf.ReaderUtils;
 import org.esa.snap.runtime.Config;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,7 +49,7 @@ import java.util.logging.Logger;
 public class TestUtils {
 
     private static final String PROPERTY_NAME_TEST_DATA_DIR = "tests.data.dir";
-    public static String TESTDATA_ROOT = System.getProperty(PROPERTY_NAME_TEST_DATA_DIR,"../testData/");
+    public static String TESTDATA_ROOT = System.getProperty(PROPERTY_NAME_TEST_DATA_DIR, IOHelper.createATempDir().resolve("testData/").toString());
     static {
         if(!TESTDATA_ROOT.endsWith("/")) {
             TESTDATA_ROOT += "/";
@@ -85,18 +85,18 @@ public class TestUtils {
     }
 
     private static void initAuxData() throws Exception {
-        Path propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("snap-engine").resolve("etc/snap.auxdata.properties");
+        Path propFile = SystemUtils.getApplicationHomeDir().resolve("snap-engine").resolve("etc/snap.auxdata.properties");
         if(!Files.exists(propFile)) {
-            propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../etc/snap.auxdata.properties");
+            propFile = SystemUtils.getApplicationHomeDir().resolve("../etc/snap.auxdata.properties");
         }
         if(!Files.exists(propFile)) {
-            propFile = SystemUtils.getApplicationHomeDir().toPath().resolve("../../snap-engine/etc/snap.auxdata.properties");
+            propFile = SystemUtils.getApplicationHomeDir().resolve("../../snap-engine/etc/snap.auxdata.properties");
         }
         if(!Files.exists(propFile)) {
             final Path moduleBasePath = ResourceInstaller.findModuleCodeBasePath(TestUtils.class);
             propFile = moduleBasePath.resolve("etc/snap.auxdata.properties");
         }
-        if(propFile.toFile().exists()) {
+        if(Files.exists(propFile)) {
             System.out.println("Auxdata properties loaded from "  + propFile);
             Config.instance(Settings.SNAP_AUXDATA).load(propFile);
         } else {
@@ -104,9 +104,9 @@ public class TestUtils {
         }
     }
 
-    public static Product readSourceProduct(final File inputFile) throws IOException {
-        if (!inputFile.exists()) {
-            throw new IOException(inputFile.getAbsolutePath() + " not found");
+    public static Product readSourceProduct(final Path inputFile) throws IOException {
+        if (!Files.exists(inputFile)) {
+            throw new IOException(inputFile.toAbsolutePath() + " not found");
         }
         final Product product = CommonReaders.readProduct(inputFile);
         if (product == null) {
@@ -124,7 +124,7 @@ public class TestUtils {
         if (product == null)
             throw new Exception("product is null");
         if (verifyGeoCoding && product.getSceneGeoCoding() == null) {
-            SystemUtils.LOG.warning("Geocoding is null for " + product.getFileLocation().getAbsolutePath());
+            SystemUtils.LOG.warning("Geocoding is null for " + product.getFileLocation().toAbsolutePath());
             //throw new Exception("geocoding is null");
         }
         if (product.getMetadataRoot() == null)
@@ -372,7 +372,7 @@ public class TestUtils {
             final float[] trgTiePoints = trgTPG.getTiePoints();
 
             if (!Arrays.equals(trgTiePoints, expectedTiePoints)) {
-                throwErr("TPGs are different in file " + expectedProduct.getFileLocation().getAbsolutePath());
+                throwErr("TPGs are different in file " + expectedProduct.getFileLocation().toAbsolutePath());
             }
         }
 
@@ -389,7 +389,7 @@ public class TestUtils {
             expectedBand.readPixels(40, 40, 50, 50, expectedValues, ProgressMonitor.NULL);
 
             if (!Arrays.equals(floatValues, expectedValues)) {
-                throwErr("Pixels are different in file " + expectedProduct.getFileLocation().getAbsolutePath());
+                throwErr("Pixels are different in file " + expectedProduct.getFileLocation().toAbsolutePath());
             }
         }
     }
@@ -438,9 +438,9 @@ public class TestUtils {
         targetBand.readPixels(40, 40, 50, 50, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs:
-        final File expectedFile = new File(expectedPath);
-        if (!expectedFile.exists()) {
-            throwErr("Expected file not found " + expectedFile.toString());
+        final Path expectedFile = Path.of(expectedPath);
+        if (!Files.exists(expectedFile)) {
+            throwErr("Expected file not found " + expectedFile);
         }
 
         final ProductReader reader2 = ProductIO.getProductReaderForInput(expectedFile);

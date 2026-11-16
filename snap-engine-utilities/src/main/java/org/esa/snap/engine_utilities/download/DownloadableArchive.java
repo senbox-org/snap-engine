@@ -17,31 +17,32 @@ package org.esa.snap.engine_utilities.download;
 
 import org.esa.snap.engine_utilities.util.ZipUtils;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Used for retrieving a single file from a remote server
  */
 public class DownloadableArchive extends DownloadableContentImpl {
 
-    private final File localFile;
+    private final Path localFile;
 
-    public DownloadableArchive(final File localFile, final URL remotePath) {
+    public DownloadableArchive(final Path localFile, final URL remotePath) {
         super(localFile, remotePath, ".zip");
         this.localFile = localFile;
     }
 
     public void getContentFiles() throws Exception {
-        final File archiveFile = (File)getContentFile();
+        final Path archiveFile = (Path)getContentFile();
 
         if(archiveFile != null && ZipUtils.isValid(archiveFile)) {
-            ZipUtils.unzip(archiveFile.toPath(), localFile.getParentFile().toPath(), true);
-            archiveFile.delete();
+            ZipUtils.unzip(archiveFile, localFile.getParent(), true);
+            Files.delete(archiveFile);
         }
     }
 
-    protected DownloadableFile createContentFile(final File dataFile) {
+    protected DownloadableFile createContentFile(final Path dataFile) {
         return new DownloadableArchiveFile(dataFile);
     }
 }

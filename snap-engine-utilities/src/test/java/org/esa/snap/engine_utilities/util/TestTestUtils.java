@@ -6,7 +6,6 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.SystemUtils;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -30,10 +29,10 @@ public class TestTestUtils {
 
             Path currentPath = Paths.get("");
             System.out.println("Current path is: " + currentPath.toAbsolutePath());
-            File currentRelativePath = new File(currentPath.toAbsolutePath().toString()).getParentFile().getParentFile().getParentFile();
-            System.out.println("Trying relative path: " + currentRelativePath.getAbsolutePath());
+            Path currentRelativePath = Path.of(currentPath.toAbsolutePath().toString()).getParent().getParent().getParent();
+            System.out.println("Trying relative path: " + currentRelativePath.toAbsolutePath());
 
-            printFolders(currentRelativePath.toPath(), 0);
+            printFolders(currentRelativePath, 0);
         }
     }
 

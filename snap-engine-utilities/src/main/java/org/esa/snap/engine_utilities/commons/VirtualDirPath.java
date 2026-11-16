@@ -3,7 +3,7 @@ package org.esa.snap.engine_utilities.commons;
 import org.esa.snap.engine_utilities.util.AllFilesVisitor;
 import org.esa.snap.engine_utilities.util.FileSystemUtils;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -43,8 +43,8 @@ public class VirtualDirPath extends AbstractVirtualPath {
     }
 
     @Override
-    public File getBaseFile() {
-        return this.dirPath.toFile();
+    public Path getBaseFile() {
+        return this.dirPath;
     }
 
     @Override
@@ -69,11 +69,11 @@ public class VirtualDirPath extends AbstractVirtualPath {
     }
 
     @Override
-    public File getFile(String childRelativePath) throws IOException {
+    public Path getFile(String childRelativePath) throws IOException {
         Path child = this.dirPath.resolve(childRelativePath);
         if (Files.exists(child)) {
             Path fileToReturn = copyFileOnLocalDiskIfNeeded(child, childRelativePath);
-            return fileToReturn.toFile();
+            return fileToReturn;
         } else {
             throw new FileNotFoundException(child.toString());
         }

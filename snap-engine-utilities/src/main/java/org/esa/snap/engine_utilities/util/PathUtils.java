@@ -17,7 +17,6 @@
 
 package org.esa.snap.engine_utilities.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
@@ -34,13 +33,6 @@ import java.util.List;
  * Created by kraftek on 11/9/2015.
  */
 public class PathUtils {
-
-    public static Path get(File basePath, String...relatives) {
-        if (relatives == null || relatives.length == 0) {
-            return basePath.toPath();
-        }
-        return Paths.get(basePath.getAbsolutePath(), relatives);
-    }
 
     public static Path get(Path basePath, String...relatives) {
         if (relatives == null || relatives.length == 0) {

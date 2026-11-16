@@ -1,6 +1,7 @@
 package org.esa.snap.engine_utilities.commons;
 
 import com.bc.ceres.core.VirtualDir;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.util.CleanUpState;
 import com.bc.ceres.util.CleanerRegistry;
 import eu.esa.snap.core.lib.FileHelper;
@@ -52,7 +53,7 @@ public abstract class AbstractVirtualPath extends VirtualDir {
 
 
     @Override
-    public File getTempDir() throws IOException {
+    public Path getTempDir() throws IOException {
         return state.localTempDir;
     }
 
@@ -60,7 +61,7 @@ public abstract class AbstractVirtualPath extends VirtualDir {
         if (state.localTempDir == null) {
             state.localTempDir = VirtualDir.createUniqueTempDir();
         }
-        return state.localTempDir.toPath();
+        return state.localTempDir;
     }
 
     protected final Path copyFileOnLocalDiskIfNeeded(Path entryPath, String childRelativePath) throws IOException {
@@ -69,18 +70,18 @@ public abstract class AbstractVirtualPath extends VirtualDir {
             if (state.localTempDir == null) {
                 state.localTempDir = VirtualDir.createUniqueTempDir();
             }
-            Path localFilePath = state.localTempDir.toPath().resolve(childRelativePath);
+            Path localFilePath = state.localTempDir.resolve(childRelativePath);
             if (FileHelper.canCopyOrReplaceFile(entryPath, localFilePath)) {
                 Path parentFolder = localFilePath.getParent();
 
                 if (logger.isLoggable(Level.FINE)) {
-                    logger.log(Level.FINE, "Copy file '" + entryPath.toString() + "' to local folder '" + parentFolder.toString() + "'.");
+                    logger.log(Level.FINE, "Copy file '" + entryPath + "' to local folder '" + parentFolder.toString() + "'.");
                 }
 
                 if (!Files.exists(parentFolder)) {
                     Files.createDirectories(parentFolder);
                 }
-                FileHelper.copyFileUsingInputStream(entryPath, localFilePath.toString(), AbstractFile.BUFFER_SIZE);
+                FileHelper.copyFileUsingInputStream(entryPath, localFilePath, AbstractFile.BUFFER_SIZE);
             }
             return localFilePath;
         } else {
@@ -142,12 +143,12 @@ public abstract class AbstractVirtualPath extends VirtualDir {
 
 
     private static final class AbstractVirtualPathState implements CleanUpState {
-        private File localTempDir;
+        private Path localTempDir;
 
         @Override
         public synchronized void run() {
             if (localTempDir != null) {
-                deleteFileTree(localTempDir);
+                IOHelper.deleteFileTree(localTempDir);
                 localTempDir = null;
             }
         }
