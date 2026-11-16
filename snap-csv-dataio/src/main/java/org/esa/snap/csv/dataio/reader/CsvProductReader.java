@@ -21,7 +21,12 @@ import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.PixelTimeCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
@@ -30,14 +35,21 @@ import org.esa.snap.csv.dataio.CsvSource;
 import org.esa.snap.csv.dataio.CsvSourceParser;
 import org.opengis.feature.type.AttributeDescriptor;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.stream.DoubleStream;
 
-import static org.esa.snap.csv.dataio.Constants.*;
+import static org.esa.snap.csv.dataio.Constants.LAT_NAMES;
+import static org.esa.snap.csv.dataio.Constants.LON_NAMES;
+import static org.esa.snap.csv.dataio.Constants.NAME_METADATA_ELEMENT_CSV_HEADER_PROPERTIES;
+import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_RASTER_RESOLUTION;
+import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_SCENE_RASTER_WIDTH;
+import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_TIME_COLUMN;
+import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_TIME_PATTERN;
 
 /**
  * The CsvProductReader is able to read a CSV file as a product.
@@ -71,8 +83,8 @@ public class CsvProductReader extends AbstractProductReader {
 
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        final File inputFile = getInputFile();
-        parser = CsvFile.createCsvSourceParser(inputFile.getAbsolutePath());
+        final Path inputFile = getInputFile();
+        parser = CsvFile.createCsvSourceParser(inputFile.toAbsolutePath());
         source = parser.parseMetadata();
         String sceneRasterWidthProperty = source.getProperties().get(PROPERTY_NAME_SCENE_RASTER_WIDTH);
         final int sceneRasterWidth;
@@ -172,7 +184,7 @@ public class CsvProductReader extends AbstractProductReader {
                 }
             }
         }
-        SystemUtils.LOG.warning("Not able to create PixelTimeCoding for product '" + product.getFileLocation().getAbsolutePath() + "'");
+        SystemUtils.LOG.warning("Not able to create PixelTimeCoding for product '" + product.getFileLocation().toAbsolutePath() + "'");
     }
 
     private void addCsvHeaderProperty(String name, String stringValue) {
@@ -225,10 +237,10 @@ public class CsvProductReader extends AbstractProductReader {
         }
     }
 
-    private File getInputFile() throws FileNotFoundException {
-        final File inputFile = new File(getInput().toString());
-        if (!inputFile.exists()) {
-            throw new FileNotFoundException(inputFile.getPath());
+    private Path getInputFile() throws FileNotFoundException {
+        final Path inputFile = Path.of(getInput().toString());
+        if (!Files.exists(inputFile)) {
+            throw new FileNotFoundException(inputFile.toString());
         }
 
         return inputFile;

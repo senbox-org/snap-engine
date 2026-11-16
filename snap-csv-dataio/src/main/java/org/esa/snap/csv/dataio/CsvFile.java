@@ -38,7 +38,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -55,7 +55,7 @@ public class CsvFile implements CsvSourceParser, CsvSource {
     private static final String DEFAULT_HEADER_NAME = "csv";
 
     private final Map<String, String> properties = new HashMap<>();
-    private final File csv;
+    private final Path csv;
     private final SortedMap<Long, Long> bytePositionForOffset = new TreeMap<>();
 
     private SimpleFeatureType simpleFeatureType;
@@ -73,10 +73,10 @@ public class CsvFile implements CsvSourceParser, CsvSource {
     private Converter<?>[] converters;
 
     private CsvFile(String csv) throws IOException {
-        this(new File(csv), null);
+        this(Path.of(csv), null);
     }
 
-    private CsvFile(File csv, CoordinateReferenceSystem crs) throws IOException {
+    private CsvFile(Path csv, CoordinateReferenceSystem crs) throws IOException {
         this.csv = csv;
         ConverterRegistry.getInstance().setConverter(ProductData.UTC.class, new UTCConverter());
         this.crs = crs;
@@ -87,7 +87,7 @@ public class CsvFile implements CsvSourceParser, CsvSource {
         return new CsvFile(csv);
     }
 
-    public static CsvSourceParser createCsvSourceParser(File csv) throws IOException {
+    public static CsvSourceParser createCsvSourceParser(Path csv) throws IOException {
         return new CsvFile(csv, null);
     }
 
@@ -136,7 +136,7 @@ public class CsvFile implements CsvSourceParser, CsvSource {
                 values.add(value);
             } catch (ConversionException e) {
                 SystemUtils.LOG.warning(String.format("Problem in '%s': %s",
-                        csv.getPath(), e.getMessage()));
+                        csv.toString(), e.getMessage()));
             }
             bytePositionForOffset.put(featureCount, stream.getStreamPosition());
         }
@@ -175,7 +175,7 @@ public class CsvFile implements CsvSourceParser, CsvSource {
                         builder.set(simpleFeatureType.getDescriptor(currentIndex).getLocalName(), value);
                     } catch (ConversionException e) {
                         SystemUtils.LOG.warning(String.format("Problem in '%s': %s",
-                                csv.getPath(), e.getMessage()));
+                                csv.toString(), e.getMessage()));
                     }
                 }
             }

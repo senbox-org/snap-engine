@@ -16,16 +16,16 @@
 
 package org.esa.snap.csv.dataio.reader;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Olaf Danne
@@ -43,11 +43,11 @@ public class CsvProductReaderPlugInTest {
 
     @Test
     public void testGetDecodeQualification() throws Exception {
-        File validFile = new File(getResourceFilePath("simple_format_example.txt"));
-        File validFileWithoutProperties = new File(getResourceFilePath("simple_format_no_properties.txt"));
-        File invalidProperties = new File(getResourceFilePath("simple_format_invalid_properties.txt"));
-        File invalidHeader = new File(getResourceFilePath("simple_format_no_header.txt"));
-        File invalidType = new File(getResourceFilePath("simple_format_invalid_type.txt"));
+        Path validFile = Path.of(getResourceFilePath("simple_format_example.txt"));
+        Path validFileWithoutProperties = Path.of(getResourceFilePath("simple_format_no_properties.txt"));
+        Path invalidProperties = Path.of(getResourceFilePath("simple_format_invalid_properties.txt"));
+        Path invalidHeader = Path.of(getResourceFilePath("simple_format_no_header.txt"));
+        Path invalidType = Path.of(getResourceFilePath("simple_format_invalid_type.txt"));
 
         assertEquals(DecodeQualification.SUITABLE, csvProductReaderPlugIn.getDecodeQualification(validFile));
         assertEquals(DecodeQualification.SUITABLE, csvProductReaderPlugIn.getDecodeQualification(validFileWithoutProperties));
@@ -66,9 +66,11 @@ public class CsvProductReaderPlugInTest {
         assertEquals("CSV products", csvProductReaderPlugIn.getDescription(null));
     }
 
-    private String getResourceFilePath (String name) throws URISyntaxException {
+    private String getResourceFilePath (String name) {
         URL url = getClass().getResource(name);
-        URI uri = new URI(url.toString());
-        return uri.getPath();
+        assertNotNull(url);
+        final Path file = UrlHelper.urlToFile(url);
+        assertNotNull(file);
+        return file.toAbsolutePath().toString();
     }
 }

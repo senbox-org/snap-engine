@@ -23,7 +23,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.csv.dataio.Constants;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Locale;
 
 /**
@@ -33,15 +33,13 @@ import java.util.Locale;
 public class CsvProductWriterPlugIn implements ProductWriterPlugIn {
 
     private final int config;
-    private File inputFile;
 
     // required for service loader tb 2020-02-28
     public CsvProductWriterPlugIn() {
-        this(null, CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES);
+        this(CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES);
     }
 
-    public CsvProductWriterPlugIn(File inputFile, int config) {
-        this.inputFile = inputFile;
+    public CsvProductWriterPlugIn(int config) {
         this.config = config;
     }
 
@@ -56,7 +54,7 @@ public class CsvProductWriterPlugIn implements ProductWriterPlugIn {
 
     @Override
     public Class[] getOutputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     @Override

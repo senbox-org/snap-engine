@@ -6,7 +6,7 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -18,7 +18,7 @@ public class CsvProductWrterPlugInTest {
 
     @Before
     public void setUp() {
-        plugIn = new CsvProductWriterPlugIn(null, 0);
+        plugIn = new CsvProductWriterPlugIn(0);
     }
 
     @Test
@@ -41,13 +41,13 @@ public class CsvProductWrterPlugInTest {
 
         assertEquals(2, outputTypes.length);
         assertEquals(String.class, outputTypes[0]);
-        assertEquals(File.class, outputTypes[1]);
+        assertEquals(Path.class, outputTypes[1]);
     }
 
     // @todo 2 tb/tb make this test run again
 //    @Test
 //    public void testCreateWriterInstance() {
-//        final CsvProductWriterPlugIn writerPlugIn = new CsvProductWriterPlugIn(new File("."), 0);
+//        final CsvProductWriterPlugIn writerPlugIn = new CsvProductWriterPlugIn(Path.of("."), 0);
 //        final ProductWriter writer = writerPlugIn.createWriterInstance();
 //        assertTrue(writer instanceof CsvProductWriter);
 //    }

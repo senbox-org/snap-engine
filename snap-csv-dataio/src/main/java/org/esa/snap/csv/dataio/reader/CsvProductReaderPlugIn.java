@@ -27,7 +27,7 @@ import org.esa.snap.csv.dataio.Constants;
 import org.esa.snap.csv.dataio.CsvFile;
 import org.esa.snap.csv.dataio.CsvSourceParser;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -42,7 +42,7 @@ public class CsvProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
-        final File file = getProductFile(input);
+        final Path file = getProductPath(input);
         if (!isFileExtensionValid(file)) {
             return DecodeQualification.UNABLE;
         }
@@ -72,7 +72,7 @@ public class CsvProductReaderPlugIn implements ProductReaderPlugIn {
         return decodeQualification;
     }
 
-    private boolean isFileExtensionValid(File file) {
+    private boolean isFileExtensionValid(Path file) {
         String fileExtension = FileUtils.getExtension(file);
         if (fileExtension != null) {
             return StringUtils.contains(getDefaultFileExtensions(), fileExtension.toLowerCase());
@@ -82,7 +82,7 @@ public class CsvProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     @Override

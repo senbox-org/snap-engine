@@ -17,23 +17,40 @@
 package org.esa.snap.csv.dataio.writer;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.csv.dataio.reader.CsvProductReaderPlugIn;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
-import java.net.URI;
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static org.esa.snap.csv.dataio.CsvTestUtils.createProductWithPixelGeoCoding;
 import static org.esa.snap.csv.dataio.CsvTestUtils.createProductWithoutGeoCoding;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Marco Peters
@@ -52,9 +69,10 @@ public class CsvProductReadWriteTest {
     @Test
     public void testWriteFeatures_WhenReadingFromProduct() throws Exception {
         final URL url = getClass().getResource("CSV_export_test.dim");
-        final URI uri = new URI(url.toString());
+        assertNotNull(url);
+        final Path path = FileUtils.getPathFromURI(url.toURI());
 
-        final Product product = ProductIO.readProduct(uri.getPath());
+        final Product product = ProductIO.readProduct(path);
 
         final StringWriter stringWriter = new StringWriter();
         final ProductWriter productWriter = new CsvProductWriter(new CsvProductWriterPlugIn(), CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES, stringWriter);
@@ -82,11 +100,11 @@ public class CsvProductReadWriteTest {
     public void testWriteRead_noGeoCoding() throws IOException {
         final Product product = createProductWithoutGeoCoding(11, 4, 5);
 
-        File targetFile = null;
+        Path targetFile = null;
         Product writtenProduct = null;
         try {
             targetFile = createFileInTempDir("no_geocoding.csv");
-            final FileWriter fileWriter = new FileWriter(targetFile);
+            final Writer fileWriter = Files.newBufferedWriter(targetFile);
             final ProductWriter productWriter = new CsvProductWriter(new CsvProductWriterPlugIn(), CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES, fileWriter);
 
             productWriter.writeProductNodes(product, "");
@@ -124,8 +142,8 @@ public class CsvProductReadWriteTest {
             }
             productReader.close();
             if (targetFile != null) {
-                if (targetFile.isFile()) {
-                    if (!targetFile.delete()) {
+                if (Files.isRegularFile(targetFile)) {
+                    if (!Files.deleteIfExists(targetFile)) {
                         fail("unable to delete test file");
                     }
                 }
@@ -137,10 +155,10 @@ public class CsvProductReadWriteTest {
     public void testWriteRead_pixelGeoCoding() throws IOException {
         final Product product = createProductWithPixelGeoCoding(12, 5, 6);
 
-        File targetFile = null;
+        Path targetFile = null;
         try {
             targetFile = createFileInTempDir("pixel_geocoding.csv");
-            final FileWriter fileWriter = new FileWriter(targetFile);
+            final Writer fileWriter = Files.newBufferedWriter(targetFile);
             final ProductWriter productWriter = new CsvProductWriter(new CsvProductWriterPlugIn(), CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES, fileWriter);
 
             productWriter.writeProductNodes(product, "");
@@ -182,22 +200,22 @@ public class CsvProductReadWriteTest {
             productReader.close();
 
             if (targetFile != null) {
-                if (!targetFile.delete()) {
+                if (!Files.deleteIfExists(targetFile)) {
                     fail("unable to delete test file");
                 }
             }
         }
     }
 
-    private File createFileInTempDir(String fileName) throws IOException {
-        final File tempDir = new File(System.getProperty("java.io.tmpdir"));
-        final File file = new File(tempDir, fileName);
-        if (file.isFile()) {
-            if (!file.delete()) {
+    private Path createFileInTempDir(String fileName) throws IOException {
+        final Path tempDir = IOHelper.createATempDir();
+        final Path file = tempDir.resolve(fileName);
+        if (Files.isRegularFile(file)) {
+            if (!Files.deleteIfExists(file)) {
                 fail("unable to delete test-file");
             }
         }
-        if (!file.createNewFile()) {
+        if (!IOHelper.createFile(file)) {
             fail("unable to create test-file");
         }
         return file;

@@ -1,16 +1,18 @@
 package org.esa.snap.csv.dataio.reader;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
-import com.bc.ceres.test.LongTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 
@@ -20,12 +22,13 @@ public class CsvProduct2x2Test {
     @Test
     public void test2x2Product() throws Exception {
         URL urlDimap = getClass().getResource("MER_FR__1PNUPA20030808_073810_000000982018_00450_07518_6007.dim");
-        URI uriDimap = new URI(urlDimap.toString());
-        final String dimap = uriDimap.getPath();
+        assertNotNull(urlDimap);
+        final Path dimap = UrlHelper.urlToFile(urlDimap);
+        assertNotNull(dimap);
 
         URL urlCsv = getClass().getResource("MER_FR__1PNUPA20030808_073810_000000982018_00450_07518_6007.csv");
-        URI uriCsv = new URI(urlCsv.toString());
-        final String csv = uriCsv.getPath();
+        assertNotNull(urlCsv);
+        final Path csv = UrlHelper.urlToFile(urlCsv);
 
         Product dimPro = ProductIO.readProduct(dimap);
         Product csvPro = ProductIO.readProduct(csv);

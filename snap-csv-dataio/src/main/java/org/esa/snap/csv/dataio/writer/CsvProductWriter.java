@@ -31,10 +31,10 @@ import org.esa.snap.csv.dataio.Constants;
 import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_RASTER_RESOLUTION;
 
@@ -122,7 +122,7 @@ public class CsvProductWriter extends AbstractProductWriter {
 
     private void ensureWriter() throws IOException {
         if (writer == null) {
-            writer = new FileWriter(new File(getOutput().toString()));
+            writer = Files.newBufferedWriter(Path.of(getOutput().toString()));
         }
     }
 

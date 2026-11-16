@@ -16,6 +16,7 @@
 
 package org.esa.snap.csv.dataio;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
@@ -24,8 +25,8 @@ import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.PropertyDescriptor;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 
@@ -42,8 +43,10 @@ public class CsvFileTest {
     @Test
     public void testParseProperties() throws Exception {
         URL url = getClass().getResource("reader/simple_format_example.txt");
-        URI uri = new URI(url.toString());
-        final String simpleFormatExample = uri.getPath();
+        assertNotNull(url);
+        final Path file = UrlHelper.urlToFile(url);
+        assertNotNull(file);
+        final String simpleFormatExample = file.toString();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         parser.parseMetadata();
 
@@ -66,8 +69,10 @@ public class CsvFileTest {
     @Test
     public void testParseRecords() throws Exception {
         URL url = getClass().getResource("reader/simple_format_example.txt");
-        URI uri = new URI(url.toString());
-        final String simpleFormatExample = uri.getPath();
+        assertNotNull(url);
+        final Path file = UrlHelper.urlToFile(url);
+        assertNotNull(file);
+        final String simpleFormatExample = file.toAbsolutePath().toString();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         final CsvSource csvSource = parser.parseMetadata();
         parser.parseRecords(0, 3);
@@ -138,8 +143,10 @@ public class CsvFileTest {
     @Test
     public void testParseRecords_NoFeatureId() throws Exception {
         URL url = getClass().getResource("reader/simple_format_no_feature_id.txt");
-        URI uri = new URI(url.toString());
-        final String simpleFormatExample = uri.getPath();
+        assertNotNull(url);
+        final Path file = UrlHelper.urlToFile(url);
+        assertNotNull(file);
+        final String simpleFormatExample = file.toAbsolutePath().toString();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         final CsvSource csvSource = parser.parseMetadata();
         parser.parseRecords(0, 3);
@@ -211,8 +218,10 @@ public class CsvFileTest {
     @Test
     public void testParseRecords_NotAllRecords() throws Exception {
         URL url = getClass().getResource("reader/simple_format_example.txt");
-        URI uri = new URI(url.toString());
-        final String simpleFormatExample = uri.getPath();
+        assertNotNull(url);
+        final Path file = UrlHelper.urlToFile(url);
+        assertNotNull(file);
+        final String simpleFormatExample = file.toAbsolutePath().toString();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         final CsvSource csvSource = parser.parseMetadata();
         parser.parseRecords(1, 2);
@@ -263,8 +272,10 @@ public class CsvFileTest {
     @Test
     public void testParseRecords_LessRecordsThanExpected() throws Exception {
         URL url = getClass().getResource("reader/simple_format_example.txt");
-        URI uri = new URI(url.toString());
-        final String simpleFormatExample = uri.getPath();
+        assertNotNull(url);
+        final Path file = UrlHelper.urlToFile(url);
+        assertNotNull(file);
+        final String simpleFormatExample = file.toAbsolutePath().toString();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         final CsvSource csvSource = parser.parseMetadata();
         parser.parseRecords(0, 10);
@@ -278,8 +289,10 @@ public class CsvFileTest {
     @Test
     public void testParseHeader() throws Exception {
         URL url = getClass().getResource("reader/simple_format_example.txt");
-        URI uri = new URI(url.toString());
-        final String simpleFormatExample = uri.getPath();
+        assertNotNull(url);
+        final Path file = UrlHelper.urlToFile(url);
+        assertNotNull(file);
+        final String simpleFormatExample = file.toAbsolutePath().toString();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         parser.parseMetadata();
 
@@ -312,8 +325,10 @@ public class CsvFileTest {
     @Test
     public void testParseHeader_NoFeatureId() throws Exception {
         URL url = getClass().getResource("reader/simple_format_no_feature_id.txt");
-        URI uri = new URI(url.toString());
-        final String simpleFormatExample = uri.getPath();
+        assertNotNull(url);
+        final Path file = UrlHelper.urlToFile(url);
+        assertNotNull(file);
+        final String simpleFormatExample = file.toAbsolutePath().toString();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         parser.parseMetadata();
 
