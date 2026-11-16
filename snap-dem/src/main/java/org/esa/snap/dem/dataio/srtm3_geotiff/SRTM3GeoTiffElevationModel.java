@@ -22,7 +22,7 @@ import org.esa.snap.core.dataop.dem.BaseElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.resamp.Resampling;
 
-import java.io.File;
+import java.nio.file.Path;
 
 public final class SRTM3GeoTiffElevationModel extends BaseElevationModel {
 
@@ -54,9 +54,9 @@ public final class SRTM3GeoTiffElevationModel extends BaseElevationModel {
 
     @Override
     protected void createElevationFile(final ElevationFile[][] elevationFiles,
-                                       final int x, final int y, final File demInstallDir) {
+                                       final int x, final int y, final Path demInstallDir) {
         final String fileName = createTileFilename(x + 1, y + 1);
-        final File localFile = new File(demInstallDir, fileName);
+        final Path localFile = demInstallDir.resolve(fileName);
         elevationFiles[x][y] = new SRTM3GeoTiffFile(this, localFile, productReaderPlugIn.createReaderInstance());
     }
 

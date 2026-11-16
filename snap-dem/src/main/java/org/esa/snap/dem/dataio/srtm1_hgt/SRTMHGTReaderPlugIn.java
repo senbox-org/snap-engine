@@ -21,19 +21,19 @@ import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.engine_utilities.gpf.ReaderUtils;
 
-import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 
 /**
- * The ReaderPlugIn for SRTM HGT File Format.
+ * The ReaderPlugIn for SRTM HGT Path Format.
  */
 public class SRTMHGTReaderPlugIn implements ProductReaderPlugIn {
 
     public final static String[] FORMAT_NAMES = {"HGT"};
     private final static String[] FORMAT_FILE_EXTENSIONS = {"hgt","hgt.zip"};
     private final static String PLUGIN_DESCRIPTION = "SRTM Height";
-    private final Class[] VALID_INPUT_TYPES = new Class[]{Path.class, File.class, String.class};
+    private final Class[] VALID_INPUT_TYPES = new Class[]{Path.class, Path.class, String.class};
 
     /**
      * Checks whether the given object is an acceptable input for this product reader and if so, the method checks if it
@@ -131,12 +131,12 @@ public class SRTMHGTReaderPlugIn implements ProductReaderPlugIn {
          * @return <code>true</code> if given file is accepted by this filter
          */
         @Override
-        public boolean accept(final File file) {
+        public boolean accept(final Path file) {
             if (super.accept(file)) {
-                if (file.isDirectory()) {
+                if (Files.isDirectory(file)) {
                     return true;
                 }
-                String name = file.getName().toLowerCase();
+                String name = file.getFileName().toString().toLowerCase();
                 if(name.endsWith(FORMAT_FILE_EXTENSIONS[0]) || name.endsWith(FORMAT_FILE_EXTENSIONS[1])) {
                     return true;
                 }

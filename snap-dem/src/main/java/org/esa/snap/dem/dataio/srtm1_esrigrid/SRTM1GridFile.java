@@ -20,7 +20,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 /**
@@ -30,7 +30,7 @@ public final class SRTM1GridFile extends ElevationFile {
 
     private final SRTM1GridElevationModel demModel;
 
-    public SRTM1GridFile(SRTM1GridElevationModel model, File localFile, ProductReader reader) {
+    public SRTM1GridFile(SRTM1GridElevationModel model, Path localFile, ProductReader reader) {
         super(localFile, reader);
         this.demModel = model;
     }

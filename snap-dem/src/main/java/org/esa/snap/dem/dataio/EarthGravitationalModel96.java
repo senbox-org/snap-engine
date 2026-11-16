@@ -15,13 +15,19 @@
  */
 package org.esa.snap.dem.dataio;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.download.DownloadableContentImpl;
 import org.esa.snap.engine_utilities.util.Maths;
 import org.esa.snap.engine_utilities.util.Settings;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -87,13 +93,13 @@ public final class EarthGravitationalModel96 {
 
     private EarthGravitationalModel96() throws IOException {
 
-        final File demInstallDir = new File(SystemUtils.getAuxDataPath().resolve("dem").toFile(), "egm96");
-        if(!demInstallDir.exists()) {
-            demInstallDir.mkdirs();
+        final Path demInstallDir = SystemUtils.getAuxDataPath().resolve("dem").resolve("egm96");
+        if(!Files.exists(demInstallDir)) {
+            IOHelper.createDirectories(demInstallDir);
         }
-        File localZipFile = new File(demInstallDir, ZIPNAME);
+        Path localZipFile = demInstallDir.resolve(ZIPNAME);
 
-        if(!localZipFile.exists()) {
+        if(!Files.exists(localZipFile)) {
                 final URL remoteURL = new URL(remoteHTTP);
                 localZipFile = DownloadableContentImpl.getRemoteHttpFile(remoteURL, localZipFile);
             if(localZipFile == null) {
@@ -101,7 +107,7 @@ public final class EarthGravitationalModel96 {
             }
         }
 
-        try (final ZipFile zipFile = new ZipFile(localZipFile)) {
+        try (final ZipFile zipFile = new ZipFile(localZipFile.toFile())) {
             final ZipEntry entry = zipFile.getEntry(NAME);
             try (final InputStream inputStream = zipFile.getInputStream(entry)) {
 

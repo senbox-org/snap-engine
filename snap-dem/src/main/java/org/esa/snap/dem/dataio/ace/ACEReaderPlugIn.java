@@ -21,7 +21,6 @@ import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.engine_utilities.gpf.ReaderUtils;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Locale;
 
@@ -37,7 +36,7 @@ public class ACEReaderPlugIn implements ProductReaderPlugIn {
     private static final String[] FILE_EXTENSIONS = new String[]{".ACE"};
     private static final Class[] INPUT_TYPES = new Class[]{
             String.class,
-            File.class,
+            Path.class,
     };
     private static final String DESCRIPTION = "ACE Data Product Tile";
 

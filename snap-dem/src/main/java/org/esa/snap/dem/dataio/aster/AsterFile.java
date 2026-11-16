@@ -15,15 +15,17 @@
  */
 package org.esa.snap.dem.dataio.aster;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Holds information about a dem file.
@@ -34,7 +36,7 @@ public final class AsterFile extends ElevationFile {
 
     private static final String[] ASTERVERSIONS = new String[] {"ASTGTMV003","ASTGTM2"};
 
-    public AsterFile(final AsterElevationModel model, final File localFile, final ProductReader reader) {
+    public AsterFile(final AsterElevationModel model, final Path localFile, final ProductReader reader) {
         super(localFile, reader);
         this.demModel = model;
     }
@@ -51,27 +53,27 @@ public final class AsterFile extends ElevationFile {
     }
 
     protected boolean findLocalFile() {
-        if (localFile.exists() && localFile.isFile() && localFile.length() > 0) {
+        if (Files.exists(localFile) && Files.isRegularFile(localFile) && IOHelper.size(localFile) > 0) {
             return true;
         } else {
-            final String name = FileUtils.getFilenameWithoutExtension(localFile.getName());
+            final String name = FileUtils.getFilenameWithoutExtension(localFile.getFileName());
             for(String asterVersion : ASTERVERSIONS) {
                 // check for versions 3 or 2
                 final String versionedName = name.replace("ASTGTM", asterVersion);
-                final File versionedFile = new File(localFile.getParentFile(), versionedName + ".zip");
-                if (versionedFile.exists()) {
-                    localFile = new File(localFile.getParentFile(), versionedName + "_dem.tif");
+                final Path versionedFile = localFile.getParent().resolve(versionedName + ".zip");
+                if (Files.exists(versionedFile)) {
+                    localFile = localFile.getParent().resolve(versionedName + "_dem.tif");
                     localZipFile = versionedFile;
                     return true;
                 } else {
                     // check if unzipped
-                    final File unzipFile = new File(localFile.getParentFile(), name + "_dem.tif");
-                    if (unzipFile.exists()) {
+                    final Path unzipFile = localFile.getParent().resolve(name + "_dem.tif");
+                    if (Files.exists(unzipFile)) {
                         localFile = unzipFile;
                         return true;
                     } else {
-                        final File v2UnzipFile = new File(localFile.getParentFile(), versionedName + "_dem.tif");
-                        if (v2UnzipFile.exists()) {
+                        final Path v2UnzipFile = localFile.getParent().resolve(versionedName + "_dem.tif");
+                        if (Files.exists(v2UnzipFile)) {
                             localFile = v2UnzipFile;
                             return true;
                         }
@@ -82,12 +84,12 @@ public final class AsterFile extends ElevationFile {
         return false;
     }
 
-    protected InputStream getZipInputStream(File dataFile) throws IOException {
-        if (!dataFile.exists()) {
+    protected InputStream getZipInputStream(Path dataFile) throws IOException {
+        if (!Files.exists(dataFile)) {
             for(String asterVersion : ASTERVERSIONS) {
-                final String v2Name = dataFile.getName().replace("ASTGTM", asterVersion);
-                dataFile = new File(dataFile.getParentFile(), v2Name);
-                if (dataFile.exists()) {
+                final String v2Name = dataFile.getFileName().toString().replace("ASTGTM", asterVersion);
+                dataFile = dataFile.getParent().resolve(v2Name);
+                if (Files.exists(dataFile)) {
                     break;
                 }
             }

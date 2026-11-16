@@ -15,6 +15,7 @@
  */
 package org.esa.snap.dem.dataio.cdem;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -28,9 +29,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,17 +88,17 @@ public final class CDEMElevationModel extends BaseElevationModel {
     }
 
     private void loadTiles(final String folder) {
-        final File demInstallDir = descriptor.getDemInstallDir();
-        final File demFolder = new File(demInstallDir, folder);
+        final Path demInstallDir = descriptor.getDemInstallDir();
+        final Path demFolder = demInstallDir.resolve(folder);
 
-        File[] files = demFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".zip"));
-        if (files == null || files.length == 0) {
+        Collection<Path> files = IOHelper.listFiles(demFolder, dir -> dir.getFileName().toString().toLowerCase().endsWith(".zip"));
+        if (files == null || files.isEmpty()) {
             download(folder, demFolder);
-            files = demFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".zip"));
+            files = IOHelper.listFiles(demFolder, dir -> dir.getFileName().toString().toLowerCase().endsWith(".zip"));
         }
-        if (files != null && files.length > 0) {
+        if (files != null && !files.isEmpty()) {
             List<CDEMFile> tileList = new ArrayList<>();
-            for (File file : files) {
+            for (Path file : files) {
                 CDEMFile demFile = new CDEMFile(this, file, productReaderPlugIn.createReaderInstance());
                 tileList.add(demFile);
             }
@@ -104,12 +106,12 @@ public final class CDEMElevationModel extends BaseElevationModel {
         }
     }
 
-    private void download(final String folder, final File demFolder) {
+    private void download(final String folder, final Path demFolder) {
 
         List<String> fileList = getFileURLs(CDEMFile.getRemoteHTTP()+ folder, ".zip");
         for(String fileName : fileList) {
             try {
-                final File localFile = new File(demFolder, fileName);
+                final Path localFile = demFolder.resolve(fileName);
                 DownloadableContentImpl.getRemoteHttpFile(new URL(CDEMFile.getRemoteHTTP()+ folder +"/"), localFile);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -162,9 +164,9 @@ public final class CDEMElevationModel extends BaseElevationModel {
 
     @Override
     protected void createElevationFile(final ElevationFile[][] elevationFiles,
-                                       final int x, final int y, final File demInstallDir) {
+                                       final int x, final int y, final Path demInstallDir) {
         final String fileName = createTileFilename(x + 1, y + 1);
-        final File localFile = new File(demInstallDir, fileName);
+        final Path localFile = demInstallDir.resolve(fileName);
         elevationFiles[x][y] = new CDEMFile(this, localFile, productReaderPlugIn.createReaderInstance());
     }
 

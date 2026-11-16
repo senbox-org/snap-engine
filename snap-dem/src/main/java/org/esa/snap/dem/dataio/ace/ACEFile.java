@@ -21,7 +21,7 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.engine_utilities.util.Settings;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 /**
@@ -34,7 +34,7 @@ public final class ACEFile extends ElevationFile {
     private static final String remoteHTTP = Settings.instance().get("DEM.aceDEM_HTTP",
                                                                      "http://step.esa.int/auxdata/dem/ACE30/");
 
-    public ACEFile(final ACEElevationModel model, final File localFile, final ProductReader reader) {
+    public ACEFile(final ACEElevationModel model, final Path localFile, final ProductReader reader) {
         super(localFile, reader);
         this.demModel = model;
     }

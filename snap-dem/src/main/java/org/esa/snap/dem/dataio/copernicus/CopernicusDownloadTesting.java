@@ -1,10 +1,10 @@
 package org.esa.snap.dem.dataio.copernicus;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class CopernicusDownloadTesting {
 
     public List<Long> getDownloadTimes(ArrayList<double[]> coordinates, int resolution) throws Exception {
         List<Long> downloadTimes = new ArrayList<>();
-        File folder = Files.createTempDirectory(this.getClass().getSimpleName()).toFile();
+        Path folder = IOHelper.createATempDir(this.getClass().getSimpleName());
         CopernicusDownloader d = new CopernicusDownloader(folder);
 
         for (double[] coordinate : coordinates) {

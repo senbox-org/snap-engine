@@ -40,7 +40,7 @@ import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.concurrent.CancellationException;
 
@@ -72,7 +72,7 @@ public class AddElevationOp extends Operator {
     private String demResamplingMethod = ResamplingFactory.BICUBIC_INTERPOLATION_NAME;
 
     @Parameter(label = "External DEM")
-    private File externalDEMFile = null;
+    private Path externalDEMFile = null;
 
     @Parameter(label = "DEM No Data Value", defaultValue = "0")
     private double externalDEMNoDataValue = 0;
@@ -236,7 +236,7 @@ public class AddElevationOp extends Operator {
         if (demName.contains(externalDEMStr) && externalDEMFile != null) { // if external DEM file is specified by user
             dem = new FileElevationModel(externalDEMFile, demResamplingMethod, externalDEMNoDataValue);
             demNoDataValue = externalDEMNoDataValue;
-            demName = externalDEMFile.getPath();
+            demName = externalDEMFile.toString();
         } else {
             dem = DEMFactory.createElevationModel(demName, demResamplingMethod);
             demNoDataValue = dem.getDescriptor().getNoDataValue();

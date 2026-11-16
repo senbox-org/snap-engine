@@ -15,6 +15,7 @@
  */
 package org.esa.snap.dem.dataio.ace2_5min;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.dataop.dem.EastingNorthingParser;
@@ -119,7 +120,7 @@ public class ACE2_5MinFileInfo {
                 zipFile.close();
             }
         } else {
-            setFromData(fileName, dataPath.toFile().length());
+            setFromData(fileName, IOHelper.size(dataPath));
         }
     }
 

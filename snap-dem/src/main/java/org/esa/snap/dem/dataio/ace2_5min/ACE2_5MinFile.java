@@ -22,7 +22,7 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.engine_utilities.util.Settings;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 /**
@@ -35,7 +35,7 @@ public final class ACE2_5MinFile extends ElevationFile {
     private static final String remoteHTTP = Settings.instance().get("DEM.ace2_5MinDEM_HTTP",
                                                                      "http://step.esa.int/auxdata/dem/ACE2/5M/");
 
-    public ACE2_5MinFile(final ACE2_5MinElevationModel model, final File localFile, final ProductReader reader) {
+    public ACE2_5MinFile(final ACE2_5MinElevationModel model, final Path localFile, final ProductReader reader) {
         super(localFile, reader);
         this.demModel = model;
     }

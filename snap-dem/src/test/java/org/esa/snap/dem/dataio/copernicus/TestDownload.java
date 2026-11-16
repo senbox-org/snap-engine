@@ -1,15 +1,15 @@
 package org.esa.snap.dem.dataio.copernicus;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,8 +19,8 @@ public class TestDownload {
 
     @Test
     @STTM("SNAP-3717")
-    public void testSearch() throws Exception {
-        File folder = Files.createTempDirectory(this.getClass().getSimpleName()).toFile();
+    public void testSearch() {
+        Path folder = IOHelper.createATempDir(this.getClass().getSimpleName());
         CopernicusDownloader d = new CopernicusDownloader(folder);
         try{
             URL url = new URL("http://www.google.com");

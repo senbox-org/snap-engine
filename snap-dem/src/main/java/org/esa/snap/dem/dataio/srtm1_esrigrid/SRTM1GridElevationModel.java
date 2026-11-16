@@ -22,7 +22,7 @@ import org.esa.snap.core.dataop.dem.BaseElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.resamp.Resampling;
 
-import java.io.File;
+import java.nio.file.Path;
 
 public final class SRTM1GridElevationModel extends BaseElevationModel {
 
@@ -53,13 +53,13 @@ public final class SRTM1GridElevationModel extends BaseElevationModel {
 
     @Override
     protected void createElevationFile(final ElevationFile[][] elevationFiles,
-                                       final int x, final int y, final File demInstallDir) {
+                                       final int x, final int y, final Path demInstallDir) {
 
         final int minLon = x * DEGREE_RES - 180;
         final int minLat = y * DEGREE_RES - 60;
         final String folderName = createTileFilename(minLat, minLon);
-        final File localFolder = new File(demInstallDir, folderName);
-        final File localFile = new File(localFolder, "hdr.adf");
+        final Path localFolder = demInstallDir.resolve(folderName);
+        final Path localFile = localFolder.resolve("hdr.adf");
         elevationFiles[x][NUM_Y_TILES - 1 - y] = new SRTM1GridFile(this, localFile, productReaderPlugIn.createReaderInstance());
     }
 

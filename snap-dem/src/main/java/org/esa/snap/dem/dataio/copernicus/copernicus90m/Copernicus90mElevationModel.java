@@ -6,7 +6,7 @@ import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 
-import java.io.File;
+import java.nio.file.Path;
 
 public class Copernicus90mElevationModel extends CopernicusElevationModel {
 
@@ -25,7 +25,7 @@ public class Copernicus90mElevationModel extends CopernicusElevationModel {
     }
 
     @Override
-    protected ElevationFile createElevationFile(final CopernicusElevationModel model, final File localFile, final ProductReader reader) {
+    protected ElevationFile createElevationFile(final CopernicusElevationModel model, final Path localFile, final ProductReader reader) {
         return new Copernicus90mFile(model, localFile, reader);
     }
 }

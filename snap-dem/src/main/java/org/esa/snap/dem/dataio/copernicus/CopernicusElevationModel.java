@@ -9,7 +9,7 @@ import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 
-import java.io.File;
+import java.nio.file.Path;
 
 public abstract class CopernicusElevationModel extends BaseElevationModel {
 
@@ -73,13 +73,13 @@ public abstract class CopernicusElevationModel extends BaseElevationModel {
     }
 
     @Override
-    protected void createElevationFile(ElevationFile[][] elevationFiles, int x, int y, File demInstallDir) {
+    protected void createElevationFile(ElevationFile[][] elevationFiles, int x, int y, Path demInstallDir) {
 
         final int minLon = x * DEGREE_RES - 180;
         final int minLat = y * DEGREE_RES - 90;
 
         final String fileName = createTileFilename(minLat, minLon);
-        final File localFile = new File(demInstallDir, fileName);
+        final Path localFile = demInstallDir.resolve(fileName);
         try {
             elevationFiles[x][NUM_Y_TILES - 1 - y] = createElevationFile(this, localFile, plugIn.createReaderInstance());
         } catch (Exception e){
@@ -88,7 +88,7 @@ public abstract class CopernicusElevationModel extends BaseElevationModel {
     }
 
     protected abstract ElevationFile createElevationFile(final CopernicusElevationModel model,
-                                                         final File localFile, final ProductReader reader);
+                                                         final Path localFile, final ProductReader reader);
 
     public String createTileFilename(double minLat, double minLon) {
         int lat = (int) minLat;

@@ -3,8 +3,8 @@ package org.esa.snap.dem.dataio.copernicus;
 import org.esa.snap.dataio.geotiff.GeoTiffImageReader;
 
 import java.awt.image.Raster;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 
 public final class GeoTiffCopernicusTileSource implements CopernicusTileSource {
@@ -15,7 +15,7 @@ public final class GeoTiffCopernicusTileSource implements CopernicusTileSource {
     private final int height;
 
 
-    public GeoTiffCopernicusTileSource(final File file) throws IOException {
+    public GeoTiffCopernicusTileSource(final Path file) throws IOException {
         reader = new GeoTiffImageReader(file);
         width = reader.getImageWidth();
         height = reader.getImageHeight();

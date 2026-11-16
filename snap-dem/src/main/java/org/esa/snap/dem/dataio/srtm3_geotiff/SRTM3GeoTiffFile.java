@@ -21,7 +21,7 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.engine_utilities.util.Settings;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.concurrent.CancellationException;
 
@@ -43,7 +43,7 @@ public final class SRTM3GeoTiffFile extends ElevationFile {
         }
     }
 
-    public SRTM3GeoTiffFile(final SRTM3GeoTiffElevationModel model, final File localFile, final ProductReader reader) {
+    public SRTM3GeoTiffFile(final SRTM3GeoTiffElevationModel model, final Path localFile, final ProductReader reader) {
         super(localFile, reader);
         this.demModel = model;
     }

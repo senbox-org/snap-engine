@@ -15,6 +15,7 @@
  */
 package org.esa.snap.dem.dataio.aster;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -23,7 +24,9 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.util.io.FileUnpacker;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
 
 public final class AsterElevationModel extends BaseElevationModel {
 
@@ -56,26 +59,26 @@ public final class AsterElevationModel extends BaseElevationModel {
 
     @Override
     protected void createElevationFile(final ElevationFile[][] elevationFiles,
-                                       final int x, final int y, final File demInstallDir) {
+                                       final int x, final int y, final Path demInstallDir) {
         final int minLon = x * DEGREE_RES - 180;
         final int minLat = y * DEGREE_RES - 83;
         final String fileName = createTileFilename(minLat, minLon);
-        final File localFile = new File(demInstallDir, fileName);
+        final Path localFile = demInstallDir.resolve(fileName);
         elevationFiles[x][NUM_Y_TILES - 1 - y] = new AsterFile(this, localFile, productReaderPlugIn.createReaderInstance());
     }
 
     private void unpackTileBundles() {
 
-        final File parentFolder = descriptor.getDemInstallDir();
-        final File[] files = parentFolder.listFiles();
+        final Path parentFolder = descriptor.getDemInstallDir();
+        final Collection<Path> files = IOHelper.listFiles(parentFolder);
         if(files == null)
             return;
         try {
-            for (File f : files) {
-                final String name = f.getName().toLowerCase();
+            for (Path f : files) {
+                final String name = f.getFileName().toString().toLowerCase();
                 if ((name.startsWith("download_") || name.startsWith("tiles_")) && name.endsWith(".zip")) {
                     FileUnpacker.unpackZip(f, parentFolder, null);
-                    f.delete();
+                    Files.delete(f);
                 }
             }
         } catch (Exception e) {

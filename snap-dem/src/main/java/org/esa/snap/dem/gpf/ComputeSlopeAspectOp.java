@@ -41,7 +41,7 @@ import org.esa.snap.engine_utilities.gpf.TileIndex;
 import org.esa.snap.engine_utilities.eo.GeoUtils;
 
 import java.awt.Rectangle;
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Map;
 
 /**
@@ -68,7 +68,7 @@ public final class ComputeSlopeAspectOp extends Operator {
     private String demResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
 
     @Parameter(label = "External DEM")
-    private File externalDEMFile = null;
+    private Path externalDEMFile = null;
 
     @Parameter(label = "DEM No Data Value", defaultValue = "0")
     private double externalDEMNoDataValue = 0;
@@ -250,7 +250,7 @@ public final class ComputeSlopeAspectOp extends Operator {
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
 
         if (externalDEMFile != null) { // if external DEM file is specified by user
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, externalDEMFile.getPath());
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, externalDEMFile.toString());
         } else {
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
         }
@@ -343,7 +343,7 @@ public final class ComputeSlopeAspectOp extends Operator {
                 dem = new FileElevationModel(externalDEMFile, demResamplingMethod, externalDEMNoDataValue);
                 ((FileElevationModel) dem).applyEarthGravitionalModel(externalDEMApplyEGM);
                 demNoDataValue = externalDEMNoDataValue;
-                demName = externalDEMFile.getPath();
+                demName = externalDEMFile.toString();
 
             } else {
                 dem = DEMFactory.createElevationModel(demName, demResamplingMethod);

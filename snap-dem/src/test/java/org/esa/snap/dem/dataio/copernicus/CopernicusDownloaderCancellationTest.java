@@ -2,12 +2,10 @@ package org.esa.snap.dem.dataio.copernicus;
 
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
-import org.junit.Rule;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -15,6 +13,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.CancellationException;
 
 import static org.junit.Assert.assertFalse;
@@ -22,8 +22,7 @@ import static org.junit.Assert.assertThrows;
 
 public class CopernicusDownloaderCancellationTest {
 
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public Path temporaryFolder = IOHelper.createATempDir();
 
     @Test
     @STTM("SNAP-4209")
@@ -31,13 +30,13 @@ public class CopernicusDownloaderCancellationTest {
         SlowHttpServer server = new SlowHttpServer();
         server.start();
         try {
-            CopernicusDownloader downloader = new CopernicusDownloader(temporaryFolder.getRoot(),
+            CopernicusDownloader downloader = new CopernicusDownloader(temporaryFolder,
                                                                        server.getBaseUrl(),
                                                                        server.getBaseUrl());
             ProgressMonitor progressMonitor = new CancelAfterChecksProgressMonitor(1);
 
             assertThrows(CancellationException.class, () -> downloader.downloadTiles(3, -80, 90, progressMonitor));
-            assertFalse(new File(temporaryFolder.getRoot(), "Copernicus_DSM_COG_30_N03_00_W080_00_DEM.tif").exists());
+            assertFalse(Files.exists(temporaryFolder.resolve("Copernicus_DSM_COG_30_N03_00_W080_00_DEM.tif")));
         } finally {
             server.close();
         }

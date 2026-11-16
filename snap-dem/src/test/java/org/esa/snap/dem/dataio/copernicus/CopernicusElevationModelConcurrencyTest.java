@@ -1,7 +1,6 @@
 package org.esa.snap.dem.dataio.copernicus;
 
 import com.bc.ceres.annotation.STTM;
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.dataop.dem.ElevationFile;
@@ -11,8 +10,8 @@ import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,7 +55,7 @@ public class CopernicusElevationModelConcurrencyTest {
         }
 
         @Override
-        protected ElevationFile createElevationFile(CopernicusElevationModel model, File localFile, ProductReader reader) {
+        protected ElevationFile createElevationFile(CopernicusElevationModel model, Path localFile, ProductReader reader) {
             BlockingDescriptor descriptor = (BlockingDescriptor) getDescriptor();
             return new BlockingElevationFile(model, localFile, descriptor.createTile());
         }
@@ -71,7 +70,7 @@ public class CopernicusElevationModelConcurrencyTest {
         private final CopernicusElevationModel model;
         private final ElevationTile blockingTile;
 
-        private BlockingElevationFile(CopernicusElevationModel model, File localFile, ElevationTile blockingTile) {
+        private BlockingElevationFile(CopernicusElevationModel model, Path localFile, ElevationTile blockingTile) {
             super(localFile, null);
             this.model = model;
             this.blockingTile = blockingTile;
@@ -198,8 +197,8 @@ public class CopernicusElevationModelConcurrencyTest {
         }
 
         @Override
-        public File getDemInstallDir() {
-            return new File(".");
+        public Path getDemInstallDir() {
+            return Path.of(".");
         }
     }
 }

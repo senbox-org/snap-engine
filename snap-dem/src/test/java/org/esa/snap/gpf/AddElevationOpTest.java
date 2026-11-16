@@ -2,23 +2,22 @@ package org.esa.snap.gpf;
 
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
+import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.dem.gpf.AddElevationOp;
-import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.engine_utilities.util.TestUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,9 +33,9 @@ public class AddElevationOpTest {
     private static final String DEM_NAME = "45N015E_5M.ACE2";
 
     @Test
-    public void testAddingExternalDEM() throws IOException, URISyntaxException {
+    public void testAddingExternalDEM() throws IOException {
         final Map<String, Object> parametersMap = new HashMap<>();
-        final File externalDEMFile = new File(getResourcePath(DEM_NAME));
+        final Path externalDEMFile = Path.of(getResourcePath(DEM_NAME));
         parametersMap.put("demName", "External DEM");
         parametersMap.put("externalDEMFile", externalDEMFile);
         parametersMap.put("externalDEMNoDataValue", -500.0);
@@ -52,10 +51,12 @@ public class AddElevationOpTest {
         assertEquals(38.6651268, sampleFloat, 1e-8);
     }
 
-    private static String getResourcePath(String name) throws URISyntaxException {
+    private static String getResourcePath(String name) {
         URL url = AddElevationOpTest.class.getResource(name);
-        URI uri = new URI(url.toString());
-        return uri.getPath();
+        assertNotNull(url);
+        final Path file = UrlHelper.urlToFile(url);
+        assertNotNull(file);
+        return file.toAbsolutePath().toString();
     }
 
     @Test

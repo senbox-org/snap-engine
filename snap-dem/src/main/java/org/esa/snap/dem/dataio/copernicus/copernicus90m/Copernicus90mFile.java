@@ -7,10 +7,6 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.dem.ElevationFile;
-
-import java.awt.*;
-import java.awt.image.Raster;
-import java.io.*;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.internal.TileImpl;
@@ -25,39 +21,45 @@ import org.esa.snap.dem.dataio.copernicus.GeoTiffCopernicusTileSource;
 import org.esa.snap.dem.dataio.copernicus.CopernicusNoDataElevationTile;
 import org.esa.snap.runtime.Config;
 
+import java.nio.file.Files;
 import java.util.concurrent.CancellationException;
+
+import java.awt.Rectangle;
+import java.awt.image.Raster;
+import java.io.IOException;
+import java.nio.file.Path;
 
 public class Copernicus90mFile extends ElevationFile {
 
     private final CopernicusElevationModel demModel;
 
-    public Copernicus90mFile(CopernicusElevationModel copernicusElevationModel, File localFile, ProductReader reader) {
+    public Copernicus90mFile(CopernicusElevationModel copernicusElevationModel, Path localFile, ProductReader reader) {
         super(localFile, reader);
         demModel = copernicusElevationModel;
     }
 
     @Override
     protected void getLocalFile() throws IOException {
-        if (Config.instance().preferences().getBoolean("snap.dem.copernicus.directReader", true) && localFile.exists()) {
+        if (Config.instance().preferences().getBoolean("snap.dem.copernicus.directReader", true) && Files.exists(localFile)) {
             try {
                 tile = createDirectTile(localFile);
                 demModel.updateCache(tile);
                 return;
             } catch (IOException e) {
-                SystemUtils.LOG.fine("Falling back to ProductReader for " + localFile.getName() + ": " + e.getMessage());
+                SystemUtils.LOG.fine("Falling back to ProductReader for " + localFile.getFileName() + ": " + e.getMessage());
             }
         }
         super.getLocalFile();
     }
 
-    private ElevationTile createDirectTile(final File file) throws IOException {
+    private ElevationTile createDirectTile(final Path file) throws IOException {
         final int[] tileIndices = getTileIndices(file);
         return new CopernicusDirectElevationTile(demModel, new GeoTiffCopernicusTileSource(file),
                                                  1200, 1200, tileIndices[0], tileIndices[1]);
     }
 
-    private static int[] getTileIndices(final File file) {
-        final String[] fileNameSplit = file.getName().split("_");
+    private static int[] getTileIndices(final Path file) {
+        final String[] fileNameSplit = file.getFileName().toString().split("_");
         final int minLat = parseSignedTileCoordinate(fileNameSplit[4]);
         final int minLon = parseSignedTileCoordinate(fileNameSplit[6]);
         return new int[]{minLon + 180, 89 - minLat};
@@ -126,7 +128,7 @@ public class Copernicus90mFile extends ElevationFile {
     @Override
     protected Boolean getRemoteFile(ProgressMonitor progressMonitor) {
         try {
-            String [] fileNameSplit = localFile.getName().split("_");
+            String [] fileNameSplit = localFile.getFileName().toString().split("_");
             String north = fileNameSplit[4];
             String east =  fileNameSplit[6];
             if (Copernicus90mMissingTileIndex.isMissing(north, east)) {
@@ -157,7 +159,7 @@ public class Copernicus90mFile extends ElevationFile {
     }
 
     protected boolean downloadTiles(int lat, int lon, int resolution, ProgressMonitor progressMonitor) throws Exception {
-        CopernicusDownloader downloader = new CopernicusDownloader(localFile.getParentFile());
+        CopernicusDownloader downloader = new CopernicusDownloader(localFile.getParent());
         return downloader.downloadTiles(lat, lon, resolution, progressMonitor);
     }
 

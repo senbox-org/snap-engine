@@ -27,7 +27,7 @@ import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.engine_utilities.eo.Constants;
 import org.esa.snap.engine_utilities.gpf.CommonReaders;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.concurrent.CancellationException;
 
@@ -43,7 +43,7 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
     private int RASTER_HEIGHT;
     private Double noDataValue = 0.0;
 
-    public FileElevationModel(final File file, final String resamplingMethodName, final Double demNoDataValue) throws IOException {
+    public FileElevationModel(final Path file, final String resamplingMethodName, final Double demNoDataValue) throws IOException {
 
         if (resamplingMethodName.equals(DEMFactory.DELAUNAY_INTERPOLATION))
             throw new IOException("Delaunay interpolation for an external DEM file is currently not supported");
@@ -51,7 +51,7 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
         init(file, ResamplingFactory.createResampling(resamplingMethodName), demNoDataValue);
     }
 
-    private void init(final File file, final Resampling resamplingMethod, Double demNoDataValue) throws IOException {
+    private void init(final Path file, final Resampling resamplingMethod, Double demNoDataValue) throws IOException {
         final Product product = CommonReaders.readProduct(file);
         if(product == null) {
             throw new IOException("No product reader found for "+file.toString());

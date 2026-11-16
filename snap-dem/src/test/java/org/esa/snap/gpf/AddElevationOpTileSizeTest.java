@@ -7,7 +7,6 @@ import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
@@ -18,15 +17,15 @@ import org.esa.snap.runtime.Config;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
 
+import javax.media.jai.RasterFactory;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
-import java.io.File;
 import java.lang.reflect.Field;
+import java.nio.file.Path;
 import java.util.prefs.Preferences;
-import javax.media.jai.RasterFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -257,7 +256,7 @@ public class AddElevationOpTileSizeTest {
         }
 
         @Override
-        public File getDemInstallDir() {
+        public Path getDemInstallDir() {
             return null;
         }
     }

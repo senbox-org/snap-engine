@@ -1,10 +1,12 @@
 package org.esa.snap.dem.dataio.copernicus;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.dataop.downloadable.DownloadStatusManager;
 import eu.esa.snap.core.util.ProgressMonitorContext;
+import org.esa.snap.core.dataop.downloadable.DownloadStatusManager;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -17,16 +19,16 @@ public class CopernicusDownloader {
     private static final String DEFAULT_S3_PREFIX_30M = "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com";
     private static final String DEFAULT_S3_PREFIX_90M = "https://copernicus-dem-90m.s3.eu-central-1.amazonaws.com";
 
-    private final File installDir;
+    private final Path installDir;
     private final String s3Prefix30m;
     private final String s3Prefix90m;
 
 
-    public CopernicusDownloader(File installDir) {
+    public CopernicusDownloader(Path installDir) {
         this(installDir, DEFAULT_S3_PREFIX_30M, DEFAULT_S3_PREFIX_90M);
     }
 
-    CopernicusDownloader(File installDir, String s3Prefix30m, String s3Prefix90m) {
+    CopernicusDownloader(Path installDir, String s3Prefix30m, String s3Prefix90m) {
         this.installDir = installDir;
         this.s3Prefix30m = s3Prefix30m;
         this.s3Prefix90m = s3Prefix90m;
@@ -59,7 +61,7 @@ public class CopernicusDownloader {
     }
 
     public boolean downloadTiles(double lat, double lon, int resolution, ProgressMonitor progressMonitor) throws Exception {
-        String installDir = this.installDir.getAbsolutePath();
+        String installDir = this.installDir.toAbsolutePath().toString();
         String download_path = "";
         String target_filename = "";
 
@@ -92,7 +94,7 @@ public class CopernicusDownloader {
             urlConnection.setConnectTimeout(30000);
             urlConnection.setReadTimeout(60000);
             try (BufferedInputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                 FileOutputStream fileOutputStream = new FileOutputStream(targetPath.toFile())) {
+                 OutputStream fileOutputStream = Files.newOutputStream(targetPath)) {
                 byte[] dataBuffer = new byte[1024];
                 int bytesRead;
                 ProgressMonitorContext.checkCanceled(progressMonitor);

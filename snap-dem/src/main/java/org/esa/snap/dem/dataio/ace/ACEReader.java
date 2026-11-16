@@ -17,6 +17,7 @@ package org.esa.snap.dem.dataio.ace;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MapGeoCoding;
@@ -26,18 +27,18 @@ import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.snap.core.dataop.maptransf.MapInfo;
 import org.esa.snap.core.dataop.maptransf.MapProjectionRegistry;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.engine_utilities.datamodel.Unit;
 import org.esa.snap.engine_utilities.gpf.ReaderUtils;
 
 import javax.imageio.stream.FileCacheImageInputStream;
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
@@ -83,10 +84,10 @@ public class ACEReader extends AbstractProductReader {
                 _zipFile = new ZipFile(dataPath.toFile());
                 final ZipEntry entry = getZipEntryIgnoreCase(entryName);
                 final InputStream inputStream = _zipFile.getInputStream(entry);
-                _imageInputStream = new FileCacheImageInputStream(inputStream, createCacheDir());
+                _imageInputStream = new FileCacheImageInputStream(inputStream, createCacheDir().toFile());
                 fileName = FileUtils.getFilenameWithoutExtension(entryName);
             } else {
-                _imageInputStream = new FileImageInputStream(dataPath.toFile());
+                _imageInputStream = ImageUtils.getImageInputStream(dataPath);
                 fileName = FileUtils.getFilenameWithoutExtension(inputFileName);
             }
             _imageInputStream.setByteOrder(ByteOrder.LITTLE_ENDIAN);
@@ -99,7 +100,7 @@ public class ACEReader extends AbstractProductReader {
         }
 
         initProduct(ACEReaderPlugIn.FORMAT_NAME + '_' + fileName);
-        _product.setFileLocation(dataPath.toFile());
+        _product.setFileLocation(dataPath);
         return _product;
     }
 
@@ -185,11 +186,11 @@ public class ACEReader extends AbstractProductReader {
         _fileInfo = null;
     }
 
-    private static File createCacheDir() throws IOException {
-        final File cacheDir = new File(SystemUtils.getCacheDir(), "temp");
-        if (!cacheDir.exists()) {
-            cacheDir.mkdirs();
-            if (!cacheDir.exists()) {
+    private static Path createCacheDir() throws IOException {
+        final Path cacheDir = SystemUtils.getCacheDir().resolve("temp");
+        if (!Files.exists(cacheDir)) {
+            IOHelper.createDirectories(cacheDir);
+            if (!Files.exists(cacheDir)) {
                 throw new IOException(String.format("Failed to create directory '%s'.", cacheDir));
             }
         }

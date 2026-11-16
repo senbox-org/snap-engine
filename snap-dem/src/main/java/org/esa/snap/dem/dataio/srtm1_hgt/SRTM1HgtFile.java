@@ -21,7 +21,7 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.engine_utilities.util.Settings;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 /**
@@ -34,7 +34,7 @@ public final class SRTM1HgtFile extends ElevationFile {
     private static final String remoteHTTP = Settings.instance().get("DEM.srtm1HgtDEM_HTTP",
                                                                      "http://step.esa.int/auxdata/dem/SRTMGL1/");
 
-    public SRTM1HgtFile(final SRTM1HgtElevationModel model, final File localFile, final ProductReader reader) {
+    public SRTM1HgtFile(final SRTM1HgtElevationModel model, final Path localFile, final ProductReader reader) {
         super(localFile, reader);
         this.demModel = model;
     }

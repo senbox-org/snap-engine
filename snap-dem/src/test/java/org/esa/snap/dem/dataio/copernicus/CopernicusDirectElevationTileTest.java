@@ -8,7 +8,7 @@ import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 
@@ -180,8 +180,8 @@ public class CopernicusDirectElevationTileTest {
             return false;
         }
         @Override
-        public File getDemInstallDir() {
-            return new File(".");
+        public Path getDemInstallDir() {
+            return Path.of(".");
         }
     }
 }

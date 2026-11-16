@@ -2,14 +2,13 @@ package org.esa.snap.dem.dataio.copernicus;
 
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.dem.dataio.copernicus.copernicus30m.Copernicus30mFile;
 import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mFile;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -19,14 +18,13 @@ import static org.junit.Assert.assertSame;
 public class CopernicusElevationFileTest {
 
 
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public Path temporaryFolder = IOHelper.createATempDir();
 
 
     @Test
     @STTM("SNAP-4213")
     public void test30mMissingRemoteTileIsCachedAsNoDataTile() throws Exception {
-        File localFile = new File(temporaryFolder.getRoot(), "Copernicus_DSM_COG_10_N03_00_W080_00_DEM.tif");
+        Path localFile = temporaryFolder.resolve("Copernicus_DSM_COG_10_N03_00_W080_00_DEM.tif");
         CountingCopernicus30mFile file = new CountingCopernicus30mFile(localFile);
 
         ElevationTile firstTile = file.getTile(ProgressMonitor.NULL);
@@ -41,7 +39,7 @@ public class CopernicusElevationFileTest {
     @Test
     @STTM("SNAP-4213")
     public void test90mKnownMissingRemoteTileIsCachedAsNoDataTileWithoutDownload() throws Exception {
-        File localFile = new File(temporaryFolder.getRoot(), "Copernicus_DSM_COG_30_N03_00_W080_00_DEM.tif");
+        Path localFile = temporaryFolder.resolve("Copernicus_DSM_COG_30_N03_00_W080_00_DEM.tif");
         CountingCopernicus90mFile file = new CountingCopernicus90mFile(localFile);
 
         ElevationTile firstTile = file.getTile(ProgressMonitor.NULL);
@@ -56,7 +54,7 @@ public class CopernicusElevationFileTest {
     @Test
     @STTM("SNAP-4213")
     public void test90mKnownMissingTileSkipsRemoteLookup() throws Exception {
-        File localFile = new File(temporaryFolder.getRoot(), "Copernicus_DSM_COG_30_N00_00_W160_00_DEM.tif");
+        Path localFile = temporaryFolder.resolve("Copernicus_DSM_COG_30_N00_00_W160_00_DEM.tif");
         CountingCopernicus90mFile file = new CountingCopernicus90mFile(localFile);
 
         ElevationTile tile = file.getTile(ProgressMonitor.NULL);
@@ -70,7 +68,7 @@ public class CopernicusElevationFileTest {
 
         private int downloadCount;
 
-        CountingCopernicus30mFile(File localFile) {
+        CountingCopernicus30mFile(Path localFile) {
             super(null, localFile, null);
         }
 
@@ -90,7 +88,7 @@ public class CopernicusElevationFileTest {
 
         private int downloadCount;
 
-        CountingCopernicus90mFile(File localFile) {
+        CountingCopernicus90mFile(Path localFile) {
             super(null, localFile, null);
         }
 

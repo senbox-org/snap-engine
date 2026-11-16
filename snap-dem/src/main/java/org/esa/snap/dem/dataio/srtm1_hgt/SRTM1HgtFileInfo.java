@@ -18,7 +18,7 @@ package org.esa.snap.dem.dataio.srtm1_hgt;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.dataop.dem.EastingNorthingParser;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.text.ParseException;
 
@@ -47,9 +47,9 @@ public class SRTM1HgtFileInfo {
         return northing;
     }
 
-    public static SRTM1HgtFileInfo create(final File dataFile) throws IOException {
+    public static SRTM1HgtFileInfo create(final Path dataFile) throws IOException {
         final SRTM1HgtFileInfo fileInfo = new SRTM1HgtFileInfo();
-        fileInfo.setFromData(dataFile.getName());
+        fileInfo.setFromData(dataFile.getFileName().toString());
         return fileInfo;
     }
 

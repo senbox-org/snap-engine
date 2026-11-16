@@ -26,7 +26,8 @@ import org.esa.snap.engine_utilities.util.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -38,7 +39,7 @@ import static org.junit.Assume.assumeTrue;
  */
 public class TestCreateElevationOp {
 
-    private final static File inputASAR_WSM = new File(TestUtils.TEST_SAR_UNITTESTS +
+    private final static Path inputASAR_WSM = Path.of(TestUtils.TEST_SAR_UNITTESTS +
             "ASAR/subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim");
 
     private final static OperatorSpi spi = new AddElevationOp.Spi();
@@ -57,7 +58,7 @@ public class TestCreateElevationOp {
     @Before
     public void setup() throws Exception {
         try {
-            assumeTrue(inputASAR_WSM + " not found.", inputASAR_WSM.exists());
+            assumeTrue(inputASAR_WSM + " not found.", Files.exists(inputASAR_WSM));
         } catch (Exception e) {
             TestUtils.skipTest(this, e.getMessage());
             throw e;

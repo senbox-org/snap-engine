@@ -2,11 +2,11 @@ package org.esa.snap.dem.dataio;
 
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.io.File;
+import java.nio.file.Path;
 import java.util.prefs.Preferences;
 
 import static org.junit.Assert.assertEquals;
@@ -271,8 +271,8 @@ public class DEMFactoryFillTest {
             return false;
         }
         @Override
-        public File getDemInstallDir() {
-            return new File(".");
+        public Path getDemInstallDir() {
+            return Path.of(".");
         }
     }
 }

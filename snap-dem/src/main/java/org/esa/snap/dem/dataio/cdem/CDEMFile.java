@@ -21,7 +21,7 @@ import org.esa.snap.core.dataop.dem.ElevationFile;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.engine_utilities.util.Settings;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 /**
@@ -34,7 +34,7 @@ public final class CDEMFile extends ElevationFile {
     private static final String remoteHTTP1 = "http://step.esa.int/auxdata/dem/cdem/";
     private static final String remoteHTTP = Settings.instance().get("DEM.CDEM_HTTP", remoteHTTP1);
 
-    public CDEMFile(final CDEMElevationModel model, final File localFile, final ProductReader reader) {
+    public CDEMFile(final CDEMElevationModel model, final Path localFile, final ProductReader reader) {
         super(localFile, reader);
         this.demModel = model;
     }

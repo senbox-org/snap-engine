@@ -19,7 +19,7 @@ import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.junit.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -38,7 +38,7 @@ public class TestACEReaderPlugIn {
 
     private void checkValidInput(final String s) {
         assertTrue(_plugIn.getDecodeQualification(s) == DecodeQualification.INTENDED);
-        assertTrue(_plugIn.getDecodeQualification(new File(s)) == DecodeQualification.INTENDED);
+        assertTrue(_plugIn.getDecodeQualification(Path.of(s)) == DecodeQualification.INTENDED);
     }
 
     @Test
@@ -61,13 +61,13 @@ public class TestACEReaderPlugIn {
 
     private void checkInvalidInput(final String s) {
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(s));
-        assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(new File(s)));
+        assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(Path.of(s)));
     }
 
     @Test
     public void testThatOtherTypesCannotBeDecoded() throws MalformedURLException {
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(null));
-        final URL url = new File("./ACE/readme.txt").toURI().toURL();
+        final URL url = Path.of("./ACE/readme.txt").toUri().toURL();
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(url));
         final Object object = new Object();
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(object));
@@ -85,7 +85,7 @@ public class TestACEReaderPlugIn {
         assertNotNull(inputTypes);
         assertTrue(inputTypes.length == 2);
         assertEquals(String.class, inputTypes[0]);
-        assertEquals(File.class, inputTypes[1]);
+        assertEquals(Path.class, inputTypes[1]);
     }
 
     @Test
