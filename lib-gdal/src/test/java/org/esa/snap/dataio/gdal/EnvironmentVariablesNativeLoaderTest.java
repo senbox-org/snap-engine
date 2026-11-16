@@ -1,25 +1,28 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.lib.gdal.AbstractGDALTest;
 import org.esa.snap.jni.EnvironmentVariables;
 import org.junit.Test;
 
-import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 import static org.esa.snap.dataio.gdal.GDALVersion.GDAL_NATIVE_LIBRARIES_SRC;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class EnvironmentVariablesNativeLoaderTest {
 
 
     private static URL getExpectedEnvironmentVariablesFilePathFromSources() {
-        return GDALVersion.class.getClassLoader().getResource(getExpectedEnvironmentVariablesDirectory().replace(File.separator, "/"));
+        return GDALVersion.class.getClassLoader().getResource(getExpectedEnvironmentVariablesDirectory().replace(IOHelper.SEPARATOR, "/"));
     }
 
     private static String getExpectedEnvironmentVariablesDirectory() {
@@ -49,7 +52,7 @@ public class EnvironmentVariablesNativeLoaderTest {
     public void testGetEnvironmentVariablesFilePathFromSources() {
         try {
             assertEquals(getExpectedEnvironmentVariablesFilePathFromSources(), EnvironmentVariablesNativeLoader.getEnvironmentVariablesFilePathFromSources());
-            assertTrue(Files.exists(Paths.get(Objects.requireNonNull(EnvironmentVariablesNativeLoader.getEnvironmentVariablesFilePathFromSources()).toURI())));
+            assertTrue(Files.exists(Objects.requireNonNull(UrlHelper.urlToFile(Objects.requireNonNull(EnvironmentVariablesNativeLoader.getEnvironmentVariablesFilePathFromSources())))));
         } catch (Exception e) {
             fail("Error on testGetEnvironmentVariablesFilePathFromSources(): " + e.getMessage());
         }

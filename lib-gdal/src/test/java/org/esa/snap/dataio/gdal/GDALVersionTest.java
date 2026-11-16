@@ -1,16 +1,15 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import eu.esa.snap.core.lib.NativeLibraryTools;
 import org.esa.lib.gdal.AbstractGDALTest;
 import org.junit.Test;
 
-import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
 
 import static org.esa.snap.dataio.gdal.GDALVersion.DIR_NAME;
 import static org.esa.snap.dataio.gdal.GDALVersion.GDAL_JNI_LIBRARY_FILE;
@@ -19,6 +18,7 @@ import static org.esa.snap.dataio.gdal.GDALVersion.VERSION_NAME;
 import static org.esa.snap.dataio.gdal.GDALVersion.ZIP_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -43,7 +43,7 @@ public class GDALVersionTest {
     }
 
     private static URL getExpectedZipFileURLFromSources() {
-        return GDALVersion.class.getClassLoader().getResource(GDAL_NATIVE_LIBRARIES_SRC + "/" + AbstractGDALTest.getExpectedDirectory() + "/" + getExpectedZipName(TEST_VERSION.name).replace(File.separator, "/"));
+        return GDALVersion.class.getClassLoader().getResource(GDAL_NATIVE_LIBRARIES_SRC + "/" + AbstractGDALTest.getExpectedDirectory() + "/" + getExpectedZipName(TEST_VERSION.name).replace(IOHelper.SEPARATOR, "/"));
     }
 
     private static Path getExpectedZipFilePath() {
@@ -97,7 +97,11 @@ public class GDALVersionTest {
     public void testGetZipFileURLFromSources() {
         assertEquals(getExpectedZipFileURLFromSources(), TEST_VERSION.getZipFileURLFromSources());
         try {
-            assertTrue(Files.exists(Paths.get(Objects.requireNonNull(TEST_VERSION.getZipFileURLFromSources()).toURI())));
+            final URL fileURL = TEST_VERSION.getZipFileURLFromSources();
+            assertNotNull(fileURL);
+            final Path file = UrlHelper.urlToFile(fileURL);
+            assertNotNull(file);
+            assertTrue(Files.exists(file));
         } catch (Exception e) {
             fail("Error on testGetZipFileURLFromSources(): " + e.getMessage());
         }

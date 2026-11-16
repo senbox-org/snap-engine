@@ -113,7 +113,7 @@ public class GDALLoaderTest extends AbstractGDALTest {
             Path gdalRootFolderPath = getExpectedNativeLibrariesRootFolderPath();
             //remove gdal folder when not itialised to force the bundle deploy during this test
             if(TEST_GDAL_LOADER.isNotInitialised() && Files.exists(gdalRootFolderPath)){
-                FileUtils.deleteTree(gdalRootFolderPath.toFile());
+                FileUtils.deleteTree(gdalRootFolderPath);
             }
 
             final ThreadExecutor executor = new ThreadExecutor();

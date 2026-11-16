@@ -1,9 +1,9 @@
 package org.esa.snap.dataio.gdal;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import eu.esa.snap.core.lib.FileHelper;
 import eu.esa.snap.core.lib.NativeLibraryTools;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -39,7 +39,7 @@ public class EnvironmentVariablesNativeLoader {
     public static URL getEnvironmentVariablesFilePathFromSources() {
         final String evFileDirectoryFromSources = GDALVersion.GDAL_NATIVE_LIBRARIES_SRC + "/" + OSCategory.getDirectory() + "/" + OSCategory.getOSCategory().getOSSpecificEnvironmentVariablesFileName();
         try {
-            return GDALVersion.class.getClassLoader().getResource(evFileDirectoryFromSources.replace(File.separator, "/"));
+            return GDALVersion.class.getClassLoader().getResource(evFileDirectoryFromSources.replace(IOHelper.SEPARATOR, "/"));
         } catch (Exception ignored) {
             return null;
         }

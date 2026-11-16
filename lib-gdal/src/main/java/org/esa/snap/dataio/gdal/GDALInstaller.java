@@ -17,21 +17,23 @@
 package org.esa.snap.dataio.gdal;
 
 import com.bc.ceres.core.runtime.Version;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import eu.esa.snap.core.lib.FileHelper;
 import eu.esa.snap.core.lib.NativeLibraryTools;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -251,7 +253,7 @@ class GDALInstaller {
 
     private static void deleteDistribution(Path gdalNativeLibrariesFolderPath){
         if (Files.exists(gdalNativeLibrariesFolderPath)) {
-            if (!FileUtils.deleteTree(gdalNativeLibrariesFolderPath.toFile())) {
+            if (!FileUtils.deleteTree(gdalNativeLibrariesFolderPath)) {
                 logger.log(Level.WARNING, () -> "Failed to delete the GDAL distribution folder '" + gdalNativeLibrariesFolderPath + "'.");
             }
         }
@@ -310,7 +312,7 @@ class GDALInstaller {
                     manifestPath = classPath.substring(0, classPath.lastIndexOf('!') + 1) + "/META-INF/MANIFEST.MF";
                 } else {
                     // class not from jar archive
-                    final String relativePath = clazz.getName().replace('.', File.separatorChar) + ".class";
+                    final String relativePath = clazz.getName().replace('.', IOHelper.SEPARATOR_CHAR) + ".class";
                     final String classFolder = classPath.substring(0, classPath.length() - relativePath.length() - 1);
                     manifestPath = classFolder + "/META-INF/MANIFEST.MF";
                 }

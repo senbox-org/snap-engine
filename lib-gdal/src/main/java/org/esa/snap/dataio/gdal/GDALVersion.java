@@ -1,9 +1,9 @@
 package org.esa.snap.dataio.gdal;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import eu.esa.snap.core.lib.NativeLibraryTools;
 import org.esa.snap.core.util.SystemUtils;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
@@ -149,7 +149,7 @@ public enum GDALVersion {
         final String zipFileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + OSCategory.getDirectory() + "/" + getZipName();
         try {
             logger.log(Level.FINE, "version zip archive URL from sources: '" + zipFileDirectoryFromSources + "'.");
-            return getClass().getClassLoader().getResource(zipFileDirectoryFromSources.replace(File.separator, "/"));
+            return getClass().getClassLoader().getResource(zipFileDirectoryFromSources.replace(IOHelper.SEPARATOR, "/"));
         } catch (Exception ignored) {
             return null;
         }
@@ -164,7 +164,7 @@ public enum GDALVersion {
         final String sha256FileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + OSCategory.getDirectory() + "/" + getSHA256Name();
         try {
             logger.log(Level.FINE, "version SHA256 file URL from sources: '" + sha256FileDirectoryFromSources + "'.");
-            return getClass().getClassLoader().getResourceAsStream(sha256FileDirectoryFromSources.replace(File.separator, "/"));
+            return getClass().getClassLoader().getResourceAsStream(sha256FileDirectoryFromSources.replace(IOHelper.SEPARATOR, "/"));
         } catch (Exception ignored) {
             return null;
         }
@@ -228,7 +228,7 @@ public enum GDALVersion {
     public static URL getLoaderFilePathFromSources() {
         final String loaderFileDirectoryFromSources = GDAL_NATIVE_LIBRARIES_SRC + "/" + GDAL_LOADER_LIBRARY_FILE;
         try {
-            return GDALVersion.class.getClassLoader().getResource(loaderFileDirectoryFromSources.replace(File.separator, "/"));
+            return GDALVersion.class.getClassLoader().getResource(loaderFileDirectoryFromSources.replace(IOHelper.SEPARATOR, "/"));
         } catch (Exception ignored) {
             return null;
         }

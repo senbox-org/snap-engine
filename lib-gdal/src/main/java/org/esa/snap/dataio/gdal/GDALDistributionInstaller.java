@@ -1,10 +1,10 @@
 package org.esa.snap.dataio.gdal;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.dataio.gdal.drivers.GDAL;
 import org.esa.snap.dataio.gdal.drivers.OSR;
 import org.esa.snap.jni.EnvironmentVariables;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.logging.Level;
@@ -93,7 +93,7 @@ class GDALDistributionInstaller {
      */
     private static void processInstalledWindowsDistribution(Path gdalDistributionRootFolderPath) {
         StringBuilder gdalEnv = new StringBuilder();
-        gdalEnv.append("PATH=").append(gdalDistributionRootFolderPath).append(File.pathSeparator).append(EnvironmentVariables.getEnvironmentVariable("PATH"));
+        gdalEnv.append("PATH=").append(gdalDistributionRootFolderPath).append(IOHelper.PATH_SEPARATOR).append(EnvironmentVariables.getEnvironmentVariable("PATH"));
         logger.log(Level.FINE, "Set the PATH environment variable on Windows with '" + gdalEnv + "'.");
         EnvironmentVariables.setEnvironmentVariable(gdalEnv.toString());
 
