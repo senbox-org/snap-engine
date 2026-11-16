@@ -17,6 +17,7 @@
 package org.esa.snap.dataio.netcdf.util;
 
 import com.bc.ceres.core.VirtualDir;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
@@ -37,16 +38,15 @@ import ucar.unidata.util.StringUtil2;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
@@ -94,17 +94,17 @@ public class NetcdfFileOpener {
 
     private static String getNetcdfCacheFolder() {
         try {
-            final File localTempFolder = VirtualDir.createUniqueTempDir();
-            localTempFolder.deleteOnExit(); // request to delete the Netcdf temporary/cache directory when the SNAP application is closed
-            return localTempFolder.getAbsolutePath();
+            final Path localTempFolder = VirtualDir.createUniqueTempDir();
+            IOHelper.deleteOnExit(localTempFolder); // request to delete the Netcdf temporary/cache directory when the SNAP application is closed
+            return localTempFolder.toAbsolutePath().toString();
         } catch (IOException e) {
-            final File localTempFolder = new File(System.getProperty("user.home", "."), ".snap/temp/nc_cache");
-            localTempFolder.delete();
-            if (localTempFolder.mkdirs()) {
-                LOG.fine("successfully created the NC cache dir: " + localTempFolder.getAbsolutePath());
+            final Path localTempFolder = Path.of(System.getProperty("user.home", "."), ".snap/temp/nc_cache");
+            IOHelper.delete(localTempFolder);
+            if (IOHelper.createDirectories(localTempFolder)) {
+                LOG.fine("successfully created the NC cache dir: " + localTempFolder.toAbsolutePath());
             }
-            localTempFolder.deleteOnExit(); // request to delete the Netcdf temporary/cache directory when the SNAP application is closed
-            return localTempFolder.getAbsolutePath();
+            IOHelper.deleteOnExit(localTempFolder); // request to delete the Netcdf temporary/cache directory when the SNAP application is closed
+            return localTempFolder.toAbsolutePath().toString();
         }
     }
 
@@ -159,12 +159,12 @@ public class NetcdfFileOpener {
         return null;
     }
 
-    private static File getFile(Object input) {
-        return ProductUtils.getProductPath(input).toFile();
+    private static Path getFile(Object input) {
+        return ProductUtils.getProductPath(input);
     }
 
     private static void readMagicBytes(Object input, byte[] buffer) throws IOException {
-        if (input instanceof String || input instanceof File || input instanceof Path) {
+        if (input instanceof String || input instanceof Path) {
             readMagicBytesFromFile(getFile(input), buffer);
         } else if (input instanceof ImageInputStream) {
             ImageInputStream imageInputStream = (ImageInputStream) input;
@@ -175,10 +175,10 @@ public class NetcdfFileOpener {
     }
 
     private static RandomAccessFile getRafForTesting(Object input) throws IOException {
-        if (input instanceof String || input instanceof File) {
-            File file = getFile(input);
+        if (input instanceof String || input instanceof Path) {
+            Path file = getFile(input);
             MemoryCacheImageInputStream imageInputStream = new MemoryCacheImageInputStream(openInputStream(file));
-            return new ImageInputStreamRandomAccessFile(imageInputStream, file.length());
+            return new ImageInputStreamRandomAccessFile(imageInputStream, Files.size(file));
         } else if (input instanceof ImageInputStream) {
             ImageInputStream imageInputStream = (ImageInputStream) input;
             return new ImageInputStreamRandomAccessFile(imageInputStream, imageInputStream.length());
@@ -186,8 +186,8 @@ public class NetcdfFileOpener {
         throw new IllegalArgumentException();
     }
 
-    private static InputStream openInputStream(File file) throws IOException {
-        String fileName = file.getName().toLowerCase();
+    private static InputStream openInputStream(Path file) throws IOException {
+        String fileName = file.getFileName().toString().toLowerCase();
         InputStream is = ProductUtils.getProductInputStream(file);
         if (fileName.endsWith(".z")) {
             is = new UncompressInputStream(is);
@@ -205,7 +205,7 @@ public class NetcdfFileOpener {
         return is;
     }
 
-    private static void readMagicBytesFromFile(File file, byte[] buffer) throws IOException {
+    private static void readMagicBytesFromFile(Path file, byte[] buffer) throws IOException {
         try (InputStream iss = openInputStream(file)) {
             iss.read(buffer);
         }
@@ -238,12 +238,9 @@ public class NetcdfFileOpener {
         if (input instanceof String) {
             String location = (String) input;
             return getRafFromFile(location);
-        } else if (input instanceof File file) {
-            return getRafFromFile(FileUtils.getCachedFilePath(file));
         } else if (input instanceof Path path) {
-            return getRafFromFile(FileUtils.getCachedFilePath(path.toFile()));
-        } else if (input instanceof ImageInputStream) {
-            ImageInputStream imageInputStream = (ImageInputStream) input;
+            return getRafFromFile(FileUtils.getCachedFile(path).toString());
+        } else if (input instanceof ImageInputStream imageInputStream) {
             return new ImageInputStreamRandomAccessFile(imageInputStream, imageInputStream.length());
         }
         return null;
@@ -303,9 +300,9 @@ public class NetcdfFileOpener {
     // copied from ucar.nc2.NetcdfFile
     static private String makeUncompressed(String filename) throws Exception {
         // see if its a compressed file
-        final File compressedFile = new File(filename);
-        final File ncCacheDir = new File(NC_CACHE_DIR);
-        final String compressedFileName = compressedFile.getName();
+        final Path compressedFile = Path.of(filename);
+        final Path ncCacheDir = Path.of(NC_CACHE_DIR);
+        final String compressedFileName = compressedFile.getFileName().toString();
         int pos = compressedFileName.lastIndexOf('.');
         if (pos < 0) {
             return null;
@@ -313,7 +310,7 @@ public class NetcdfFileOpener {
 
         String suffix = compressedFileName.substring(pos + 1);
         final String uncompressedFileName = compressedFileName.substring(0, pos);
-        String uncompressedFilename = ncCacheDir.toPath().resolve(uncompressedFileName).toString();
+        String uncompressedFilename = ncCacheDir.resolve(uncompressedFileName).toString();
 
         if (!suffix.equalsIgnoreCase("Z") && !suffix.equalsIgnoreCase("zip") && !suffix.equalsIgnoreCase("gzip")
             && !suffix.equalsIgnoreCase("gz") && !suffix.equalsIgnoreCase("bz2")) {
@@ -321,18 +318,16 @@ public class NetcdfFileOpener {
         }
 
         // see if already decompressed, look in cache if need be
-        File uncompressedFile = DiskCache.getFileStandardPolicy(uncompressedFilename);
-        uncompressedFile.deleteOnExit(); // request to delete the temporary file when the SNAP application is closed
-        if (uncompressedFile.exists() && uncompressedFile.length() > 0) {
+        Path uncompressedFile = DiskCache.getFileStandardPolicy(uncompressedFilename).toPath();
+        IOHelper.deleteOnExit(uncompressedFile); // request to delete the temporary file when the SNAP application is closed
+        if (Files.exists(uncompressedFile) && Files.size(uncompressedFile) > 0) {
             // see if its locked - another thread is writing it
-            FileInputStream stream = null;
             FileLock lock = null;
-            try {
-                stream = new FileInputStream(uncompressedFile);
+            try (FileChannel fileChannel = FileChannel.open(uncompressedFile)){
                 // obtain the lock
                 while (true) { // loop waiting for the lock
                     try {
-                        lock = stream.getChannel().lock(0, 1, true); // wait till its unlocked
+                        lock = fileChannel.lock(0, 1, true); // wait till its unlocked
                         break;
 
                     } catch (OverlappingFileLockException oe) { // not sure why lock() doesnt block
@@ -344,54 +339,48 @@ public class NetcdfFileOpener {
                     }
                 }
                 LOG.fine("found uncompressed " + uncompressedFile + " for " + filename);
-                return uncompressedFile.getPath();
+                return uncompressedFile.toString();
             } finally {
                 if (lock != null) {
                     lock.release();
-                }
-                if (stream != null) {
-                    stream.close();
                 }
             }
         }
 
         // ok gonna write it
         // make sure compressed file exists
-        File file = new File(filename);
-        if (!file.exists()) {
+        if (!Files.exists(compressedFile)) {
             return null; // bail out  */
         }
 
-        FileOutputStream fout = new FileOutputStream(uncompressedFile);
-
         // obtain the lock
         FileLock lock = null;
-        while (true) { // loop waiting for the lock
-            try {
-                lock = fout.getChannel().lock(0, 1, false);
-                break;
-
-            } catch (OverlappingFileLockException oe) { // not sure why lock() doesnt block
+        try (OutputStream fout = Files.newOutputStream(uncompressedFile);
+             FileChannel fileChannel = FileChannel.open(uncompressedFile);
+             InputStream inputStream = new BufferedInputStream(Files.newInputStream(compressedFile), COPY_BUFFER_LENGTH)){
+            while (true) { // loop waiting for the lock
                 try {
-                    Thread.sleep(100); // msecs
-                } catch (InterruptedException ignored) {
+                    lock = fileChannel.lock(0, 1, false);
+                    break;
+                } catch (OverlappingFileLockException oe) { // not sure why lock() doesnt block
+                    try {
+                        Thread.sleep(100); // msecs
+                    } catch (InterruptedException ignored) {
+                    }
                 }
             }
-        }
-
-        try {
-            InputStream inputStream = new BufferedInputStream(new FileInputStream(filename), COPY_BUFFER_LENGTH);
             if (suffix.equalsIgnoreCase("Z")) {
                 try (InputStream in = new UncompressInputStream(inputStream)) {
                     copy(in, fout, COPY_BUFFER_LENGTH);
                 }
                 LOG.fine("uncompressed " + filename + " to " + uncompressedFile);
             } else if (suffix.equalsIgnoreCase("zip")) {
-                ZipInputStream zin = new ZipInputStream(inputStream);
-                ZipEntry ze = zin.getNextEntry();
-                if (ze != null) {
-                    copy(zin, fout, COPY_BUFFER_LENGTH);
-                    LOG.fine("unzipped " + filename + " entry " + ze.getName() + " to " + uncompressedFile);
+                try (ZipInputStream zin = new ZipInputStream(inputStream)) {
+                    ZipEntry ze = zin.getNextEntry();
+                    if (ze != null) {
+                        copy(zin, fout, COPY_BUFFER_LENGTH);
+                        LOG.fine("unzipped " + filename + " entry " + ze.getName() + " to " + uncompressedFile);
+                    }
                 }
             } else if (suffix.equalsIgnoreCase("bz2")) {
                 try (InputStream in = new CBZip2InputStream(inputStream, true)) {
@@ -405,14 +394,9 @@ public class NetcdfFileOpener {
                 LOG.fine("ungzipped " + filename + " to " + uncompressedFile);
             }
         } catch (Exception e) {
-
-            // appears we have to close before we can delete
-            fout.close();
-            fout = null;
-
             // dont leave bad files around
-            if (uncompressedFile.exists()) {
-                if (!uncompressedFile.delete()) {
+            if (Files.exists(uncompressedFile)) {
+                if (!IOHelper.delete(uncompressedFile)) {
                     LOG.warning("failed to delete uncompressed file (IOException)" + uncompressedFile);
                 }
             }
@@ -422,12 +406,9 @@ public class NetcdfFileOpener {
             if (lock != null) {
                 lock.release();
             }
-            if (fout != null) {
-                fout.close();
-            }
         }
 
-        return uncompressedFile.getPath();
+        return uncompressedFile.toString();
     }
 
     // copied from ucar.nc2.NetcdfFile

@@ -26,7 +26,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import ucar.nc2.NetcdfFile;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 /**
@@ -52,11 +52,11 @@ public class GenericNetCdfReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
 
-        final File fileLocation = getProductFile();
+        final Path fileLocation = getProductPath();
         try {
             netcdfFile = NetcdfFileOpener.open(fileLocation);
             if (netcdfFile == null) {
-                throw new IOException("Failed to open file " + fileLocation.getPath());
+                throw new IOException("Failed to open file " + fileLocation.toString());
             }
             AbstractNetCdfReaderPlugIn[] plugIns = GenericNetCdfReaderPlugIn.getAllNetCdfReaderPlugIns();
             AbstractNetCdfReaderPlugIn bestPlugIn = null;

@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -10,13 +11,13 @@ import org.esa.snap.core.util.SystemUtils;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class NetCdfActivatorTest {
 
@@ -93,8 +94,8 @@ public class NetCdfActivatorTest {
         parameters.put("crs", "EPSG:4326");
         Product reprojectProduct = GPF.createProduct("Reproject", parameters, product);
 
-        File nc4testFile = File.createTempFile("nc4test", ".nc");
-        ProductIO.writeProduct(reprojectProduct, nc4testFile.getAbsolutePath(), "NetCDF4-CF");
+        Path nc4testFile = IOHelper.createTempFile("nc4test", ".nc");
+        ProductIO.writeProduct(reprojectProduct, nc4testFile.toAbsolutePath(), "NetCDF4-CF");
         reprojectProduct.dispose();
         product.dispose();
     }

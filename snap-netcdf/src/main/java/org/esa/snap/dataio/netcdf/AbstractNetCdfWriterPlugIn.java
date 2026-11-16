@@ -32,14 +32,14 @@ import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartWriter;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartWriter;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 
 public abstract class AbstractNetCdfWriterPlugIn implements ProductWriterPlugIn {
 
     @Override
     public Class[] getOutputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     @Override

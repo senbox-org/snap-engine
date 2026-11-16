@@ -16,13 +16,16 @@
 
 package org.esa.snap.dataio.netcdf.util;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 
@@ -30,13 +33,13 @@ class Sen3ExpAtmosphericConverter {
 
     public static void main(String[] args) {
         final String sourceDirPath = args[0];
-        final File sourceDir = new File(sourceDirPath);
+        final Path sourceDir = Path.of(sourceDirPath);
 
         final String targetDirPath = args[1];
-        final File targetDir = new File(targetDirPath);
+        final Path targetDir = Path.of(targetDirPath);
 
         final String propertyFilePath = args[2];
-        final File propertyFile = new File(propertyFilePath);
+        final Path propertyFile = Path.of(propertyFilePath);
 
         convert(sourceDir, targetDir, propertyFile, new ErrorHandler() {
             @Override
@@ -52,21 +55,22 @@ class Sen3ExpAtmosphericConverter {
         });
     }
 
-    private static void convert(File sourceDir, File targetDir, File propertyFile, ErrorHandler errorHandler) {
+    private static void convert(Path sourceDir, Path targetDir, Path propertyFile, ErrorHandler errorHandler) {
         final Properties properties = new Properties();
         try {
-            try (FileInputStream inStream = new FileInputStream(propertyFile)) {
+            try (InputStream inStream = Files.newInputStream(propertyFile)) {
                 properties.load(inStream);
             }
         } catch (IOException e) {
             errorHandler.error(e);
         }
 
-        final File[] sourceFiles = sourceDir.listFiles((dir, name) -> {
-            return name.endsWith(".nc");
-        });
+        final Collection<Path> sourceFiles = IOHelper.listFiles(sourceDir, path -> path.getFileName().toString().endsWith(".nc"));
+        if (sourceFiles == null) {
+            return;
+        }
 
-        for (final File sourceFile : sourceFiles) {
+        for (final Path sourceFile : sourceFiles) {
             Product product = null;
             try {
                 product = ProductIO.readProduct(sourceFile);
@@ -77,7 +81,7 @@ class Sen3ExpAtmosphericConverter {
                             band.setSpectralWavelength(Float.parseFloat((String) entry.getValue()));
                         }
                     }
-                    ProductIO.writeProduct(product, new File(targetDir, sourceFile.getName()),
+                    ProductIO.writeProduct(product, targetDir.resolve(sourceFile.getFileName()),
                                            "NetCDF", false);
                 }
             } catch (IOException e) {

@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.netcdf;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -8,9 +9,9 @@ import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.junit.Test;
 import ucar.nc2.NetcdfFile;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Collection;
 
 /**
  * @author Norman Fomferra
@@ -23,19 +24,17 @@ public class S3L2PPTest {
             return;
         }
 
-        File[] ncFiles = new File(path).listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".nc");
-            }
-        });
+        final Collection<Path> ncFiles = IOHelper.listFiles(Path.of(path), p -> p.getFileName().toString().endsWith(".nc"));
+        if(ncFiles == null){
+            return;
+        }
 
-        for (File ncFile : ncFiles) {
+        for (Path ncFile : ncFiles) {
             //ncdump(ncFile);
 
             try {
                 final ProductReader reader = new CfNetCdfReaderPlugIn().createReaderInstance();
-                final Product product = reader.readProductNodes(ncFile.getPath(), null);
+                final Product product = reader.readProductNodes(ncFile.toString(), null);
                 Band[] bands = product.getBands();
                 System.out.println("product = " + product.getName());
                 for (int i = 0; i < bands.length; i++) {
@@ -48,8 +47,8 @@ public class S3L2PPTest {
         }
     }
 
-    private static void ncdump(File ncFile) throws IOException {
-        NetcdfFile netcdfFile = NetcdfFileOpener.open("file:" + ncFile.getPath());
+    private static void ncdump(Path ncFile) throws IOException {
+        NetcdfFile netcdfFile = NetcdfFileOpener.open("file:" + ncFile.toString());
         System.out.println(netcdfFile);
         netcdfFile.close();
     }

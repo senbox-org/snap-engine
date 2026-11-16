@@ -1,16 +1,17 @@
 package org.esa.snap.dataio.netcdf;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.test.LongTestRunner;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.util.DummyProductBuilder;
-import com.bc.ceres.test.LongTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertNotNull;
@@ -34,12 +35,12 @@ public class Nc4ReaderIOTest {
         parameters.put("crs", "EPSG:4326");
         Product reprojectProduct = GPF.createProduct("Reproject", parameters, product);
 
-        File nc4testFile = File.createTempFile("nc4test", ".nc");
-        ProductIO.writeProduct(reprojectProduct, nc4testFile.getAbsolutePath(), "NetCDF4-CF");
+        Path nc4testFile = IOHelper.createTempFile("nc4test", ".nc");
+        ProductIO.writeProduct(reprojectProduct, nc4testFile.toAbsolutePath(), "NetCDF4-CF");
         reprojectProduct.dispose();
         product.dispose();
 
-        Product readProduct = ProductIO.readProduct(nc4testFile.getAbsolutePath());
+        Product readProduct = ProductIO.readProduct(nc4testFile.toAbsolutePath());
         assertNotNull(readProduct.getSceneGeoCoding().getGeoPos(new PixelPos(5.0, 5.0), null));
 
     }

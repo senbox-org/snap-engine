@@ -16,6 +16,7 @@
 
 package org.esa.snap.dataio.netcdf;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
@@ -36,7 +37,8 @@ import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.esa.snap.dataio.netcdf.util.RasterDigest;
 import ucar.nc2.NetcdfFile;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 
 public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn {
@@ -47,7 +49,7 @@ public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn 
 
     @Override
     public final Class[] getInputTypes() {
-        return new Class[]{String.class, File.class};
+        return new Class[]{String.class, Path.class};
     }
 
     @Override
@@ -66,10 +68,10 @@ public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn 
                 if (pathname.toLowerCase().trim().endsWith(ZIP_FILE_EXTENSION)) {
                     final String trimmed = pathname.trim();
                     pathname = trimmed.substring(0, trimmed.length() - 4);
-                    final File file = new File(pathname);
-                    if (file.isFile() && file.length() == 0) {
-                        if(!file.delete()) {
-                            file.deleteOnExit();
+                    final Path file = Path.of(pathname);
+                    if (Files.isRegularFile(file) && IOHelper.size(file) == 0) {
+                        if(!IOHelper.delete(file)) {
+                            IOHelper.deleteOnExit(file);
                         }
                     }
                 }

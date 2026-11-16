@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.SystemUtils;
@@ -9,11 +10,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.awt.Dimension;
-import java.io.File;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 
 /**
@@ -43,8 +44,9 @@ public class CfTileSizeTest {
         assertEquals(new Dimension(10, 10), preferredTileSize);
     }
 
-    private File getTestFile() throws URISyntaxException {
+    private Path getTestFile() {
         URL url = CfTileSizeTest.class.getResource("tileSizeTest_nc4CF.nc");
-        return new File(url.toURI());
+        assertNotNull(url);
+        return UrlHelper.urlToFile(url);
     }
 }

@@ -1,7 +1,12 @@
 package org.esa.snap.dataio.netcdf.nc;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.dataio.netcdf.NetCdfActivator;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import ucar.ma2.DataType;
 
 import java.io.IOException;
@@ -38,9 +43,9 @@ public class MaxStringAttributeLengthTest {
 
     @Before
     public void setUp() throws Exception {
-        nc4TempFile = Files.createTempFile(getClass().getSimpleName(), "nc4");
+        nc4TempFile = IOHelper.createTempFile(getClass().getSimpleName(), "nc4");
         nc4Writable = NWritableFactory.create(nc4TempFile.toString(),"netcdf4");
-        nc3TempFile = Files.createTempFile(getClass().getSimpleName(), "nc3");
+        nc3TempFile = IOHelper.createTempFile(getClass().getSimpleName(), "nc3");
         nc3Writable = NWritableFactory.create(nc3TempFile.toString(),"netcdf3");
     }
 
@@ -72,7 +77,7 @@ public class MaxStringAttributeLengthTest {
 
     @Test
     public void testMaxStringVariableAttributeLengthNC3() throws IOException {
-        Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
+        Path tempFile = IOHelper.createTempFile(getClass().getSimpleName(), null);
         NFileWriteable ncFile = NWritableFactory.create(tempFile.toString(),"netcdf3");
         try {
             NVariable variable = ncFile.addScalarVariable("metadataVariable", DataType.BYTE);

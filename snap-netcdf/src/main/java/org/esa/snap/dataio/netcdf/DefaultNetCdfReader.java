@@ -34,10 +34,10 @@ import org.esa.snap.dataio.netcdf.util.TimeUtils;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.nio.file.Path;
 
 class DefaultNetCdfReader extends AbstractProductReader {
 
@@ -59,10 +59,10 @@ class DefaultNetCdfReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         final AbstractNetCdfReaderPlugIn plugIn = getReaderPlugIn();
-        final File fileLocation = getProductFile();
+        final Path fileLocation = getProductPath();
         netcdfFile = NetcdfFileOpener.open(fileLocation);
         if (netcdfFile == null) {
-            throw new IOException("Failed to open file " + fileLocation.getPath());
+            throw new IOException("Failed to open file " + fileLocation.toString());
         }
 
         cacheDataProvider = new NetcdfCacheDataProvider();
@@ -99,8 +99,8 @@ class DefaultNetCdfReader extends AbstractProductReader {
         }
     }
 
-    static String extractProductName(File fileLocation) {
-        String name = fileLocation.getName();
+    static String extractProductName(Path fileLocation) {
+        String name = fileLocation.getFileName().toString();
         if (name.endsWith(".gz") || name.endsWith(".zip")) {
             final int dotIndex = name.lastIndexOf(".");
             name = name.substring(0, dotIndex);

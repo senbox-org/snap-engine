@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.netcdf.util;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.junit.Test;
 import ucar.ma2.Array;
@@ -11,8 +12,8 @@ import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -23,7 +24,7 @@ public class NetcdfFileOpenerNativeNc4Test {
     @Test
     public void testOpenNativeNc4ReadsNetcdf4VariableAndAttributes() throws Exception {
         NetCdfActivator.activate();
-        final File file = createNetcdf4File();
+        final Path file = createNetcdf4File();
 
         try (NetcdfFile netcdfFile = NetcdfFileOpener.openNativeNc4(file)) {
             assertNotNull(netcdfFile);
@@ -38,18 +39,18 @@ public class NetcdfFileOpenerNativeNc4Test {
             final Array array = variable.read(new Section(new int[]{1, 0}, new int[]{1, 3}));
             assertArrayEquals(new int[]{10, 11, 12}, (int[]) array.get1DJavaArray(DataType.INT));
         } finally {
-            file.delete();
+            IOHelper.delete(file);
         }
     }
 
     @Test(expected = IOException.class)
     public void testOpenNativeNc4WithMissingFileThrowsIOException() throws IOException {
-        NetcdfFileOpener.openNativeNc4(new File("missing-native-nc4-file.nc"));
+        NetcdfFileOpener.openNativeNc4(Path.of("missing-native-nc4-file.nc"));
     }
 
-    private static File createNetcdf4File() throws IOException, InvalidRangeException {
-        final File file = File.createTempFile("NetcdfFileOpenerNativeNc4Test", ".nc");
-        final NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, file.getAbsolutePath());
+    private static Path createNetcdf4File() throws IOException, InvalidRangeException {
+        final Path file = IOHelper.createTempFile("NetcdfFileOpenerNativeNc4Test", ".nc");
+        final NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, file.toAbsolutePath().toString());
 
         writer.addDimension("y", 2);
         writer.addDimension("x", 3);

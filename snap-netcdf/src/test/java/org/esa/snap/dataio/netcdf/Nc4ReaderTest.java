@@ -16,6 +16,8 @@
 
 package org.esa.snap.dataio.netcdf;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
+import com.bc.ceres.core.runtime.internal.UrlHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.MetadataAttribute;
@@ -31,11 +33,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -61,7 +64,7 @@ public class Nc4ReaderTest {
     }
 
     @Test
-    public void testGlobalAttributes() throws IOException {
+    public void testGlobalAttributes() throws Exception {
 
         final URL url = Nc4ReaderTest.class.getResource("test.nc");
         assertNotNull(url);
@@ -70,13 +73,14 @@ public class Nc4ReaderTest {
         final String path = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
         assertTrue(path.endsWith("test.nc"));
 
-        final File file = new File(path);
-        assertEquals(file.getName(), "test.nc");
-        assertTrue(file.exists());
-        assertTrue(file.canRead());
+        final Path file = UrlHelper.urlToFile(url);
+        assertNotNull(file);
+        assertEquals("test.nc", file.getFileName().toString());
+        assertTrue(Files.exists(file));
+        assertTrue(Files.isReadable(file));
 
         final ProductReader reader = new CfNetCdfReaderPlugIn().createReaderInstance();
-        final Product product = reader.readProductNodes(file.getPath(), null);
+        final Product product = reader.readProductNodes(file.toString(), null);
         assertNotNull(product);
 
         checkStartTime(product);
@@ -86,12 +90,13 @@ public class Nc4ReaderTest {
     @Test
     public void testVariableAttributes() throws Exception {
         final URL url = Nc4ReaderTest.class.getResource("test.nc");
-        final String path = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
-        final File file = new File(path);
+        assertNotNull(url);
+        final Path file = UrlHelper.urlToFile(url);
+        assertNotNull(file);
         final ProductReader reader = new CfNetCdfReaderPlugIn().createReaderInstance();
 
         // default case: up to 100 values are read
-        final Product defaultProduct = reader.readProductNodes(file.getPath(), null);
+        final Product defaultProduct = reader.readProductNodes(file.toString(), null);
         MetadataElement defaultLonElement = defaultProduct.getMetadataRoot().getElement("Variable_Attributes").getElement("lon");
         MetadataAttribute defaultLonValues = defaultLonElement.getElement("Values").getAttribute("data");
         long defaultLonValueCount = defaultLonValues.getNumDataElems();
@@ -99,7 +104,7 @@ public class Nc4ReaderTest {
 
         // constraining number of read values
         Config.instance().preferences().putInt("snap.dataio.netcdf.metadataElementLimit", 3);
-        final Product constrainedProduct = reader.readProductNodes(file.getPath(), null);
+        final Product constrainedProduct = reader.readProductNodes(file.toString(), null);
         MetadataElement constrainedLonElement = constrainedProduct.getMetadataRoot().getElement("Variable_Attributes").getElement("lon");
         MetadataAttribute constrainedLonValues = constrainedLonElement.getElement("Values").getAttribute("data");
         long constrainedLonValueCount = constrainedLonValues.getNumDataElems();
@@ -107,7 +112,7 @@ public class Nc4ReaderTest {
 
         // removing constrains of number of read values
         Config.instance().preferences().putInt("snap.dataio.netcdf.metadataElementLimit", -1);
-        final Product unconstrainedProduct = reader.readProductNodes(file.getPath(), null);
+        final Product unconstrainedProduct = reader.readProductNodes(file.toString(), null);
         MetadataElement unconstrainedLonElement = unconstrainedProduct.getMetadataRoot().getElement("Variable_Attributes").getElement("lon");
         MetadataAttribute unconstrainedLonValues = unconstrainedLonElement.getElement("Values").getAttribute("data");
         long unconstrainedLonValueCount = unconstrainedLonValues.getNumDataElems();
@@ -129,12 +134,12 @@ public class Nc4ReaderTest {
         parameters.put("crs", "EPSG:4326");
         Product reprojectProduct = GPF.createProduct("Reproject", parameters, product);
 
-        File nc4testFile = File.createTempFile("nc4test", ".nc");
-        ProductIO.writeProduct(reprojectProduct, nc4testFile.getAbsolutePath(), "NetCDF4-CF");
+        Path nc4testFile = IOHelper.createTempFile("nc4test", ".nc");
+        ProductIO.writeProduct(reprojectProduct, nc4testFile.toAbsolutePath(), "NetCDF4-CF");
         reprojectProduct.dispose();
         product.dispose();
 
-        Product readProduct = ProductIO.readProduct(nc4testFile.getAbsolutePath());
+        Product readProduct = ProductIO.readProduct(nc4testFile.toAbsolutePath());
         assertNotNull(readProduct.getSceneGeoCoding().getGeoPos(new PixelPos(5.0, 5.0), null));
 
     }

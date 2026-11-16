@@ -17,6 +17,7 @@
 package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.core.datamodel.Band;
@@ -28,8 +29,8 @@ import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.logging.Level;
 
@@ -148,7 +149,7 @@ public class DefaultNetCdfWriter extends AbstractProductWriter {
     public void deleteOutput() throws IOException {
         close();
         //noinspection ResultOfMethodCallIgnored
-        getOutputFile().delete();
+        IOHelper.delete(getOutputFile());
     }
 
     private synchronized NVariable getVariable(String variableName) throws ProductIOException {
@@ -163,8 +164,8 @@ public class DefaultNetCdfWriter extends AbstractProductWriter {
         return variable;
     }
 
-    private File getOutputFile() {
-        return new File(getOutputString());
+    private Path getOutputFile() {
+        return Path.of(getOutputString());
     }
 
     private String getOutputString() {

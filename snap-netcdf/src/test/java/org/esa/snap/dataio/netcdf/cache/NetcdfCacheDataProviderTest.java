@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.netcdf.cache;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import eu.esa.snap.core.dataio.cache.CacheManager;
 import eu.esa.snap.core.dataio.cache.CachedSubsamplingReader;
 import eu.esa.snap.core.dataio.cache.DataBuffer;
@@ -20,8 +21,9 @@ import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
 import java.awt.Dimension;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -33,15 +35,15 @@ public class NetcdfCacheDataProviderTest {
     private static final int WIDTH = 6;
     private static final int HEIGHT = 4;
 
-    private static File tempFile;
+    private static Path tempFile;
     private static NetcdfFile netcdfFile;
 
 
     @BeforeClass
     public static void createTestFile() throws IOException {
-        tempFile = File.createTempFile("NetcdfCacheDataProviderTest", ".nc");
+        tempFile = IOHelper.createTempFile("NetcdfCacheDataProviderTest", ".nc");
         NetcdfFileWriter writer = NetcdfFileWriter.createNew(
-                NetcdfFileWriter.Version.netcdf3, tempFile.getAbsolutePath());
+                NetcdfFileWriter.Version.netcdf3, tempFile.toAbsolutePath().toString());
 
         writer.addDimension("lat", HEIGHT);
         writer.addDimension("lon", WIDTH);
@@ -91,7 +93,7 @@ public class NetcdfCacheDataProviderTest {
         }
         writer.close();
 
-        netcdfFile = NetcdfFile.open(tempFile.getAbsolutePath());
+        netcdfFile = NetcdfFile.open(tempFile.toAbsolutePath().toString());
     }
 
     @AfterClass
@@ -100,7 +102,7 @@ public class NetcdfCacheDataProviderTest {
             netcdfFile.close();
         }
         if (tempFile != null) {
-            tempFile.delete();
+            Files.delete(tempFile);
         }
     }
 

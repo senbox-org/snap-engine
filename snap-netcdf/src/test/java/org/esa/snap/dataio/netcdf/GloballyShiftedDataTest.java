@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -21,8 +22,9 @@ import ucar.nc2.Variable;
 import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -35,7 +37,7 @@ public class GloballyShiftedDataTest {
     // This generates data which mimics the LCCCI data for the Climate Data Store, just with a lower resolution
     // This test relates to https://senbox.atlassian.net/browse/SNAP-950 and https://senbox.atlassian.net/browse/SNAP-951
 
-    private static File tempFile;
+    private static Path tempFile;
     private static final int WIDTH = 810;
     private static final int HEIGHT = 405;
     private static final int STEP_HEIGHT = 5;
@@ -59,9 +61,8 @@ public class GloballyShiftedDataTest {
 
         NetCdfActivator.activate();
 
-        tempFile = File.createTempFile(GloballyShiftedDataTest.class.getSimpleName(), ".nc");
-//        tempFile = new File(String.format("%s\\%s.nc", System.getProperty("user.home"), GloballyShiftedDataTest.class.getSimpleName()));
-        NetcdfFileWriter ncFile = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, tempFile.getAbsolutePath());
+        tempFile = IOHelper.createATempDir().resolve(GloballyShiftedDataTest.class.getSimpleName()+".nc");
+        NetcdfFileWriter ncFile = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, tempFile.toAbsolutePath().toString());
         ncFile.addDimension("lat", HEIGHT);
         ncFile.addDimension("lon", WIDTH);
         Variable lat = ncFile.addVariable("lat", DataType.DOUBLE, "lat");
@@ -116,9 +117,9 @@ public class GloballyShiftedDataTest {
 
     @AfterClass
     public static void deleteTestDataFile() {
-        if (tempFile != null && tempFile.exists()) {
-            if (!tempFile.delete()) {
-                tempFile.deleteOnExit();
+        if (tempFile != null && Files.exists(tempFile)) {
+            if (!IOHelper.delete(tempFile)) {
+                IOHelper.deleteOnExit(tempFile);
             }
         }
     }
@@ -190,9 +191,9 @@ public class GloballyShiftedDataTest {
             // for visual inspection
 //            String userHome = System.getProperty("user.home");
 //            String path = String.format("%s\\%s_Level%d.png", userHome, GloballyShiftedDataTest.class.getSimpleName(), level);
-//            File imageFile = new File(path);
+//            Path imageFile = Path.of(path);
               // needs to be tiff 32-bit int is not supported by png
-//            ImageIO.write(levelImage, "TIFF", imageFile);
+//            ImageUtils.writeImage(levelImage, "TIFF", imageFile);
         }
 
     }

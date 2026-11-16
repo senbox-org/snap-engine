@@ -2,6 +2,7 @@ package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.annotation.STTM;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import eu.esa.snap.core.dataio.cache.CacheManager;
 import eu.esa.snap.core.dataio.cache.ProductCache;
 import org.esa.snap.core.datamodel.Band;
@@ -20,9 +21,9 @@ import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
 import java.awt.Dimension;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Path;
 import java.util.Map;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -35,12 +36,12 @@ public class DefaultNetCdfReaderLayerCacheTest {
     @Test
     @STTM("SNAP-4190")
     public void testReadBandRasterData_singleLayer3DMapping_uses2DCacheRead() throws Exception {
-        File tempFile = createSingleLayer3DFile();
+        Path tempFile = createSingleLayer3DFile();
         NetcdfFile netcdfFile = null;
         ProductCache productCache = null;
         DefaultNetCdfReader reader = null;
         try {
-            netcdfFile = NetcdfFile.open(tempFile.getAbsolutePath());
+            netcdfFile = NetcdfFile.open(tempFile.toAbsolutePath().toString());
             NetcdfCacheDataProvider provider = new NetcdfCacheDataProvider();
             provider.register("data_3d", netcdfFile.findVariable("data_3d"), new int[0], false,
                     ProductData.TYPE_INT32, ArrayConverter.IDENTITY, new Dimension(2, 2));
@@ -70,14 +71,14 @@ public class DefaultNetCdfReaderLayerCacheTest {
             if (netcdfFile != null) {
                 netcdfFile.close();
             }
-            tempFile.delete();
+            IOHelper.delete(tempFile);
         }
     }
 
-    private static File createSingleLayer3DFile() throws IOException {
-        File tempFile = File.createTempFile("DefaultNetCdfReaderLayerCacheTest", ".nc");
+    private static Path createSingleLayer3DFile() throws IOException {
+        Path tempFile = IOHelper.createTempFile("DefaultNetCdfReaderLayerCacheTest", ".nc");
         NetcdfFileWriter writer = NetcdfFileWriter.createNew(
-                NetcdfFileWriter.Version.netcdf3, tempFile.getAbsolutePath());
+                NetcdfFileWriter.Version.netcdf3, tempFile.toAbsolutePath().toString());
 
         writer.addDimension("time", 1);
         writer.addDimension("lat", HEIGHT);

@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.annotation.STTM;
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -15,8 +16,9 @@ import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
@@ -26,15 +28,15 @@ public class CfLayerCacheReaderTest {
     private static final int WIDTH = 6;
     private static final int HEIGHT = 4;
 
-    private static File tempFile;
+    private static Path tempFile;
 
     @BeforeClass
     public static void createTestFile() throws IOException {
         NetCdfActivator.activate();
 
-        tempFile = File.createTempFile(CfLayerCacheReaderTest.class.getSimpleName(), ".nc");
+        tempFile = IOHelper.createTempFile(CfLayerCacheReaderTest.class.getSimpleName(), ".nc");
         NetcdfFileWriter writer = NetcdfFileWriter.createNew(
-                NetcdfFileWriter.Version.netcdf3, tempFile.getAbsolutePath());
+                NetcdfFileWriter.Version.netcdf3, tempFile.toAbsolutePath().toString());
 
         writer.addDimension("time", 2);
         writer.addDimension("lat", HEIGHT);
@@ -81,8 +83,8 @@ public class CfLayerCacheReaderTest {
 
     @AfterClass
     public static void deleteTestFile() {
-        if (tempFile != null && tempFile.exists() && !tempFile.delete()) {
-            tempFile.deleteOnExit();
+        if (tempFile != null && Files.exists(tempFile) && !IOHelper.delete(tempFile)) {
+            IOHelper.deleteOnExit(tempFile);
         }
         System.gc();
     }

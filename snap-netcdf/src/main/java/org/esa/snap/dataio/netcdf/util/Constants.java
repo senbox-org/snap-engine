@@ -16,7 +16,7 @@
 
 package org.esa.snap.dataio.netcdf.util;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Provides most of the constants used in this package.
@@ -37,7 +37,7 @@ public interface Constants {
     };
     Class[] READER_INPUT_TYPES = new Class[]{
             String.class,
-            File.class,
+            Path.class,
     };
 
     String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
