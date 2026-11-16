@@ -17,16 +17,15 @@
 
 package org.esa.snap.dataio;
 
-import com.sun.media.imageioimpl.stream.ChannelImageInputStreamSpi;
-import com.sun.media.imageio.stream.FileChannelImageInputStream;
-
+import javax.imageio.spi.ImageInputStreamSpi;
 import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Locale;
 
 /**
  * Wrapper over <code>ChannelImageInputStreamSpi</code>.
@@ -34,23 +33,36 @@ import java.nio.file.StandardOpenOption;
  *
  * @author Cosmin Cara
  */
-public class FileImageInputStreamSpi extends ChannelImageInputStreamSpi {
+public class FileImageInputStreamSpi extends ImageInputStreamSpi {
 
     public FileImageInputStreamSpi() {
         super();
     }
 
     @Override
-    public ImageInputStream createInputStreamInstance(Object input, boolean useCache, File cacheDir) throws IOException {
-        if (!File.class.isInstance(input)) {
-            throw new IllegalArgumentException("This SPI accepts only java.io.File");
+    public String getDescription(Locale locale) {
+        return "SNAP NIO File ImageInputStream";
+    }
+
+    @Override
+    public ImageInputStream createInputStreamInstance(Object input, boolean useCache, java.io.File cacheDir) throws IOException {
+        return createInputStreamInstance(input, useCache, cacheDir != null ? cacheDir.toPath() : null);
+    }
+
+    @Override
+    public ImageInputStream createInputStreamInstance(Object input) throws IOException {
+        return createInputStreamInstance(input, false, (Path) null);
+    }
+
+    public ImageInputStream createInputStreamInstance(Object input, boolean useCache, Path cacheDir) throws IOException {
+        if (!(input instanceof Path inputFile)) {
+            throw new IllegalArgumentException("This SPI accepts only java.nio.file.Path");
         }
-        File inputFile = (File) input;
         // We need to make sure the underlying channel is closed, because it may hold a reference to our file and
         // the respective Java classes do not close it.
-        FileChannel channel = FileChannel.open(inputFile.toPath(), StandardOpenOption.READ);
-        if (useCache) {
-            return new FileCacheImageInputStream(Channels.newInputStream(channel), cacheDir) {
+        FileChannel channel = FileChannel.open(inputFile, StandardOpenOption.READ);
+        if (useCache && cacheDir != null) {
+            return new FileCacheImageInputStream(Channels.newInputStream(channel), cacheDir.toFile()) {
                 @Override
                 public void close() throws IOException {
                     channel.close();
@@ -58,18 +70,12 @@ public class FileImageInputStreamSpi extends ChannelImageInputStreamSpi {
                 }
             };
         }
-        return new FileChannelImageInputStream(channel){
-        //return new FileChannelImageInputStream(new FileChannelInputStream(channel)) {
-            @Override
-            public void close() throws IOException {
-                channel.close();
-                super.close();
-            }
-        };
+        channel.close();
+        return NIOFileImageInputStream.createInputStream(inputFile);
     }
 
     @Override
     public Class<?> getInputClass() {
-        return File.class;
+        return Path.class;
     }
 }
