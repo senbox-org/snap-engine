@@ -15,7 +15,6 @@
  */
 package org.esa.snap.core.util.io;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -62,19 +61,4 @@ public class IOUtils {
         }
     }
 
-    /**
-     * Creates the specified directory. Does nothing if the directory already exists otherwise it is created.
-     * If creation fails, an I/O exception is thrown.
-     *
-     * @param dir the directory to be created
-     * @return <code>true</code> if it has been created, <code>false</code> if the directory already exists
-     * @throws IOException if the directory could not be created
-     */
-    public static boolean createDir(final File dir) throws IOException {
-        boolean created = dir.mkdirs();
-        if (!dir.exists()) {
-            throw new IOException("failed to create output directory " + dir);
-        }
-        return created;
-    }
 }
