@@ -20,14 +20,14 @@ import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.FileUtils;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Dimension;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
@@ -65,8 +65,8 @@ public class PgxProductReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         final Object input = getInput();
-        if (input instanceof String || input instanceof File) {
-            stream = new FileImageInputStream(new File(input.toString()));
+        if (input instanceof String || input instanceof Path) {
+            stream = ImageUtils.getImageInputStream(Path.of(input.toString()));
         } else if (input instanceof ImageInputStream) {
             stream = (ImageInputStream) input;
         } else {
@@ -87,8 +87,9 @@ public class PgxProductReader extends AbstractProductReader {
         }
 
         dataPosition = stream.getStreamPosition();
-        final Product product = new Product(FileUtils.getFilenameWithoutExtension(new File(inputName)), "PGX", header.width, header.height);
-        product.setFileLocation(new File(inputName));
+        final Path filePath = Path.of(inputName);
+        final Product product = new Product(FileUtils.getFilenameWithoutExtension(filePath), "PGX", header.width, header.height);
+        product.setFileLocation(filePath);
         product.setPreferredTileSize(new Dimension(512, 512));
         band = product.addBand("data", header.signed ? ProductData.TYPE_INT16 : ProductData.TYPE_UINT16);
         return product;
@@ -188,13 +189,13 @@ public class PgxProductReader extends AbstractProductReader {
             final int height;
 
             try {
-                bitDepth = new Integer(st.nextToken());
+                bitDepth = Integer.parseInt(st.nextToken());
                 // bitDepth must be between 1 and 31
                 if ((bitDepth <= 0) || (bitDepth > 31)) {
                     return null;
                 }
-                width = new Integer(st.nextToken());
-                height = new Integer(st.nextToken());
+                width = Integer.parseInt(st.nextToken());
+                height = Integer.parseInt(st.nextToken());
 
                 return new Header(byteOrder, signed, bitDepth, width, height);
             } catch (NumberFormatException e) {

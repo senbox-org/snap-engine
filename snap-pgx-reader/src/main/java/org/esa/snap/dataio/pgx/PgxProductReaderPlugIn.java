@@ -15,15 +15,17 @@
  */
 package org.esa.snap.dataio.pgx;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Locale;
 
 /**
@@ -48,8 +50,8 @@ public class PgxProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     public DecodeQualification getDecodeQualification(Object input) {
-        if (input instanceof String || input instanceof File) {
-            if (canReadHeader(new File(input.toString()))) {
+        if (input instanceof String || input instanceof Path) {
+            if (canReadHeader(Path.of(input.toString()))) {
                 return DecodeQualification.INTENDED;
             }
         } else if (input instanceof ImageInputStream) {
@@ -60,12 +62,12 @@ public class PgxProductReaderPlugIn implements ProductReaderPlugIn {
         return DecodeQualification.UNABLE;
     }
 
-    private boolean canReadHeader(File file) {
-        if (!file.isFile() || file.length() == 0) {
+    private boolean canReadHeader(Path file) {
+        if (!Files.isRegularFile(file) || IOHelper.size(file) == 0) {
             return false;
         }
         try {
-            try (FileImageInputStream stream = new FileImageInputStream(file)) {
+            try (ImageInputStream stream = ImageUtils.getImageInputStream(file)) {
                 return canReadHeader(stream);
             }
         } catch (IOException e) {
@@ -82,7 +84,7 @@ public class PgxProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class, ImageInputStream.class};
+        return new Class[]{String.class, Path.class, ImageInputStream.class};
     }
 
     public ProductReader createReaderInstance() {
