@@ -3,6 +3,7 @@ package org.esa.snap.vfs;
 import org.esa.snap.vfs.preferences.model.Property;
 import org.esa.snap.vfs.preferences.model.VFSRemoteFileRepository;
 import org.esa.snap.vfs.remote.AbstractRemoteFileSystemProvider;
+import org.esa.snap.vfs.remote.VFSPath;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -132,7 +133,7 @@ public class VFS {
      * @return the resulting {@code Path}
      */
     public Path get(String first, String... more) {
-        Path path = getVirtualPath(first, more);
+        VFSPath path = getVirtualPath(first, more);
         if (path != null) {
             return path;
         }
@@ -149,10 +150,10 @@ public class VFS {
      * @param more  additional strings to be joined to form the path string
      * @return the resulting {@code VFSPath}
      */
-    private Path getVirtualPath(String first, String... more) {
+    private VFSPath getVirtualPath(String first, String... more) {
         for (FileSystemProvider provider : VFS.getInstance().getInstalledProviders()) {
             if (provider instanceof AbstractRemoteFileSystemProvider remoteFileSystemProvider) {
-                Path path = remoteFileSystemProvider.getPathIfFileSystemRootMatches(first, more);
+                VFSPath path = remoteFileSystemProvider.getPathIfFileSystemRootMatches(first, more);
                 if (path != null) {
                     return path;
                 }

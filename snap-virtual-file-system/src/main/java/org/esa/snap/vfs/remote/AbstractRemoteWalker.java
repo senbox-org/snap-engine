@@ -31,7 +31,7 @@ public abstract class AbstractRemoteWalker implements VFSWalker {
     public BasicFileAttributes readBasicFileAttributes(VFSPath path) throws IOException {
         // check if the address represents a directory
         String address = path.buildURL().toString();
-        String fileSystemRoot = path.getFileSystem().getRoot().getPath();
+        String fileSystemRoot = path.getFileSystem().getRoot().toString();
         if (dirsCache.contains(address)) {
             return VFSFileAttributes.newDir(path.toString());
         }

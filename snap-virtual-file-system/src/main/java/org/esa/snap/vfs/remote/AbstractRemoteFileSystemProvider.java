@@ -435,7 +435,7 @@ public abstract class AbstractRemoteFileSystemProvider extends FileSystemProvide
         throw new UnsupportedOperationException();
     }
 
-    public Path getPathIfFileSystemRootMatches(String first, String... more) {
+    public VFSPath getPathIfFileSystemRootMatches(String first, String... more) {
         for (Map.Entry<String, AbstractRemoteFileSystem> entry : this.fileSystems.entrySet()) {
             String fileSystemRoot = entry.getKey();
             if (first.startsWith(fileSystemRoot)) {

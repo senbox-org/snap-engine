@@ -198,7 +198,7 @@ public abstract class AbstractRemoteFileSystem extends FileSystem {
      */
     @Override
     @NotNull
-    public Path getPath(@NotNull String first, String... more) {
+    public VFSPath getPath(@NotNull String first, String... more) {
         assertOpen();
         String pathName = first;
         final String pathSeparator = getSeparator();

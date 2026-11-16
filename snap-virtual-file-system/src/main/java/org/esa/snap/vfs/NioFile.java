@@ -1,8 +1,8 @@
 package org.esa.snap.vfs;
 
+import com.bc.ceres.core.runtime.internal.IOHelper;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  *
  * @author Adrian Drăghici
  */
-public class NioFile extends File {
+public class NioFile extends java.io.File {
 
     private static final String INVALID_FILE_PATH_ERROR_MESSAGE = "Invalid file path.";
 
@@ -124,7 +124,7 @@ public class NioFile extends File {
      * @since 1.2
      */
     @Override
-    public File getParentFile() {
+    public java.io.File getParentFile() {
         Path p = path.getParent();
         if (p != null)
             try {
@@ -196,14 +196,14 @@ public class NioFile extends File {
      */
     @Override
     @NotNull
-    public File getAbsoluteFile()
+    public java.io.File getAbsoluteFile()
     {
         Path absPath = _getAbsolutePath();
         try {
             return new NioFile(absPath);
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "Unable to get the absolute form of abstract pathname: " + absPath + ". Details: " + ex.getMessage());
-            return new File(absPath.toString());
+            return NioPaths.get(absPath.toString()).toFile();
         }
     }
 
@@ -263,13 +263,13 @@ public class NioFile extends File {
      */
     @Override
     @NotNull
-    public File getCanonicalFile() throws IOException {
+    public NioFile getCanonicalFile() throws IOException {
         Path canonPath = getCanonicalPath0();
         try {
             return new NioFile(canonPath);
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "Unable to get the canonical form of abstract pathname:" + canonPath + ". Details: " + ex.getMessage());
-            return new File(canonPath.toString());
+            return new NioFile(NioPaths.get(canonPath.toString()));
         }
     }
 
@@ -588,7 +588,7 @@ public class NioFile extends File {
      */
     @Override
     public String[] list(FilenameFilter filter) {
-        DirectoryStream.Filter<Path> newFilter = entry -> !(filter.accept(NioFile.this, new File(entry.toString()).getName()));
+        DirectoryStream.Filter<Path> newFilter = entry -> !(filter.accept(NioFile.this, entry.getFileName().toString()));
         return list(newFilter);
     }
 
@@ -603,19 +603,19 @@ public class NioFile extends File {
      * @see java.nio.file.Files#newDirectoryStream(Path, java.nio.file.DirectoryStream.Filter)
      * @since 1.2
      */
-    private File[] listFiles(DirectoryStream.Filter<Path> filter) {
-        List<File> files = new ArrayList<>();
+    private java.io.File[] listFiles(DirectoryStream.Filter<Path> filter) {
+        List<java.io.File> files = new ArrayList<>();
         if (Files.isDirectory(path)) {
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(path, filter)) {
                 for (Path currentPath : stream) {
                     files.add(currentPath.toFile());
                 }
-                return files.toArray(new File[0]);
+                return files.toArray(new java.io.File[0]);
             } catch (IOException ex) {
                 logger.log(Level.SEVERE, "Unable to browse the path: " + path + " and get an array of path names denoting the files and directories in the directory path. Details: " + ex.getMessage());
             }
         }
-        return new File[0];
+        return new java.io.File[0];
     }
 
     /**
@@ -634,7 +634,7 @@ public class NioFile extends File {
      * @since 1.2
      */
     @Override
-    public File[] listFiles() {
+    public java.io.File[] listFiles() {
         DirectoryStream.Filter<Path> newFilter = entry -> true;
         return listFiles(newFilter);
     }
@@ -652,8 +652,8 @@ public class NioFile extends File {
      * @since 1.2
      */
     @Override
-    public File[] listFiles(FilenameFilter filter) {
-        DirectoryStream.Filter<Path> newFilter = entry -> (filter.accept(NioFile.this, entry.toFile().getName()));
+    public java.io.File[] listFiles(FilenameFilter filter) {
+        DirectoryStream.Filter<Path> newFilter = entry -> (filter.accept(NioFile.this, entry.getFileName().toString()));
         return listFiles(newFilter);
     }
 
@@ -669,7 +669,7 @@ public class NioFile extends File {
      * @since 1.2
      */
     @Override
-    public File[] listFiles(FileFilter filter) {
+    public java.io.File[] listFiles(FileFilter filter) {
         DirectoryStream.Filter<Path> newFilter = entry -> (filter.accept(entry.toFile()));
         return listFiles(newFilter);
     }
@@ -705,17 +705,16 @@ public class NioFile extends File {
         if (mkdir()) {
             return true;
         }
-        File canonFile;
+        Path canonFile;
         try {
-            canonFile = getCanonicalFile();
+            canonFile = getCanonicalFile().toPath();
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "Unable to create the directory named by abstract pathname:" + path + ", including any necessary but nonexistent parent directories. Details: " + ex.getMessage());
             return false;
         }
 
-        File parent = canonFile.getParentFile();
-        return (parent != null && (parent.mkdirs() || parent.exists()) &&
-                canonFile.mkdir());
+        Path parent = canonFile.getParent();
+        return (parent != null && (IOHelper.createDirectories(parent) || Files.exists(parent)) && IOHelper.createDirectory(canonFile));
     }
 
     /**
@@ -732,7 +731,7 @@ public class NioFile extends File {
      * @throws NullPointerException If parameter <code>dest</code> is <code>null</code>
      */
     @Override
-    public boolean renameTo(File dest) {
+    public boolean renameTo(java.io.File dest) {
         if (dest == null) {
             throw new NullPointerException();
         }
@@ -1034,7 +1033,7 @@ public class NioFile extends File {
      * @since 1.2
      */
     @Override
-    public int compareTo(File pathname) {
+    public int compareTo(java.io.File pathname) {
         return path.compareTo(pathname.toPath());
     }
 
@@ -1053,7 +1052,7 @@ public class NioFile extends File {
     @Override
     public boolean equals(Object obj) {
         if ((obj instanceof NioFile)) {
-            return path.getClass().equals(((NioFile) obj).path.getClass()) && compareTo((File) obj) == 0;
+            return path.getClass().equals(((NioFile) obj).path.getClass()) && compareTo((java.io.File) obj) == 0;
         }
         return false;
     }

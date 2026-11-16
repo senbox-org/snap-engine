@@ -3,7 +3,6 @@ package org.esa.snap.vfs.remote;
 import org.esa.snap.vfs.NioFile;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
 import java.net.URI;
@@ -604,10 +603,10 @@ public class VFSPath implements Path {
      *
      * <p> This method constructs an absolute {@link URI} with a {@link URI#getScheme() scheme} equal to the URI scheme that identifies the provider. The exact form of the scheme specific part is highly provider dependent.
      *
-     * <p> In the case of the default provider, the URI is hierarchical with a {@link URI#getPath() path} component that is absolute. The query and fragment components are undefined. Whether the authority component is defined or not is implementation dependent. There is no guarantee that the {@code URI} may be used to construct a {@link File java.io.File}.
+     * <p> In the case of the default provider, the URI is hierarchical with a {@link URI#getPath() path} component that is absolute. The query and fragment components are undefined. Whether the authority component is defined or not is implementation dependent. There is no guarantee that the {@code URI} may be used to construct a {@link java.io.File java.io.File}.
      * In particular, if this path represents a Universal Naming Convention (UNC) path, then the UNC server name may be encoded in the authority component of the resulting URI. In the case of the default provider, and the file exists, and it can be determined that the file is a directory, then the resulting {@code URI} will end with a slash.
      *
-     * <p> The default provider provides a similar <em>round-trip</em> guarantee to the {@link File} class. For a given {@code Path} <i>p</i> it is guaranteed that
+     * <p> The default provider provides a similar <em>round-trip</em> guarantee to the {@link java.io.File} class. For a given {@code Path} <i>p</i> it is guaranteed that
      * <blockquote><tt>
      * {@link Paths#get(URI) Paths.getItem}(</tt><i>p</i><tt>.toUri()).equals(</tt><i>p</i>
      * <tt>.{@link #toAbsolutePath() toAbsolutePath}())</tt>
@@ -676,14 +675,14 @@ public class VFSPath implements Path {
     }
 
     /**
-     * Returns a {@link File} object representing this path.
+     * Returns a {@link java.io.File} object representing this path.
      *
-     * @return a {@code File} object representing this path
+     * @return a {@code java.io.File} object representing this path
      * @throws UnsupportedOperationException if this {@code Path} is not associated with the default provider
      */
     @Override
     @NotNull
-    public File toFile() {
+    public java.io.File toFile() {
         return new NioFile(this);
     }
 
