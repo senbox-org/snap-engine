@@ -5,6 +5,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.CustomEOProduct;
 import org.esa.snap.remote.products.repository.DataFormatType;
@@ -312,7 +313,7 @@ public class RemoteRepositoriesManager {
                         try {
                             ThreadStatus.checkCancelled(thread);
 
-                            ImageInputStream imageInputStream = ImageIO.createImageInputStream(inputStream);
+                            ImageInputStream imageInputStream = ImageUtils.getImageInputStream(inputStream);
                             if (imageInputStream == null) {
                                 return null;
                             }
