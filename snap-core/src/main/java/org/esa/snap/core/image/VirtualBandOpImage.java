@@ -92,6 +92,7 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
             sources = new Product[]{source};
             contextSourceIndex = 0;
         }
+
         return parseExpression(expression, contextSourceIndex, sources);
     }
 

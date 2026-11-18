@@ -7,6 +7,11 @@ public class SpectralNoiseReducer {
 
 
     public static void applyConvolution(double[] spectrum, boolean[] validMask, double[] kernel, double[] result) {
+        applyConvolution(spectrum, validMask, kernel, result, true, true);
+    }
+
+    public static void applyConvolution(double[] spectrum, boolean[] validMask, double[] kernel, double[] result,
+                                        boolean renormalizeMissingSamples, boolean clampOutsideBounds) {
         final int bandCount = spectrum.length;
         final int half = kernel.length / 2;
 
@@ -20,8 +25,10 @@ public class SpectralNoiseReducer {
             double weightSum = 0.0;
 
             for (int k = -half; k <= half; k++) {
-                final int sourceIndex = clamp(center + k, 0, bandCount - 1);
-                if (!validMask[sourceIndex]) {
+                final int sourceIndex = clampOutsideBounds
+                        ? Math.max(0, Math.min(center + k, bandCount - 1))
+                        : center + k;
+                if (sourceIndex < 0 || sourceIndex >= bandCount || !validMask[sourceIndex]) {
                     continue;
                 }
 
@@ -30,11 +37,9 @@ public class SpectralNoiseReducer {
                 weightSum += weight;
             }
 
-            result[center] = weightSum > 0.0 ? weightedSum / weightSum : spectrum[center];
+            result[center] = renormalizeMissingSamples
+                    ? (weightSum > 0.0 ? weightedSum / weightSum : spectrum[center])
+                    : weightedSum;
         }
-    }
-
-    private static int clamp(int value, int min, int max) {
-        return Math.max(min, Math.min(max, value));
     }
 }

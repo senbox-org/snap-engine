@@ -6,6 +6,7 @@ import com.bc.ceres.multilevel.MultiLevelImage;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.FeatureUtils;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.statistics.output.Util;
 import org.esa.snap.statistics.tools.TimeInterval;
@@ -128,11 +129,10 @@ public class StatisticComputer {
         for (BandConfiguration bandConfiguration : bandConfigurations) {
             final Band band = getBand(bandConfiguration, product);
             final String newExpression = bandConfiguration.validPixelExpression;
-            if (newExpression != null) {
+            if (StringUtils.isNotNullAndNotEmpty(newExpression)) {
                 final String oldExpression = band.getValidPixelExpression();
                 if (oldExpression != null) {
-                    logger.info(
-                            "Replaced old valid pixel expression '" + oldExpression + "' by '" + newExpression + "'.");
+                    logger.info("Replaced old valid pixel expression '" + oldExpression + "' by '" + newExpression + "'.");
                 }
                 band.setValidPixelExpression(newExpression);
             }

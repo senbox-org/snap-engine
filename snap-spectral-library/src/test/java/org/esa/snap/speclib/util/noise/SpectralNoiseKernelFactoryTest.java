@@ -168,6 +168,38 @@ public class SpectralNoiseKernelFactoryTest {
     }
 
     @Test
+    @STTM("SNAP-4338")
+    public void test_CreateKernelReturnsEnmapCompatibleRickerWaveletKernel() {
+        SpectralNoiseKernelFactory parameter = new SpectralNoiseKernelFactory(
+                SpectralNoiseKernelFactory.FILTER_RICKER_WAVELET, 11, 1.0, 3,
+                1.0, 3.0, 1.0);
+
+        double[] kernel = parameter.createKernel();
+
+        assertEquals(9, kernel.length);
+        assertEquals(1.0 / Math.sqrt(2.0 * Math.PI), kernel[4], DOUBLE_ERR);
+        assertEquals(0.0, kernel[3], DOUBLE_ERR);
+        assertEquals(kernel[2], kernel[6], DOUBLE_ERR);
+        assertTrue(kernel[2] < 0.0);
+        assertTrue(Math.abs(sum(kernel)) < 1.0e-3);
+        assertTrue(parameter.usesZeroIntegralKernel());
+    }
+
+    @Test
+    @STTM("SNAP-4338")
+    public void test_CreateKernelReturnsEnmapCompatibleTrapezoidKernel() {
+        SpectralNoiseKernelFactory parameter = new SpectralNoiseKernelFactory(
+                SpectralNoiseKernelFactory.FILTER_TRAPEZOID, 11, 1.0, 3,
+                1.0, 3.0, 1.0);
+
+        double[] kernel = parameter.createKernel();
+
+        assertArrayEquals(new double[]{0.125, 0.25, 0.25, 0.25, 0.125}, kernel, DOUBLE_ERR);
+        assertKernelNormalized(kernel);
+        assertFalse(parameter.usesZeroIntegralKernel());
+    }
+
+    @Test
     @STTM("SNAP-4173")
     public void test_CreateKernelReturnsSavitzkyGolayKernel_Window5_Order2() {
         SpectralNoiseKernelFactory parameter = new SpectralNoiseKernelFactory(
@@ -330,11 +362,15 @@ public class SpectralNoiseKernelFactoryTest {
     }
 
     private static void assertKernelNormalized(double[] kernel) {
+        assertEquals(1.0, sum(kernel), 1.0e-8);
+    }
+
+    private static double sum(double[] kernel) {
         double sum = 0.0;
         for (double v : kernel) {
             sum += v;
         }
-        assertEquals(1.0, sum, 1.0e-8);
+        return sum;
     }
 
     private static void assertSymmetric(double[] kernel) {
