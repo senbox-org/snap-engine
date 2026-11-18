@@ -13,6 +13,8 @@ import java.awt.geom.Rectangle2D;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY;
 import static org.junit.Assert.assertEquals;
 
+// @todo 2 tb/tb - after update to JUnit 5 we need to add synchronisation for the access to the
+// preferences to avoid concurrent modification issues
 public class ImageGeometryTest {
 
     @Test
