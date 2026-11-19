@@ -20,6 +20,14 @@ public class GeometryUtils {
 
     public static Polygon2D buildPolygon(Rectangle2D selectionArea) {
         Polygon2D polygon = new Polygon2D();
+        if (selectionArea instanceof PolygonArea) {
+            PolygonArea polygonArea = (PolygonArea) selectionArea;
+            for (int i = 0; i < polygonArea.getVertexCount(); i++) {
+                polygon.append(polygonArea.getLongitude(i), polygonArea.getLatitude(i));
+            }
+            polygon.append(polygonArea.getLongitude(0), polygonArea.getLatitude(0)); // closed
+            return polygon;
+        }
         polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
         polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
         polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY() + selectionArea.getHeight()); // the bottom right corner
@@ -29,6 +37,9 @@ public class GeometryUtils {
     }
 
     public static Path2D.Double buildPath(Rectangle2D rectangle) {
+        if (rectangle instanceof PolygonArea) {
+            return ((PolygonArea) rectangle).toPath();
+        }
         Path2D.Double path = new Path2D.Double();
         path.moveTo(rectangle.getX(), rectangle.getY()); // the top left corner
         path.lineTo(rectangle.getX() + rectangle.getWidth(), rectangle.getY()); // the top right corner
