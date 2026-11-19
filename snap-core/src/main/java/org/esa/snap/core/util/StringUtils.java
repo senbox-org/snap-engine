@@ -1073,4 +1073,54 @@ public class StringUtils {
 
         return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     }
+
+
+    /**
+     * Creates a more user friendly folder name for the band group with the match criteria being removed.
+     * For example: if the band grouping was "^a_" (which would match a_442, a_460, etc.) then the returned
+     * displayName would be "a"
+     *
+     * @param displayName  current display name of the particular group
+     * @return a modified display name which has removed characters intended for the match criteria
+     */
+    static  public String cleanUpGroupName(String displayName) {
+
+        if (displayName == null) {
+            return null;
+        }
+
+        if (displayName.contains("#")) {
+            final String[] split = StringUtils.split(displayName, new char[]{'#'}, true);
+            final String groupName = split[0];
+            if (groupName.length() > 0) {
+                displayName = groupName;
+            }
+        } else {
+            if (displayName.startsWith("^")) {
+                displayName = displayName.substring(1);
+            }
+
+            if (displayName.endsWith("$")) {
+                displayName = displayName.substring(0, displayName.length() - 1);
+            }
+
+            if (displayName.startsWith("*")) {
+                displayName = displayName.substring(1);
+            }
+
+            if (displayName.endsWith("*")) {
+                displayName = displayName.substring(0, displayName.length() - 1);
+            }
+
+            if (displayName.startsWith("_")) {
+                displayName = displayName.substring(1);
+            }
+
+            if (displayName.endsWith("_")) {
+                displayName = displayName.substring(0, displayName.length() - 1);
+            }
+        }
+
+        return displayName;
+    }
 }
