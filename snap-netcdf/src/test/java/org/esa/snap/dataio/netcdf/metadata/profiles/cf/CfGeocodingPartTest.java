@@ -79,8 +79,8 @@ public class CfGeocodingPartTest {
 
         final CfGeocodingPart.GeoVariables geoVariables = CfGeocodingPart.getGeolocationVariables(netcdfFile, "longitude", "latitude");
         assertNotNull(geoVariables);
-        assertEquals(lonVar, geoVariables.lonVar);
-        assertEquals(latVar, geoVariables.latVar);
+        assertEquals(lonVar, geoVariables.lonVar());
+        assertEquals(latVar, geoVariables.latVar());
 
         verify(netcdfFile, times(1)).getVariables();
         verifyNoMoreInteractions(netcdfFile);
@@ -105,8 +105,8 @@ public class CfGeocodingPartTest {
 
         final CfGeocodingPart.GeoVariables geoVariables = CfGeocodingPart.getGeolocationVariables(netcdfFile, "longitude", "latitude");
         assertNotNull(geoVariables);
-        assertNull(geoVariables.lonVar);
-        assertEquals(latVar, geoVariables.latVar);
+        assertNull(geoVariables.lonVar());
+        assertEquals(latVar, geoVariables.latVar());
 
         verify(netcdfFile, times(1)).getVariables();
         verifyNoMoreInteractions(netcdfFile);
@@ -131,8 +131,8 @@ public class CfGeocodingPartTest {
 
         final CfGeocodingPart.GeoVariables geoVariables = CfGeocodingPart.getGeolocationVariables(netcdfFile, "longitude", "latitude");
         assertNotNull(geoVariables);
-        assertEquals(lonVar, geoVariables.lonVar);
-        assertNull(geoVariables.latVar);
+        assertEquals(lonVar, geoVariables.lonVar());
+        assertNull(geoVariables.latVar());
 
         verify(netcdfFile, times(1)).getVariables();
         verifyNoMoreInteractions(netcdfFile);

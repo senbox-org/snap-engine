@@ -23,11 +23,10 @@ import org.esa.snap.dataio.netcdf.metadata.ProfilePartReader;
 class NullProfilePartReader implements ProfilePartReader {
 
     @Override
-    public void preDecode(ProfileReadContext ctx, Product p) throws ProductIOException {
+    public void preDecode(ProfileReadContext ctx, Product p) {
     }
 
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws ProductIOException {
     }
-
 }

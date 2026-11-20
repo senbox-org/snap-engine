@@ -76,7 +76,7 @@ class DefaultNetCdfReader extends AbstractProductReader {
         plugIn.initReadContext(context);
         final NetCdfReadProfile profile = new NetCdfReadProfile();
         configureProfile(plugIn, profile);
-        final Product product = profile.readProduct(context);
+        final Product product = profile.readProduct(context, this);
         cacheLayerMappings = NetcdfCacheLayerMapper.getMappings(context);
         product.setFileLocation(fileLocation);
         product.setProductReader(this);
@@ -112,9 +112,9 @@ class DefaultNetCdfReader extends AbstractProductReader {
     private void configureProfile(AbstractNetCdfReaderPlugIn plugIn, NetCdfReadProfile profile) {
         profile.setInitialisationPartReader(plugIn.createInitialisationPartReader());
         profile.addProfilePartReader(plugIn.createMetadataPartReader());
-        profile.addProfilePartReader(plugIn.createGeoCodingPartReader());
         profile.addProfilePartReader(plugIn.createBandPartReader());
         profile.addProfilePartReader(plugIn.createTiePointGridPartReader());
+        profile.addProfilePartReader(plugIn.createGeoCodingPartReader());
         profile.addProfilePartReader(plugIn.createFlagCodingPartReader());
         profile.addProfilePartReader(plugIn.createImageInfoPartReader());
         profile.addProfilePartReader(plugIn.createIndexCodingPartReader());
