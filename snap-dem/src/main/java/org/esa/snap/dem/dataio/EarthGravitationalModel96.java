@@ -52,7 +52,7 @@ import java.util.zip.ZipFile;
  * 0.00 E           360.00 E
  */
 
-public final class EarthGravitationalModel96 {
+public final class EarthGravitationalModel96 implements GeoidModel {
 
     private static final String NAME = "ww15mgh_b.grd";
     private static final String ZIPNAME = "ww15mgh_b.zip";
@@ -152,6 +152,7 @@ public final class EarthGravitationalModel96 {
         return getEGM(lat, lon, v);
     }
 
+    @Override
     public float getEGM(final double lat, final double lon, final double[][] v) {
 
         final double r = (90 - lat) / 0.25;

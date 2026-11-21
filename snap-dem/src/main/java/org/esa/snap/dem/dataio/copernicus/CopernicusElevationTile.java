@@ -7,7 +7,8 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.BaseElevationTile;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.resamp.Resampling;
-import org.esa.snap.dem.dataio.EarthGravitationalModel96;
+import org.esa.snap.dem.dataio.EarthGravitationalModel2008;
+import org.esa.snap.dem.dataio.GeoidModel;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 
 import java.io.IOException;
@@ -15,11 +16,12 @@ import java.io.IOException;
 
 public class CopernicusElevationTile extends BaseElevationTile  implements Resampling.Raster {
 
-    private final EarthGravitationalModel96 egm;
+    // Copernicus DEM heights are relative to EGM2008, not EGM96
+    private final GeoidModel egm;
 
     public CopernicusElevationTile(ElevationModel demModel, Product product) throws IOException  {
         super(demModel, product);
-        egm = EarthGravitationalModel96.instance();
+        egm = EarthGravitationalModel2008.instanceOrEGM96();
     }
 
     @Override
