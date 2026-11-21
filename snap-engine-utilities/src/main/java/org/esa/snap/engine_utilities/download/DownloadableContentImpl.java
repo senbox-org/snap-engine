@@ -244,7 +244,10 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
         final File outputFile = new File(localZipFile.getParentFile(), new File(fileUrl.getFile()).getName());
         final URLConnection urlConnection = fileUrl.openConnection();
         final int contentLength = urlConnection.getContentLength();
-        final InputStream is = new BufferedInputStream(urlConnection.getInputStream(), contentLength);
+        // no Content-Length (chunked or proxied responses) gives -1, which BufferedInputStream rejects
+        final InputStream is = contentLength > 0 ?
+                new BufferedInputStream(urlConnection.getInputStream(), contentLength) :
+                new BufferedInputStream(urlConnection.getInputStream());
         final OutputStream os;
         try {
             if (!outputFile.getParentFile().exists()) {

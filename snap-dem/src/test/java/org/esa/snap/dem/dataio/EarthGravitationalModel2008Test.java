@@ -16,6 +16,7 @@
 package org.esa.snap.dem.dataio;
 
 import org.esa.snap.core.util.SystemUtils;
+import org.junit.After;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -27,12 +28,16 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static org.esa.snap.dem.dataio.EarthGravitationalModel2008.NUM_LATS;
 import static org.esa.snap.dem.dataio.EarthGravitationalModel2008.NUM_LONS;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -109,6 +114,123 @@ public class EarthGravitationalModel2008Test {
     public void testPolesAreClamped() {
         assertEquals(field(0, 0) * 0.01f, synthetic.getEGM(90.0, -180.0), 1e-4f);
         assertEquals(field(NUM_LATS - 1, 0) * 0.01f, synthetic.getEGM(-90.0, -180.0), 1e-4f);
+    }
+
+    @After
+    public void restoreSingleton() {
+        EarthGravitationalModel2008.resetForTests(null, null);
+    }
+
+    private static File syntheticZip() {
+        return new File(tmp.getRoot(), "synthetic.zip");
+    }
+
+    /** A fetcher that copies the synthetic grid into place, counting its calls. */
+    private static EarthGravitationalModel2008.ZipFetcher copying(final AtomicInteger calls) {
+        return target -> {
+            calls.incrementAndGet();
+            Files.copy(syntheticZip().toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return target;
+        };
+    }
+
+    @Test
+    public void testOversizedGridIsRejected() throws IOException {
+        try {
+            new EarthGravitationalModel2008(writeZip("long.zip", NUM_LATS * NUM_LONS + 1));
+            fail("an oversized grid must be rejected");
+        } catch (IOException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("larger"));
+        }
+    }
+
+    @Test
+    public void testZipWithoutGridIsRejected() throws IOException {
+        final File zip = new File(tmp.getRoot(), "empty.zip");
+        try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zip))) {
+            out.putNextEntry(new ZipEntry("readme.txt"));
+            out.closeEntry();
+        }
+        try {
+            new EarthGravitationalModel2008(zip);
+            fail("a zip without the grid must be rejected");
+        } catch (IOException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("does not contain"));
+        }
+    }
+
+    @Test
+    public void testMissingGridIsFetched() throws IOException {
+        final File dir = tmp.newFolder();
+        final AtomicInteger calls = new AtomicInteger();
+        final EarthGravitationalModel2008 egm = EarthGravitationalModel2008.load(dir, copying(calls));
+        assertEquals(1, calls.get());
+        assertEquals(field(500, 7) * 0.01f, egm.node(500, 7), 1e-4f);
+        // present now: loaded without fetching again
+        EarthGravitationalModel2008.load(dir, copying(calls));
+        assertEquals(1, calls.get());
+    }
+
+    /** An interrupted or damaged download is discarded and fetched once more instead of failing forever. */
+    @Test
+    public void testUnreadableLocalCopyIsFetchedAgain() throws IOException {
+        final File dir = tmp.newFolder();
+        Files.write(new File(dir, EarthGravitationalModel2008.ZIPNAME).toPath(), new byte[]{'P', 'K', 3, 4, 0});
+        final AtomicInteger calls = new AtomicInteger();
+        final EarthGravitationalModel2008 egm = EarthGravitationalModel2008.load(dir, copying(calls));
+        assertEquals(1, calls.get());
+        assertEquals(field(2000, 4000) * 0.01f, egm.node(2000, 4000), 1e-4f);
+    }
+
+    private static void assumeEGM96Available() {
+        try {
+            EarthGravitationalModel96.instance();
+        } catch (IOException e) {
+            Assume.assumeNoException("EGM96 auxdata unavailable", e);
+        }
+    }
+
+    /** Without the EGM2008 grid the Copernicus tiles keep working with EGM96, and the download is not retried. */
+    @Test
+    public void testFallbackToEGM96IsCachedForTheSession() throws IOException {
+        assumeEGM96Available();
+        final AtomicInteger calls = new AtomicInteger();
+        EarthGravitationalModel2008.resetForTests(tmp.newFolder(), target -> {
+            calls.incrementAndGet();
+            throw new IOException("offline");
+        });
+        assertSame(EarthGravitationalModel96.instance(), EarthGravitationalModel2008.instanceOrEGM96());
+        assertSame(EarthGravitationalModel96.instance(), EarthGravitationalModel2008.instanceOrEGM96());
+        assertEquals("download attempted once per session", 1, calls.get());
+    }
+
+    /** A RuntimeException from the download (e.g. a response without Content-Length) must not break the DEM. */
+    @Test
+    public void testRuntimeFailureFallsBackAndIsCached() throws IOException {
+        assumeEGM96Available();
+        final AtomicInteger calls = new AtomicInteger();
+        EarthGravitationalModel2008.resetForTests(tmp.newFolder(), target -> {
+            calls.incrementAndGet();
+            throw new IllegalArgumentException("Buffer size <= 0");
+        });
+        assertSame(EarthGravitationalModel96.instance(), EarthGravitationalModel2008.instanceOrEGM96());
+        try {
+            EarthGravitationalModel2008.instance();
+            fail("instance() must report the cached failure");
+        } catch (IOException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("Buffer size"));
+        }
+        assertEquals(1, calls.get());
+    }
+
+    @Test
+    public void testInstanceLoadsTheFetchedGridOnce() throws IOException {
+        final AtomicInteger calls = new AtomicInteger();
+        EarthGravitationalModel2008.resetForTests(tmp.newFolder(), copying(calls));
+        final EarthGravitationalModel2008 egm = EarthGravitationalModel2008.instance();
+        assertSame(egm, EarthGravitationalModel2008.instanceOrEGM96());
+        assertEquals(field(1080, 0) * 0.01f, egm.getEGM(0.0, -180.0), 1e-4f);
+        assertEquals(1, calls.get());
     }
 
     @Test

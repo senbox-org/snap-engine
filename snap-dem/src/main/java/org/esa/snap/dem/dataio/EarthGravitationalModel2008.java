@@ -53,6 +53,22 @@ public final class EarthGravitationalModel2008 implements GeoidModel {
     private static final String remoteHTTP =
             Settings.instance().get("DEM.egm2008_HTTP", "https://step.esa.int/auxdata/dem/egm2008/");
 
+    /** Puts the grid zip at the given local path (normally by downloading it); replaceable by tests. */
+    interface ZipFetcher {
+        File fetch(File localZipFile) throws IOException;
+    }
+
+    static final ZipFetcher DOWNLOAD = localZipFile -> {
+        final URL remoteURL = new URL(remoteHTTP);
+        final File zip = DownloadableContentImpl.getRemoteHttpFile(remoteURL, localZipFile);
+        if (zip == null) {
+            throw new IOException("Unable to download " + remoteURL + ZIPNAME);
+        }
+        return zip;
+    };
+
+    private static File installDir = null;          // null: <SNAP auxdata>/dem/egm2008
+    private static ZipFetcher fetcher = DOWNLOAD;
     private static volatile EarthGravitationalModel2008 theInstance = null;
     // a failed load is not retried in this session: every DEM tile would otherwise try the download again
     private static volatile IOException loadFailure = null;
@@ -74,28 +90,55 @@ public final class EarthGravitationalModel2008 implements GeoidModel {
         if (loadFailure != null) {
             throw loadFailure;
         }
+        final File dir = installDir != null ? installDir :
+                new File(SystemUtils.getAuxDataPath().resolve("dem").toFile(), "egm2008");
         try {
-            File zip = installedZipFile();
-            try {
-                theInstance = new EarthGravitationalModel2008(zip);
-            } catch (IOException corrupt) {
-                // a damaged local copy would otherwise be used, and fail, forever: fetch it once more
-                SystemUtils.LOG.warning("Discarding unreadable " + zip + ": " + corrupt.getMessage());
-                if (!zip.delete()) {
-                    throw corrupt;
-                }
-                zip = installedZipFile();
-                theInstance = new EarthGravitationalModel2008(zip);
-            }
+            theInstance = load(dir, fetcher);
         } catch (IOException e) {
             loadFailure = e;
             throw e;
+        } catch (RuntimeException e) {
+            // e.g. from the download helper: must not escape into every Copernicus DEM tile
+            loadFailure = new IOException("Unable to load the EGM2008 geoid grid: " + e, e);
+            throw loadFailure;
         }
     }
 
     /**
-     * EGM2008, or EGM96 with a one-time warning when the EGM2008 grid cannot be loaded (for example while it is not
-     * yet available for download). Heights referenced to EGM2008 are then converted with EGM96, as before.
+     * Loads the grid from {@code dir}, fetching it first if it is missing. A local copy that cannot be read
+     * (an interrupted or damaged download) would otherwise fail forever, so it is deleted and fetched once more.
+     */
+    static EarthGravitationalModel2008 load(final File dir, final ZipFetcher fetcher) throws IOException {
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new IOException("Unable to create " + dir);
+        }
+        File zip = new File(dir, ZIPNAME);
+        if (!zip.exists()) {
+            zip = fetcher.fetch(zip);
+        }
+        try {
+            return new EarthGravitationalModel2008(zip);
+        } catch (IOException corrupt) {
+            SystemUtils.LOG.warning("Discarding unreadable " + zip + ": " + corrupt.getMessage());
+            if (!zip.delete()) {
+                throw corrupt;
+            }
+            return new EarthGravitationalModel2008(fetcher.fetch(new File(dir, ZIPNAME)));
+        }
+    }
+
+    /** Non-API: points the singleton at another folder and fetcher, and forgets any loaded grid or failure. */
+    static synchronized void resetForTests(final File dir, final ZipFetcher zipFetcher) {
+        installDir = dir;
+        fetcher = zipFetcher != null ? zipFetcher : DOWNLOAD;
+        theInstance = null;
+        loadFailure = null;
+        fallbackWarned = false;
+    }
+
+    /**
+     * EGM2008, or EGM96 with a one-time warning when the EGM2008 grid cannot be loaded (for example offline on
+     * first use). Heights referenced to EGM2008 are then converted with EGM96, as before this model existed.
      */
     public static GeoidModel instanceOrEGM96() throws IOException {
         try {
@@ -108,22 +151,6 @@ public final class EarthGravitationalModel2008 implements GeoidModel {
             }
             return EarthGravitationalModel96.instance();
         }
-    }
-
-    private static File installedZipFile() throws IOException {
-        final File installDir = new File(SystemUtils.getAuxDataPath().resolve("dem").toFile(), "egm2008");
-        if (!installDir.exists() && !installDir.mkdirs()) {
-            throw new IOException("Unable to create " + installDir);
-        }
-        File localZipFile = new File(installDir, ZIPNAME);
-        if (!localZipFile.exists()) {
-            final URL remoteURL = new URL(remoteHTTP);
-            localZipFile = DownloadableContentImpl.getRemoteHttpFile(remoteURL, localZipFile);
-            if (localZipFile == null) {
-                throw new IOException("Unable to download " + remoteURL + ZIPNAME);
-            }
-        }
-        return localZipFile;
     }
 
     /** Loads the grid from the given zip file. Non-API: also used by tests. */

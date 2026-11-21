@@ -11,6 +11,8 @@ import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mElevationMo
 import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mFile;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.esa.snap.dem.dataio.EarthGravitationalModel2008;
+import org.esa.snap.dem.dataio.EarthGravitationalModel96;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
@@ -69,7 +71,8 @@ public class TestElevationFile {
 
         File testFile = new File (tempFolder.newFolder("dem"), "Copernicus_DSM_COG_10_N55_00_W005_00_DEM.tif");
 
-        final float[] expected = new float[] {159.47452f, 150.17595f, 143.38873f};
+        // raw GLO-30 + EGM96, as recorded before the Copernicus tiles switched to EGM2008
+        final float[] egm96Based = new float[] {159.47452f, 150.17595f, 143.38873f};
         Copernicus30mElevationModel model = new Copernicus30mElevationModel(new Copernicus30mElevationModelDescriptor(), Resampling.NEAREST_NEIGHBOUR);
         Copernicus30mFile file = new Copernicus30mFile(model, testFile, (new GeoTiffProductReaderPlugIn()).createReaderInstance());
         final ElevationTile tile = file.getTile();
@@ -78,7 +81,13 @@ public class TestElevationFile {
         actual[0] = tile.getSample(0, 0);
         actual[1] = tile.getSample(0, 1);
         actual[2] = tile.getSample(0, 2);
-        Assert.assertArrayEquals(expected, actual, 1e-5f);
+        // GLO-30 is EGM2008-referenced: the tile now adds EGM2008, about 0.57 m more than EGM96 at 56N 5W
+        final double[][] workspace = new double[4][4];
+        final double shift = EarthGravitationalModel2008.instanceOrEGM96().getEGM(56.0, -5.0, workspace)
+                - EarthGravitationalModel96.instance().getEGM(56.0, -5.0, workspace);
+        for (int i = 0; i < actual.length; i++) {
+            Assert.assertEquals("row " + i, egm96Based[i] + shift, actual[i], 0.01);
+        }
     }
 
 }
