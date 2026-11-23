@@ -82,7 +82,6 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
         for (int i = 0; i < _codingWrappers.length; i++) {
             final CodingWrapper wrapper = _codingWrappers[i];
             final Point location = wrapper.getLocation();
-            final Dimension dimension = wrapper.getDimension();
             final FXYGeoCoding sourceGC = wrapper.getGeoGoding();
 
             float gcPixelOffsetX = sourceGC.getPixelOffsetX();
@@ -90,11 +89,11 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
             float gcPixelSizeX = sourceGC.getPixelSizeX();
             float gcPixelSizeY = sourceGC.getPixelSizeY();
             int gcwPosX = location.x;
-            int gcwPosXSrc = 0;
+            int gcwPosXSrc;
             int gcwPosY = location.y;
-            int gcwWidth = dimension.width;
-            int gcwWidthSrc = 0;
-            int gcwHeight = dimension.height;
+            int gcwWidth;
+            int gcwWidthSrc;
+            int gcwHeight;
 
 
             final Rectangle subsetRegion;

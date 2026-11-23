@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -39,7 +40,10 @@ public class VersionChecker {
     public static final String PK_CHECK_INTERVAL = "snap.versionCheck.interval";
     private static final String PK_LAST_DATE = "snap.versionCheck.lastDate";
     private static final String VERSION_FILE_NAME = "VERSION.txt";
-    private static final String REMOTE_VERSION_FILE_URL = "http://step.esa.int/downloads/" + VERSION_FILE_NAME;
+    private static final String REMOTE_VERSION_FILE_URL = "https://step.esa.int/downloads/" + VERSION_FILE_NAME;
+    // keep startup responsive when offline or behind a slow proxy
+    private static final int CONNECT_TIMEOUT_MS = 5000;
+    private static final int READ_TIMEOUT_MS = 5000;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
     private static VersionChecker instance = new VersionChecker();
@@ -141,13 +145,20 @@ public class VersionChecker {
         if (remoteVersion.get() == null) {
             try {
                 remoteVersion.set(readVersionFromStream(
-                        remoteVersionStream == null ? new URL(VersionChecker.REMOTE_VERSION_FILE_URL).openStream() : remoteVersionStream));
+                        remoteVersionStream == null ? openRemoteVersionStream() : remoteVersionStream));
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
             }
         }
         return remoteVersion.get();
+    }
+
+    private static InputStream openRemoteVersionStream() throws IOException {
+        final URLConnection connection = new URL(VersionChecker.REMOTE_VERSION_FILE_URL).openConnection();
+        connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+        connection.setReadTimeout(READ_TIMEOUT_MS);
+        return connection.getInputStream();
     }
 
     static boolean mustCheck(CHECK checkInterval, LocalDateTime lastDate) {

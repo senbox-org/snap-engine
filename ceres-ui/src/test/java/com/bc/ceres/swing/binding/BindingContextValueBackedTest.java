@@ -162,6 +162,9 @@ public class BindingContextValueBackedTest {
         JTextArea textArea = new JTextArea();
         TextComponentAdapter textComponentAdapter = new TextComponentAdapter(textArea);
         Binding binding = bindingContextVB.bind("stringValue", textComponentAdapter);
+        // bind() runs off the EDT, so the adapter queues the initial setText("") via invokeLater;
+        // drain it now, otherwise it can overwrite "Bibo" below on a slow (CI) machine
+        flushEventQueue();
         assertNotNull(binding);
         assertSame(textArea, getPrimaryComponent(binding));
         assertNotNull(binding.getComponents());
@@ -171,11 +174,11 @@ public class BindingContextValueBackedTest {
 
         textArea.setText("Bibo");
         textComponentAdapter.actionPerformed(null);
-        Thread.sleep(150);
+        flushEventQueue();
         assertEquals("Bibo", propertyContainerVB.getValue("stringValue"));
 
         propertyContainerVB.setValue("stringValue", "Samson");
-        Thread.sleep(150);
+        flushEventQueue();
         assertEquals("Samson", textArea.getText());
     }
 
@@ -416,5 +419,13 @@ public class BindingContextValueBackedTest {
             error = null;
             component = null;
         }
+    }
+
+    /**
+     * Blocks until all events queued on the EDT so far (e.g. adapter invokeLater calls) have run.
+     */
+    static void flushEventQueue() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+        });
     }
 }

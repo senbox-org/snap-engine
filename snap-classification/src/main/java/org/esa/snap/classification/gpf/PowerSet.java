@@ -15,7 +15,7 @@ public class PowerSet<E> implements Iterator<Set<E>>, Iterable<Set<E>> {
     private final int maxSize;
     private final E[] arr;
     private long bits = 0;
-    private long count = 0;
+    private long count;
 
     /**
      * Build a PowerSet of the given {@link Set} to iterate over subsets whose size is between the given boundaries

@@ -344,7 +344,7 @@ public class StereographicDescriptor implements MapTransformDescriptor {
 
             double sinX = 0.0;
             double cosX = 0.0;
-            double A = 0.0;
+
 
             if (_mode == OBLIQ || _mode == EQUIT) {
                 final double X = 2.0 * Math.atan(MapTransformUtils.ssfn(phi, sinphi, _e)) - HALFPI;
@@ -357,6 +357,7 @@ public class StereographicDescriptor implements MapTransformDescriptor {
                 mapPoint = new Point2D.Double();
             }
 
+            double A;
             switch (_mode) {
             case OBLIQ:
                 A = _akm1 / (_cosX1 * (1.0 + _sinX1 * sinX + _cosX1 * cosX * coslam));

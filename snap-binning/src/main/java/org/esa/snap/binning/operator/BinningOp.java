@@ -69,6 +69,7 @@ import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.ref.Reference;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -732,8 +733,9 @@ public class BinningOp extends Operator {
 
         final String productName = sourceProduct.getName();
         getLogger().info(String.format("Spatial binning of product '%s'...", productName));
+        SubsetOp subsetOp = null;
         if (region != null) {
-            SubsetOp subsetOp = new SubsetOp();
+            subsetOp = new SubsetOp();
             subsetOp.setSourceProduct(sourceProduct);
 
             final Rectangle subsetRectangle = SubsetOp.computePixelRegion(sourceProduct, region, 0);
@@ -752,6 +754,8 @@ public class BinningOp extends Operator {
         getLogger().fine(String.format("Product start time: '%s'", sourceProduct.getStartTime()));
         getLogger().fine(String.format("Product end time:   '%s'", sourceProduct.getEndTime()));
         getLogger().info(String.format("Spatial binning of product '%s' done, %d observations seen, took %s", productName, numObs, stopWatch));
+        // Operator.finalize() disposes the target product: keep the subset operator reachable until binning is done
+        Reference.reachabilityFence(subsetOp);
 
         if (region == null && regionArea != null) {
             for (GeneralPath generalPath : GeoUtils.createGeoBoundaryPaths(sourceProduct)) {

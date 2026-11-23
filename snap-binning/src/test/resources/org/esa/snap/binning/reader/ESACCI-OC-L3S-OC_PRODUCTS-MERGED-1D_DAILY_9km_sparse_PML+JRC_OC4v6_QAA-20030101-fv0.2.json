@@ -26,20 +26,19 @@
         "bands": [
             {
                 "name": "bl_bin_num",
-                "noDataValue": "0.0",
-                "noDataValueUsed": "true",
+                "noDataValueUsed": "false",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
                 "expectedPixels": [
                     {
                         "x": 225,
                         "y": 384,
-                        "value": "NaN"
+                        "value": 0
                     },
                     {
                         "x": 2959,
                         "y": 1837,
-                        "value": "NaN"
+                        "value": 0
                     }
                 ]
             }

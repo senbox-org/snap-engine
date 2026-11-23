@@ -41,9 +41,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.jcraft</groupId>
+            <!-- maintained fork of com.jcraft:jsch (same packages); also used by TAO -->
+            <groupId>com.github.mwiede</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.1.54</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>

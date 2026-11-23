@@ -26,7 +26,7 @@ import net.sf.javaml.core.Instance;
  */
 public class KDTreeKNNClassifier extends BaseClassifier implements SupervisedClassifier {
 
-    private int numNeighbours = 5;
+    private final int numNeighbours;
 
     public KDTreeKNNClassifier(final ClassifierParams params, final int numNeighbours) {
         super(params);

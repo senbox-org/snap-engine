@@ -48,7 +48,7 @@ public class ResourceResolver implements LSResourceResolver {
                                    String publicId, String systemId, String baseURI) {
         // The base resource that includes this current resource
         String baseResourceName = null;
-        String baseResourcePath = null;
+
         // Extract the current resource name
         String currentResourceName = systemId.substring(systemId
                                                                 .lastIndexOf("/") + 1);
@@ -67,6 +67,7 @@ public class ResourceResolver implements LSResourceResolver {
 
             // If the baseResourcePath has already been discovered, get that
             // from pathMap
+            final String baseResourcePath;
             if (pathMap.containsKey(baseResourceName)) {
                 baseResourcePath = pathMap.get(baseResourceName);
             } else {

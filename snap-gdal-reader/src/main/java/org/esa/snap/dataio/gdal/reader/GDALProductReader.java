@@ -331,7 +331,7 @@ public class GDALProductReader extends AbstractProductReader {
             Product product = new Product(localFile.getFileName().toString(), this.getReaderPlugIn().getDescription(Locale.getDefault()),
                                           productBounds.width, productBounds.height, this);
 
-            Dimension readTileSize = null;
+            Dimension readTileSize;
             try (org.esa.snap.dataio.gdal.drivers.Band firstBand = gdalDataset.getRasterBand(1)) {
                 readTileSize = new Dimension(firstBand.getBlockXSize(), firstBand.getBlockYSize());
             }

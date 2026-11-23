@@ -76,7 +76,7 @@ public class HeaderParser {
             while ((line = reader.readLine()) != null) {
 
                 line = line.trim();
-                if (line.length() == 0) {
+                if (line.isEmpty()) {
                     // Ignore empty lines
                     continue;
                 }
@@ -103,13 +103,9 @@ public class HeaderParser {
                 recordInfo.add(fieldInfo);
                 recordTokens.add(value);
             }
-        } catch (HeaderParseException e) {
-            error(headerName, reader, e.getMessage());
-        } catch (IOException e) {
+        } catch (HeaderParseException | IOException e) {
             error(headerName, reader, e.getMessage());
         }
-
-        reader = null;
 
         Record record = recordInfo.createRecord();
         for (int i = 0; i < record.getNumFields(); i++) {

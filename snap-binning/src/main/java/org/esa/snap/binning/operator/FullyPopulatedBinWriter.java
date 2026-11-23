@@ -175,26 +175,23 @@ class FullyPopulatedBinWriter extends AbstractBinWriter {
         getLogger().info("Writing bin list variables");
 
         final int[] origin = new int[1];
+        final ArrayList<TemporalBin> rowBins = new ArrayList<TemporalBin>(2 * planetaryGrid.getNumRows());
+
         int bufferIndex = 0;
         int lastRowIndex = -1;
-        int rowIndex = -1;
-        ArrayList<TemporalBin> rowBins = new ArrayList<TemporalBin>(2 * planetaryGrid.getNumRows());
 
         // Reverse-iterate through the bins
         int binListIndex = temporalBins.size() - 1;
         TemporalBin temporalBin = null;
         TemporalBin emptyBin = new TemporalBin(0,0);
         int id = -1;
-        final int numFeatures = 0;//temporalBins.get(0).getFeatureValues().length;
         for (int globalIndex = (int) (planetaryGrid.getNumBins() - 1); globalIndex >= 0; globalIndex--) {
             if (temporalBin == null && binListIndex >= 0) {
                 temporalBin = temporalBins.get(binListIndex--);
                 id = (int) temporalBin.getIndex();
             }
 
-//            final long id = temporalBin.getIndex();
-
-            rowIndex = planetaryGrid.getRowIndex(globalIndex);
+            final int rowIndex = planetaryGrid.getRowIndex(globalIndex);
             // Row change? If so we can write the bins of the same row.
             if (rowIndex == lastRowIndex) {
                 if (id == globalIndex) {
