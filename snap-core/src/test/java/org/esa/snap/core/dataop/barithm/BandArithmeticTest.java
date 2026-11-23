@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.dataop.barithm;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -191,5 +192,28 @@ public class BandArithmeticTest {
         product1.addTiePointGrid(tiePointGrid);
 
         assertEquals(true, BandArithmetic.areRastersEqualInSize(product1, "b1", "tiePointGrid"));
+    }
+
+    @Test
+    @STTM("SNAP-4221")
+    public void testParseMaskWithNegativeInfinity() throws ParseException {
+        Term mask = BandArithmetic.parseExpression("fneq(b1, -Infinity)", product1);
+
+        RasterDataSymbol[] symbols = BandArithmetic.getRefRasterDataSymbols(mask);
+        assertEquals(1, symbols.length);
+        symbols[0].setData(new float[]{
+                Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, 42.0f
+        });
+
+        RasterDataEvalEnv env = new RasterDataEvalEnv(0, 0, 3, 1);
+
+        env.setElemIndex(0);
+        assertFalse("Negative infinity should be excluded", mask.evalB(env));
+
+        env.setElemIndex(1);
+        assertTrue("Positive infinity should be retained", mask.evalB(env));
+
+        env.setElemIndex(2);
+        assertTrue("Finite values should be retained", mask.evalB(env));
     }
 }

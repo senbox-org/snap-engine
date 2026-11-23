@@ -4,6 +4,7 @@ import com.bc.ceres.util.CleanUpState;
 import com.bc.ceres.util.CleanerRegistry;
 import eu.esa.snap.core.lib.NotRegularFileException;
 import it.geosolutions.imageio.plugins.tiff.TIFFField;
+import it.geosolutions.imageio.plugins.tiff.TIFFTag;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
@@ -21,10 +22,9 @@ import org.geotools.util.factory.Hints;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.*;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
 import javax.media.jai.InterpolationNearest;
 import javax.media.jai.RenderedOp;
@@ -237,7 +237,10 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         while (imageReaders.hasNext()) {
             ImageReader reader = imageReaders.next();
             if (reader instanceof TIFFImageReader) {
-                TIFFImageReader imageReader = (TIFFImageReader) reader;
+                ImageReaderSpi provider = reader.getOriginatingProvider();
+                reader.dispose();
+
+                TIFFImageReader imageReader = new NoDataCompatibleTiffReader(provider);
                 imageReader.setInput(imageInputStream);
                 return imageReader;
             }
@@ -274,31 +277,17 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
     }
 
     private Double readNoDataValue() {
-        Double noDataValue = null;
         TIFFImageMetadata imageMetadata;
 
         try {
             imageMetadata = getImageMetadata();
         } catch (IOException e) {
-            return noDataValue;
+            return null;
         }
 
         TIFFField field = imageMetadata.getTIFFField(TIFFTAG_GDAL_NODATA);
-        if (field != null) {
-            String strValue = field.getAsString(0);
 
-            if (strValue != null) {
-                strValue = strValue.trim();
-
-                if (strValue.equalsIgnoreCase("nan")) {
-                    noDataValue = Double.NaN;
-                } else {
-                    noDataValue = Double.valueOf(strValue);
-                }
-            }
-        }
-
-        return noDataValue;
+        return field == null ? null : Utils.parseNoDataValue(field.getAsString(0));
     }
 
     public static GeoTiffImageReader buildGeoTiffImageReader(Path productPath) throws IOException, IllegalAccessException, InstantiationException, InvocationTargetException {
@@ -534,7 +523,6 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
         }
     }
 
-
     private static final class GeoTiffImageReaderState implements CleanUpState {
         private TIFFImageReader imageReader;
         private Closeable closeable;
@@ -566,6 +554,44 @@ public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
                     }
                     closeable = null;
                 }
+            }
+        }
+    }
+
+    private static final class NoDataCompatibleTiffReader extends TIFFImageReader {
+
+        private NoDataCompatibleTiffReader(ImageReaderSpi provider) {
+            super(provider);
+        }
+
+        @Override
+        public IIOMetadata getImageMetadata(int imageIndex) throws IIOException {
+            try {
+                return super.getImageMetadata(imageIndex);
+            } catch (NumberFormatException ex) {
+                TIFFField field = imageMetadata == null
+                        ? null
+                        : imageMetadata.getTIFFField(TIFFTAG_GDAL_NODATA);
+                if (field == null) {
+                    throw ex;
+                }
+
+                String value = field.getAsString(0);
+                Double parsedValue;
+                try {
+                    parsedValue = Utils.parseNoDataValue(value);
+                } catch (NumberFormatException invalidNoData) {
+                    throw ex;
+                }
+                if (parsedValue == null || parsedValue.toString().equals(value)) {
+                    throw ex;
+                }
+
+                // The reader retains the parsed IFD after NoData initialization fails.
+                imageMetadata.getRootIFD().addTIFFField(new TIFFField(
+                        field.getTag(), TIFFTag.TIFF_ASCII, 1,
+                        new String[]{parsedValue.toString()}));
+                return super.getImageMetadata(imageIndex);
             }
         }
     }
