@@ -104,6 +104,61 @@ public class ClassFractionStatisticsTest {
 
     @Test
     @STTM("SNAP-4339")
+    public void reportsNoStatisticsWhenNoCommonValidSampleExists() {
+        Product product = product();
+        Band first = band(product, "first", new float[]{Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN});
+        Band second = band(product, "second", new float[]{1, 1, 1, 1, 1});
+
+        ClassFractionStatisticsResult result = ClassFractionStatistics.compute(
+                config(product, ValidityPolicy.STRICT_SOURCE_VALIDITY, true, true), Arrays.asList(first, second),
+                null, 4, ProgressMonitor.NULL);
+
+        assertEquals(0, result.getValidPixelCount());
+        assertEquals(5, result.getInvalidPixelCount());
+        ClassFractionStatisticsResult.BandStatistics statistics = result.getBandStatistics().get(0);
+        assertTrue(Double.isNaN(statistics.getMinimum()));
+        assertTrue(Double.isNaN(statistics.getPercentile05()));
+        assertTrue(Double.isNaN(statistics.getPercentile25()));
+        assertTrue(Double.isNaN(statistics.getMedian()));
+        assertTrue(Double.isNaN(statistics.getPercentile75()));
+        assertTrue(Double.isNaN(statistics.getPercentile95()));
+    }
+
+    @Test
+    @STTM("SNAP-4339")
+    public void rejectsHistogramWithFewerThanTwoBins() {
+        Product product = product();
+        Band first = band(product, "first", new float[]{1, 2, 3, 4, 5});
+        Band second = band(product, "second", new float[]{1, 2, 3, 4, 5});
+
+        try {
+            ClassFractionStatistics.compute(config(product, ValidityPolicy.STRICT_SOURCE_VALIDITY, true, true),
+                    Arrays.asList(first, second), null, 1, ProgressMonitor.NULL);
+            fail("Expected histogram-bin validation");
+        } catch (IllegalArgumentException expected) {
+            assertEquals("histogramBinCount must be at least two", expected.getMessage());
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4339")
+    public void exposesFixedWidthHistogramBinBounds() {
+        Product product = product();
+        Band first = band(product, "first", new float[]{1, 2, 3, 4, 5});
+        Band second = band(product, "second", new float[]{1, 2, 3, 4, 5});
+
+        ClassFractionStatisticsResult.ValueDistribution distribution = ClassFractionStatistics.compute(
+                config(product, ValidityPolicy.STRICT_SOURCE_VALIDITY, true, true), Arrays.asList(first, second),
+                null, 4, ProgressMonitor.NULL).getBandStatistics().get(0).getDistribution();
+
+        assertEquals(1.0, distribution.getBinMinimum(0), 0.0);
+        assertEquals(2.0, distribution.getBinMaximum(0), 0.0);
+        assertEquals(4.0, distribution.getBinMinimum(3), 0.0);
+        assertEquals(5.0, distribution.getBinMaximum(3), 0.0);
+    }
+
+    @Test
+    @STTM("SNAP-4339")
     public void rejectsIncompatibleRoi() {
         Product product = product();
         Band first = band(product, "first", new float[]{1, 2, 3, 4, 5});

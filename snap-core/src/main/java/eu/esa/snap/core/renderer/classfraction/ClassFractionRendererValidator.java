@@ -72,8 +72,7 @@ public final class ClassFractionRendererValidator {
                 if (Double.compare(anchorModel.getScale(level), source.getMultiLevelModel().getScale(level)) != 0) {
                     throw new IllegalArgumentException("Class sources must have compatible multi-level models");
                 }
-                if (!anchorModel.getImageToModelTransform(level)
-                        .equals(source.getMultiLevelModel().getImageToModelTransform(level))) {
+                if (!anchorModel.getImageToModelTransform(level).equals(source.getMultiLevelModel().getImageToModelTransform(level))) {
                     throw new IllegalArgumentException("Class sources must share the same raster grid transform");
                 }
             }

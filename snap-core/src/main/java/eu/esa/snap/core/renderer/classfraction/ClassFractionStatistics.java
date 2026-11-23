@@ -170,14 +170,13 @@ public final class ClassFractionStatistics {
         if (rank >= count - 1) {
             return maximum;
         }
-        long cumulative = 0;
-        for (int i = 0; i < histogram.length; i++) {
+        long cumulative = histogram[0];
+        int i = 0;
+        while (cumulative <= rank) {
+            i++;
             cumulative += histogram[i];
-            if (cumulative > rank) {
-                return minimum + (maximum - minimum) * (i + 0.5) / histogram.length;
-            }
         }
-        return maximum;
+        return minimum + (maximum - minimum) * (i + 0.5) / histogram.length;
     }
 
     private static void visit(List<PlanarImage> images, List<PlanarImage> validMasks, PlanarImage roiImage,
