@@ -4,11 +4,11 @@ import com.bc.ceres.annotation.STTM;
 import org.junit.Test;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
+import ucar.nc2.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -136,5 +136,33 @@ public class CfGeocodingPartTest {
 
         verify(netcdfFile, times(1)).getVariables();
         verifyNoMoreInteractions(netcdfFile);
+    }
+
+    @Test
+    @STTM("SNAP-4381")
+    public void testHasHdfMetadataOrigin() {
+        final ArrayList<Attribute> hdfEosAttributes = new ArrayList<>();
+        hdfEosAttributes.add(new Attribute("StructMetadata_A", "yes, it is one"));
+
+        final AttributeContainer attributeContainer = mock(AttributeContainer.class);
+        when(attributeContainer.iterator()).thenReturn(hdfEosAttributes.iterator());
+
+        final Group rootGroup = mock(Group.class);
+        when(rootGroup.attributes()).thenReturn(attributeContainer);
+
+        final NetcdfFile netcdfFile = mock(NetcdfFile.class);
+        when(netcdfFile.getRootGroup()).thenReturn(rootGroup);
+
+        assertTrue(CfGeocodingPart.hasHdfMetadataOrigin(netcdfFile));
+
+        final ArrayList<Attribute> emptyAttributes = new ArrayList<>();
+        //noinspection RedundantOperationOnEmptyContainer
+        when(attributeContainer.iterator()).thenReturn(emptyAttributes.iterator());
+        assertFalse(CfGeocodingPart.hasHdfMetadataOrigin(netcdfFile));
+
+        final ArrayList<Attribute> otherAttributes = new ArrayList<>();
+        otherAttributes.add(new Attribute("MuckStreta", "nope"));
+        when(attributeContainer.iterator()).thenReturn(otherAttributes.iterator());
+        assertFalse(CfGeocodingPart.hasHdfMetadataOrigin(netcdfFile));
     }
 }

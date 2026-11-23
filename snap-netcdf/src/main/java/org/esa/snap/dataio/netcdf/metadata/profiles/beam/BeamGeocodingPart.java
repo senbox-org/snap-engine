@@ -15,7 +15,6 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
-import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.StringUtils;
@@ -55,8 +54,8 @@ public class BeamGeocodingPart extends CfGeocodingPart {
 
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
-        NetcdfFile netcdfFile = ctx.getNetcdfFile();
-        GeoCoding geoCoding = createGeoCoding(p, netcdfFile);
+        final NetcdfFile netcdfFile = ctx.getNetcdfFile();
+        final GeoCoding geoCoding = createHistoricGeoCoding(p, netcdfFile);
         if (geoCoding != null) {
             p.setSceneGeoCoding(geoCoding);
         } else {
@@ -64,7 +63,7 @@ public class BeamGeocodingPart extends CfGeocodingPart {
         }
     }
 
-    private GeoCoding createGeoCoding(Product p, NetcdfFile netcdfFile) {
+    private GeoCoding createHistoricGeoCoding(Product p, NetcdfFile netcdfFile) {
         final Attribute geoCodingAtt = netcdfFile.findGlobalAttribute(GEOCODING);
         if (geoCodingAtt != null) {
             final String xml = geoCodingAtt.getStringValue();
@@ -82,7 +81,7 @@ public class BeamGeocodingPart extends CfGeocodingPart {
                         return (GeoCoding) objectFromXml;
                     }
                 } catch (JDOMException | IOException e) {
-                    SystemUtils.LOG.warning("Unable to instanciate ComponentGeoCoding from NetCDF.");
+                    SystemUtils.LOG.warning("Unable to instantiate ComponentGeoCoding from NetCDF.");
                     SystemUtils.LOG.warning(e.getMessage());
                 }
             }
@@ -130,12 +129,8 @@ public class BeamGeocodingPart extends CfGeocodingPart {
     public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
         super.preEncode(ctx, p);
         final GeoCoding geoCoding = p.getSceneGeoCoding();
-        if (geoCoding instanceof ComponentGeoCoding) {
-            final ComponentGeoCodingPersistable persistable = new ComponentGeoCodingPersistable();
-            final Element xmlFromObject = persistable.createXmlFromObject(geoCoding);
-            final String value = StringUtils.toXMLString(xmlFromObject);
-            ctx.getNetcdfFileWriteable().addGlobalAttribute(GEOCODING, value);
-        } else if (geoCoding instanceof TiePointGeoCoding) {
+
+        if (geoCoding instanceof TiePointGeoCoding) {
             final TiePointGeoCoding tpGC = (TiePointGeoCoding) geoCoding;
             final String[] names = new String[2];
             names[LON_INDEX] = tpGC.getLonGrid().getName();

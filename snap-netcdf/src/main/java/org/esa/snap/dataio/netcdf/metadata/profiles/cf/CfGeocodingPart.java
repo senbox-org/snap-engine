@@ -76,27 +76,10 @@ public class CfGeocodingPart extends ProfilePartIO {
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         final NetcdfFile netcdfFile = ctx.getNetcdfFile();
+
         final Attribute geoCodingAttribute = netcdfFile.findGlobalAttribute(Constants.SNAP_GEOCODING_TAG);
         if (geoCodingAttribute != null) {
-            final String gcEncodedElement = geoCodingAttribute.getStringValue();
-            if (gcEncodedElement == null) {
-                throw new IOException("No geocoding element is empty.");
-            }
-            final SAXBuilder saxBuilder = new SAXBuilder();
-
-            Document document;
-            try {
-                document = saxBuilder.build(new ByteArrayInputStream(gcEncodedElement.getBytes(StandardCharsets.UTF_8)));
-            } catch (JDOMException e) {
-                throw new IOException(e);
-            }
-
-            Element gcElement = document.getRootElement();
-            Item gcItem = jdomLanguageSupport.translateToItem(gcElement);
-
-            PersistenceDecoder<Object> decoder = persistence.getDecoder(gcItem);
-            GeoCoding geoCoding = (GeoCoding) decoder.decode(gcItem, p);
-            p.setSceneGeoCoding(geoCoding);
+            setGeoCodingFromPersistenceConverter(p, geoCodingAttribute);
             return;
         }
 
@@ -108,12 +91,34 @@ public class CfGeocodingPart extends ProfilePartIO {
         // from hdf file and has 'StructMetadata.n' element.
         // In this case, the HDF 'elements' were put into a single Netcdf String attribute
         // todo: in fact this has been checked only for MODIS09 HDF-EOS product. Try to further generalize
-        if (geoCoding == null && hasHdfMetadataOrigin(netcdfFile.getGlobalAttributes())) {
+        if (geoCoding == null && hasHdfMetadataOrigin(netcdfFile)) {
             hdfDecode(ctx, p);
         }
         if (geoCoding != null) {
             p.setSceneGeoCoding(geoCoding);
         }
+    }
+
+    private void setGeoCodingFromPersistenceConverter(Product p, Attribute geoCodingAttribute) throws IOException {
+        final String gcEncodedElement = geoCodingAttribute.getStringValue();
+        if (gcEncodedElement == null) {
+            throw new IOException("SNAP geocoding element is empty.");
+        }
+        final SAXBuilder saxBuilder = new SAXBuilder();
+
+        Document document;
+        try {
+            document = saxBuilder.build(new ByteArrayInputStream(gcEncodedElement.getBytes(StandardCharsets.UTF_8)));
+        } catch (JDOMException e) {
+            throw new IOException(e);
+        }
+
+        Element gcElement = document.getRootElement();
+        Item gcItem = jdomLanguageSupport.translateToItem(gcElement);
+
+        final PersistenceDecoder<Object> decoder = persistence.getDecoder(gcItem);
+        final GeoCoding geoCoding = (GeoCoding) decoder.decode(gcItem, p);
+        p.setSceneGeoCoding(geoCoding);
     }
 
     private void hdfDecode(ProfileReadContext ctx, Product p) {
@@ -131,8 +136,10 @@ public class CfGeocodingPart extends ProfilePartIO {
         HdfEosGeocodingPart.attachGeoCoding(p, upperLeftLon, upperLeftLat, lowerRightLon, lowerRightLat, projection, null);
     }
 
-    private boolean hasHdfMetadataOrigin(List<Attribute> netcdfAttributes) {
-        for (Attribute att : netcdfAttributes) {
+    // package access for testing only tb 2026-11-23
+    static boolean hasHdfMetadataOrigin(NetcdfFile netcdfFile) {
+        ucar.nc2.AttributeContainer attributeContainer = netcdfFile.getRootGroup().attributes();
+        for (Attribute att : attributeContainer) {
             if (att.getShortName().startsWith("StructMetadata")) {
                 return true;
             }
@@ -160,7 +167,6 @@ public class CfGeocodingPart extends ProfilePartIO {
             netcdfFileWriteable.addGlobalAttribute(Constants.SNAP_GEOCODING_TAG, byteArrayOutputStream.toString());
             return;
         }
-
 
         geographicCRS = isGeographicCRS(geoCoding);
         final boolean latLonPresent = isLatLonPresent(netcdfFileWriteable);
