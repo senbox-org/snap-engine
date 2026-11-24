@@ -285,6 +285,40 @@ public class ProductSubsetBuilderTest {
         assertEquals(0, subsetBand.getPixelInt(3, 3)); // inside polygon
     }
 
+    @Test
+    public void testSubsetOffsetOfNestedSubsetIsAbsolute() throws IOException {
+        // subset_offset_x/y locate a subset in the original product (used e.g. to look up calibration and noise LUTs);
+        // a subset of a subset must accumulate the offsets, not report the last region's offset only
+        addAbstractedSubsetOffsets(product);
+
+        final ProductSubsetDef first = new ProductSubsetDef();
+        first.setRegion(2, 3, 8, 7);
+        final Product subset1 = ProductSubsetBuilder.createProductSubset(product, first, "subset1", "");
+        assertEquals(2, getOffset(subset1, "subset_offset_x"));
+        assertEquals(3, getOffset(subset1, "subset_offset_y"));
+
+        final ProductSubsetDef second = new ProductSubsetDef();
+        second.setRegion(1, 2, 5, 4);
+        final Product subset2 = ProductSubsetBuilder.createProductSubset(subset1, second, "subset2", "");
+        assertEquals(3, getOffset(subset2, "subset_offset_x"));
+        assertEquals(5, getOffset(subset2, "subset_offset_y"));
+    }
+
+    private static void addAbstractedSubsetOffsets(final Product product) {
+        final org.esa.snap.core.datamodel.MetadataElement absRoot =
+                new org.esa.snap.core.datamodel.MetadataElement("Abstracted_Metadata");
+        for (String name : new String[]{"subset_offset_x", "subset_offset_y", "num_output_lines", "num_samples_per_line"}) {
+            final org.esa.snap.core.datamodel.MetadataAttribute attribute = new org.esa.snap.core.datamodel.MetadataAttribute(
+                    name, ProductData.createInstance(ProductData.TYPE_UINT32, 1), false);
+            absRoot.addAttribute(attribute);
+        }
+        product.getMetadataRoot().addElement(absRoot);
+    }
+
+    private static long getOffset(final Product product, final String name) {
+        return product.getMetadataRoot().getElement("Abstracted_Metadata").getAttribute(name).getData().getElemUInt();
+    }
+
     private void attachIndexCodedBand() {
         final Band band = createDataBand(0, 1, INDEX_CODED_BAND_NAME);
         final IndexCoding indexCoding = new IndexCoding(INDEX_CODING_NAME);
