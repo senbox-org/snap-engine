@@ -1,5 +1,6 @@
 package org.esa.snap.core.datamodel;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataio.geocoding.GeoCodingFactory;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
@@ -9,8 +10,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCoding.SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY;
 import static org.junit.Assert.assertEquals;
 
+// @todo 2 tb/tb - after update to JUnit 5 we need to add synchronisation for the access to the
+// preferences to avoid concurrent modification issues
 public class ImageGeometryTest {
 
     @Test
@@ -38,7 +42,7 @@ public class ImageGeometryTest {
 
         assertEquals(x(3 + 0.1 * (-2 - 5)), i2m(5, 3, 0.1, x(-2)));
         assertEquals(x(3 + 0.1 * (-1 - 5)), i2m(5, 3, 0.1, x(-1)));
-        assertEquals(x(3 + 0.1 * (0 - 5)), i2m(5, 3, 0.1, x(0)));
+        assertEquals(x(3 + 0.1 * (-5)), i2m(5, 3, 0.1, x(0)));
         assertEquals(x(3 + 0.1 * (1 - 5)), i2m(5, 3, 0.1, x(1)));
         assertEquals(x(3 + 0.1 * (2 - 5)), i2m(5, 3, 0.1, x(2)));
     }
@@ -53,7 +57,7 @@ public class ImageGeometryTest {
         product.setSceneGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
 
         ImageGeometry imageGeometry = ImageGeometry.createTargetGeometry(product, product.getSceneGeoCoding().getMapCRS(),
-                                                                         null, null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, null);
 
         assertEquals(0.1, imageGeometry.getPixelSizeX(), 1.0e-6);
         assertEquals(0.1, imageGeometry.getPixelSizeY(), 1.0e-6);
@@ -78,50 +82,104 @@ public class ImageGeometryTest {
 
 
     @Test
+    @STTM("SNAP-4376")
     public void testPixelSizeCalculationWithPixelGeoCoding() throws Exception {
-        Product product = new Product("test", "T", 2, 2);
-        Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
-        Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
-        // these are the outer bounds
-        latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
-        lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
-        product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand));
+        final boolean oldState = Config.instance().preferences().getBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
+        try {
+            Config.instance().preferences().putBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
 
-        ImageGeometry imageGeometry = ImageGeometry.createTargetGeometry(product, product.getSceneGeoCoding().getMapCRS(),
-                                                                         null, null, null, null, null, null, null, null, null);
-        final boolean accuracyEnabled = Config.instance().preferences().getBoolean("snap.pixelGeoCoding.fractionAccuracy", false);
-        if (accuracyEnabled) {
-            assertEquals(4.0, imageGeometry.getPixelSizeX(), 1.0e-6);
-            assertEquals(4.0, imageGeometry.getPixelSizeY(), 1.0e-6);
-        } else {
+            final Product product = new Product("test", "T", 2, 2);
+            final Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
+            final Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
+            // these are the outer bounds
+            latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
+            lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
+            product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand));
+
+            final ImageGeometry imageGeometry = ImageGeometry.createTargetGeometry(product, product.getSceneGeoCoding().getMapCRS(),
+                    null, null, null, null, null, null, null, null, null);
+
             assertEquals(2.0, imageGeometry.getPixelSizeX(), 1.0e-6);
             assertEquals(2.0, imageGeometry.getPixelSizeY(), 1.0e-6);
+        } finally {
+            Config.instance().preferences().putBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, oldState);
         }
     }
 
     @Test
+    @STTM("SNAP-4376")
+    public void testPixelSizeCalculationWithPixelGeoCoding_fractionAccuracy() throws Exception {
+        final boolean oldState = Config.instance().preferences().getBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
+        try {
+            Config.instance().preferences().putBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, true);
+
+            final Product product = new Product("test", "T", 2, 2);
+            final Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
+            final Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
+            // these are the outer bounds
+            latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
+            lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
+            product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand));
+
+            final ImageGeometry imageGeometry = ImageGeometry.createTargetGeometry(product, product.getSceneGeoCoding().getMapCRS(),
+                    null, null, null, null, null, null, null, null, null);
+
+            assertEquals(3.6, imageGeometry.getPixelSizeX(), 1.0e-6);
+            assertEquals(3.6, imageGeometry.getPixelSizeY(), 1.0e-6);
+        } finally {
+            Config.instance().preferences().putBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, oldState);
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4376")
     public void testMapBoundaryWithPixelGeoCoding() throws Exception {
-        Product product = new Product("test", "T", 2, 2);
-        Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
-        Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
-        // these are the outer bounds
-        latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
-        lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
-        product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand));
+        final boolean oldState = Config.instance().preferences().getBoolean("snap.pixelGeoCoding.fractionAccuracy", false);
+        try {
+            Config.instance().preferences().putBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
 
-        Rectangle2D mapBoundary = ImageGeometry.createMapBoundary(product, product.getSceneGeoCoding().getMapCRS());
+            final Product product = new Product("test", "T", 2, 2);
+            final Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
+            final Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
+            // these are the outer bounds
+            latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
+            lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
+            product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand));
 
-        final boolean accuracyEnabled = Config.instance().preferences().getBoolean("snap.pixelGeoCoding.fractionAccuracy", false);
-        if (accuracyEnabled) {
-            assertEquals(8.5, mapBoundary.getMinX(), 1.0e-6);
-            assertEquals(16.5, mapBoundary.getMaxX(), 1.0e-6);
-            assertEquals(43.5, mapBoundary.getMinY(), 1.0e-6);
-            assertEquals(51.5, mapBoundary.getMaxY(), 1.0e-6);
-        } else {
+            final Rectangle2D mapBoundary = ImageGeometry.createMapBoundary(product, product.getSceneGeoCoding().getMapCRS());
+
             assertEquals(10.5, mapBoundary.getMinX(), 1.0e-6);
             assertEquals(14.5, mapBoundary.getMaxX(), 1.0e-6);
             assertEquals(45.5, mapBoundary.getMinY(), 1.0e-6);
             assertEquals(49.5, mapBoundary.getMaxY(), 1.0e-6);
+        } finally {
+            Config.instance().preferences().putBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, oldState);
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4376")
+    public void testMapBoundaryWithPixelGeoCoding_fractionAccuracy() throws Exception {
+        final boolean oldState = Config.instance().preferences().getBoolean("snap.pixelGeoCoding.fractionAccuracy", false);
+        try {
+            Config.instance().preferences().putBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, true);
+
+            final Product product = new Product("test", "T", 2, 2);
+            final Band latBand = product.addBand("lat", ProductData.TYPE_FLOAT32);
+            final Band lonBand = product.addBand("lon", ProductData.TYPE_FLOAT32);
+            // these are the outer bounds
+            latBand.setRasterData(ProductData.createInstance(new float[]{49.5f, 49.5f, 45.5f, 45.5f}));
+            lonBand.setRasterData(ProductData.createInstance(new float[]{10.5f, 14.5f, 10.5f, 14.5f}));
+            product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand));
+
+            final Rectangle2D mapBoundary = ImageGeometry.createMapBoundary(product, product.getSceneGeoCoding().getMapCRS());
+
+            assertEquals(8.5, mapBoundary.getMinX(), 1.0e-6);
+            assertEquals(15.7, mapBoundary.getMaxX(), 1.0e-6);
+            assertEquals(44.3, mapBoundary.getMinY(), 1.0e-6);
+            assertEquals(51.5, mapBoundary.getMaxY(), 1.0e-6);
+        } finally {
+            Config.instance().preferences().putBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, oldState);
         }
     }
 
@@ -132,7 +190,7 @@ public class ImageGeometryTest {
         product.setSceneGeoCoding(new CrsGeoCoding(CRS.decode("EPSG:32632"), 50, 50, 0, 0, 30, 30, 0, 0));
 
         ImageGeometry imageGeometry = ImageGeometry.createTargetGeometry(product, product.getSceneGeoCoding().getMapCRS(),
-                                                                         null, null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, null);
 
         assertEquals(30, imageGeometry.getPixelSizeX(), 1.0e-6);
         assertEquals(30, imageGeometry.getPixelSizeY(), 1.0e-6);
@@ -148,7 +206,7 @@ public class ImageGeometryTest {
 
         assertEquals(0, mapBoundary.getMinX(), 1.0e-6);
         assertEquals(50 * 30, mapBoundary.getMaxX(), 1.0e-6);
-        assertEquals(-50*30, mapBoundary.getMinY(), 1.0e-6);
+        assertEquals(-50 * 30, mapBoundary.getMinY(), 1.0e-6);
         assertEquals(0, mapBoundary.getMaxY(), 1.0e-6);
     }
 
@@ -168,11 +226,11 @@ public class ImageGeometryTest {
                                        double pixelSize) {
 
         return ImageGeometry.createImageToMapTransform(referencePixelX,
-                                                       0.0,
-                                                       easting,
-                                                       0.0,
-                                                       pixelSize,
-                                                       pixelSize,
-                                                       0.0);
+                0.0,
+                easting,
+                0.0,
+                pixelSize,
+                pixelSize,
+                0.0);
     }
 }
