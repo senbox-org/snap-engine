@@ -28,4 +28,9 @@ public interface GeoidModel {
      * @return the geoid undulation in metres
      */
     float getEGM(double lat, double lon, double[][] workspace);
+
+    /** As {@link #getEGM(double, double, double[][])}, allocating the workspace. */
+    default float getEGM(double lat, double lon) {
+        return getEGM(lat, lon, new double[4][4]);
+    }
 }

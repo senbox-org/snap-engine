@@ -15,6 +15,7 @@
  */
 package org.esa.snap.engine_utilities.download;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataop.downloadable.StatusProgressMonitor;
 import org.esa.snap.core.dataop.downloadable.FtpDownloader;
 import org.esa.snap.core.util.DefaultPropertyMap;
@@ -32,6 +33,8 @@ import java.io.OutputStream;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -42,6 +45,9 @@ import java.util.zip.ZipFile;
  * Retrieves downloadable content
  */
 public abstract class DownloadableContentImpl implements DownloadableContent {
+
+    private static final int CONNECT_TIMEOUT_MS = 30000;
+    private static final int READ_TIMEOUT_MS = 60000;
 
     private File localFile;
     private final File localZipFile;
@@ -234,64 +240,73 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
     /**
      * Downloads a file from the specified URL to the specified local target directory.
      * The method uses a progress monitor to visualize the download process.
+     * <p>
+     * The data is written to a temporary file next to the target and moved into place only when complete, so
+     * another thread or process never sees a partial file under the final name. A download that ends before
+     * the announced Content-Length is reported as an error.
      *
      * @param fileUrl      the URL of the file to be downloaded
      * @param localZipFile the target file
      * @return File the downloaded file
      * @throws java.io.IOException if an I/O error occurs
      */
-    private static File downloadFile(final URL fileUrl, final File localZipFile) throws IOException {
+    static File downloadFile(final URL fileUrl, final File localZipFile) throws IOException {
         final File outputFile = new File(localZipFile.getParentFile(), new File(fileUrl.getFile()).getName());
-        final URLConnection urlConnection = fileUrl.openConnection();
-        final int contentLength = urlConnection.getContentLength();
-        // no Content-Length (chunked or proxied responses) gives -1, which BufferedInputStream rejects
-        final InputStream is = contentLength > 0 ?
-                new BufferedInputStream(urlConnection.getInputStream(), contentLength) :
-                new BufferedInputStream(urlConnection.getInputStream());
-        final OutputStream os;
-        try {
-            if (!outputFile.getParentFile().exists()) {
-                if(!outputFile.getParentFile().mkdirs()) {
-                    SystemUtils.LOG.severe("Unable to create folders in "+outputFile.getParentFile());
-                }
-            }
-            os = new BufferedOutputStream(new FileOutputStream(outputFile));
-        } catch (IOException e) {
-            is.close();
-            throw e;
+        final File outputDir = outputFile.getParentFile();
+        if (!outputDir.exists() && !outputDir.mkdirs()) {
+            SystemUtils.LOG.severe("Unable to create folders in " + outputDir);
         }
+        final URLConnection urlConnection = fileUrl.openConnection();
+        // without timeouts a stalled server or proxy blocks every caller waiting for this file
+        urlConnection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+        urlConnection.setReadTimeout(READ_TIMEOUT_MS);
+        final long contentLength = urlConnection.getContentLengthLong();   // -1 when not announced
 
+        final File partFile = File.createTempFile(outputFile.getName() + '.', ".part", outputDir);
         final StatusProgressMonitor pm = new StatusProgressMonitor(StatusProgressMonitor.TYPE.DATA_TRANSFER);
-        pm.beginTask("Downloading " + localZipFile.getName() + "... ", contentLength);
-
+        pm.beginTask("Downloading " + localZipFile.getName() + "... ",
+                contentLength > 0 && contentLength <= Integer.MAX_VALUE ? (int) contentLength : ProgressMonitor.UNKNOWN);
+        boolean complete = false;
         try {
-            final int size = 32768;
-            final byte[] buf = new byte[size];
-            int n;
-            while ((n = is.read(buf, 0, size)) > -1) {
-                os.write(buf, 0, n);
-                pm.worked(n);
-            }
-
-            while (true) {
-                final int b = is.read();
-                if (b == -1) {
-                    break;
+            long received = 0;
+            try (InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+                 OutputStream os = new BufferedOutputStream(new FileOutputStream(partFile))) {
+                final byte[] buf = new byte[32768];
+                int n;
+                while ((n = is.read(buf)) > -1) {
+                    os.write(buf, 0, n);
+                    received += n;
+                    pm.worked(n);
                 }
-                os.write(b);
             }
-        } catch (IOException e) {
-            outputFile.delete();
-            throw e;
+            if (contentLength >= 0 && received != contentLength) {
+                throw new IOException("Download of " + fileUrl + " ended after " + received + " of " +
+                        contentLength + " bytes");
+            }
+            moveIntoPlace(partFile, outputFile);
+            complete = true;
         } finally {
-            try {
-                os.close();
-            } finally {
-                is.close();
+            if (!complete) {
+                partFile.delete();
             }
             pm.done();
         }
         return outputFile;
+    }
+
+    private static void moveIntoPlace(final File partFile, final File outputFile) throws IOException {
+        try {
+            Files.move(partFile.toPath(), outputFile.toPath(), StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            // e.g. Windows refuses to replace a file another process has open: a concurrent download of the
+            // same file finished first, so use that one
+            if (outputFile.isFile()) {
+                Files.deleteIfExists(partFile.toPath());
+            } else {
+                throw e;
+            }
+        }
     }
 
     private boolean getRemoteFTPFile(final URL remoteURL) throws IOException {

@@ -59,7 +59,8 @@ public final class EarthGravitationalModel2008 implements GeoidModel {
     }
 
     static final ZipFetcher DOWNLOAD = localZipFile -> {
-        final URL remoteURL = new URL(remoteHTTP);
+        // the file name is appended to this folder URL
+        final URL remoteURL = new URL(remoteHTTP.endsWith("/") ? remoteHTTP : remoteHTTP + '/');
         final File zip = DownloadableContentImpl.getRemoteHttpFile(remoteURL, localZipFile);
         if (zip == null) {
             throw new IOException("Unable to download " + remoteURL + ZIPNAME);
@@ -70,9 +71,13 @@ public final class EarthGravitationalModel2008 implements GeoidModel {
     private static File installDir = null;          // null: <SNAP auxdata>/dem/egm2008
     private static ZipFetcher fetcher = DOWNLOAD;
     private static volatile EarthGravitationalModel2008 theInstance = null;
-    // a failed load is not retried in this session: every DEM tile would otherwise try the download again
-    private static volatile IOException loadFailure = null;
-    private static volatile boolean fallbackWarned = false;
+    // A failed load is retried only after RETRY_INTERVAL_MS: every DEM tile would otherwise try the download
+    // again, but a transient failure (offline, proxy, server error) must not pin a long session to EGM96.
+    static final long RETRY_INTERVAL_MS = 10 * 60 * 1000L;
+    static long retryIntervalMs = RETRY_INTERVAL_MS;
+    private static IOException loadFailure = null;
+    private static long loadFailureTime = 0L;
+    private static boolean fallbackWarned = false;
 
     private final short[] undulationCm;
 
@@ -88,20 +93,28 @@ public final class EarthGravitationalModel2008 implements GeoidModel {
             return;
         }
         if (loadFailure != null) {
-            throw loadFailure;
+            if (System.currentTimeMillis() - loadFailureTime < retryIntervalMs) {
+                throw loadFailure;
+            }
+            loadFailure = null;
         }
         final File dir = installDir != null ? installDir :
                 new File(SystemUtils.getAuxDataPath().resolve("dem").toFile(), "egm2008");
         try {
             theInstance = load(dir, fetcher);
         } catch (IOException e) {
-            loadFailure = e;
-            throw e;
+            throw failed(e);
         } catch (RuntimeException e) {
             // e.g. from the download helper: must not escape into every Copernicus DEM tile
-            loadFailure = new IOException("Unable to load the EGM2008 geoid grid: " + e, e);
-            throw loadFailure;
+            throw failed(new IOException("Unable to load the EGM2008 geoid grid: " + e, e));
         }
+    }
+
+    private static IOException failed(final IOException e) {
+        loadFailure = e;
+        loadFailureTime = System.currentTimeMillis();
+        fallbackWarned = false;     // warn again for every failed attempt
+        return e;
     }
 
     /**
@@ -133,23 +146,31 @@ public final class EarthGravitationalModel2008 implements GeoidModel {
         fetcher = zipFetcher != null ? zipFetcher : DOWNLOAD;
         theInstance = null;
         loadFailure = null;
+        loadFailureTime = 0L;
         fallbackWarned = false;
+        retryIntervalMs = RETRY_INTERVAL_MS;
     }
 
     /**
-     * EGM2008, or EGM96 with a one-time warning when the EGM2008 grid cannot be loaded (for example offline on
-     * first use). Heights referenced to EGM2008 are then converted with EGM96, as before this model existed.
+     * EGM2008, or EGM96 with a warning when the EGM2008 grid cannot be loaded (for example offline on first use).
+     * Heights referenced to EGM2008 are then converted with EGM96, as before this model existed. The load is
+     * tried again {@value #RETRY_INTERVAL_MS} ms after a failure, so a transient failure does not last the session.
      */
     public static GeoidModel instanceOrEGM96() throws IOException {
         try {
             return instance();
         } catch (IOException e) {
-            if (!fallbackWarned) {
-                fallbackWarned = true;
-                SystemUtils.LOG.warning("EGM2008 geoid grid unavailable (" + e.getMessage() +
-                        "); converting EGM2008 heights with EGM96 instead");
-            }
+            warnFallback(e);
             return EarthGravitationalModel96.instance();
+        }
+    }
+
+    private static synchronized void warnFallback(final IOException e) {
+        if (!fallbackWarned) {
+            fallbackWarned = true;
+            SystemUtils.LOG.severe("EGM2008 geoid grid unavailable (" + e.getMessage() + "); Copernicus DEM " +
+                    "heights are converted with EGM96 instead, which differs by up to 12 m. Retrying in " +
+                    retryIntervalMs / 60000 + " minutes.");
         }
     }
 

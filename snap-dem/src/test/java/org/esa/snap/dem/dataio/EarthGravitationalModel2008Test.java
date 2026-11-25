@@ -190,9 +190,9 @@ public class EarthGravitationalModel2008Test {
         }
     }
 
-    /** Without the EGM2008 grid the Copernicus tiles keep working with EGM96, and the download is not retried. */
+    /** Without the EGM2008 grid the Copernicus tiles keep working with EGM96; no retry within the interval. */
     @Test
-    public void testFallbackToEGM96IsCachedForTheSession() throws IOException {
+    public void testFallbackToEGM96IsCachedUntilTheRetryInterval() throws IOException {
         assumeEGM96Available();
         final AtomicInteger calls = new AtomicInteger();
         EarthGravitationalModel2008.resetForTests(tmp.newFolder(), target -> {
@@ -201,7 +201,7 @@ public class EarthGravitationalModel2008Test {
         });
         assertSame(EarthGravitationalModel96.instance(), EarthGravitationalModel2008.instanceOrEGM96());
         assertSame(EarthGravitationalModel96.instance(), EarthGravitationalModel2008.instanceOrEGM96());
-        assertEquals("download attempted once per session", 1, calls.get());
+        assertEquals("download not retried within the interval", 1, calls.get());
     }
 
     /** A RuntimeException from the download (e.g. a response without Content-Length) must not break the DEM. */
@@ -221,6 +221,29 @@ public class EarthGravitationalModel2008Test {
             assertTrue(e.getMessage(), e.getMessage().contains("Buffer size"));
         }
         assertEquals(1, calls.get());
+    }
+
+    /** A transient failure (offline on first use) is retried after the interval, and EGM2008 is then used. */
+    @Test
+    public void testFailedLoadIsRetriedAfterTheInterval() throws IOException {
+        assumeEGM96Available();
+        final AtomicInteger calls = new AtomicInteger();
+        final EarthGravitationalModel2008.ZipFetcher copy = copying(new AtomicInteger());
+        EarthGravitationalModel2008.resetForTests(tmp.newFolder(), target -> {
+            if (calls.incrementAndGet() == 1) {
+                throw new IOException("offline");
+            }
+            return copy.fetch(target);
+        });
+        assertSame(EarthGravitationalModel96.instance(), EarthGravitationalModel2008.instanceOrEGM96());
+        assertEquals(1, calls.get());
+
+        EarthGravitationalModel2008.retryIntervalMs = 0;     // the interval has passed
+        final GeoidModel egm = EarthGravitationalModel2008.instanceOrEGM96();
+        assertTrue(egm instanceof EarthGravitationalModel2008);
+        assertEquals(2, calls.get());
+        assertSame(egm, EarthGravitationalModel2008.instanceOrEGM96());
+        assertEquals("loaded: no further downloads", 2, calls.get());
     }
 
     @Test

@@ -68,21 +68,22 @@ public final class EarthGravitationalModel96 implements GeoidModel {
     private static final int MAX_LONS = NUM_LONS - 1;
 
     private final float[][] egm = new float[NUM_LATS][NUM_LONS];
-    private static EarthGravitationalModel96 theInstance = null;
+    private static volatile EarthGravitationalModel96 theInstance = null;
 
     private static final String remoteHTTP = Settings.instance().get("DEM.egm96_HTTP", "http://step.esa.int/auxdata/dem/egm96/");
 
     public static EarthGravitationalModel96 instance() throws IOException {
         if (theInstance == null) {
-            theInstance = create();
+            create();
         }
         return theInstance;
     }
 
-    private static synchronized EarthGravitationalModel96 create() throws IOException {
-        if (theInstance != null)
-            return theInstance;
-        return new EarthGravitationalModel96();
+    // assigned under the lock, so concurrent first calls (every DEM tile thread) load the grid only once
+    private static synchronized void create() throws IOException {
+        if (theInstance == null) {
+            theInstance = new EarthGravitationalModel96();
+        }
     }
 
     private EarthGravitationalModel96() throws IOException {

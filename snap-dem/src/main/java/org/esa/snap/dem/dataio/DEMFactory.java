@@ -28,6 +28,8 @@ import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.dem.dataio.copernicus.copernicus30m.Copernicus30mElevationModelDescriptor;
+import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mElevationModelDescriptor;
 import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 import org.esa.snap.engine_utilities.gpf.TileIndex;
@@ -129,6 +131,24 @@ public class DEMFactory {
                 throw new IOException("Entire image is outside of SRTM valid area.\nPlease use another DEM.");
             }
         }
+    }
+
+    /**
+     * The geoid the heights of this DEM are referenced to: EGM2008 for the Copernicus DEM, EGM96 for the
+     * others. Fill no-data (sea) pixels with this geoid's height, so the fill meets the land heights without a
+     * step at the coast.
+     */
+    public static GeoidModel getGeoidModel(final ElevationModel dem) throws IOException {
+        return getGeoidModel(dem != null ? dem.getDescriptor() : null);
+    }
+
+    /** @see #getGeoidModel(ElevationModel) */
+    public static GeoidModel getGeoidModel(final ElevationModelDescriptor descriptor) throws IOException {
+        if (descriptor instanceof Copernicus30mElevationModelDescriptor ||
+                descriptor instanceof Copernicus90mElevationModelDescriptor) {
+            return EarthGravitationalModel2008.instanceOrEGM96();
+        }
+        return EarthGravitationalModel96.instance();
     }
 
     public static void fillDEM(final double[][] localDEM, final double alt) {
@@ -282,6 +302,7 @@ public class DEMFactory {
         final int maxX = targetRectangle.x + targetRectangle.width;
         final GeoPos geoPos = new GeoPos();
         final double[][] egmWorkspace = new double[4][4];
+        GeoidModel geoid = null;    // loaded on the first no-data pixel
 
         try (ProgressMonitorContext.Scope ignored = ProgressMonitorContext.use(progressMonitor)) {
             boolean valid = false;
@@ -295,7 +316,10 @@ public class DEMFactory {
                     geoPosProvider.getGeoPos(x, y, geoPos);
                     Double alt = dem.getElevation(geoPos);
                     if (alt.equals(demNoDataValue) && !nodataValueAtSea) {
-                        alt = (double) EarthGravitationalModel96.instance().getEGM(geoPos.lat, geoPos.lon, egmWorkspace);
+                        if (geoid == null) {
+                            geoid = getGeoidModel(dem);
+                        }
+                        alt = (double) geoid.getEGM(geoPos.lat, geoPos.lon, egmWorkspace);
                     }
                     if (!valid && !alt.equals(demNoDataValue)) {
                         valid = true;
@@ -395,6 +419,7 @@ public class DEMFactory {
             Double alt;
             boolean valid = false;
             final double[][] v = new double[4][4];
+            GeoidModel geoid = null;    // loaded on the first no-data pixel
             for (int y = y0 - 1; y < maxY; y++) {
                 ProgressMonitorContext.checkCanceled(progressMonitor);
                 final int yy = y - y0 + 1;
@@ -416,7 +441,10 @@ public class DEMFactory {
                     alt = dem.getElevation(geoPos);
 
                     if (alt.equals(demNoDataValue) && !nodataValueAtSea) {
-                        alt = (double)EarthGravitationalModel96.instance().getEGM(geoPos.lat, geoPos.lon, v);
+                        if (geoid == null) {
+                            geoid = getGeoidModel(dem);
+                        }
+                        alt = (double) geoid.getEGM(geoPos.lat, geoPos.lon, v);
                     }
 
                     if (!valid && !alt.equals(demNoDataValue)) {
