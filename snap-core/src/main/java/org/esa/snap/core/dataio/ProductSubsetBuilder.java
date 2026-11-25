@@ -108,14 +108,15 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 width.getData().setElemUInt(targetProduct.getSceneRasterWidth());
             }
 
+            // the offsets locate the subset in the original product: accumulate them over nested subsets
             final MetadataAttribute offsetX = trgAbsRoot.getAttribute("subset_offset_x");
             if (offsetX != null && region != null) {
-                offsetX.getData().setElemUInt(region.x);
+                offsetX.getData().setElemUInt(offsetX.getData().getElemUInt() + region.x);
             }
 
             final MetadataAttribute offsetY = trgAbsRoot.getAttribute("subset_offset_y");
             if (offsetY != null && region != null) {
-                offsetY.getData().setElemUInt(region.y);
+                offsetY.getData().setElemUInt(offsetY.getData().getElemUInt() + region.y);
             }
 
             boolean isSARProduct = trgAbsRoot.getAttributeDouble("radar_frequency", 99999) != 99999;
@@ -125,7 +126,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
             // update subset metadata for SAR products
 
-            boolean nearRangeOnLeft = isNearRangeOnLeft(targetProduct);
+            // a property of the source: the subset may have dropped incident_angle or be one column wide
+            boolean nearRangeOnLeft = isNearRangeOnLeft(sourceProduct);
 
             final int sourceImageHeight = sourceProduct.getSceneRasterHeight();
             final double srcFirstLineTime = ProductData.UTC.parse(srcAbsRoot.getAttributeString("first_line_time")).getMJD(); // in days
@@ -178,32 +180,22 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             final MetadataAttribute slantRange = trgAbsRoot.getAttribute("slant_range_to_first_pixel");
             if (slantRange != null) {
                 final TiePointGrid srTPG = targetProduct.getTiePointGrid("slant_range_time");
-                if (srTPG != null && region != null) {
+                if (region != null) {
                     final boolean srgrFlag = srcAbsRoot.getAttributeInt("srgr_flag") != 0;
-                    double slantRangeDist;
                     if (srgrFlag) {
-                        final double slantRangeTime;
-                        if (nearRangeOnLeft) {
-                            slantRangeTime = srTPG.getPixelDouble(
-                                    region.x, region.y) / 1000000000.0; // ns to s
-                        } else {
-                            slantRangeTime = srTPG.getPixelDouble(
-                                    targetProduct.getSceneRasterWidth() - region.x - 1,
-                                    region.y) / 1000000000.0; // ns to s
+                        if (srTPG != null) {
+                            // srTPG is the target's subset grid, so it is indexed in subset pixel coordinates
+                            final int nearRangeX = nearRangeOnLeft ? 0 : targetProduct.getSceneRasterWidth() - 1;
+                            final double slantRangeTime = srTPG.getPixelDouble(nearRangeX, 0) / 1000000000.0; // ns to s
+                            final double halfLightSpeed = 299792458.0 / 2.0;
+                            slantRange.getData().setElemDouble(slantRangeTime * halfLightSpeed);
                         }
-                        final double halfLightSpeed = 299792458.0 / 2.0;
-                        slantRangeDist = slantRangeTime * halfLightSpeed;
-                        slantRange.getData().setElemDouble(slantRangeDist);
                     } else {
+                        // slant range grows linearly with columns, so no tie-point grid is needed
                         final double slantRangeToFirstPixel = srcAbsRoot.getAttributeDouble("slant_range_to_first_pixel");
                         final double rangeSpacing = srcAbsRoot.getAttributeDouble("RANGE_SPACING", 0);
-                        if (nearRangeOnLeft) {
-                            slantRangeDist = slantRangeToFirstPixel + region.x * rangeSpacing;
-                        } else {
-                            slantRangeDist = slantRangeToFirstPixel +
-                                             (targetProduct.getSceneRasterWidth() - region.x - 1) * rangeSpacing;
-                        }
-                        slantRange.getData().setElemDouble(slantRangeDist);
+                        slantRange.getData().setElemDouble(slantRangeToFirstPixel + rangeSpacing *
+                                columnsFromNearRange(sourceProduct, targetProduct, subsetDef, nearRangeOnLeft));
                     }
                 }
             }
@@ -219,10 +211,27 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         if (incidenceAngle != null) {
             final double incidenceAngleToFirstPixel = incidenceAngle.getPixelDouble(0, 0);
             final double incidenceAngleToLastPixel = incidenceAngle.getPixelDouble(product.getSceneRasterWidth() - 1, 0);
-            return (incidenceAngleToFirstPixel < incidenceAngleToLastPixel);
+            return (incidenceAngleToFirstPixel <= incidenceAngleToLastPixel);
         } else {
             return true;
         }
+    }
+
+    /**
+     * Number of source columns between near range and the subset's near-range pixel. That pixel is the
+     * subset's first column, or with near range on the right its last one, which with sub-sampling is
+     * source column {@code x + (w - 1) * step} and can fall short of the region's right edge.
+     */
+    private static int columnsFromNearRange(final Product sourceProduct, final Product targetProduct,
+                                            final ProductSubsetDef subsetDef, final boolean nearRangeOnLeft) {
+        final Rectangle region = subsetDef.getRegion();
+        final int x0 = region == null ? 0 : region.x;
+        if (nearRangeOnLeft) {
+            return x0;
+        }
+        final int step = Math.max(1, subsetDef.getSubSamplingX());
+        final int lastColumn = x0 + (targetProduct.getSceneRasterWidth() - 1) * step;
+        return sourceProduct.getSceneRasterWidth() - 1 - lastColumn;
     }
 
     private static void setSubsetSRGRCoefficients(
@@ -232,19 +241,11 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         final MetadataElement SRGRCoefficientsElem = absRoot.getElement("SRGR_Coefficients");
         if (SRGRCoefficientsElem != null) {
             final double rangeSpacing = absRoot.getAttributeDouble("RANGE_SPACING", 0);
-            final double colIndex = subsetDef.getRegion() == null ? 0 : subsetDef.getRegion().getX();
+            final int columns = columnsFromNearRange(sourceProduct, targetProduct, subsetDef, nearRangeOnLeft);
 
             for (MetadataElement srgrList : SRGRCoefficientsElem.getElements()) {
                 final double grO = srgrList.getAttributeDouble("ground_range_origin", 0);
-                double ground_range_origin_subset;
-                if (nearRangeOnLeft) {
-                    ground_range_origin_subset = grO + colIndex * rangeSpacing;
-                } else {
-                    final double colIndexFromRight = sourceProduct.getSceneRasterWidth() - colIndex -
-                                                     targetProduct.getSceneRasterWidth();
-                    ground_range_origin_subset = grO + colIndexFromRight * rangeSpacing;
-                }
-                srgrList.setAttributeDouble("ground_range_origin", ground_range_origin_subset);
+                srgrList.setAttributeDouble("ground_range_origin", grO + columns * rangeSpacing);
             }
         }
     }

@@ -44,10 +44,7 @@ import java.io.StringReader;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Utils {
 
@@ -401,5 +398,19 @@ public class Utils {
         return pixelScales != null
                 && pixelScales[0] > 0 && pixelScales[0] <= 1.0
                 && pixelScales[1] > 0 && pixelScales[1] <= 1.0;
+    }
+
+    protected static Double parseNoDataValue(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmedValue = value.trim();
+        return switch (trimmedValue.toLowerCase(Locale.ROOT)) {
+            case "nan" -> Double.NaN;
+            case "-inf", "-infinity" -> Double.NEGATIVE_INFINITY;
+            case "inf", "+inf", "infinity", "+infinity" -> Double.POSITIVE_INFINITY;
+            default -> Double.valueOf(trimmedValue);
+        };
     }
 }
