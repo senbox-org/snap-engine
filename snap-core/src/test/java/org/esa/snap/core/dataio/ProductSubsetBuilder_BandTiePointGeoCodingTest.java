@@ -13,6 +13,7 @@
  */
 package org.esa.snap.core.dataio;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -71,6 +72,7 @@ public class ProductSubsetBuilder_BandTiePointGeoCodingTest {
     }
 
     @Test
+    @STTM("SNAP-4385")
     public void subsetWithoutTheBandsOwnGridsKeepsItsGeoCoding() throws Exception {
         final Product source = createMultiSizeProduct();
         final ProductSubsetDef def = new ProductSubsetDef();
