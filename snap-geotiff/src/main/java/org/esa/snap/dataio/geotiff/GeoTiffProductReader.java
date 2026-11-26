@@ -235,21 +235,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
     static Double getFillValue(GeoTiffImageReader geoTiffImageReader) throws IOException {
         final TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
         final TIFFField tiffField = imageMetadata.getTIFFField(TIFFTAG_GDAL_NODATA);
-        Double fillValue = null;
-        if (tiffField != null) {
-            String strValue = tiffField.getAsString(0);
 
-            if (strValue != null) {
-                strValue = strValue.trim();
-
-                if (strValue.equalsIgnoreCase("nan")) {
-                    fillValue = Double.NaN;
-                } else {
-                    fillValue = Double.valueOf(strValue);
-                }
-            }
-        }
-        return fillValue;
+        return tiffField == null ? null : Utils.parseNoDataValue(tiffField.getAsString(0));
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds) throws Exception {
