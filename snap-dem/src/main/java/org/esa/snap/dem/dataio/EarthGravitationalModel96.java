@@ -52,7 +52,7 @@ import java.util.zip.ZipFile;
  * 0.00 E           360.00 E
  */
 
-public final class EarthGravitationalModel96 {
+public final class EarthGravitationalModel96 implements GeoidModel {
 
     private static final String NAME = "ww15mgh_b.grd";
     private static final String ZIPNAME = "ww15mgh_b.zip";
@@ -68,21 +68,39 @@ public final class EarthGravitationalModel96 {
     private static final int MAX_LONS = NUM_LONS - 1;
 
     private final float[][] egm = new float[NUM_LATS][NUM_LONS];
-    private static EarthGravitationalModel96 theInstance = null;
+    private static volatile EarthGravitationalModel96 theInstance = null;
 
     private static final String remoteHTTP = Settings.instance().get("DEM.egm96_HTTP", "http://step.esa.int/auxdata/dem/egm96/");
 
     public static EarthGravitationalModel96 instance() throws IOException {
         if (theInstance == null) {
-            theInstance = create();
+            create();
         }
         return theInstance;
     }
 
-    private static synchronized EarthGravitationalModel96 create() throws IOException {
-        if (theInstance != null)
-            return theInstance;
-        return new EarthGravitationalModel96();
+    // A failed load (offline, no auxdata) is not retried for this long: every DEM tile would otherwise start
+    // another download.
+    static long retryIntervalMs = EarthGravitationalModel2008.RETRY_INTERVAL_MS;
+    private static IOException loadFailure = null;
+    private static long loadFailureTime = 0L;
+
+    // assigned under the lock, so concurrent first calls (every DEM tile thread) load the grid only once
+    private static synchronized void create() throws IOException {
+        if (theInstance != null) {
+            return;
+        }
+        if (loadFailure != null && (System.nanoTime() - loadFailureTime) / 1_000_000L < retryIntervalMs) {
+            throw loadFailure;
+        }
+        try {
+            theInstance = new EarthGravitationalModel96();
+            loadFailure = null;
+        } catch (IOException e) {
+            loadFailure = e;
+            loadFailureTime = System.nanoTime();
+            throw e;
+        }
     }
 
     private EarthGravitationalModel96() throws IOException {
@@ -152,6 +170,7 @@ public final class EarthGravitationalModel96 {
         return getEGM(lat, lon, v);
     }
 
+    @Override
     public float getEGM(final double lat, final double lon, final double[][] v) {
 
         final double r = (90 - lat) / 0.25;
