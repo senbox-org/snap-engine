@@ -2,6 +2,8 @@ package eu.esa.snap.core.renderer.classfraction;
 
 import java.util.Objects;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 
 /**
  * Configuration for the class-fraction renderer.
@@ -14,7 +16,7 @@ public final class ClassFractionRendererConfig {
 
 
     public ClassFractionRendererConfig(String displayName, ClassBandGroupConfig classBandGroup) {
-        if (displayName == null || displayName.trim().isEmpty()) {
+        if (isBlank(displayName)) {
             throw new IllegalArgumentException("displayName must not be blank");
         }
 

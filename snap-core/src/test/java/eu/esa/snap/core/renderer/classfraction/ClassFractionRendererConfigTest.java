@@ -129,6 +129,24 @@ public class ClassFractionRendererConfigTest {
         }
     }
 
+    @Test
+    @STTM("SNAP-4339")
+    public void rejectsAnAnchorRasterThatDoesNotMatchItsPersistentIdentity() {
+        Product product = new Product("p", "t", 4, 3);
+        Band first = product.addBand("class_1", ProductData.TYPE_FLOAT32);
+        Band second = product.addBand("class_2", ProductData.TYPE_FLOAT32);
+        ClassFractionRendererConfig config = new ClassFractionRendererConfig("classes",
+                new ClassBandGroupConfig(Arrays.asList(
+                        band("p", "class_2", "two", 0),
+                        band("p", "class_1", "one", 0)),
+                        1.0,
+                        ValidityPolicy.STRICT_SOURCE_VALIDITY)
+        );
+
+        assertIllegalArgument("Configured class source does not match resolved raster: class_1",
+                () -> ClassFractionRendererValidator.validate(config, Arrays.asList(first, second)));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     @STTM("SNAP-4339")
     public void rejectsNonPositiveDisplayScale() {
@@ -139,6 +157,7 @@ public class ClassFractionRendererConfigTest {
     @Test
     @STTM("SNAP-4339")
     public void rejectsBlankPersistentNamesAndNullBandEntries() {
+        assertIllegalArgument("productName must not be blank", () -> new ClassBandConfig(null, "class_1", "one", 0, true));
         assertIllegalArgument("productName must not be blank", () -> new ClassBandConfig(" ", "class_1", "one", 0, true));
         assertIllegalArgument("bandName must not be blank", () -> new ClassBandConfig("p", "", "one", 0, true));
         assertIllegalArgument("displayName must not be blank", () -> new ClassBandConfig("p", "class_1", "\t", 0, true));

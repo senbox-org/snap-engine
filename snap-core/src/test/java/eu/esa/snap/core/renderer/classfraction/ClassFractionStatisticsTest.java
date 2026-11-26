@@ -91,7 +91,7 @@ public class ClassFractionStatisticsTest {
         Band first = band(product, "first", values);
         Band second = band(product, "second", values);
 
-        ClassFractionStatisticsResult.BandStatistics statistics = ClassFractionStatistics.compute(
+        ClassFractionBandStatistics statistics = ClassFractionStatistics.compute(
                 config(product, ValidityPolicy.STRICT_SOURCE_VALIDITY, true, true), Arrays.asList(first, second),
                 null, 4, ProgressMonitor.NULL).getBandStatistics().get(0);
 
@@ -115,7 +115,7 @@ public class ClassFractionStatisticsTest {
 
         assertEquals(0, result.getValidPixelCount());
         assertEquals(5, result.getInvalidPixelCount());
-        ClassFractionStatisticsResult.BandStatistics statistics = result.getBandStatistics().get(0);
+        ClassFractionBandStatistics statistics = result.getBandStatistics().get(0);
         assertTrue(Double.isNaN(statistics.getMinimum()));
         assertTrue(Double.isNaN(statistics.getPercentile05()));
         assertTrue(Double.isNaN(statistics.getPercentile25()));
@@ -147,7 +147,7 @@ public class ClassFractionStatisticsTest {
         Band first = band(product, "first", new float[]{1, 2, 3, 4, 5});
         Band second = band(product, "second", new float[]{1, 2, 3, 4, 5});
 
-        ClassFractionStatisticsResult.ValueDistribution distribution = ClassFractionStatistics.compute(
+        ClassFractionValueDistribution distribution = ClassFractionStatistics.compute(
                 config(product, ValidityPolicy.STRICT_SOURCE_VALIDITY, true, true), Arrays.asList(first, second),
                 null, 4, ProgressMonitor.NULL).getBandStatistics().get(0).getDistribution();
 
@@ -177,7 +177,7 @@ public class ClassFractionStatisticsTest {
     }
 
 
-    private static void assertBand(ClassFractionStatisticsResult.BandStatistics statistics, double minimum, double maximum, double mean, double standardDeviation, long count) {
+    private static void assertBand(ClassFractionBandStatistics statistics, double minimum, double maximum, double mean, double standardDeviation, long count) {
         assertEquals(count, statistics.getValidPixelCount());
         assertEquals(minimum, statistics.getMinimum(), 1.0e-7);
         assertEquals(maximum, statistics.getMaximum(), 1.0e-7);

@@ -1,5 +1,7 @@
 package eu.esa.snap.core.renderer.classfraction;
 
+import org.apache.commons.lang3.StringUtils;
+
 
 /**
  * Display metadata and persistent source identity for one class band.
@@ -15,9 +17,18 @@ public final class ClassBandConfig {
 
 
     public ClassBandConfig(String productName, String bandName, String displayName, int argb, boolean visible) {
-        this.productName = requireText(productName, "productName");
-        this.bandName = requireText(bandName, "bandName");
-        this.displayName = requireText(displayName, "displayName");
+        if (StringUtils.isBlank(productName)) {
+            throw new IllegalArgumentException("productName must not be blank");
+        }
+        if (StringUtils.isBlank(bandName)) {
+            throw new IllegalArgumentException("bandName must not be blank");
+        }
+        if (StringUtils.isBlank(displayName)) {
+            throw new IllegalArgumentException("displayName must not be blank");
+        }
+        this.productName = productName;
+        this.bandName = bandName;
+        this.displayName = displayName;
         this.argb = argb;
         this.visible = visible;
     }
@@ -47,10 +58,4 @@ public final class ClassBandConfig {
         return productName + "\u0000" + bandName;
     }
 
-    private static String requireText(String value, String name) {
-        if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException(name + " must not be blank");
-        }
-        return value;
-    }
 }

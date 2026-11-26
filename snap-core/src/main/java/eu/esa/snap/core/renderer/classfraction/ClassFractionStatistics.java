@@ -87,15 +87,15 @@ public final class ClassFractionStatistics {
                   }, null);
             pm.worked(1);
 
-            List<ClassFractionStatisticsResult.BandStatistics> resultBands = new ArrayList<>();
+            List<ClassFractionBandStatistics> resultBands = new ArrayList<>();
             for (int i = 0; i < accumulators.length; i++) {
                 Accumulator accumulator = accumulators[i];
                 double[] percentiles = percentiles(accumulator.minimum, accumulator.maximum, quantileHistograms[i], accumulator.count);
-                resultBands.add(new ClassFractionStatisticsResult.BandStatistics(
+                resultBands.add(new ClassFractionBandStatistics(
                         config.getClassBandGroup().getBands().get(i), accumulator.count, accumulator.minimum,
                         accumulator.maximum, accumulator.mean, accumulator.standardDeviation(), percentiles[0], percentiles[1],
                         percentiles[2], percentiles[3], percentiles[4],
-                        new ClassFractionStatisticsResult.ValueDistribution(accumulator.minimum, accumulator.maximum, histograms[i])));
+                        new ClassFractionValueDistribution(accumulator.minimum, accumulator.maximum, histograms[i])));
             }
 
             return new ClassFractionStatisticsResult(roiMask != null ? roiMask.getName() : null,

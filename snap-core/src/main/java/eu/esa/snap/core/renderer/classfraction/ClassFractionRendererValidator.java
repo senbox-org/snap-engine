@@ -40,8 +40,10 @@ public final class ClassFractionRendererValidator {
         MultiLevelModel anchorModel = anchor.getMultiLevelModel();
         int levelCount = anchorModel.getLevelCount();
         Set<RasterDataNode> seen = new HashSet<>();
+        validateConfiguredSource(config.getClassBandGroup().getBands().get(0), anchor);
+        seen.add(anchor);
 
-        for (int index = 0; index < sources.size(); index++) {
+        for (int index = 1; index < sources.size(); index++) {
             RasterDataNode source = sources.get(index);
             if (source == null) {
                 throw new IllegalArgumentException("Resolved raster must not be null");
@@ -53,11 +55,7 @@ public final class ClassFractionRendererValidator {
                 throw new IllegalArgumentException("All class sources must belong to one product");
             }
 
-            ClassBandConfig configuredBand = config.getClassBandGroup().getBands().get(index);
-            if (!configuredBand.getProductName().equals(source.getProduct().getName()) ||
-                    !configuredBand.getBandName().equals(source.getName())) {
-                throw new IllegalArgumentException("Configured class source does not match resolved raster: " + source.getName());
-            }
+            validateConfiguredSource(config.getClassBandGroup().getBands().get(index), source);
             if (width != source.getRasterWidth() || height != source.getRasterHeight()) {
                 throw new IllegalArgumentException("Class sources must have equal raster bounds");
             }
@@ -76,6 +74,13 @@ public final class ClassFractionRendererValidator {
                     throw new IllegalArgumentException("Class sources must share the same raster grid transform");
                 }
             }
+        }
+    }
+
+    private static void validateConfiguredSource(ClassBandConfig configuredBand, RasterDataNode source) {
+        if (!configuredBand.getProductName().equals(source.getProduct().getName())
+                || !configuredBand.getBandName().equals(source.getName())) {
+            throw new IllegalArgumentException("Configured class source does not match resolved raster: " + source.getName());
         }
     }
 }
