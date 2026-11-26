@@ -79,10 +79,27 @@ public final class EarthGravitationalModel96 implements GeoidModel {
         return theInstance;
     }
 
+    // A failed load (offline, no auxdata) is not retried for this long: every DEM tile would otherwise start
+    // another download.
+    static long retryIntervalMs = EarthGravitationalModel2008.RETRY_INTERVAL_MS;
+    private static IOException loadFailure = null;
+    private static long loadFailureTime = 0L;
+
     // assigned under the lock, so concurrent first calls (every DEM tile thread) load the grid only once
     private static synchronized void create() throws IOException {
-        if (theInstance == null) {
+        if (theInstance != null) {
+            return;
+        }
+        if (loadFailure != null && (System.nanoTime() - loadFailureTime) / 1_000_000L < retryIntervalMs) {
+            throw loadFailure;
+        }
+        try {
             theInstance = new EarthGravitationalModel96();
+            loadFailure = null;
+        } catch (IOException e) {
+            loadFailure = e;
+            loadFailureTime = System.nanoTime();
+            throw e;
         }
     }
 

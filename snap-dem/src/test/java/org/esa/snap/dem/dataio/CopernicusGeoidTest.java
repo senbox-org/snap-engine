@@ -16,17 +16,24 @@
 package org.esa.snap.dem.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dem.dataio.copernicus.CopernicusDirectElevationTile;
+import org.esa.snap.dem.dataio.copernicus.CopernicusElevationTile;
 import org.esa.snap.dem.dataio.copernicus.CopernicusTileSource;
+import org.esa.snap.dem.dataio.copernicus.copernicus30m.Copernicus30mElevationModel;
 import org.esa.snap.dem.dataio.copernicus.copernicus30m.Copernicus30mElevationModelDescriptor;
 import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mElevationModelDescriptor;
+import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 import org.esa.snap.runtime.Config;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
@@ -51,6 +58,7 @@ import static org.esa.snap.dem.dataio.EarthGravitationalModel2008.NUM_LATS;
 import static org.esa.snap.dem.dataio.EarthGravitationalModel2008.NUM_LONS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * The Copernicus DEM must be converted with EGM2008, and its no-data (sea) pixels filled with EGM2008 too.
@@ -83,13 +91,18 @@ public class CopernicusGeoidTest {
 
     private String savedEgmPref;
 
-    @Before
-    public void useConstantGrid() throws IOException {
+    /** Points the EGM2008 singleton at the synthetic constant grid (fetched on first use). */
+    private static void useConstantGrid() throws IOException {
         final File zip = constantZip();
         EarthGravitationalModel2008.resetForTests(tmp.newFolder(), target -> {
             Files.copy(zip.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
             return target;
         });
+    }
+
+    @Before
+    public void setUp() throws IOException {
+        useConstantGrid();
         final Preferences prefs = Config.instance().preferences();
         savedEgmPref = prefs.get(EGM_KEY, null);
         prefs.putBoolean(EGM_KEY, true);
@@ -152,6 +165,85 @@ public class CopernicusGeoidTest {
         for (int i = 0; i < 12; i++) {
             assertEquals("pixel " + i, expected[i], values[i], 1e-3f);
         }
+    }
+
+    /** The sea fill path the operators use (getLocalDEM, with its one-pixel border) uses EGM2008 too. */
+    @Test
+    public void testLocalDEMSeaFillUsesEGM2008ForCopernicus() throws Exception {
+        final Product product = geocodedProduct(4, 3, 100f);
+        final TileGeoreferencing tileGeoRef = new TileGeoreferencing(product, -1, -1, 6, 5);
+        final double[][] localDEM = new double[5][6];
+        final boolean valid = DEMFactory.getLocalDEM(new FakeDem(new Copernicus30mElevationModelDescriptor()), 0.0,
+                "BILINEAR_INTERPOLATION", tileGeoRef, 0, 0, 4, 3, product, false, localDEM);
+        assertTrue(valid);
+        for (double[] row : localDEM) {
+            for (double v : row) {
+                assertEquals(N, v, 1e-3);
+            }
+        }
+    }
+
+    /** The reprojected-tile path (CopernicusElevationTile) adds EGM2008 to the heights it reads. */
+    @Test
+    public void testReprojectedTileAddsEGM2008() throws Exception {
+        final CopernicusElevationTile tile = new CopernicusElevationTile(
+                new FakeDem(new Copernicus30mElevationModelDescriptor()), geocodedProduct(4, 3, 100f));
+        assertEquals(100f + N, tile.getSample(2, 1), 1e-3f);
+    }
+
+    /**
+     * The geoid is chosen once per DEM model. If EGM2008 cannot be loaded when the model first needs it, that model
+     * keeps EGM96 for all its tiles and its sea fill, even after a later retry succeeds, so one product never mixes
+     * geoids; a model created after the retry uses EGM2008.
+     */
+    @Test
+    public void testGeoidIsChosenOncePerModel() throws Exception {
+        final EarthGravitationalModel96 egm96;
+        try {
+            egm96 = EarthGravitationalModel96.instance();
+        } catch (IOException e) {
+            Assume.assumeNoException("EGM96 auxdata unavailable", e);
+            return;
+        }
+        EarthGravitationalModel2008.resetForTests(tmp.newFolder(), target -> {
+            throw new IOException("offline");
+        });
+        final Copernicus30mElevationModel before = newCopernicusModel();
+        assertSame(egm96, before.getGeoidModel());
+
+        // the EGM2008 grid becomes available (a successful retry)
+        useConstantGrid();
+        assertTrue(EarthGravitationalModel2008.instanceOrEGM96() instanceof EarthGravitationalModel2008);
+
+        assertSame("the earlier model keeps its geoid", egm96, before.getGeoidModel());
+        assertSame("its sea fill too", egm96, DEMFactory.getGeoidModel(before));
+        final CopernicusDirectElevationTile tile = new CopernicusDirectElevationTile(
+                before, new ConstantSource(64, 64, 100f), 64, 64, 10, 40);
+        final double lat = 90.0 - 40 - 7 / 64.0;
+        final double lon = 10 - 180.0 + 5 / 64.0;
+        assertEquals("and its tiles", 100f + egm96.getEGM(lat, lon), tile.getSample(5, 7), 1e-3f);
+        tile.dispose();
+
+        final Copernicus30mElevationModel after = newCopernicusModel();
+        assertEquals(N, after.getGeoidModel().getEGM(lat, lon), 1e-4f);
+        assertSame(after.getGeoidModel(), DEMFactory.getGeoidModel(after));
+    }
+
+    private static Copernicus30mElevationModel newCopernicusModel() {
+        return new Copernicus30mElevationModel(new Copernicus30mElevationModelDescriptor(),
+                Resampling.BILINEAR_INTERPOLATION);
+    }
+
+    /** A constant-height product on a 0.01 degree WGS84 grid near 47N 8E. */
+    private static Product geocodedProduct(final int w, final int h, final float height) throws Exception {
+        final Product p = new Product("tile", "DEM", w, h);
+        final float[] data = new float[w * h];
+        Arrays.fill(data, height);
+        final Band b = new Band("elevation", ProductData.TYPE_FLOAT32, w, h);
+        b.setRasterData(ProductData.createInstance(data));
+        p.addBand(b);
+        p.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84, w, h, 8.0, 47.0, 0.01, 0.01));
+        return p;
     }
 
     private static final class ConstantSource implements CopernicusTileSource {

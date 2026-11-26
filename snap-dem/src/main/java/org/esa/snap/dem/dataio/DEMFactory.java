@@ -28,6 +28,7 @@ import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.dem.dataio.copernicus.CopernicusElevationModel;
 import org.esa.snap.dem.dataio.copernicus.copernicus30m.Copernicus30mElevationModelDescriptor;
 import org.esa.snap.dem.dataio.copernicus.copernicus90m.Copernicus90mElevationModelDescriptor;
 import eu.esa.snap.core.util.ProgressMonitorContext;
@@ -139,6 +140,10 @@ public class DEMFactory {
      * step at the coast.
      */
     public static GeoidModel getGeoidModel(final ElevationModel dem) throws IOException {
+        if (dem instanceof CopernicusElevationModel) {
+            // the model's own choice, the same as its tiles use
+            return ((CopernicusElevationModel) dem).getGeoidModel();
+        }
         return getGeoidModel(dem != null ? dem.getDescriptor() : null);
     }
 

@@ -3,7 +3,6 @@ package org.esa.snap.dem.dataio.copernicus;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationTile;
 import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.dem.dataio.EarthGravitationalModel2008;
 import org.esa.snap.dem.dataio.GeoidModel;
 import org.esa.snap.runtime.Config;
 
@@ -267,7 +266,7 @@ public final class CopernicusDirectElevationTile implements ElevationTile {
 
     private void addGravitationalModel(final int localY, final float[] targetRows, final int targetOffset) throws Exception {
         // Copernicus DEM heights are relative to EGM2008, not EGM96
-        final GeoidModel egm = EarthGravitationalModel2008.instanceOrEGM96();
+        final GeoidModel egm = CopernicusElevationModel.geoidOf(demModel);
         final double[][] workspace = new double[4][4];
         final double noDataValue = demModel.getDescriptor().getNoDataValue();
         final double lat = 90.0 - tileYIndex - (double) localY / (double) targetHeight;

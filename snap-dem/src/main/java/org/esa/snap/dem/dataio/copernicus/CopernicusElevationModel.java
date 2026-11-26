@@ -5,16 +5,25 @@ import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.dem.BaseElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationFile;
+import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
+import org.esa.snap.dem.dataio.EarthGravitationalModel2008;
+import org.esa.snap.dem.dataio.GeoidModel;
 import org.esa.snap.runtime.Config;
 
 import java.io.File;
+import java.io.IOException;
 
 public abstract class CopernicusElevationModel extends BaseElevationModel {
 
     private final static GeoTiffProductReaderPlugIn plugIn = new GeoTiffProductReaderPlugIn();
+
+    // Chosen once per model, so all heights of one product (every tile and the sea fill) use the same geoid:
+    // EGM2008, or EGM96 while the EGM2008 grid cannot be loaded. A later successful retry of the EGM2008
+    // download then applies to DEMs created afterwards instead of switching geoids part-way through a product.
+    private volatile GeoidModel geoid;
 
     public CopernicusElevationModel(final ElevationModelDescriptor descriptor, final Resampling resamplingMethod) {
         super(descriptor, resamplingMethod);
@@ -26,6 +35,26 @@ public abstract class CopernicusElevationModel extends BaseElevationModel {
         // moment it is handed out and fail every read.
         setMaxCacheSize(Math.max(1,
                 Config.instance().preferences().getInt("snap.dem.copernicus.maxCachedTiles", 60)));
+    }
+
+    /** The geoid this DEM's heights are converted with; see {@link #geoid}. */
+    public GeoidModel getGeoidModel() throws IOException {
+        GeoidModel g = geoid;
+        if (g == null) {
+            synchronized (this) {
+                if (geoid == null) {
+                    geoid = EarthGravitationalModel2008.instanceOrEGM96();
+                }
+                g = geoid;
+            }
+        }
+        return g;
+    }
+
+    /** The geoid of a Copernicus DEM model; EGM2008 (or its EGM96 fallback) for any other model. */
+    public static GeoidModel geoidOf(final ElevationModel dem) throws IOException {
+        return dem instanceof CopernicusElevationModel ? ((CopernicusElevationModel) dem).getGeoidModel()
+                : EarthGravitationalModel2008.instanceOrEGM96();
     }
 
     @Override

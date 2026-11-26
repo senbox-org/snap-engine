@@ -93,7 +93,7 @@ public final class EarthGravitationalModel2008 implements GeoidModel {
             return;
         }
         if (loadFailure != null) {
-            if (System.currentTimeMillis() - loadFailureTime < retryIntervalMs) {
+            if ((System.nanoTime() - loadFailureTime) / 1_000_000L < retryIntervalMs) {
                 throw loadFailure;
             }
             loadFailure = null;
@@ -112,7 +112,7 @@ public final class EarthGravitationalModel2008 implements GeoidModel {
 
     private static IOException failed(final IOException e) {
         loadFailure = e;
-        loadFailureTime = System.currentTimeMillis();
+        loadFailureTime = System.nanoTime();   // monotonic: a clock change must not shorten the wait
         fallbackWarned = false;     // warn again for every failed attempt
         return e;
     }

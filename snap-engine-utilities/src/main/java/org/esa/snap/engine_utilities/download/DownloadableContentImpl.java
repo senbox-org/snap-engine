@@ -264,10 +264,10 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
 
         final File partFile = File.createTempFile(outputFile.getName() + '.', ".part", outputDir);
         final StatusProgressMonitor pm = new StatusProgressMonitor(StatusProgressMonitor.TYPE.DATA_TRANSFER);
-        pm.beginTask("Downloading " + localZipFile.getName() + "... ",
-                contentLength > 0 && contentLength <= Integer.MAX_VALUE ? (int) contentLength : ProgressMonitor.UNKNOWN);
         boolean complete = false;
         try {
+            pm.beginTask("Downloading " + localZipFile.getName() + "... ",
+                    contentLength > 0 && contentLength <= Integer.MAX_VALUE ? (int) contentLength : ProgressMonitor.UNKNOWN);
             long received = 0;
             try (InputStream is = new BufferedInputStream(urlConnection.getInputStream());
                  OutputStream os = new BufferedOutputStream(new FileOutputStream(partFile))) {
@@ -302,6 +302,8 @@ public abstract class DownloadableContentImpl implements DownloadableContent {
             // e.g. Windows refuses to replace a file another process has open: a concurrent download of the
             // same file finished first, so use that one
             if (outputFile.isFile()) {
+                SystemUtils.LOG.warning("Could not replace " + outputFile + " with the new download (" + e +
+                        "); using the existing file");
                 Files.deleteIfExists(partFile.toPath());
             } else {
                 throw e;

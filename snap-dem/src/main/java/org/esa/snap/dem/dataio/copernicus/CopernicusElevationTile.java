@@ -7,7 +7,6 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.BaseElevationTile;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.resamp.Resampling;
-import org.esa.snap.dem.dataio.EarthGravitationalModel2008;
 import org.esa.snap.dem.dataio.GeoidModel;
 import org.esa.snap.engine_utilities.gpf.TileGeoreferencing;
 
@@ -16,12 +15,8 @@ import java.io.IOException;
 
 public class CopernicusElevationTile extends BaseElevationTile  implements Resampling.Raster {
 
-    // Copernicus DEM heights are relative to EGM2008, not EGM96
-    private final GeoidModel egm;
-
     public CopernicusElevationTile(ElevationModel demModel, Product product) throws IOException  {
         super(demModel, product);
-        egm = EarthGravitationalModel2008.instanceOrEGM96();
     }
 
     @Override
@@ -39,7 +34,7 @@ public class CopernicusElevationTile extends BaseElevationTile  implements Resam
         boolean allValid = true;
         for (int i = 0; i < y.length; i++) {
             for (int j = 0; j < x.length; j++) {
-                samples[i][j] = getSample(x[i], y[j]);
+                samples[i][j] = getSample(x[j], y[i]);   // row i, column j
                 if (noDataValue == samples[i][j]) {
                     samples[i][j] = Double.NaN;
                     allValid = false;
@@ -53,6 +48,9 @@ public class CopernicusElevationTile extends BaseElevationTile  implements Resam
         final GeoPos geoPos = new GeoPos();
         final TileGeoreferencing tileGeoRef = new TileGeoreferencing(product, 0, index, line.length, 1);
         final double[][] v = new double[4][4];
+        // Copernicus DEM heights are relative to EGM2008, not EGM96; the geoid is the model's own choice, and is
+        // only loaded when the conversion is enabled
+        final GeoidModel egm = CopernicusElevationModel.geoidOf(demModel);
         for (int i = 0; i < line.length; i++) {
             if (line[i] != noDataValue) {
                 tileGeoRef.getGeoPos(i, index, geoPos);
