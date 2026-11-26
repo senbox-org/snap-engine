@@ -6,7 +6,8 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
-import org.esa.snap.dem.dataio.EarthGravitationalModel96;
+import org.esa.snap.dem.dataio.EarthGravitationalModel2008;
+import org.esa.snap.dem.dataio.GeoidModel;
 import org.esa.snap.runtime.Config;
 import org.junit.After;
 import org.junit.Assume;
@@ -417,7 +418,8 @@ public class CopernicusDirectElevationTileDefaultsTest {
     @Test
     public void geoidOffsetTracksTheGlobalRow() throws Exception {
         assumeGeoidAvailable();
-        final EarthGravitationalModel96 egm = EarthGravitationalModel96.instance();
+        // the tile converts with EGM2008 (EGM96 while the EGM2008 grid is unavailable)
+        final GeoidModel egm = EarthGravitationalModel2008.instanceOrEGM96();
 
         final int tileX = 111;
         final int tileY = 40;
@@ -532,9 +534,9 @@ public class CopernicusDirectElevationTileDefaultsTest {
 
     private static void assumeGeoidAvailable() {
         try {
-            EarthGravitationalModel96.instance();
+            EarthGravitationalModel2008.instanceOrEGM96();
         } catch (Exception e) {
-            Assume.assumeNoException("EGM96 auxdata unavailable", e);
+            Assume.assumeNoException("geoid auxdata unavailable", e);
         }
     }
 

@@ -62,7 +62,7 @@ public final class CDEMElevationTile extends BaseElevationTile implements Resamp
         boolean allValid = true;
         for (int i = 0; i < y.length; i++) {
             for (int j = 0; j < x.length; j++) {
-                samples[i][j] = getSample(x[i], y[j]);
+                samples[i][j] = getSample(x[j], y[i]);   // row i, column j
                 if (noDataValue == samples[i][j]) {
                     samples[i][j] = Double.NaN;
                     allValid = false;
