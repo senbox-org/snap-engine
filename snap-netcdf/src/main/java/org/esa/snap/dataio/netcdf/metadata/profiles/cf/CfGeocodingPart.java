@@ -164,7 +164,7 @@ public class CfGeocodingPart extends ProfilePartIO {
             final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             final XMLOutputter xmlOutputter = new XMLOutputter();
             xmlOutputter.output(gcElement, byteArrayOutputStream);
-            netcdfFileWriteable.addGlobalAttribute(Constants.SNAP_GEOCODING_TAG, byteArrayOutputStream.toString());
+            netcdfFileWriteable.addGlobalAttribute(Constants.SNAP_GEOCODING_TAG, byteArrayOutputStream.toString(StandardCharsets.UTF_8));
             return;
         }
 
