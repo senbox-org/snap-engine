@@ -30,6 +30,14 @@ import org.esa.snap.core.util.SystemUtils;
  */
 public final class TileGeoreferencing {
 
+    /**
+     * When true (default), pixel geo-positions of map-projected (non-geographic) {@link CrsGeoCoding}s are
+     * computed by verified biquadratic interpolation of the exact transform instead of an inverse projection
+     * per pixel. See {@link CrsTileGeoPosInterpolator}.
+     */
+    static final boolean INTERPOLATE_CRS = Boolean.parseBoolean(
+            System.getProperty("snap.engine.tileGeoreferencing.interpolate", "true"));
+
     private final GeoCoding geocoding;
     private final int width, size;
     private final int x1, y1;
@@ -56,7 +64,7 @@ public final class TileGeoreferencing {
             if (geocoding instanceof CrsGeoCoding) {
                 latPixels = new double[size];
                 lonPixels = new double[size];
-                ((CrsGeoCoding) geocoding).getPixels(x1, y1, w, h, latPixels, lonPixels);
+                computeCrsPixels((CrsGeoCoding) geocoding, x1, y1, w, h, latPixels, lonPixels);
                 isCached = true;
             } else if(geocoding instanceof TiePointGeoCoding) {
                 TiePointGeoCoding tiePointGeoCoding = (TiePointGeoCoding) geocoding;
@@ -77,6 +85,19 @@ public final class TileGeoreferencing {
             SystemUtils.LOG.severe("TileGeoreferencing tiepoint error " + e.getMessage());
             isCached = false;
         }
+    }
+
+    static void computeCrsPixels(final CrsGeoCoding geocoding, final int x1, final int y1, final int w, final int h,
+                                 final double[] latPixels, final double[] lonPixels) {
+        if (INTERPOLATE_CRS && CrsTileGeoPosInterpolator.isApplicable(geocoding, w, h)) {
+            try {
+                CrsTileGeoPosInterpolator.computePixels(geocoding, x1, y1, w, h, latPixels, lonPixels);
+                return;
+            } catch (RuntimeException e) {
+                SystemUtils.LOG.fine("TileGeoreferencing interpolation failed, using exact transform: " + e.getMessage());
+            }
+        }
+        geocoding.getPixels(x1, y1, w, h, latPixels, lonPixels);
     }
 
     public boolean isCached() {
