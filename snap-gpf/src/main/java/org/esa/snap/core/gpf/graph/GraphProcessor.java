@@ -116,7 +116,7 @@ public class GraphProcessor {
      * @see GraphProcessor#executeGraph(GraphContext, com.bc.ceres.core.ProgressMonitor)
      */
     public void executeGraph(Graph graph, ProgressMonitor pm) throws GraphException {
-        GraphContext graphContext;
+        GraphContext graphContext = null;
         try {
             pm.beginTask("Executing processing graph", 100);
 
@@ -126,9 +126,15 @@ public class GraphProcessor {
 
             graphContext = new GraphContext(graph);
             executeGraph(graphContext, SubProgressMonitor.create(pm, 90));
-            graphContext.dispose();
         } finally {
-            pm.done();
+            try {
+                // also when the graph failed: otherwise its operators, products and cached tiles stay reachable
+                if (graphContext != null) {
+                    graphContext.dispose();
+                }
+            } finally {
+                pm.done();
+            }
         }
     }
 

@@ -16,12 +16,21 @@
 
 package org.esa.snap.core.gpf.graph;
 
+import com.bc.ceres.annotation.STTM;
+
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.snap.core.gpf.TestOps;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.jai.VerboseTileCache;
 import org.junit.After;
 import org.junit.Before;
@@ -32,6 +41,8 @@ import javax.media.jai.TileCache;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class GraphProcessorTest {
     private OperatorSpi spi1;
@@ -132,5 +143,78 @@ public class GraphProcessorTest {
         // --> Op2 should only be called once
         assertEquals("Op1;Op2;Op3;", TestOps.getCalls());
         TestOps.clearCalls();
+    }
+
+    @Test
+    @STTM("SNAP-4391")
+    public void graphContextIsDisposedWhenTheGraphFails() throws Exception {
+        final OperatorSpi failingSpi = new FailingOp.Spi();
+        final OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
+        registry.addOperatorSpi(failingSpi);
+        FailingOp.disposed = 0;
+        try {
+            final Graph graph = new Graph("failing");
+            final Node node1 = new Node("node1", "Op1");
+            final Node node2 = new Node("node2", "GraphProcessorTestFailingOp");
+            node2.addSource(new NodeSource("input", "node1"));
+            graph.addNode(node1);
+            graph.addNode(node2);
+
+            final RuntimeException e = assertThrows(RuntimeException.class,
+                                                    () -> new GraphProcessor().executeGraph(graph, ProgressMonitor.NULL));
+            assertTrue(String.valueOf(e), String.valueOf(e).contains("simulated failure"));
+            assertEquals("the failed graph's operators must be disposed", 1, FailingOp.disposed);
+        } finally {
+            registry.removeOperatorSpi(failingSpi);
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4391")
+    public void graphContextIsDisposedWhenTheGraphSucceeds() throws Exception {
+        final Graph graph = new Graph("chain");
+        final Node node1 = new Node("node1", "Op1");
+        final Node node2 = new Node("node2", "Op2");
+        node2.addSource(new NodeSource("input", "node1"));
+        graph.addNode(node1);
+        graph.addNode(node2);
+
+        new GraphProcessor().executeGraph(graph, ProgressMonitor.NULL);
+        assertEquals("Op1;Op2;", TestOps.getCalls());
+        TestOps.clearCalls();
+    }
+
+    @OperatorMetadata(alias = "GraphProcessorTestFailingOp")
+    public static class FailingOp extends Operator {
+        static int disposed;
+
+        @SourceProduct
+        public Product input;
+
+        @TargetProduct
+        public Product output;
+
+        @Override
+        public void initialize() {
+            output = new Product("FailingName", "FailingType", TestOps.RASTER_WIDTH, TestOps.RASTER_HEIGHT);
+            output.addBand(new Band("F", ProductData.TYPE_INT8, TestOps.RASTER_WIDTH, TestOps.RASTER_HEIGHT));
+        }
+
+        @Override
+        public void doExecute(ProgressMonitor pm) {
+            throw new OperatorException("simulated failure");
+        }
+
+        @Override
+        public void dispose() {
+            disposed++;
+            super.dispose();
+        }
+
+        public static class Spi extends OperatorSpi {
+            public Spi() {
+                super(FailingOp.class);
+            }
+        }
     }
 }
