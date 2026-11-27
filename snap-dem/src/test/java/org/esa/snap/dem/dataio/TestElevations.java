@@ -84,7 +84,8 @@ public class TestElevations {
 
         double altitude = copernicus90mDem.getElevation(north60);
         SystemUtils.LOG.info("Copernicus 90m DEM = " + altitude);
-        assertEquals(183.7947235107422, altitude, 0.0001);
+        // Copernicus DEM heights are relative to EGM2008 (EGM96 gave 183.7947, 0.343 m lower here)
+        assertEquals(184.13772583007812, altitude, 0.0001);
     }
 }
 
