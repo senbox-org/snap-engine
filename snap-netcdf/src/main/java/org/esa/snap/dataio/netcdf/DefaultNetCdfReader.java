@@ -76,7 +76,7 @@ class DefaultNetCdfReader extends AbstractProductReader {
         plugIn.initReadContext(context);
         final NetCdfReadProfile profile = new NetCdfReadProfile();
         configureProfile(plugIn, profile);
-        final Product product = profile.readProduct(context);
+        final Product product = profile.readProduct(context, this);
         cacheLayerMappings = NetcdfCacheLayerMapper.getMappings(context);
         product.setFileLocation(fileLocation);
         product.setProductReader(this);

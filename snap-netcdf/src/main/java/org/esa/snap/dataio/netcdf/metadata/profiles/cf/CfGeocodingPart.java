@@ -15,24 +15,13 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
-import org.esa.snap.core.dataio.geocoding.ComponentFactory;
-import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
-import org.esa.snap.core.dataio.geocoding.ForwardCoding;
-import org.esa.snap.core.dataio.geocoding.GeoChecks;
-import org.esa.snap.core.dataio.geocoding.GeoRaster;
-import org.esa.snap.core.dataio.geocoding.InverseCoding;
+import org.esa.snap.core.dataio.geocoding.*;
 import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
 import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.MapGeoCoding;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.dataio.persistence.*;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
@@ -47,16 +36,23 @@ import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.XMLOutputter;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
-import ucar.ma2.MAMath;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.awt.Dimension;
+import java.awt.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static eu.esa.snap.core.dataio.CfConstants.*;
@@ -69,8 +65,24 @@ public class CfGeocodingPart extends ProfilePartIO {
     private String latVarName;
     private String lonVarName;
 
+    private final Persistence persistence;
+    private final JdomLanguageSupport jdomLanguageSupport;
+
+    public CfGeocodingPart() {
+        persistence = new Persistence();
+        jdomLanguageSupport = new JdomLanguageSupport();
+    }
+
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
+        final NetcdfFile netcdfFile = ctx.getNetcdfFile();
+
+        final Attribute geoCodingAttribute = netcdfFile.findGlobalAttribute(Constants.SNAP_GEOCODING_TAG);
+        if (geoCodingAttribute != null) {
+            setGeoCodingFromPersistenceConverter(p, geoCodingAttribute);
+            return;
+        }
+
         GeoCoding geoCoding = readConventionBasedMapGeoCoding(ctx, p);
         if (geoCoding == null) {
             geoCoding = readPixelBasedGeoCoding(ctx, p);
@@ -79,12 +91,34 @@ public class CfGeocodingPart extends ProfilePartIO {
         // from hdf file and has 'StructMetadata.n' element.
         // In this case, the HDF 'elements' were put into a single Netcdf String attribute
         // todo: in fact this has been checked only for MODIS09 HDF-EOS product. Try to further generalize
-        if (geoCoding == null && hasHdfMetadataOrigin(ctx.getNetcdfFile().getGlobalAttributes())) {
+        if (geoCoding == null && hasHdfMetadataOrigin(netcdfFile)) {
             hdfDecode(ctx, p);
         }
         if (geoCoding != null) {
             p.setSceneGeoCoding(geoCoding);
         }
+    }
+
+    private void setGeoCodingFromPersistenceConverter(Product p, Attribute geoCodingAttribute) throws IOException {
+        final String gcEncodedElement = geoCodingAttribute.getStringValue();
+        if (gcEncodedElement == null) {
+            throw new IOException("SNAP geocoding element is empty.");
+        }
+        final SAXBuilder saxBuilder = new SAXBuilder();
+
+        Document document;
+        try {
+            document = saxBuilder.build(new ByteArrayInputStream(gcEncodedElement.getBytes(StandardCharsets.UTF_8)));
+        } catch (JDOMException e) {
+            throw new IOException(e);
+        }
+
+        Element gcElement = document.getRootElement();
+        Item gcItem = jdomLanguageSupport.translateToItem(gcElement);
+
+        final PersistenceDecoder<Object> decoder = persistence.getDecoder(gcItem);
+        final GeoCoding geoCoding = (GeoCoding) decoder.decode(gcItem, p);
+        p.setSceneGeoCoding(geoCoding);
     }
 
     private void hdfDecode(ProfileReadContext ctx, Product p) {
@@ -102,8 +136,10 @@ public class CfGeocodingPart extends ProfilePartIO {
         HdfEosGeocodingPart.attachGeoCoding(p, upperLeftLon, upperLeftLat, lowerRightLon, lowerRightLat, projection, null);
     }
 
-    private boolean hasHdfMetadataOrigin(List<Attribute> netcdfAttributes) {
-        for (Attribute att : netcdfAttributes) {
+    // package access for testing only tb 2026-11-23
+    static boolean hasHdfMetadataOrigin(NetcdfFile netcdfFile) {
+        ucar.nc2.AttributeContainer attributeContainer = netcdfFile.getRootGroup().attributes();
+        for (Attribute att : attributeContainer) {
             if (att.getShortName().startsWith("StructMetadata")) {
                 return true;
             }
@@ -118,9 +154,25 @@ public class CfGeocodingPart extends ProfilePartIO {
         if (geoCoding == null) {
             return;
         }
+
+        final NFileWriteable netcdfFileWriteable = ctx.getNetcdfFileWriteable();
+
+        final PersistenceEncoder<Object> encoder = persistence.getEncoder(geoCoding);
+        // although TiePointGeoCoding has PersistenceEncoder, this cannot be used in the current context
+        // NetCDF-CF has no tie-point entity built in, so we must expand the tie-point geo-locations to full
+        // raster dimensions and skip encoding here and use the old-school way below. tb 2026-11-27
+        if (encoder != null && !(geoCoding instanceof TiePointGeoCoding)) {
+            final Item encodedGC = encoder.encode(geoCoding);
+            final Element gcElement = jdomLanguageSupport.translateToLanguageObject(encodedGC);
+            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            final XMLOutputter xmlOutputter = new XMLOutputter();
+            xmlOutputter.output(gcElement, byteArrayOutputStream);
+            netcdfFileWriteable.addGlobalAttribute(Constants.SNAP_GEOCODING_TAG, byteArrayOutputStream.toString(StandardCharsets.UTF_8));
+            return;
+        }
+
         geographicCRS = isGeographicCRS(geoCoding);
-        final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
-        final boolean latLonPresent = isLatLonPresent(ncFile);
+        final boolean latLonPresent = isLatLonPresent(netcdfFileWriteable);
         if (!latLonPresent) {
             latVarName = "lat";
             lonVarName = "lon";
@@ -129,9 +181,9 @@ public class CfGeocodingPart extends ProfilePartIO {
                 final int w = product.getSceneRasterWidth();
                 final int h = product.getSceneRasterHeight();
                 final GeoPos br = geoCoding.getGeoPos(new PixelPos(w - 0.5f, h - 0.5f), null);
-                addGeographicCoordinateVariables(ncFile, ul, br, latVarName, lonVarName);
+                addGeographicCoordinateVariables(netcdfFileWriteable, ul, br, latVarName, lonVarName);
             } else {
-                addLatLonBands(ncFile, ImageManager.getPreferredTileSize(product), latVarName, lonVarName);
+                addLatLonBands(netcdfFileWriteable, ImageManager.getPreferredTileSize(product), latVarName, lonVarName);
             }
             latLonVarsAddedByGeocoding = true;
         } else {
@@ -146,7 +198,7 @@ public class CfGeocodingPart extends ProfilePartIO {
                 latVarName = "lat_intern";
                 lonVarName = "lon_intern";
                 latLonVarsAddedByGeocoding = true;
-                addGeographicCoordinateVariables(ncFile, ul, br, latVarName, lonVarName);
+                addGeographicCoordinateVariables(netcdfFileWriteable, ul, br, latVarName, lonVarName);
             }
         }
         ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, false);
@@ -271,8 +323,8 @@ public class CfGeocodingPart extends ProfilePartIO {
             if (rasterDim.fitsTo(lonVariable, latVariable)) {
                 try {
                     return createConventionBasedMapGeoCoding(lonVariable, latVariable,
-                                                             product.getSceneRasterWidth(),
-                                                             product.getSceneRasterHeight(), ctx);
+                            product.getSceneRasterWidth(),
+                            product.getSceneRasterHeight(), ctx);
                 } catch (Exception e) {
                     SystemUtils.LOG.warning("Failed to create NetCDF geo-coding");
                 }
@@ -343,10 +395,10 @@ public class CfGeocodingPart extends ProfilePartIO {
         }
         ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, yFlipped);
         return new CrsGeoCoding(DefaultGeographicCRS.WGS84,
-                                sceneRasterWidth, sceneRasterHeight,
-                                easting, northing,
-                                pixelSizeX, pixelSizeY,
-                                pixelX, pixelY);
+                sceneRasterWidth, sceneRasterHeight,
+                easting, northing,
+                pixelSizeX, pixelSizeY,
+                pixelX, pixelY);
     }
 
     static boolean isGlobalShifted180(Array lonData) {
@@ -392,7 +444,7 @@ public class CfGeocodingPart extends ProfilePartIO {
 
         final double resolutionInKm = RasterUtils.computeResolutionInKm(longitudes, latitudes, width, height);
         final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBandName, latBandName,
-                                                  width, height, resolutionInKm);
+                width, height, resolutionInKm);
 
         final boolean fractionalAccuracy = Config.instance().preferences().getBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
         final ForwardCoding forward;
@@ -413,7 +465,7 @@ public class CfGeocodingPart extends ProfilePartIO {
         return geoCoding;
     }
 
-     static Band getLatitudeBand(Product product) {
+    static Band getLatitudeBand(Product product) {
         Band latBand = product.getBand(Constants.LAT_INTERN_VAR_NAME);
         if (latBand == null) {
             latBand = product.getBand(Constants.LAT_VAR_NAME);
@@ -425,7 +477,7 @@ public class CfGeocodingPart extends ProfilePartIO {
         return latBand;
     }
 
-     static Band getLongitudeBand(Product product) {
+    static Band getLongitudeBand(Product product) {
         Band lonBand = product.getBand(Constants.LON_INTERN_VAR_NAME);
         if (lonBand == null) {
             lonBand = product.getBand(Constants.LON_VAR_NAME);
@@ -455,14 +507,7 @@ public class CfGeocodingPart extends ProfilePartIO {
         return new GeoVariables(lonVar, latVar);
     }
 
-    static class GeoVariables {
-        public final Variable lonVar;
-        public final Variable latVar;
-
-        GeoVariables(Variable lonVar, Variable latVar) {
-            this.lonVar = lonVar;
-            this.latVar = latVar;
-        }
+    record GeoVariables(Variable lonVar, Variable latVar) {
     }
 
     static double[] readVarAsDoubleArray(Variable variable) throws IOException {
