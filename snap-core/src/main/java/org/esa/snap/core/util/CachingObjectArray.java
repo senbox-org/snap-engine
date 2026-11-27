@@ -70,6 +70,19 @@ public class CachingObjectArray {
         }
     }
 
+    /**
+     * Removes the cached object at the given index, if any, so that the next {@link #getObject(int)}
+     * creates it again. Unlike {@link #setObject(int, Object)}, which only fills an empty slot,
+     * this always clears the slot. Indexes outside the cached range are ignored.
+     *
+     * @param index the index of the object to remove
+     */
+    public final void removeObject(final int index) {
+        if (objectArray != null && index >= minIndex && index <= maxIndex) {
+            objectArray.setObject(index, null);
+        }
+    }
+
     public void clear() {
         if (objectArray != null) {
             objectArray.clear();

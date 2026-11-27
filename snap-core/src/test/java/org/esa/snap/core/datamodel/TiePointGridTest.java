@@ -704,4 +704,70 @@ public class TiePointGridTest extends AbstractRasterDataNodeTest {
 
         assertArrayEquals(expectedTiePoints, subsetGrid2.getTiePoints(), 1e-6f);
     }
+
+    @Test
+    @STTM("SNAP-4391")
+    public void unloadRasterDataReleasesTheInterpolatedRasterAndItIsRecreated() {
+        // 3x3 tie points, sub-sampling 10 -> 21x21 raster: getRasterData() interpolates and caches it
+        final TiePointGrid grid = new TiePointGrid("g", 3, 3, 0.5, 0.5, 10, 10,
+                                                   new float[]{0, 10, 20, 100, 110, 120, 200, 210, 220});
+        final ProductData first = grid.getRasterData();
+        assertEquals(21 * 21, first.getNumElems());
+        assertSame("cached until unloaded", first, grid.getRasterData());
+        final float[] expected = ((float[]) first.getElems()).clone();
+
+        grid.unloadRasterData();
+        assertNull("interpolated raster released", interpolatedRasterData(grid));
+
+        final ProductData second = grid.getRasterData();
+        assertNotSame(first, second);
+        assertArrayEquals("recreated lazily with the same content", expected, (float[]) second.getElems(), 0f);
+        assertEquals(0f, grid.getPixelFloat(0, 0), 1e-5f);
+    }
+
+    @Test
+    @STTM("SNAP-4391")
+    public void disposeReleasesTheInterpolatedRaster() {
+        final TiePointGrid grid = new TiePointGrid("g", 3, 3, 0.5, 0.5, 10, 10, new float[9]);
+        grid.getRasterData();
+        assertNotNull(interpolatedRasterData(grid));
+
+        grid.dispose();
+        assertNull(interpolatedRasterData(grid));
+    }
+
+    @Test
+    @STTM("SNAP-4391")
+    public void unloadRasterDataKeepsTheTiePointsWhenGridAndRasterHaveTheSameSize() {
+        final float[] tiePoints = {1f, 2f, 3f, 4f};
+        final TiePointGrid grid = new TiePointGrid("g", 2, 2, 0.5, 0.5, 1, 1, tiePoints);
+        assertEquals(4, grid.getRasterData().getNumElems());
+
+        grid.unloadRasterData();
+        assertArrayEquals(tiePoints, grid.getTiePoints(), 0f);
+        assertArrayEquals(tiePoints, (float[]) grid.getRasterData().getElems(), 0f);
+    }
+
+    @Test
+    @STTM("SNAP-4391")
+    public void unloadRasterDataAlsoReleasesTheAngularHelperGrids() {
+        final TiePointGrid grid = new TiePointGrid("lon", 3, 3, 0.5, 0.5, 10, 10,
+                                                   new float[]{170, 175, -180, 170, 175, -180, 170, 175, -180},
+                                                   TiePointGrid.DISCONT_AT_180);
+        final ProductData first = grid.getRasterData();
+        grid.unloadRasterData();
+        final ProductData second = grid.getRasterData();
+        assertNotSame(first, second);
+        assertArrayEquals((float[]) first.getElems(), (float[]) second.getElems(), 1e-4f);
+    }
+
+    private static ProductData interpolatedRasterData(TiePointGrid grid) {
+        try {
+            final java.lang.reflect.Field f = TiePointGrid.class.getDeclaredField("rasterData");
+            f.setAccessible(true);
+            return (ProductData) f.get(grid);
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError(e);
+        }
+    }
 }

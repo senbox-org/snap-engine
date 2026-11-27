@@ -82,10 +82,20 @@ public abstract class ElevationFile {
     }
 
     public final ElevationTile getTile() throws IOException {
+        // Hot path, called per DEM sample: no cancellation check when nothing has to be loaded.
+        final ElevationTile loaded = tile;
+        if (loaded != null ? !loaded.isDisposed() : isKnownAbsent()) {
+            return loaded;
+        }
         return getTile(ProgressMonitorContext.getCurrentProgressMonitor());
     }
 
     public final ElevationTile getTile(ProgressMonitor progressMonitor) throws IOException {
+        // Cancellation is checked where the time goes: when a tile has to be found, downloaded or read.
+        final ElevationTile loaded = tile;
+        if (loaded != null ? !loaded.isDisposed() : isKnownAbsent()) {
+            return loaded;
+        }
         // A tile may have been disposed by BaseElevationModel#updateCache's LRU
         // eviction while this ElevationFile still holds a reference to it. Treat
         // the disposed reference as absent and reload, otherwise getSample() reads
@@ -100,6 +110,10 @@ public abstract class ElevationFile {
             }
             return tile;
         }
+    }
+
+    private boolean isKnownAbsent() {
+        return !remoteFileExists && !localFileExists;
     }
 
     protected ElevationTile createTile(final Product product) throws IOException {

@@ -23,7 +23,6 @@ import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
-import eu.esa.snap.core.util.ProgressMonitorContext;
 import org.esa.snap.engine_utilities.eo.Constants;
 import org.esa.snap.engine_utilities.gpf.CommonReaders;
 
@@ -41,7 +40,8 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
 
     private int RASTER_WIDTH;
     private int RASTER_HEIGHT;
-    private Double noDataValue = 0.0;
+    private double noDataValue = 0.0;
+    private long noDataBits = Double.doubleToLongBits(0.0);
 
     public FileElevationModel(final File file, final String resamplingMethodName, final Double demNoDataValue) throws IOException {
 
@@ -62,6 +62,7 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
             noDataValue = product.getBandAt(0).getNoDataValue();
         else
             noDataValue = demNoDataValue;
+        noDataBits = Double.doubleToLongBits(noDataValue);
 
         fileElevationTile = new FileElevationTile(product, noDataValue);
         tileGeocoding = product.getSceneGeoCoding();
@@ -91,7 +92,6 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
 
     public synchronized double getElevation(final GeoPos geoPos) throws Exception {
         try {
-            ProgressMonitorContext.checkCanceled();
             final PixelPos pix = tileGeocoding.getPixelPos(geoPos, null);
             if (!pix.isValid() || pix.x < 0 || pix.y < 0 || pix.x >= RASTER_WIDTH || pix.y >= RASTER_HEIGHT)
                 return noDataValue;
@@ -119,11 +119,10 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
         return tileGeocoding.getGeoPos(pixelPos, null);
     }
 
+    // Per-sample hot path: no cancellation check here; FileElevationTile checks when a line has to be read.
     public double getSample(double pixelX, double pixelY) throws IOException {
-
-        ProgressMonitorContext.checkCanceled();
         final double sample = fileElevationTile.getSample((int) pixelX, (int) pixelY);
-        if (noDataValue.equals(sample)) {
+        if (isNoData(sample)) {
             return Double.NaN;
         }
         return sample;
@@ -140,19 +139,20 @@ public class FileElevationModel implements ElevationModel, Resampling.Raster {
     public boolean getSamples(final int[] x, final int[] y, final double[][] samples) throws IOException {
         boolean allValid = true;
         for (int i = 0; i < y.length; i++) {
-            ProgressMonitorContext.checkCanceled();
             for (int j = 0; j < x.length; j++) {
-                if ((j & 63) == 0) {
-                    ProgressMonitorContext.checkCanceled();
-                }
                 samples[i][j] = fileElevationTile.getSample(x[j], y[i]);
-                if (noDataValue.equals(samples[i][j])) {
+                if (isNoData(samples[i][j])) {
                     samples[i][j] = Double.NaN;
                     allValid = false;
                 }
             }
         }
         return allValid;
+    }
+
+    // same semantics as the former Double.equals: bitwise, so a NaN no-data value matches NaN samples
+    private boolean isNoData(final double sample) {
+        return Double.doubleToLongBits(sample) == noDataBits;
     }
 
     public void applyEarthGravitionalModel(boolean flag) {
