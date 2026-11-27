@@ -158,7 +158,10 @@ public class CfGeocodingPart extends ProfilePartIO {
         final NFileWriteable netcdfFileWriteable = ctx.getNetcdfFileWriteable();
 
         final PersistenceEncoder<Object> encoder = persistence.getEncoder(geoCoding);
-        if (encoder != null) {
+        // although TiePointGeoCoding has PersistenceEncoder, this cannot be used in the current context
+        // NetCDF-CF has no tie-point entity built in, so we must expand the tie-point geo-locations to full
+        // raster dimensions and skip encoding here and use the old-school way below. tb 2026-11-27
+        if (encoder != null && !(geoCoding instanceof TiePointGeoCoding)) {
             final Item encodedGC = encoder.encode(geoCoding);
             final Element gcElement = jdomLanguageSupport.translateToLanguageObject(encodedGC);
             final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
