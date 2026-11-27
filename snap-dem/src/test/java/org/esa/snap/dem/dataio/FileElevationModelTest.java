@@ -30,6 +30,8 @@ import org.junit.Test;
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Regression test for https://forum.step.esa.int/t/external-dem-is-sampled-half-a-pixel-off/46042
@@ -64,6 +66,33 @@ public class FileElevationModelTest {
                 final double elevation = dem.getElevation(new GeoPos(48.0, 13.0));
 
                 assertEquals(valueAt(2, 3), elevation, 1.0e-9);
+            } finally {
+                dem.dispose();
+            }
+        } finally {
+            demFile.delete();
+        }
+    }
+
+    @Test
+    @STTM("SNAP-4391")
+    public void samplesEqualToTheNoDataValueBecomeNaN() throws Exception {
+        final File demFile = File.createTempFile("FileElevationModelTest", ".tif");
+        demFile.deleteOnExit();
+        try {
+            writeSyntheticDem(demFile);
+            final FileElevationModel dem = new FileElevationModel(demFile,
+                    ResamplingFactory.NEAREST_NEIGHBOUR_NAME, valueAt(2, 3));
+            dem.applyEarthGravitionalModel(false);
+            try {
+                final double[][] samples = new double[2][2];
+                assertFalse(dem.getSamples(new int[]{2, 3}, new int[]{1, 2}, samples));
+                assertEquals(valueAt(1, 2), samples[0][0], 0.0);
+                assertEquals(valueAt(1, 3), samples[0][1], 0.0);
+                assertEquals(valueAt(2, 2), samples[1][0], 0.0);
+                assertTrue(Double.isNaN(samples[1][1]));
+                assertTrue(Double.isNaN(dem.getSample(3, 2)));
+                assertTrue(dem.getSamples(new int[]{0, 1}, new int[]{0, 1}, samples));
             } finally {
                 dem.dispose();
             }

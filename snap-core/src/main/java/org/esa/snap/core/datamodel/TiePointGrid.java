@@ -448,8 +448,29 @@ public class TiePointGrid extends RasterDataNode {
         return (int) Math.round(getPixelDouble(x, y));
     }
 
+    /**
+     * Releases the raster data interpolated to full scene size by {@link #getRasterData()}, which can be large
+     * (4 bytes per scene pixel). The tie-point grid data itself is kept, so the raster data is recreated on the
+     * next call to {@link #getRasterData()}.
+     */
+    @Override
+    public void unloadRasterData() {
+        synchronized (this) {
+            rasterData = null;
+        }
+        if (cosGrid != null) {
+            cosGrid.unloadRasterData();
+        }
+        if (sinGrid != null) {
+            sinGrid.unloadRasterData();
+        }
+    }
+
     @Override
     public void dispose() {
+        synchronized (this) {
+            rasterData = null;
+        }
         if (cosGrid != null) {
             cosGrid.dispose();
             cosGrid = null;

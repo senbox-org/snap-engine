@@ -50,7 +50,7 @@ class FileElevationTile {
     public float getSample(int pixelX, int pixelY) throws IOException {
         final float[] line;
         try {
-            ProgressMonitorContext.checkCanceled();
+            // cancellation is checked in the line factory, when a line has to be read
             line = (float[]) linesCache.getObject(pixelY);
         } catch (CancellationException e) {
             throw e;
@@ -71,6 +71,9 @@ class FileElevationTile {
 
     public void clearCache() {
         linesCache.clear();
+        synchronized (indexList) {
+            indexList.clear();
+        }
     }
 
     private CachingObjectArray.ObjectFactory getLineFactory() {
@@ -90,14 +93,20 @@ class FileElevationTile {
         };
     }
 
+    // Called when a line is loaded. Keeps at most maxLines lines cached by evicting the oldest loaded line.
     private void updateCache(int index) {
-        indexList.remove((Object) index);
-        indexList.add(0, index);
-        if (indexList.size() > maxLines) {
-            final int i = indexList.size() - 1;
-            linesCache.setObject(i, null);
-            indexList.remove(i);
+        synchronized (indexList) {
+            indexList.remove((Object) index);
+            indexList.add(0, index);
+            if (indexList.size() > maxLines) {
+                final int evictedLine = indexList.remove(indexList.size() - 1);
+                linesCache.removeObject(evictedLine);
+            }
         }
+    }
+
+    static int getMaxCachedLines() {
+        return maxLines;
     }
 
     private static IOException convertLineCacheException(Exception e) {
