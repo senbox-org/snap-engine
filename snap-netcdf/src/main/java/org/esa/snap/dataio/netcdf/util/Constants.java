@@ -64,7 +64,8 @@ public interface Constants {
     String PRODUCT_FILENAME_PROPERTY = "productName";
     String CACHE_DATA_PROVIDER_PROPERTY = "cacheDataProvider";
 
-
     String RADIATION_WAVELENGTH = "radiation_wavelength"; // CF standard name
     String RADIATION_WAVELENGTH_UNIT = "radiation_wavelength_unit";
+
+    String SNAP_GEOCODING_TAG = "snap_geocoding";
 }
