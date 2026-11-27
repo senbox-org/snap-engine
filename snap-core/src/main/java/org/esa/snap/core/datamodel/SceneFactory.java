@@ -18,6 +18,7 @@ package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.esa.snap.core.subset.SubsetRegionInfo;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
@@ -79,8 +80,14 @@ public final class SceneFactory {
                 if (subsetDef == null || subsetDef.getRegionMap() == null) {
                     auxiliarSubsetDef = subsetDef;
                 } else {
+                    final SubsetRegionInfo regionInfo = subsetDef.getRegionMap().get(sourceRaster.getName());
+                    if (regionInfo == null) {
+                        // Not part of the subset: a tie-point grid that a band's geo-coding added to the
+                        // target while it was transferred, already cut with that band's region.
+                        continue;
+                    }
                     auxiliarSubsetDef = new ProductSubsetDef();
-                    auxiliarSubsetDef.setSubsetRegion(new PixelSubsetRegion(subsetDef.getRegionMap().get(sourceRaster.getName()).getSubsetExtent(), 0));
+                    auxiliarSubsetDef.setSubsetRegion(new PixelSubsetRegion(regionInfo.getSubsetExtent(), 0));
                     auxiliarSubsetDef.setSubSampling(subsetDef.getSubSamplingX(), subsetDef.getSubSamplingY());
                 }
 
