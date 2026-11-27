@@ -17,6 +17,7 @@
 package org.esa.snap.dataio.netcdf;
 
 import org.esa.snap.core.dataio.AbstractProductReader;
+import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartReader;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartReader;
@@ -43,10 +44,11 @@ class NetCdfReadProfile {
         this.profileParts.add(profilePart);
     }
 
-    public Product readProduct(final ProfileReadContext ctx) throws IOException {
+    public Product readProduct(final ProfileReadContext ctx, ProductReader reader) throws IOException {
 
         final Product product = profileInitPart.readProductBody(ctx);
         AbstractProductReader.configurePreferredTileSize(product);
+        product.setProductReader(reader);
         for (ProfilePartReader profilePart : profileParts) {
             profilePart.preDecode(ctx, product);
         }
