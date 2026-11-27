@@ -140,7 +140,8 @@ public class GloballyShiftedDataTest {
     }
 
     @Test
-    public void readingData() throws IOException {
+    @STTM("SNAP-950,SNAP-951")
+    public void testReadingData() throws IOException {
         Band band = product.getBandAt(0);
         int[] actualValues = new int[HALF_WIDTH * STEP_HEIGHT];
 
@@ -158,7 +159,8 @@ public class GloballyShiftedDataTest {
     }
 
     @Test
-    public void gettingDataLevel0() {
+    @STTM("SNAP-950,SNAP-951")
+    public void testGettingDataLevel0() {
         Band band = product.getBandAt(0);
 
         int maxLevel = band.getMultiLevelModel().getLevelCount() - 1;

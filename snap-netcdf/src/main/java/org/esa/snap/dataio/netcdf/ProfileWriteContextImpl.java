@@ -28,7 +28,7 @@ public class ProfileWriteContextImpl implements ProfileWriteContext {
 
     public ProfileWriteContextImpl(NFileWriteable netcdfWriteable) {
         this.netcdfWriteable = netcdfWriteable;
-        propertyMap = new HashMap<String, Object>();
+        propertyMap = new HashMap<>();
     }
 
     @Override

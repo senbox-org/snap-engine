@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
+import com.bc.ceres.annotation.STTM;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.datamodel.GeoCoding;
@@ -19,8 +20,7 @@ import java.io.IOException;
 import static org.esa.snap.core.dataio.Constants.GEOCODING;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.createProduct;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.initializeWithBands;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.esa.snap.dataio.netcdf.util.Constants.SNAP_GEOCODING_TAG;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -28,15 +28,20 @@ public class BeamGeocodingPartTest_ComponentGeocoding {
 
     private BeamGeocodingPart part;
     private Product product;
-    public static final String EXPECTED = "<ComponentGeoCoding>" +
-            "  <ForwardCodingKey>FWD_PIXEL</ForwardCodingKey>" +
-            "  <InverseCodingKey>INV_PIXEL_GEO_INDEX</InverseCodingKey>" +
-            "  <GeoChecks>ANTIMERIDIAN</GeoChecks>" +
-            "  <GeoCRS>GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH], AUTHORITY[\"EPSG\",\"4326\"]]</GeoCRS>" +
-            "  <LonVariableName>Lon</LonVariableName>" +
-            "  <LatVariableName>Lat</LatVariableName>" +
-            "  <RasterResolutionKm>300.0</RasterResolutionKm>" +
-            "  <OffsetX>0.5</OffsetX><OffsetY>0.5</OffsetY><SubsamplingX>1.0</SubsamplingX><SubsamplingY>1.0</SubsamplingY>" +
+    public static final String EXPECTED = "<ComponentGeoCoding><___persistence_id___>ComponentGC:1</___persistence_id___>" +
+            "<ForwardCodingKey>FWD_PIXEL</ForwardCodingKey>" +
+            "<InverseCodingKey>INV_PIXEL_GEO_INDEX</InverseCodingKey>" +
+            "<GeoChecks>ANTIMERIDIAN</GeoChecks>" +
+            "<GeoCRS>GEOGCS[\"WGS84(DD)\", \n  DATUM[\"WGS84\", \n    SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], \n  " +
+            "PRIMEM[\"Greenwich\", 0.0], \n  UNIT[\"degree\", 0.017453292519943295], \n  AXIS[\"Geodetic longitude\", EAST], \n  " +
+            "AXIS[\"Geodetic latitude\", NORTH], \n  AUTHORITY[\"EPSG\",\"4326\"]]</GeoCRS>" +
+            "<LonVariableName>Lon</LonVariableName>" +
+            "<LatVariableName>Lat</LatVariableName>" +
+            "<RasterResolutionKm>300.0</RasterResolutionKm>" +
+            "<OffsetX>0.5</OffsetX>" +
+            "<OffsetY>0.5</OffsetY>" +
+            "<SubsamplingX>1.0</SubsamplingX>" +
+            "<SubsamplingY>1.0</SubsamplingY>" +
             "</ComponentGeoCoding>";
 
     @Before
@@ -47,7 +52,7 @@ public class BeamGeocodingPartTest_ComponentGeocoding {
     }
 
     @Test
-    public void decode() throws IOException {
+    public void testDecode() throws IOException {
         //preparation
         final Attribute attribute = mock(Attribute.class);
         when(attribute.getStringValue()).thenReturn(EXPECTED);
@@ -98,15 +103,16 @@ public class BeamGeocodingPartTest_ComponentGeocoding {
     }
 
     @Test
-    public void preEncode() throws IOException {
+    @STTM("SNAP-4381")
+    public void testPreEncode() throws IOException {
         //preparation
         final NVariable nVariable = mock(NVariable.class);
 
-        NFileWriteable nFileWriteable = mock(NFileWriteable.class);
+        final NFileWriteable nFileWriteable = mock(NFileWriteable.class);
         when(nFileWriteable.findVariable(anyString())).thenReturn(null);
         when(nFileWriteable.addVariable(any(), any(), any(), any())).thenReturn(nVariable);
 
-        ProfileWriteContext ctxW = mock(ProfileWriteContext.class);
+        final ProfileWriteContext ctxW = mock(ProfileWriteContext.class);
         when(ctxW.getNetcdfFileWriteable()).thenReturn(nFileWriteable);
 
         //execution
@@ -116,15 +122,15 @@ public class BeamGeocodingPartTest_ComponentGeocoding {
         final ArgumentCaptor<String> name = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<String> xmlStr = ArgumentCaptor.forClass(String.class);
         verify(nFileWriteable).addGlobalAttribute(name.capture(), xmlStr.capture());
-        assertEquals(name.getValue(), GEOCODING);
-        assertThat(strip(xmlStr.getValue()), is(equalTo(strip(EXPECTED))));
+        assertEquals(SNAP_GEOCODING_TAG, name.getValue());
+        assertEquals(strip(EXPECTED), strip(xmlStr.getValue()));
     }
 
     private String strip(String value) {
         return value
                 .replace("\n", "")
                 .replace("\r", "")
+                .replace("&#xD;", "")
                 .replaceAll("> *<", "><");
-
     }
 }
